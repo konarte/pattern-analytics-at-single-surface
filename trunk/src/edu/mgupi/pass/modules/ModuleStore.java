@@ -3,7 +3,19 @@ package edu.mgupi.pass.modules;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.mgupi.pass.db.Surfaces;
+
 public class ModuleStore {
+
+	private Surfaces surface;
+
+	public Surfaces getSurface() {
+		return surface;
+	}
+
+	public void setSurface(Surfaces surface) {
+		this.surface = surface;
+	}
 
 	private Map<String, Object> properties = new HashMap<String, Object>();
 

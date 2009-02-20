@@ -24,13 +24,9 @@ public interface IModule {
 	 * This method always call locally.
 	 * 
 	 * @param filteredImage
-	 * @param sensor
-	 * @param surface
-	 * @param defect
-	 * @return parameters (matrix, for example)
+	 * @param store
 	 */
-	ModuleStore analyze(Image filteredImage, Object sensor, Object surface,
-			Object defect);
+	void analyze(Image filteredImage, ModuleStore store);
 
 	/**
 	 * Method for comparing two different graphs. Method must return true if
