@@ -3,7 +3,7 @@ package edu.mgupi.pass.modules;
 import java.util.HashMap;
 import java.util.Map;
 
-import edu.mgupi.pass.db.Surfaces;
+import edu.mgupi.pass.db.surfaces.Surfaces;
 
 public class ModuleStore {
 

@@ -1,8 +1,17 @@
-package edu.mgupi.pass.db;
+package edu.mgupi.pass.db.surfaces;
 
-public class SurfaceTypes {
+/**
+ * Формы поверхностей (тело вращения, плоскость)
+ */
+public class SurfaceClasses {
 	private int idSurfaceType;
 	private String name;
+	/**
+	 * Изображение поверхности в виде картинки.
+	 * Картинка должна быть стандартизованного размера. 256x256 пикселей.
+	 * 
+	 * Формат хранения -- PNG
+	 */
 	private byte[] surfaceImage;
 
 	public void setIdSurfaceType(int aIdSurfaceType) {
