@@ -1,14 +1,17 @@
 package edu.mgupi.pass.db.sensors;
 
-public class Sensors {
-	private int idSensort;
-	edu.mgupi.pass.db.sensors.SensorTypes sensorType;
+import edu.mgupi.pass.db.surfaces.Materials;
 
-	public void setIdSensort(int aIdSensort) {
-		this.idSensort = aIdSensort;
+public class Sensors {
+	private int idSensor;
+	edu.mgupi.pass.db.sensors.SensorTypes sensorType;
+	Materials mpathMaterial;
+
+	public void setIdSensor(int aIdSensor) {
+		this.idSensor = aIdSensor;
 	}
 
-	public int getIdSensort() {
-		return this.idSensort;
+	public int getIdSensor() {
+		return this.idSensor;
 	}
 }

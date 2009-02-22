@@ -1,12 +1,14 @@
 package edu.mgupi.pass.db.surfaces;
 
+import edu.mgupi.pass.db.sensors.Sensors;
+
 /**
  * Материалы поверхностей.
  * 
  * Далее я бы захерачил все физ-хим свойства, включая атомную структуру в картинках, 
  * но это для будущего анализатора материи, пока ограничимся «электрикой»
  */
-public class SurfaceMaterials {
+public class Materials {
 	private int idSurfaceMaterial;
 	private String name;
 	/**
@@ -17,6 +19,7 @@ public class SurfaceMaterials {
 	 * Магнитная проницаемость, будем считать что без названия.
 	 */
 	private float magneticConductivity;
+	Sensors sensor;
 
 	public void setIdSurfaceMaterial(int aIdSurfaceMaterial) {
 		this.idSurfaceMaterial = aIdSurfaceMaterial;
