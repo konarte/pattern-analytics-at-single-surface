@@ -9,6 +9,10 @@ package edu.mgupi.pass.filters;
  */
 public class Param {
 
+	public void setDefault_(Object default_) {
+		this.default_ = default_;
+	}
+
 	public Param(String name, String title, TYPES type, Object default_) {
 		this.name = name;
 		this.title = title;

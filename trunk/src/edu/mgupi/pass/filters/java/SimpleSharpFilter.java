@@ -22,8 +22,12 @@ public class SimpleSharpFilter implements IFilter {
 	}
 
 	public Collection<Param> getParams() {
-		logger.debug("SimpleSharpFilter.getParams");
+		logger.debug("SimpleSharpFilter.getParams. Nothing to return.");
 		return null;
+	}
+
+	public void onAttachToImage(BufferedImage source) {
+		//
 	}
 
 	public void done() {

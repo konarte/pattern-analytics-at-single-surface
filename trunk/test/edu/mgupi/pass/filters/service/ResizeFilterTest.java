@@ -1,6 +1,6 @@
-package edu.mgupi.pass.filters.java;
+package edu.mgupi.pass.filters.service;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -16,19 +16,19 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.filters.NoSuchParamException;
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.ParamException;
 import edu.mgupi.pass.filters.ParamHelper;
 import edu.mgupi.pass.sources.TestSourceImpl;
 
-public class ColorSpaceFilterTest {
-	private final static Logger logger = LoggerFactory.getLogger(ColorSpaceFilterTest.class);
+public class ResizeFilterTest {
+	private final static Logger logger = LoggerFactory.getLogger(ResizeFilterTest.class);
 
-	private ColorSpaceFilter filter = null;
+	private ResizeFilter filter = null;
 
 	@Before
 	public void setUp() throws Exception {
-		filter = new ColorSpaceFilter();
+		filter = new ResizeFilter();
 	}
 
 	@After
@@ -42,7 +42,7 @@ public class ColorSpaceFilterTest {
 	@Test
 	public void testGetParams() {
 		Collection<Param> params = filter.getParams();
-		assertNotNull(params);
+		assertNull(params);
 		System.out.println(params);
 	}
 
@@ -54,13 +54,13 @@ public class ColorSpaceFilterTest {
 		}
 	}
 
-	private void convertImage(BufferedImage image, Map<String, Object> paramMap, int space, String name)
-			throws IOException, ParamException {
-		paramMap.put("ColorMode", space);
+	private void convertImage(BufferedImage image, Map<String, Object> paramMap, int width, int height)
+			throws IOException, NoSuchParamException {
+		paramMap.put("Width", width);
+		paramMap.put("Height", height);
 		BufferedImage newImage = filter.convert(image, null, paramMap);
-		logger.info("Image converted to " + name + " SUCCESSFULLY (image type is " + newImage.getType() + ")");
 
-		ImageIO.write(newImage, "JPG", new File("tmp/" + name + ".jpg"));
+		ImageIO.write(newImage, "JPG", new File("tmp/resize-" + width + "-" + height + ".jpg"));
 	}
 
 	@Test
@@ -73,26 +73,10 @@ public class ColorSpaceFilterTest {
 			Collection<Param> params = filter.getParams();
 			Map<String, Object> paramMap = ParamHelper.convertParamsToValues(params);
 
-			Exception savedE = null;
-
-			ImageIO.write(image, "JPG", new File("tmp/ORIGINAL.jpg"));
-
-			Param param = params.iterator().next();
-			for (int i = 0; i < param.getAllowed_values().length; i++) {
-				try {
-					this.convertImage(image, paramMap, (Integer) param.getAllowed_values()[i],
-							param.getVisual_values()[i]);
-				} catch (Exception e) {
-					new Exception("Error on converting to ColorSpace " + param.getVisual_values()[i], e)
-							.printStackTrace();
-					savedE = e;
-				}
-			}
-			if (savedE != null) {
-				throw savedE;
-			}
+			this.convertImage(image, paramMap, 256, 256);
 		} finally {
 			source.done();
 		}
 	}
+
 }
