@@ -1,6 +1,6 @@
 package edu.mgupi.pass.filters;
 
-import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.util.Collection;
 import java.util.Map;
 
@@ -13,6 +13,8 @@ import java.util.Map;
  * 
  */
 public interface IFilter {
+
+	String getName();
 
 	/**
 	 * Return params for completing in this filter. Will be call only once, for
@@ -31,8 +33,10 @@ public interface IFilter {
 	 * @param params
 	 *            Params (key is param name and value is entered value for this
 	 *            parameter)
+	 * 
 	 */
-	void process(Image image, Map<String, Object> params);
+	BufferedImage convert(BufferedImage source, BufferedImage dest, Map<String, Object> params)
+			throws NoSuchParamException;
 
 	/**
 	 * Final method for close all prepared connections/hardware calls/etc. Will

@@ -1,6 +1,6 @@
 package edu.mgupi.pass.sources;
 
-import java.util.Collection;
+import java.io.IOException;
 
 /**
  * Common interface for source modules (that provides images for us)
@@ -16,12 +16,23 @@ public interface ISource {
 	void init();
 
 	/**
-	 * Return collection of source images to process. Can be multiple ^_^. Note,
+	 * Return source images to process. Must return only single source. Note,
 	 * that we do not need any parameters to input (cause this is not our case).
 	 * 
-	 * @return collection of SourceStore objects
+	 * @return SourceStore object
 	 */
-	Collection<SourceStore> getSources();
+	SourceStore getSingleSource() throws IOException;
+
+	// /**
+	// * Return collection of source images to process. Can be multiple ^_^.
+	// Note,
+	// * that we do not need any parameters to input (cause this is not our
+	// case).
+	// *
+	// *
+	// * @return collection of SourceStore objects
+	// */
+	// Collection<SourceStore> getSourcesList() throws IOException;
 
 	/**
 	 * Final method for close all prepared connections/hardware calls/etc.

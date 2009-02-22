@@ -6,8 +6,8 @@ package edu.mgupi.pass.db.defects;
 public class Defects {
 	private int idDefect;
 	/**
-	 * Глубина залегания, мм: от 0 до 10 мм для вихретоков, к примеру. 
-	 * Глубина залегания задается для всех дефектов.
+	 * Глубина залегания, мм: от 0 до 10 мм для вихретоков, к примеру. Глубина
+	 * залегания задается для всех дефектов.
 	 */
 	private float beddingDepth;
 	/**
@@ -15,11 +15,11 @@ public class Defects {
 	 */
 	private float depth;
 	/**
-	 * Ширина (радиус), мм 
+	 * Ширина (радиус), мм
 	 */
 	private float width;
 	/**
-	 * Длина, мм 
+	 * Длина, мм
 	 */
 	private float length;
 	edu.mgupi.pass.db.defects.DefectTypes defectType;

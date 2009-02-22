@@ -1,8 +1,7 @@
 package edu.mgupi.pass.db.surfaces;
 
 /**
- * Конфигурация поверхности.
- * Для каждого типа уточняем, что это.
+ * Конфигурация поверхности. Для каждого типа уточняем, что это.
  */
 public class SurfaceTypes {
 	private int idSurfaceMode;

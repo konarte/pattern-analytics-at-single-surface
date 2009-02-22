@@ -1,23 +1,21 @@
 package edu.mgupi.pass.sources;
 
-import java.awt.Image;
-import java.util.HashMap;
-import java.util.Map;
+import java.awt.image.BufferedImage;
 
 public class SourceStore {
-	private Map<String, Object> options = new HashMap<String, Object>();
-	private Image mainImage;
+	private String name;
+	private BufferedImage mainImage;
 
-	public SourceStore(Map<String, Object> options, Image mainImage) {
-		this.options = options;
+	public SourceStore(String imageName, BufferedImage mainImage) {
+		this.name = imageName;
 		this.mainImage = mainImage;
 	}
 
-	public Map<String, Object> getOptions() {
-		return options;
+	public String getName() {
+		return name;
 	}
 
-	public Image getMainImage() {
+	public BufferedImage getMainImage() {
 		return mainImage;
 	}
 }
