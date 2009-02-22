@@ -8,7 +8,7 @@ public class SurfaceTypes {
 	private int idSurfaceMode;
 	private String name;
 	edu.mgupi.pass.db.surfaces.SurfaceClasses surfaceClass;
-	edu.mgupi.pass.db.surfaces.SurfaceMaterials unnamed_SurfaceMaterials_;
+	edu.mgupi.pass.db.surfaces.Materials surfaceMaterial;
 
 	public void setIdSurfaceMode(int aIdSurfaceMode) {
 		this.idSurfaceMode = aIdSurfaceMode;
