@@ -19,19 +19,26 @@ public class RescaleFilter implements IFilter {
 
 	private final static Logger logger = LoggerFactory.getLogger(RescaleFilter.class);
 
+	private Collection<Param> params;
+
+	public RescaleFilter() {
+		params = new ArrayList<Param>(2);
+		params.add(new Param("Brightness", "Яркость", TYPES.INT, 0, -255, 255));
+		params.add(new Param("Contrast", "Контраст", TYPES.INT, 100, 0, 255));
+
+	}
+
 	public String getName() {
 		return "Изменение яркости и контраста";
 	}
 
 	public Collection<Param> getParams() {
-		logger.debug("RescaleFilter.getParams");
-
-		Collection<Param> params = new ArrayList<Param>(1);
-		params.add(new Param("Brightness", "Яркость", TYPES.INT, 0, -255, 255));
-		params.add(new Param("Contrast", "Контраст", TYPES.INT, 100, 0, 255));
-
-		logger.debug("Return {} param(s)", params.size());
+		logger.debug("RescaleFilter.getParams return {} items", params.size());
 		return params;
+	}
+
+	public void onAttachToImage(BufferedImage source) {
+		//
 	}
 
 	public void done() {

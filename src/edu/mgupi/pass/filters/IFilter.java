@@ -25,6 +25,12 @@ public interface IFilter {
 	Collection<Param> getParams();
 
 	/**
+	 * 
+	 * @param source
+	 */
+	void onAttachToImage(BufferedImage source);
+
+	/**
 	 * Process images. This method will be call every time we need to filter
 	 * image. Please, ensure that method as fast as it can ^_^
 	 * 
@@ -35,8 +41,7 @@ public interface IFilter {
 	 *            parameter)
 	 * 
 	 */
-	BufferedImage convert(BufferedImage source, BufferedImage dest, Map<String, Object> params)
-			throws NoSuchParamException;
+	BufferedImage convert(BufferedImage source, BufferedImage dest, Map<String, Object> params) throws ParamException;
 
 	/**
 	 * Final method for close all prepared connections/hardware calls/etc. Will

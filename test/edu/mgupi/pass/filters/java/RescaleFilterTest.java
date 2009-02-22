@@ -55,13 +55,13 @@ public class RescaleFilterTest {
 		}
 	}
 
-	private void convertImage(BufferedImage image, Map<String, Object> paramMap, int brightness, int contrast)
-			throws IOException, NoSuchParamException {
+	private void convertImage(BufferedImage image, Map<String, Object> paramMap, int brightness, int contrast,
+			String name) throws IOException, NoSuchParamException {
 		paramMap.put("Brightness", brightness);
 		paramMap.put("Contrast", contrast);
 		BufferedImage newImage = filter.convert(image, null, paramMap);
 
-		ImageIO.write(newImage, "JPG", new File("tmp/color-" + contrast + "-" + brightness + ".jpg"));
+		ImageIO.write(newImage, "JPG", new File("tmp/" + name + "-" + contrast + "-" + brightness + ".jpg"));
 	}
 
 	@Test
@@ -74,8 +74,13 @@ public class RescaleFilterTest {
 			Collection<Param> params = filter.getParams();
 			Map<String, Object> paramMap = ParamHelper.convertParamsToValues(params);
 
-			this.convertImage(image, paramMap, 40, 100);
-			this.convertImage(image, paramMap, 0, 140);
+			this.convertImage(image, paramMap, 40, 100, "color");
+			this.convertImage(image, paramMap, 0, 140, "color");
+
+			ColorSpaceFilter cfilter = new ColorSpaceFilter();
+
+			BufferedImage image2 = cfilter.convert(image, null, ParamHelper.convertParamsToValues(cfilter.getParams()));
+			this.convertImage(image2, paramMap, 40, 100, "gray");
 		} finally {
 			source.done();
 		}
