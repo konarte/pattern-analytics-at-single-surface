@@ -2,6 +2,8 @@ package edu.mgupi.pass.modules;
 
 import java.awt.Image;
 
+import edu.mgupi.pass.db.locuses.Locuses;
+
 /**
  * Module of image analyzing and processing.
  * 
@@ -26,7 +28,7 @@ public interface IModule {
 	 * @param filteredImage
 	 * @param store
 	 */
-	void analyze(Image filteredImage, ModuleStore store);
+	void analyze(Image filteredImage, Locuses store);
 
 	/**
 	 * Method for comparing two different graphs. Method must return true if
@@ -39,7 +41,7 @@ public interface IModule {
 	 * @param graph2
 	 * @return
 	 */
-	boolean compare(ModuleStore graph1, ModuleStore graph2);
+	boolean compare(Locuses graph1, Locuses graph2);
 
 	/**
 	 * Final call of method. Will call once on program exit.
