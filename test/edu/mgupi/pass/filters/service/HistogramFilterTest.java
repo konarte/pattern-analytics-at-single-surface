@@ -1,6 +1,7 @@
 package edu.mgupi.pass.filters.service;
 
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
@@ -48,6 +49,7 @@ public class HistogramFilterTest {
 	public void testGetParams() {
 		Collection<Param> params = filter.getParams();
 		assertNull(params);
+		assertTrue(params == filter.getParams());
 		System.out.println(params);
 	}
 

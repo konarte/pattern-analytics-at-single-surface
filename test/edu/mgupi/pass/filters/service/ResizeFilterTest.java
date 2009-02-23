@@ -1,6 +1,7 @@
 package edu.mgupi.pass.filters.service;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -42,7 +43,8 @@ public class ResizeFilterTest {
 	@Test
 	public void testGetParams() {
 		Collection<Param> params = filter.getParams();
-		assertNull(params);
+		assertNotNull(params);
+		assertTrue(params == filter.getParams());
 		System.out.println(params);
 	}
 
@@ -54,13 +56,22 @@ public class ResizeFilterTest {
 		}
 	}
 
-	private void convertImage(BufferedImage image, Map<String, Object> paramMap, int width, int height)
-			throws IOException, NoSuchParamException {
+	private Map<String, Object> paramMap;
+
+	private void convertImage(BufferedImage image, int width, int height) throws IOException, NoSuchParamException {
 		paramMap.put("Width", width);
 		paramMap.put("Height", height);
-		BufferedImage newImage = filter.convert(image, null, paramMap);
 
-		ImageIO.write(newImage, "JPG", new File("tmp/resize-" + width + "-" + height + ".jpg"));
+		Param param = ParamHelper.getParameterL("Method", filter.getParams());
+		for (int i = 0; i < param.getAllowed_values().length; i++) {
+			paramMap.put(param.getName(), param.getAllowed_values()[i]);
+
+			BufferedImage newImage = filter.convert(image, null, paramMap);
+
+			ImageIO.write(newImage, "JPG", new File("tmp/resize-" + width + "-" + height + "-"
+					+ param.getVisual_values()[i] + ".jpg"));
+		}
+
 	}
 
 	@Test
@@ -70,10 +81,10 @@ public class ResizeFilterTest {
 		try {
 
 			BufferedImage image = source.getSingleSource().getMainImage();
-			Collection<Param> params = filter.getParams();
-			Map<String, Object> paramMap = ParamHelper.convertParamsToValues(params);
+			paramMap = ParamHelper.convertParamsToValues(filter.getParams());
 
-			this.convertImage(image, paramMap, 256, 256);
+			this.convertImage(image, 256, 256);
+			this.convertImage(image, 1024, 1024);
 		} finally {
 			source.done();
 		}

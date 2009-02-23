@@ -20,15 +20,25 @@ public interface IFilter {
 	 * Return params for completing in this filter. Will be call only once, for
 	 * first instantiation of class.
 	 * 
+	 * Every new image will be attached to this filter
+	 * 
 	 * @return
 	 */
 	Collection<Param> getParams();
 
 	/**
+	 * Method called just after loading image and processing by filters
 	 * 
 	 * @param source
 	 */
 	void onAttachToImage(BufferedImage source);
+
+	/**
+	 * Method called just after closing processing image
+	 * 
+	 * @param source
+	 */
+	void onDetachFromImage(BufferedImage source);
 
 	/**
 	 * Process images. This method will be call every time we need to filter

@@ -28,9 +28,12 @@ public class ColorSpaceFilter implements IFilter {
 
 	// ColorSpace.CS_sRGB,
 	// "sRGB",
+
+	// ColorSpace.CS_PYCC
+	// "Photo YCC"
 	private Param COLOR_MODE = new Param("ColorMode", "Режим цветности", ColorSpace.CS_GRAY,//
-			new Integer[] { ColorSpace.CS_GRAY, ColorSpace.CS_LINEAR_RGB, ColorSpace.CS_CIEXYZ, ColorSpace.CS_PYCC }, //
-			new String[] { "Gray scale", "linear RGB", "CIEXYZ", "Photo YCC" });
+			new Integer[] { ColorSpace.CS_GRAY, ColorSpace.CS_LINEAR_RGB, ColorSpace.CS_CIEXYZ }, //
+			new String[] { "Gray scale", "linear RGB", "CIEXYZ" });
 
 	public ColorSpaceFilter() {
 		params = new ArrayList<Param>(1);
@@ -42,14 +45,9 @@ public class ColorSpaceFilter implements IFilter {
 		return params;
 	}
 
-	public void onAttachToImage(BufferedImage source) {
-		//
-	}
-
 	public void done() {
 		// do nothing
 		logger.debug("ColorSpaceFilter.done");
-
 	}
 
 	public BufferedImage convert(BufferedImage source, BufferedImage dest, Map<String, Object> params)
@@ -59,7 +57,7 @@ public class ColorSpaceFilter implements IFilter {
 		}
 		ColorSpace sourceColorSpace = source.getColorModel().getColorSpace();
 
-		int destMode = (Integer) ParamHelper.getParameter(COLOR_MODE.getName(), params);
+		int destMode = (Integer) ParamHelper.getParameterM(COLOR_MODE.getName(), params);
 		boolean found = false;
 		for (int allow : (Integer[]) COLOR_MODE.getAllowed_values()) {
 			if (destMode == allow) {
@@ -81,5 +79,15 @@ public class ColorSpaceFilter implements IFilter {
 		// TODO Поисследовать, даст ли прирост скорости кэширование
 		// ColorConvertOp-а
 		return new ColorConvertOp(destColorSpace, null).filter(source, dest);
+	}
+
+	public void onAttachToImage(BufferedImage source) {
+		logger.trace("ColorSpaceFilter.onAttach");
+		// do nothing
+	}
+
+	public void onDetachFromImage(BufferedImage source) {
+		logger.trace("ColorSpaceFilter.onDetach");
+		// do nothing
 	}
 }

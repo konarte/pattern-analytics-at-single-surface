@@ -1,6 +1,7 @@
 package edu.mgupi.pass.filters.java;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -43,6 +44,7 @@ public class ColorSpaceFilterTest {
 	public void testGetParams() {
 		Collection<Param> params = filter.getParams();
 		assertNotNull(params);
+		assertTrue(params == filter.getParams());
 		System.out.println(params);
 	}
 
@@ -54,8 +56,9 @@ public class ColorSpaceFilterTest {
 		}
 	}
 
-	private void convertImage(BufferedImage image, Map<String, Object> paramMap, int space, String name)
-			throws IOException, ParamException {
+	private Map<String, Object> paramMap;
+
+	private void convertImage(BufferedImage image, int space, String name) throws IOException, ParamException {
 		paramMap.put("ColorMode", space);
 		BufferedImage newImage = filter.convert(image, null, paramMap);
 		logger.info("Image converted to " + name + " SUCCESSFULLY (image type is " + newImage.getType() + ")");
@@ -70,18 +73,16 @@ public class ColorSpaceFilterTest {
 		try {
 
 			BufferedImage image = source.getSingleSource().getMainImage();
-			Collection<Param> params = filter.getParams();
-			Map<String, Object> paramMap = ParamHelper.convertParamsToValues(params);
+			paramMap = ParamHelper.convertParamsToValues(filter.getParams());
 
 			Exception savedE = null;
 
 			ImageIO.write(image, "JPG", new File("tmp/ORIGINAL.jpg"));
 
-			Param param = params.iterator().next();
+			Param param = ParamHelper.getParameterL("ColorMode", filter.getParams());
 			for (int i = 0; i < param.getAllowed_values().length; i++) {
 				try {
-					this.convertImage(image, paramMap, (Integer) param.getAllowed_values()[i],
-							param.getVisual_values()[i]);
+					this.convertImage(image, (Integer) param.getAllowed_values()[i], param.getVisual_values()[i]);
 				} catch (Exception e) {
 					new Exception("Error on converting to ColorSpace " + param.getVisual_values()[i], e)
 							.printStackTrace();

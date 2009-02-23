@@ -26,10 +26,6 @@ public class SimpleSharpFilter implements IFilter {
 		return null;
 	}
 
-	public void onAttachToImage(BufferedImage source) {
-		//
-	}
-
 	public void done() {
 		logger.debug("SimpleSharpFilter.done");
 	}
@@ -54,5 +50,15 @@ public class SimpleSharpFilter implements IFilter {
 		}
 
 		return op.filter(source, dest);
+	}
+
+	public void onAttachToImage(BufferedImage source) {
+		logger.trace("SimpleSharpFilter.onAttach");
+		// do nothing
+	}
+
+	public void onDetachFromImage(BufferedImage source) {
+		logger.trace("SimpleSharpFilter.onDetach");
+		// do nothing
 	}
 }

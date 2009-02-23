@@ -26,10 +26,6 @@ public class SimpleSmoothFilter implements IFilter {
 		return null;
 	}
 
-	public void onAttachToImage(BufferedImage source) {
-		//
-	}
-
 	public void done() {
 		logger.debug("SimpleSmoothFilter.done");
 	}
@@ -55,4 +51,15 @@ public class SimpleSmoothFilter implements IFilter {
 
 		return op.filter(source, dest);
 	}
+
+	public void onAttachToImage(BufferedImage source) {
+		logger.trace("SimpleSmoothFilter.onAttach");
+		// do nothing
+	}
+
+	public void onDetachFromImage(BufferedImage source) {
+		logger.trace("SimpleSmoothFilter.onDetach");
+		// do nothing
+	}
+
 }
