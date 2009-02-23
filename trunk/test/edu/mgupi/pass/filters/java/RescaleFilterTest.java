@@ -1,6 +1,7 @@
 package edu.mgupi.pass.filters.java;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -44,6 +45,7 @@ public class RescaleFilterTest {
 	public void testGetParams() {
 		Collection<Param> params = filter.getParams();
 		assertNotNull(params);
+		assertTrue(params == filter.getParams());
 		System.out.println(params);
 	}
 

@@ -37,13 +37,8 @@ public class RescaleFilter implements IFilter {
 		return params;
 	}
 
-	public void onAttachToImage(BufferedImage source) {
-		//
-	}
-
 	public void done() {
 		logger.debug("RescaleFilter.done");
-
 	}
 
 	public BufferedImage convert(BufferedImage source, BufferedImage dest, Map<String, Object> params)
@@ -52,8 +47,8 @@ public class RescaleFilter implements IFilter {
 			throw new IllegalArgumentException("Internal error: image is null.");
 		}
 
-		float brightness = (float) (Integer) ParamHelper.getParameter("Brightness", params);
-		float contrast = (float) (Integer) ParamHelper.getParameter("Contrast", params) / 100;
+		float brightness = (float) (Integer) ParamHelper.getParameterM("Brightness", params);
+		float contrast = ((float) (Integer) ParamHelper.getParameterM("Contrast", params)) / 100.f;
 
 		logger.debug("RescaleFilter.convert, changing constrast index to {} and brightness value to {}", contrast,
 				brightness);
@@ -90,5 +85,15 @@ public class RescaleFilter implements IFilter {
 		//		
 		// return lop.filter(source, dest);
 
+	}
+
+	public void onAttachToImage(BufferedImage source) {
+		logger.trace("SimpleSharpFilter.onAttach");
+		// do nothing
+	}
+
+	public void onDetachFromImage(BufferedImage source) {
+		logger.trace("SimpleSharpFilter.onDetach");
+		// do nothing
 	}
 }

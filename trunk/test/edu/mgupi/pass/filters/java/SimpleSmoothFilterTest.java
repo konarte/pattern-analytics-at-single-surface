@@ -1,6 +1,7 @@
 package edu.mgupi.pass.filters.java;
 
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -44,6 +45,7 @@ public class SimpleSmoothFilterTest {
 	public void testGetParams() {
 		Collection<Param> params = filter.getParams();
 		assertNull(params);
+		assertTrue(params == filter.getParams());
 		System.out.println(params);
 	}
 
