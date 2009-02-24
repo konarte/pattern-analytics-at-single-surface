@@ -9,10 +9,6 @@ package edu.mgupi.pass.filters;
  */
 public class Param {
 
-	public void setDefault_(Object default_) {
-		this.default_ = default_;
-	}
-
 	public Param(String name, String title, TYPES type, Object default_) {
 		this.name = name;
 		this.title = title;
@@ -49,7 +45,7 @@ public class Param {
 	}
 
 	public static enum TYPES {
-		PX, LIST, STRING, INT
+		LIST, STRING, INT
 	};
 
 	private String name;
@@ -97,9 +93,31 @@ public class Param {
 		return value;
 	}
 
+	public void setDefault_(Object default_) {
+		this.default_ = default_;
+	}
+
 	private Object value;
 
-	public void setValue(Object value) {
+	public void setValue(Object value) throws IllegalParameterValueException {
+
+		if (this.allowed_values != null) {
+
+			boolean found = false;
+			for (Object allow : this.getAllowed_values()) {
+				if (value.equals(allow)) {
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) {
+				throw new IllegalParameterValueException("Parameter " + this.title + " (" + this.name
+						+ ") attempt to use incorrect value " + value
+						+ ". This is value not acceptable by allowed_parameters.");
+			}
+		}
+
 		this.value = value;
 	}
 }

@@ -3,18 +3,15 @@ package edu.mgupi.pass.filters.java;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
+import java.util.LinkedHashSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.filters.IFilter;
-import edu.mgupi.pass.filters.IllegalParameterValueException;
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.ParamException;
-import edu.mgupi.pass.filters.ParamHelper;
 
 public class ColorSpaceFilter implements IFilter {
 
@@ -36,7 +33,7 @@ public class ColorSpaceFilter implements IFilter {
 			new String[] { "Gray scale", "linear RGB", "CIEXYZ" });
 
 	public ColorSpaceFilter() {
-		params = new ArrayList<Param>(1);
+		params = new LinkedHashSet<Param>(1);
 		params.add(COLOR_MODE);
 	}
 
@@ -45,32 +42,17 @@ public class ColorSpaceFilter implements IFilter {
 		return params;
 	}
 
-	public void done() {
-		// do nothing
-		logger.debug("ColorSpaceFilter.done");
+	public String toString() {
+		return this.getName() + " (" + COLOR_MODE.getValue() + ")";
 	}
 
-	public BufferedImage convert(BufferedImage source, BufferedImage dest, Map<String, Object> params)
-			throws ParamException {
+	public BufferedImage convert(BufferedImage source) throws ParamException {
 		if (source == null) {
 			throw new IllegalArgumentException("Internal error: image is null.");
 		}
+		int destMode = (Integer) COLOR_MODE.getValue();
+
 		ColorSpace sourceColorSpace = source.getColorModel().getColorSpace();
-
-		int destMode = (Integer) ParamHelper.getParameterM(COLOR_MODE.getName(), params);
-		boolean found = false;
-		for (int allow : (Integer[]) COLOR_MODE.getAllowed_values()) {
-			if (destMode == allow) {
-				found = true;
-				break;
-			}
-		}
-
-		if (!found) {
-			throw new IllegalParameterValueException("Unable to use ColorSpaceFilter, because parameter ColorMode has "
-					+ "invalid value " + destMode + ".");
-		}
-
 		ColorSpace destColorSpace = ColorSpace.getInstance(destMode);
 
 		logger.debug("ColorSpaceFilter.convert, converting image from color space {} to {}.", sourceColorSpace
@@ -78,7 +60,7 @@ public class ColorSpaceFilter implements IFilter {
 
 		// TODO Поисследовать, даст ли прирост скорости кэширование
 		// ColorConvertOp-а
-		return new ColorConvertOp(destColorSpace, null).filter(source, dest);
+		return new ColorConvertOp(destColorSpace, null).filter(source, null);
 	}
 
 	public void onAttachToImage(BufferedImage source) {

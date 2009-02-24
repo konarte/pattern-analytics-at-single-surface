@@ -5,7 +5,6 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.util.Collection;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,15 +33,14 @@ public class HistogramFilter implements IFilter {
 		logger.debug("HistogramFilter.getParams. Nothing to return.");
 		return null;
 	}
-
-	public void done() {
-		logger.debug("HistogramFilter.done");
+	
+	public String toString() {
+		return this.getName();
 	}
 
 	private static int HEIGHT = 256;
 
-	public BufferedImage convert(BufferedImage source, BufferedImage dest, Map<String, Object> params)
-			throws NoSuchParamException {
+	public BufferedImage convert(BufferedImage source) throws NoSuchParamException {
 
 		if (source == null) {
 			throw new IllegalArgumentException("Internal error: image is null.");
@@ -50,7 +48,7 @@ public class HistogramFilter implements IFilter {
 
 		logger.debug("HistogramFilter.convert, building histogram");
 
-		dest = new BufferedImage(256, HEIGHT, BufferedImage.TYPE_INT_RGB);
+		BufferedImage dest = new BufferedImage(256, HEIGHT, BufferedImage.TYPE_INT_RGB);
 
 		int height = source.getHeight();
 		int width = source.getWidth();
@@ -117,6 +115,8 @@ public class HistogramFilter implements IFilter {
 				gc.drawLine(i, HEIGHT, i, (int) (HEIGHT - (useDiv ? hist[2][i] / div : hist[2][i])));
 			}
 		}
+
+		gc.dispose();
 
 		return dest;
 	}

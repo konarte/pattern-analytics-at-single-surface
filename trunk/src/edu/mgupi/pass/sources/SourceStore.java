@@ -4,18 +4,18 @@ import java.awt.image.BufferedImage;
 
 public class SourceStore {
 	private String name;
-	private BufferedImage mainImage;
+	private BufferedImage image;
 
-	public SourceStore(String imageName, BufferedImage mainImage) {
+	public SourceStore(String imageName, BufferedImage image) {
 		this.name = imageName;
-		this.mainImage = mainImage;
+		this.image = image;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public BufferedImage getMainImage() {
-		return mainImage;
+	public BufferedImage getImage() {
+		return image;
 	}
 }

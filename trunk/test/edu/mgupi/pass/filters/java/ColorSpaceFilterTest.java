@@ -7,7 +7,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -34,10 +33,7 @@ public class ColorSpaceFilterTest {
 
 	@After
 	public void tearDown() throws Exception {
-		if (filter != null) {
-			filter.done();
-			filter = null;
-		}
+		filter = null;
 	}
 
 	@Test
@@ -51,19 +47,14 @@ public class ColorSpaceFilterTest {
 	@Test
 	public void testDone() {
 		//
-		for (String type : ImageIO.getReaderFormatNames()) {
-			logger.debug("Supported type: " + type);
-		}
 	}
 
-	private Map<String, Object> paramMap;
-
 	private void convertImage(BufferedImage image, int space, String name) throws IOException, ParamException {
-		paramMap.put("ColorMode", space);
-		BufferedImage newImage = filter.convert(image, null, paramMap);
+		ParamHelper.getParameterL("ColorMode", filter).setValue(space);
+		BufferedImage newImage = filter.convert(image);
 		logger.info("Image converted to " + name + " SUCCESSFULLY (image type is " + newImage.getType() + ")");
 
-		ImageIO.write(newImage, "JPG", new File("tmp/" + name + ".jpg"));
+		ImageIO.write(newImage, "JPG", new File("tmp/colorspace " + name + ".jpg"));
 	}
 
 	@Test
@@ -72,8 +63,7 @@ public class ColorSpaceFilterTest {
 		source.init();
 		try {
 
-			BufferedImage image = source.getSingleSource().getMainImage();
-			paramMap = ParamHelper.convertParamsToValues(filter.getParams());
+			BufferedImage image = source.getSingleSource().getImage();
 
 			Exception savedE = null;
 

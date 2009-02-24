@@ -21,6 +21,10 @@ public class ParamHelper {
 		return value;
 	}
 
+	public static Param getParameterL(String name, IFilter filter) throws NoSuchParamException {
+		return searchParameter(name, filter.getParams(), true);
+	}
+
 	public static Param getParameterL(String name, Collection<Param> paramList) throws NoSuchParamException {
 		return searchParameter(name, paramList, true);
 	}

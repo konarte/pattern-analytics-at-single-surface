@@ -1,8 +1,7 @@
 package edu.mgupi.pass.filters.java;
 
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.ConvolveOp;
-import java.awt.image.Kernel;
 import java.util.Collection;
 
 import org.slf4j.Logger;
@@ -12,49 +11,44 @@ import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.NoSuchParamException;
 import edu.mgupi.pass.filters.Param;
 
-public class SimpleSharpFilter implements IFilter {
-
-	private final static Logger logger = LoggerFactory.getLogger(SimpleSharpFilter.class);
+public class GrayScaleFilter implements IFilter {
+	private final static Logger logger = LoggerFactory.getLogger(GrayScaleFilter.class);
 
 	public String getName() {
-		return "Увеличение резкости";
+		return "Перевод в серый цвет";
 	}
 
 	public Collection<Param> getParams() {
-		logger.debug("SimpleSharpFilter.getParams. Nothing to return.");
+		logger.debug("GrayScaleFilter.getParams. Nothing to return.");
 		return null;
 	}
 
+	
 	public String toString() {
 		return this.getName();
 	}
-
-	private float[] elements = {
-	//
-			0.0f, -1.0f, 0.0f, //
-			-1.0f, 5.f, -1.0f, //
-			0.0f, -1.0f, 0.0f };
-	private ConvolveOp op = new ConvolveOp(new Kernel(3, 3, elements));
 
 	public BufferedImage convert(BufferedImage source) throws NoSuchParamException {
 		if (source == null) {
 			throw new IllegalArgumentException("Internal error: image is null.");
 		}
 
-		logger.debug("SimpleSharpFilter.convert, sharping image");
+		logger.debug("GrayScaleFilter.convert, grayscaling image");
 
-		BufferedImage dest = new BufferedImage(source.getWidth(), source.getHeight(), source.getType());
-
-		return op.filter(source, dest);
+		BufferedImage dest = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+		Graphics2D graphics2D = dest.createGraphics();
+		graphics2D.drawImage(source, 0, 0, source.getWidth(), source.getHeight(), null);
+		graphics2D.dispose();
+		return dest;
 	}
 
 	public void onAttachToImage(BufferedImage source) {
-		logger.trace("SimpleSharpFilter.onAttach");
+		logger.trace("GrayScaleFilter.onAttach");
 		// do nothing
 	}
 
 	public void onDetachFromImage(BufferedImage source) {
-		logger.trace("SimpleSharpFilter.onDetach");
+		logger.trace("GrayScaleFilter.onDetach");
 		// do nothing
 	}
 }

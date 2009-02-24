@@ -1,5 +1,7 @@
 package edu.mgupi.pass.sources;
 
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 
 import org.junit.After;
@@ -21,13 +23,21 @@ public class TestSourceImplTest {
 	}
 
 	@Test
-	public void testInit() {
+	public void testInitAndDone() {
 		source.init();
-	}
-
-	@Test
-	public void testDone() {
+		try {
+			source.init();
+			fail("No IllegalStateException!");
+		} catch (IllegalStateException ise) {
+			System.out.println("Received expected exception: " + ise);
+		}
 		source.done();
+		try {
+			source.done();
+			fail("No IllegalStateException!");
+		} catch (IllegalStateException ise) {
+			System.out.println("Received expected exception: " + ise);
+		}
 	}
 
 	@Test
@@ -36,7 +46,7 @@ public class TestSourceImplTest {
 		try {
 			source.init();
 			SourceStore store = source.getSingleSource();
-			System.out.println("Image " + store.getName() + " (" + store.getMainImage().toString() + ")");
+			System.out.println("Image " + store.getName() + " (" + store.getImage().toString() + ")");
 		} finally {
 			source.done();
 		}

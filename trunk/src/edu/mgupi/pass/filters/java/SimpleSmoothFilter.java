@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.util.Collection;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +25,8 @@ public class SimpleSmoothFilter implements IFilter {
 		return null;
 	}
 
-	public void done() {
-		logger.debug("SimpleSmoothFilter.done");
+	public String toString() {
+		return this.getName();
 	}
 
 	private float[] elements = {
@@ -37,18 +36,14 @@ public class SimpleSmoothFilter implements IFilter {
 			1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f };
 	private ConvolveOp op = new ConvolveOp(new Kernel(3, 3, elements));
 
-	public BufferedImage convert(BufferedImage source, BufferedImage dest, Map<String, Object> params)
-			throws NoSuchParamException {
+	public BufferedImage convert(BufferedImage source) throws NoSuchParamException {
 		if (source == null) {
 			throw new IllegalArgumentException("Internal error: image is null.");
 		}
 
 		logger.debug("SimpleSmoothFilter.convert, smoothing image");
 
-		if (dest == null) {
-			dest = new BufferedImage(source.getWidth(), source.getHeight(), source.getType());
-		}
-
+		BufferedImage dest = new BufferedImage(source.getWidth(), source.getHeight(), source.getType());
 		return op.filter(source, dest);
 	}
 

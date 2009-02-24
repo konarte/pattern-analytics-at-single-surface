@@ -2,7 +2,6 @@ package edu.mgupi.pass.filters;
 
 import java.awt.image.BufferedImage;
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * Interface for filters. At least we write out filter on high-speed language
@@ -51,11 +50,6 @@ public interface IFilter {
 	 *            parameter)
 	 * 
 	 */
-	BufferedImage convert(BufferedImage source, BufferedImage dest, Map<String, Object> params) throws ParamException;
+	BufferedImage convert(BufferedImage source) throws ParamException;
 
-	/**
-	 * Final method for close all prepared connections/hardware calls/etc. Will
-	 * be called only once on program exit.
-	 */
-	void done();
 }

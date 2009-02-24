@@ -3,28 +3,24 @@ package edu.mgupi.pass.filters.java;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Map;
 
 import javax.imageio.ImageIO;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import edu.mgupi.pass.filters.NoSuchParamException;
 import edu.mgupi.pass.filters.Param;
+import edu.mgupi.pass.filters.ParamException;
 import edu.mgupi.pass.filters.ParamHelper;
 import edu.mgupi.pass.sources.TestSourceImpl;
 
 public class RescaleFilterTest {
-
-	private final static Logger logger = LoggerFactory.getLogger(RescaleFilterTest.class);
 
 	private RescaleFilter filter = null;
 
@@ -35,10 +31,7 @@ public class RescaleFilterTest {
 
 	@After
 	public void tearDown() throws Exception {
-		if (filter != null) {
-			filter.done();
-			filter = null;
-		}
+		filter = null;
 	}
 
 	@Test
@@ -52,16 +45,14 @@ public class RescaleFilterTest {
 	@Test
 	public void testDone() {
 		//
-		for (String type : ImageIO.getReaderFormatNames()) {
-			logger.debug("Supported type: " + type);
-		}
 	}
 
-	private void convertImage(BufferedImage image, Map<String, Object> paramMap, int brightness, int contrast,
-			String name) throws IOException, NoSuchParamException {
-		paramMap.put("Brightness", brightness);
-		paramMap.put("Contrast", contrast);
-		BufferedImage newImage = filter.convert(image, null, paramMap);
+	private void convertImage(BufferedImage image, int brightness, int contrast, String name) throws IOException,
+			ParamException {
+		ParamHelper.getParameterL("Brightness", filter).setValue(brightness);
+		ParamHelper.getParameterL("Contrast", filter).setValue(contrast);
+
+		BufferedImage newImage = filter.convert(image);
 
 		ImageIO.write(newImage, "JPG", new File("tmp/" + name + "-" + contrast + "-" + brightness + ".jpg"));
 	}
@@ -72,17 +63,16 @@ public class RescaleFilterTest {
 		source.init();
 		try {
 
-			BufferedImage image = source.getSingleSource().getMainImage();
-			Collection<Param> params = filter.getParams();
-			Map<String, Object> paramMap = ParamHelper.convertParamsToValues(params);
+			BufferedImage image = source.getSingleSource().getImage();
 
-			this.convertImage(image, paramMap, 40, 100, "color");
-			this.convertImage(image, paramMap, 0, 140, "color");
+			this.convertImage(image, 40, 100, "color");
+			this.convertImage(image, 0, 140, "color");
 
 			ColorSpaceFilter cfilter = new ColorSpaceFilter();
+			ParamHelper.getParameterL("ColorMode", cfilter).setValue(ColorSpace.CS_GRAY);
 
-			BufferedImage image2 = cfilter.convert(image, null, ParamHelper.convertParamsToValues(cfilter.getParams()));
-			this.convertImage(image2, paramMap, 40, 100, "gray");
+			BufferedImage image2 = cfilter.convert(image);
+			this.convertImage(image2, 40, 100, "CS_GRAY");
 		} finally {
 			source.done();
 		}

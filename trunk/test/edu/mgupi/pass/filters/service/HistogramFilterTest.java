@@ -8,27 +8,23 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Map;
 
 import javax.imageio.ImageIO;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.filters.NoSuchParamException;
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.ParamHelper;
 import edu.mgupi.pass.filters.java.ColorSpaceFilter;
+import edu.mgupi.pass.filters.java.GrayScaleFilter;
+import edu.mgupi.pass.filters.java.InvertFilter;
 import edu.mgupi.pass.filters.java.RescaleFilter;
-import edu.mgupi.pass.filters.java.SimpleSharpFilterTest;
-import edu.mgupi.pass.filters.service.HistogramFilter;
 import edu.mgupi.pass.sources.TestSourceImpl;
 
 public class HistogramFilterTest {
-	private final static Logger logger = LoggerFactory.getLogger(SimpleSharpFilterTest.class);
 
 	private HistogramFilter filter = null;
 
@@ -40,7 +36,6 @@ public class HistogramFilterTest {
 	@After
 	public void tearDown() throws Exception {
 		if (filter != null) {
-			filter.done();
 			filter = null;
 		}
 	}
@@ -56,14 +51,10 @@ public class HistogramFilterTest {
 	@Test
 	public void testDone() {
 		//
-		for (String type : ImageIO.getReaderFormatNames()) {
-			logger.debug("Supported type: " + type);
-		}
 	}
 
-	private void convertImage(BufferedImage image, Map<String, Object> paramMap, String addInfo) throws IOException,
-			NoSuchParamException {
-		BufferedImage newImage = filter.convert(image, null, paramMap);
+	private void saveImage(BufferedImage image, String addInfo) throws IOException, NoSuchParamException {
+		BufferedImage newImage = filter.convert(image);
 
 		ImageIO.write(newImage, "JPG", new File("tmp/histogram-" + addInfo + ".jpg"));
 	}
@@ -73,37 +64,51 @@ public class HistogramFilterTest {
 		TestSourceImpl source = new TestSourceImpl();
 		source.init();
 		try {
+			BufferedImage image = source.getSingleSource().getImage();
+			this.saveImage(image, "Color");
 
-			BufferedImage image = source.getSingleSource().getMainImage();
-			Collection<Param> params = filter.getParams();
-			Map<String, Object> paramMap = ParamHelper.convertParamsToValues(params);
+			GrayScaleFilter grayscale = new GrayScaleFilter();
+			BufferedImage image2 = grayscale.convert(image);
+			this.saveImage(image2, "Grayscale");
 
-			this.convertImage(image, paramMap, "Color");
+			InvertFilter invert = new InvertFilter();
+			BufferedImage image3 = invert.convert(image);
+			this.saveImage(image3, "Invert");
+
+			image3 = invert.convert(image2);
+			this.saveImage(image3, "Grayscale to Invert");
+
+			image3 = invert.convert(image);
+			image2 = grayscale.convert(image3);
+
+			this.saveImage(image2, "Invert to Grayscale");
 
 			ColorSpaceFilter cfilter = new ColorSpaceFilter();
-			Map<String, Object> paramMap1 = ParamHelper.convertParamsToValues(cfilter.getParams());
-			paramMap1.put("ColorMode", ColorSpace.CS_LINEAR_RGB);
-			BufferedImage image2 = cfilter.convert(image, null, paramMap1);
-			this.convertImage(image2, paramMap1, "Linear RGB");
-			paramMap1.put("ColorMode", ColorSpace.CS_GRAY);
-			BufferedImage image3 = cfilter.convert(image2, null, paramMap1);
-			this.convertImage(image3, paramMap1, "Linear RGB to Gray");
+			Param colorMode = ParamHelper.getParameterL("ColorMode", cfilter);
 
-//			paramMap1.put("ColorMode", ColorSpace.CS_sRGB);
-//			image2 = cfilter.convert(image, null, paramMap1);
-//			this.convertImage(image2, paramMap1, "sRGB");
+			colorMode.setValue(ColorSpace.CS_LINEAR_RGB);
+			image2 = cfilter.convert(image);
+			this.saveImage(image2, "Linear RGB");
 
-			paramMap1.put("ColorMode", ColorSpace.CS_GRAY);
-			image2 = cfilter.convert(image, null, paramMap1);
-			this.convertImage(image2, paramMap1, "Gray");
+			colorMode.setValue(ColorSpace.CS_GRAY);
+			image3 = cfilter.convert(image2);
+			this.saveImage(image3, "Linear RGB to CS_GRAY");
+
+			// paramMap1.put("ColorMode", ColorSpace.CS_sRGB);
+			// image2 = cfilter.convert(image, null, paramMap1);
+			// this.convertImage(image2, paramMap1, "sRGB");
+
+			colorMode.setValue(ColorSpace.CS_GRAY);
+			image2 = cfilter.convert(image);
+			this.saveImage(image2, "CS_GRAY");
 
 			RescaleFilter rfilter = new RescaleFilter();
-			Map<String, Object> paramMap2 = ParamHelper.convertParamsToValues(rfilter.getParams());
-			paramMap2.put("Brightness", 40);
-			paramMap2.put("Contrast", 100);
-			image = rfilter.convert(image2, null, paramMap2);
+			ParamHelper.getParameterL("Brightness", rfilter).setValue(40);
+			ParamHelper.getParameterL("Contrast", rfilter).setValue(100);
+			image = rfilter.convert(image2);
 
-			this.convertImage(image, paramMap, "Gray 100-40");
+			this.saveImage(image, "CS_GRAY 100-40");
+
 		} finally {
 			source.done();
 		}
