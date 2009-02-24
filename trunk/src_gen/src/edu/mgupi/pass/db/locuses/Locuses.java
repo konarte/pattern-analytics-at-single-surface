@@ -67,24 +67,6 @@ public class Locuses implements Serializable {
 		}
 	}
 	
-	private java.util.Set this_getSet (int key) {
-		if (key == edu.mgupi.pass.db.surfaces.ORMConstants.KEY_LOCUSES_PARAMS) {
-			return ORM_params;
-		}
-		else if (key == edu.mgupi.pass.db.surfaces.ORMConstants.KEY_LOCUSES_FILTERS) {
-			return ORM_filters;
-		}
-		
-		return null;
-	}
-	
-	org.orm.util.ORMAdapter _ormAdapter = new org.orm.util.AbstractORMAdapter() {
-		public java.util.Set getSet(int key) {
-			return this_getSet(key);
-		}
-		
-	};
-	
 	private int idLocus;
 	
 	private String name;
@@ -105,9 +87,9 @@ public class Locuses implements Serializable {
 	
 	private edu.mgupi.pass.db.sensors.Sensors sensor;
 	
-	private java.util.Set ORM_params = new java.util.HashSet();
+	private java.util.Set<edu.mgupi.pass.db.locuses.LocusModuleParams> params = new java.util.HashSet<edu.mgupi.pass.db.locuses.LocusModuleParams>();
 	
-	private java.util.Set ORM_filters = new java.util.HashSet();
+	private java.util.Set<edu.mgupi.pass.db.locuses.LocusFilters> filters = new java.util.HashSet<edu.mgupi.pass.db.locuses.LocusFilters>();
 	
 	private void setIdLocus(int value) {
 		this.idLocus = value;
@@ -237,25 +219,23 @@ public class Locuses implements Serializable {
 		return locusSource;
 	}
 	
-	private void setORM_Params(java.util.Set value) {
-		this.ORM_params = value;
+	public void setParams(java.util.Set<edu.mgupi.pass.db.locuses.LocusModuleParams> value) {
+		this.params = value;
 	}
 	
-	private java.util.Set getORM_Params() {
-		return ORM_params;
+	public java.util.Set<edu.mgupi.pass.db.locuses.LocusModuleParams> getParams() {
+		return params;
 	}
 	
-	public final edu.mgupi.pass.db.locuses.LocusModuleParamsSetCollection params = new edu.mgupi.pass.db.locuses.LocusModuleParamsSetCollection(this, _ormAdapter, edu.mgupi.pass.db.surfaces.ORMConstants.KEY_LOCUSES_PARAMS, edu.mgupi.pass.db.surfaces.ORMConstants.KEY_MUL_ONE_TO_MANY);
 	
-	private void setORM_Filters(java.util.Set value) {
-		this.ORM_filters = value;
+	public void setFilters(java.util.Set<edu.mgupi.pass.db.locuses.LocusFilters> value) {
+		this.filters = value;
 	}
 	
-	private java.util.Set getORM_Filters() {
-		return ORM_filters;
+	public java.util.Set<edu.mgupi.pass.db.locuses.LocusFilters> getFilters() {
+		return filters;
 	}
 	
-	public final edu.mgupi.pass.db.locuses.LocusFiltersSetCollection filters = new edu.mgupi.pass.db.locuses.LocusFiltersSetCollection(this, _ormAdapter, edu.mgupi.pass.db.surfaces.ORMConstants.KEY_LOCUSES_FILTERS, edu.mgupi.pass.db.surfaces.ORMConstants.KEY_MUL_ONE_TO_MANY);
 	
 	public void setSensor(edu.mgupi.pass.db.sensors.Sensors value) {
 		this.sensor = value;

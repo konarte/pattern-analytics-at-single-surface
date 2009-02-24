@@ -33,11 +33,11 @@ License Type: Evaluation
 				&#1052;&#1085;&#1086;&#1075;&#1086;&#1089;&#1083;&#1086;&#1081;&#1085;&#1099;&#1081; &#1086;&#1073;&#1098;&#1077;&#1082;&#1090; (&#1085;&#1072;&#1087;&#1088;&#1080;&#1084;&#1077;&#1088; &#1087;&#1077;&#1095;&#1072;&#1090;&#1085;&#1072;&#1103; &#1087;&#1083;&#1072;&#1090;&#1072;)
 			</meta>
 		</property>
-		<many-to-one name="surfaceType" column="SurfaceClassesIdSurfaceType" class="edu.mgupi.pass.db.surfaces.SurfaceClasses" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy" access="field">
+		<many-to-one name="surfaceType" column="SurfaceClassesIdSurfaceType" class="edu.mgupi.pass.db.surfaces.SurfaceClasses" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy">
 		</many-to-one>
-		<many-to-one name="surfaceMode" column="SurfaceTypesIdSurfaceMode" class="edu.mgupi.pass.db.surfaces.SurfaceTypes" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy" access="field">
+		<many-to-one name="surfaceMode" column="SurfaceTypesIdSurfaceMode" class="edu.mgupi.pass.db.surfaces.SurfaceTypes" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy">
 		</many-to-one>
-		<many-to-one name="type" column="SurfaceTypesIdSurfaceMode2" class="edu.mgupi.pass.db.surfaces.SurfaceTypes" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy" access="field">
+		<many-to-one name="type" column="SurfaceTypesIdSurfaceMode2" class="edu.mgupi.pass.db.surfaces.SurfaceTypes" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy">
 		</many-to-one>
 	</class>
 </hibernate-mapping>

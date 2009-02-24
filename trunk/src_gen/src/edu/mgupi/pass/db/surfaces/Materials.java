@@ -162,16 +162,7 @@ public class Materials implements Serializable {
 	}
 	
 	public void setSensor(edu.mgupi.pass.db.sensors.Sensors value) {
-		if (this.sensor != value) {
-			edu.mgupi.pass.db.sensors.Sensors lsensor = this.sensor;
-			this.sensor = value;
-			if (value != null) {
-				sensor.setMpathMaterial(this);
-			}
-			else {
-				lsensor.setMpathMaterial(null);
-			}
-		}
+		this.sensor = value;
 	}
 	
 	public edu.mgupi.pass.db.sensors.Sensors getSensor() {

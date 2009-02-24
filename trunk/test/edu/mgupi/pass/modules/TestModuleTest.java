@@ -1,10 +1,21 @@
 package edu.mgupi.pass.modules;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import edu.mgupi.pass.db.locuses.LocusSources;
+import edu.mgupi.pass.db.locuses.LocusSourcesFactory;
+import edu.mgupi.pass.db.locuses.Locuses;
+import edu.mgupi.pass.db.locuses.LocusesFactory;
+import edu.mgupi.pass.sources.SourceStore;
+import edu.mgupi.pass.sources.TestSourceImpl;
 
 public class TestModuleTest {
 
@@ -44,15 +55,49 @@ public class TestModuleTest {
 		module.init();
 	}
 
-//	@Test
-//	public void testAnalyze() {
-//		
-//		fail("Not yet implemented");
-//	}
-//
-//	@Test
-//	public void testCompare() {
-//		fail("Not yet implemented");
-//	}
+	@Test
+	public void testAnalyze() throws IOException {
+
+		TestSourceImpl source = new TestSourceImpl();
+		source.init();
+		try {
+
+			SourceStore sourceStore = source.getSingleSource();
+
+			Locuses locus = LocusesFactory.createLocuses();
+			LocusSources locusSource = LocusSourcesFactory.createLocusSources();
+			locusSource.setFilename(sourceStore.getName());
+			locusSource.setSourceImage(sourceStore.getFileData());
+
+			locus.setLocusSource(locusSource);
+
+			module.analyze(sourceStore.getImage(), locus);
+			
+			
+			FileOutputStream fileStream;
+			ObjectOutputStream out;
+			
+			
+			fileStream = new FileOutputStream("loc1.data");
+			out = new ObjectOutputStream(fileStream); 
+			out.writeObject(locus);
+			fileStream.close();
+			
+//			Locuses locus2 = LocusesFactory.createLocuses();
+			
+//			fileStream = new FileOutputStream("loc2.data");
+//			out = new ObjectOutputStream(fileStream); 
+//			out.writeObject(locus2);
+//			fileStream.close();
+
+		} finally {
+			source.done();
+		}
+
+	}
+	// @Test
+	// public void testCompare() {
+	// fail("Not yet implemented");
+	// }
 
 }

@@ -67,19 +67,6 @@ public class LocusFilters implements Serializable {
 		}
 	}
 	
-	private void this_setOwner(Object owner, int key) {
-		if (key == edu.mgupi.pass.db.surfaces.ORMConstants.KEY_LOCUSFILTERS_FILTER) {
-			this.filter = (edu.mgupi.pass.db.locuses.LFilters) owner;
-		}
-	}
-	
-	org.orm.util.ORMAdapter _ormAdapter = new org.orm.util.AbstractORMAdapter() {
-		public void setOwner(Object owner, int key) {
-			this_setOwner(owner, key);
-		}
-		
-	};
-	
 	private int idLocusFilter;
 	
 	private String options;

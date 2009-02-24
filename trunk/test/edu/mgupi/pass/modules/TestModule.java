@@ -1,10 +1,15 @@
 package edu.mgupi.pass.modules;
 
-import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.zip.GZIPOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.db.locuses.LocusModuleParams;
+import edu.mgupi.pass.db.locuses.LocusModuleParamsFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
 
 public class TestModule implements IModule {
@@ -34,7 +39,7 @@ public class TestModule implements IModule {
 		done = true;
 	}
 
-	public void analyze(Image filteredImage, Locuses store) {
+	public void analyze(BufferedImage filteredImage, Locuses store) throws IOException {
 		if (!init) {
 			throw new IllegalStateException("Internal error. Please, call init first.");
 		}
@@ -45,6 +50,29 @@ public class TestModule implements IModule {
 			throw new IllegalArgumentException("Internal error. store must be not null.");
 		}
 
+		String imageParams = "" + filteredImage.getWidth() + "x" + filteredImage.getHeight() + " : "
+				+ filteredImage.getType();
+
+		LocusModuleParams param = LocusModuleParamsFactory.createLocusModuleParams();
+		param.setParamName("myParam1");
+		param.setParamData(imageParams.getBytes());
+		store.getParams().add(param);
+
+		param = LocusModuleParamsFactory.createLocusModuleParams();
+		param.setParamName("myParam2");
+
+		byte[] imageData = (byte[]) filteredImage.getData().getDataElements(0, 0, filteredImage.getWidth(),
+				filteredImage.getHeight(), null);
+
+		ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+		GZIPOutputStream zipOut = new GZIPOutputStream(byteStream);
+		zipOut.write(imageData);
+
+		param.setParamData(byteStream.toByteArray());
+		store.getParams().add(param);
+
+		zipOut.close();
+		byteStream.close();
 	}
 
 	public boolean compare(Locuses graph1, Locuses graph2) {
@@ -56,6 +84,16 @@ public class TestModule implements IModule {
 		}
 		if (graph2 == null) {
 			throw new IllegalArgumentException("Internal error. graph2 must be not null.");
+		}
+
+		java.util.Set<LocusModuleParams> params = graph1.getParams();
+		for (LocusModuleParams param : params) {
+			System.out.println("G1: " + param.getParamName() + " = " + param.getParamData());
+		}
+
+		params = graph2.getParams();
+		for (LocusModuleParams param : params) {
+			System.out.println("G2: " + param.getParamName() + " = " + param.getParamData());
 		}
 
 		return false;
