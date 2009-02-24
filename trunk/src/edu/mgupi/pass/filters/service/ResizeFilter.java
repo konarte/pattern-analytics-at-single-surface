@@ -43,7 +43,6 @@ public class ResizeFilter implements IFilter {
 		return params;
 	}
 
-
 	public String toString() {
 		return this.getName() + " (" + WIDTH.getValue() + "x" + HEIGHT.getValue() + " by "
 				+ INTERPOLATION_METHOD.getValue() + ")";
