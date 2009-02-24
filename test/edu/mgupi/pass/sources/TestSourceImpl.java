@@ -1,6 +1,7 @@
 package edu.mgupi.pass.sources;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
@@ -50,9 +51,17 @@ public class TestSourceImpl implements ISource {
 		}
 		logger.debug("TestSourceImpl. Calling getSingleSource.");
 		File file = new File(imagePath);
-		return new SourceStore(file.getName(), ImageIO.read(file));
-	}
 
+		FileInputStream input = new FileInputStream(file);
+		byte buffer[] = new byte[(int) input.getChannel().size()];
+		try {
+			input.read(buffer);
+		} finally {
+			input.close();
+		}
+
+		return new SourceStore(file.getName(), ImageIO.read(file), buffer);
+	}
 	// private String imageDir = "test/multiple/*.jpg";
 	//
 	// @Override

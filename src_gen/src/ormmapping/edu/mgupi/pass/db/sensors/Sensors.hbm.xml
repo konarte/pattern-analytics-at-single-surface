@@ -10,8 +10,8 @@ License Type: Evaluation
 			<generator class="native">
 			</generator>
 		</id>
-		<many-to-one name="sensorType" column="SensorTypesIdSensorType" class="edu.mgupi.pass.db.sensors.SensorTypes" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy" access="field">
+		<many-to-one name="sensorType" column="SensorTypesIdSensorType" class="edu.mgupi.pass.db.sensors.SensorTypes" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy">
 		</many-to-one>
-		<one-to-one name="mpathMaterial" class="edu.mgupi.pass.db.surfaces.Materials" cascade="save-update,lock" property-ref="sensor" lazy="no-proxy" access="field"/>
+		<one-to-one name="mpathMaterial" class="edu.mgupi.pass.db.surfaces.Materials" cascade="save-update,lock" property-ref="sensor" lazy="no-proxy"/>
 	</class>
 </hibernate-mapping>

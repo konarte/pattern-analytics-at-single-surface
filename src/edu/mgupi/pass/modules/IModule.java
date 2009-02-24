@@ -1,6 +1,8 @@
 package edu.mgupi.pass.modules;
 
 import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 import edu.mgupi.pass.db.locuses.Locuses;
 
@@ -28,7 +30,7 @@ public interface IModule {
 	 * @param filteredImage
 	 * @param store
 	 */
-	void analyze(Image filteredImage, Locuses store);
+	void analyze(BufferedImage filteredImage, Locuses store) throws IOException;
 
 	/**
 	 * Method for comparing two different graphs. Method must return true if

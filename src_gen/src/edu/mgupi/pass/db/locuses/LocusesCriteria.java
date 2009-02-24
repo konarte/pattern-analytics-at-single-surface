@@ -63,11 +63,11 @@ public class LocusesCriteria extends AbstractORMCriteria {
 	}
 	
 	public LocusModuleParamsCriteria createParamsCriteria() {
-		return new LocusModuleParamsCriteria(createCriteria("ORM_Params"));
+		return new LocusModuleParamsCriteria(createCriteria("params"));
 	}
 	
 	public LocusFiltersCriteria createFiltersCriteria() {
-		return new LocusFiltersCriteria(createCriteria("ORM_Filters"));
+		return new LocusFiltersCriteria(createCriteria("filters"));
 	}
 	
 	public Locuses uniqueLocuses() {

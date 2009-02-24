@@ -124,16 +124,7 @@ public class Sensors implements Serializable {
 	}
 	
 	public void setMpathMaterial(edu.mgupi.pass.db.surfaces.Materials value) {
-		if (this.mpathMaterial != value) {
-			edu.mgupi.pass.db.surfaces.Materials lmpathMaterial = this.mpathMaterial;
-			this.mpathMaterial = value;
-			if (value != null) {
-				mpathMaterial.setSensor(this);
-			}
-			else {
-				lmpathMaterial.setSensor(null);
-			}
-		}
+		this.mpathMaterial = value;
 	}
 	
 	public edu.mgupi.pass.db.surfaces.Materials getMpathMaterial() {

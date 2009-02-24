@@ -22,7 +22,7 @@ License Type: Evaluation
 		&#1060;&#1086;&#1088;&#1084;&#1072;&#1090; &#1093;&#1088;&#1072;&#1085;&#1077;&#1085;&#1080;&#1103; -- PNG
 			</meta>
 		</property>
-		<many-to-one name="defectClass" column="DefectClassesIdDefectClass" class="edu.mgupi.pass.db.defects.DefectClasses" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy" access="field">
+		<many-to-one name="defectClass" column="DefectClassesIdDefectClass" class="edu.mgupi.pass.db.defects.DefectClasses" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy">
 		</many-to-one>
 	</class>
 </hibernate-mapping>

@@ -15,9 +15,9 @@ License Type: Evaluation
 			</generator>
 		</id>
 		<property name="name" column="Name" type="string" length="255" not-null="false" lazy="false"/>
-		<many-to-one name="surfaceClass" column="SurfaceClassesIdSurfaceType" class="edu.mgupi.pass.db.surfaces.SurfaceClasses" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy" access="field">
+		<many-to-one name="surfaceClass" column="SurfaceClassesIdSurfaceType" class="edu.mgupi.pass.db.surfaces.SurfaceClasses" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy">
 		</many-to-one>
-		<many-to-one name="surfaceMaterial" column="MaterialsIdSurfaceMaterial" class="edu.mgupi.pass.db.surfaces.Materials" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy" access="field">
+		<many-to-one name="surfaceMaterial" column="MaterialsIdSurfaceMaterial" class="edu.mgupi.pass.db.surfaces.Materials" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy">
 		</many-to-one>
 	</class>
 </hibernate-mapping>

@@ -65,11 +65,11 @@ public class LocusesDetachedCriteria extends AbstractORMDetachedCriteria {
 	}
 	
 	public LocusModuleParamsDetachedCriteria createParamsCriteria() {
-		return new LocusModuleParamsDetachedCriteria(createCriteria("ORM_Params"));
+		return new LocusModuleParamsDetachedCriteria(createCriteria("params"));
 	}
 	
 	public LocusFiltersDetachedCriteria createFiltersCriteria() {
-		return new LocusFiltersDetachedCriteria(createCriteria("ORM_Filters"));
+		return new LocusFiltersDetachedCriteria(createCriteria("filters"));
 	}
 	
 	public Locuses uniqueLocuses(PersistentSession session) {
