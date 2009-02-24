@@ -1,6 +1,5 @@
 package edu.mgupi.pass.modules.basic;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -24,13 +23,12 @@ public class SimpleMatrixModule implements IModule {
 
 	public void analyze(BufferedImage filteredImage, Locuses store) throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public boolean compare(Locuses graph1, Locuses graph2) {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
 
 }

@@ -2,8 +2,10 @@ package edu.mgupi.pass.modules;
 
 import static org.junit.Assert.fail;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import org.junit.After;
@@ -56,7 +58,7 @@ public class TestModuleTest {
 	}
 
 	@Test
-	public void testAnalyze() throws IOException {
+	public void testAnalyze() throws IOException, ClassNotFoundException {
 
 		TestSourceImpl source = new TestSourceImpl();
 		source.init();
@@ -72,23 +74,28 @@ public class TestModuleTest {
 			locus.setLocusSource(locusSource);
 
 			module.analyze(sourceStore.getImage(), locus);
-			
-			
+
 			FileOutputStream fileStream;
 			ObjectOutputStream out;
-			
-			
-			fileStream = new FileOutputStream("loc1.data");
-			out = new ObjectOutputStream(fileStream); 
+
+			fileStream = new FileOutputStream("tmp/locus-serialized.data");
+			out = new ObjectOutputStream(fileStream);
 			out.writeObject(locus);
 			fileStream.close();
-			
-//			Locuses locus2 = LocusesFactory.createLocuses();
-			
-//			fileStream = new FileOutputStream("loc2.data");
-//			out = new ObjectOutputStream(fileStream); 
-//			out.writeObject(locus2);
-//			fileStream.close();
+
+			FileInputStream input = new FileInputStream("tmp/locus-serialized.data");
+			ObjectInputStream in = new ObjectInputStream(input);
+			locus = (Locuses) in.readObject();
+			module.compare(locus, locus);
+
+			input.close();
+
+			// Locuses locus2 = LocusesFactory.createLocuses();
+
+			// fileStream = new FileOutputStream("loc2.data");
+			// out = new ObjectOutputStream(fileStream);
+			// out.writeObject(locus2);
+			// fileStream.close();
 
 		} finally {
 			source.done();

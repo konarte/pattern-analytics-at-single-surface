@@ -23,7 +23,6 @@ public class GrayScaleFilter implements IFilter {
 		return null;
 	}
 
-	
 	public String toString() {
 		return this.getName();
 	}

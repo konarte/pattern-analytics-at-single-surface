@@ -33,7 +33,7 @@ public class HistogramFilter implements IFilter {
 		logger.debug("HistogramFilter.getParams. Nothing to return.");
 		return null;
 	}
-	
+
 	public String toString() {
 		return this.getName();
 	}

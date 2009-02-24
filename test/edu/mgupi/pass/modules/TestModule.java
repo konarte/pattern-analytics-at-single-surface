@@ -1,9 +1,12 @@
 package edu.mgupi.pass.modules;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
-import java.util.zip.GZIPOutputStream;
+
+import javax.imageio.ImageIO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,17 +64,33 @@ public class TestModule implements IModule {
 		param = LocusModuleParamsFactory.createLocusModuleParams();
 		param.setParamName("myParam2");
 
-		byte[] imageData = (byte[]) filteredImage.getData().getDataElements(0, 0, filteredImage.getWidth(),
-				filteredImage.getHeight(), null);
-
 		ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-		GZIPOutputStream zipOut = new GZIPOutputStream(byteStream);
-		zipOut.write(imageData);
+
+		ImageIO.write(filteredImage, "PNG", byteStream);
+
+		// ImageWriter writer =
+		// ImageIO.getImageWritersByFormatName("JPG").next();
+		// writer.setOutput(ImageIO.createImageOutputStream(byteStream));
+		//
+		// ImageWriteParam iwp = writer.getDefaultWriteParam();
+		// iwp.setProgressiveMode(ImageWriteParam.MODE_DEFAULT );
+		// iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+		// iwp.setCompressionQuality(0.95f);
+		//
+		// writer.write(null, new IIOImage(filteredImage, null, null), iwp);
+		// writer.dispose();
+
+		// byte[] imageData = (byte[])
+		// filteredImage.getData().getDataElements(0, 0,
+		// filteredImage.getWidth(),
+		// filteredImage.getHeight(), null);
+		// GZIPOutputStream zipOut = new GZIPOutputStream(byteStream);
+		// zipOut.write(imageData);
+		// zipOut.close();
 
 		param.setParamData(byteStream.toByteArray());
 		store.getParams().add(param);
 
-		zipOut.close();
 		byteStream.close();
 	}
 
@@ -88,13 +107,28 @@ public class TestModule implements IModule {
 
 		java.util.Set<LocusModuleParams> params = graph1.getParams();
 		for (LocusModuleParams param : params) {
-			System.out.println("G1: " + param.getParamName() + " = " + param.getParamData());
-		}
+			if (param.getParamName().equals("myParam1")) {
+				System.out.println("G1: " + param.getParamName() + " = " + new String(param.getParamData()));
+			} else {
+				try {
+					ImageIO.write(ImageIO.read(new ByteArrayInputStream(param.getParamData())), "PNG", new File(
+							"tmp/G1-myParam1-imageRestored.png"));
 
-		params = graph2.getParams();
-		for (LocusModuleParams param : params) {
-			System.out.println("G2: " + param.getParamName() + " = " + param.getParamData());
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
 		}
+		//
+		// params = graph2.getParams();
+		// for (LocusModuleParams param : params) {
+		// if (param.getParamName().equals("myParam1")) {
+		// System.out.println("G2: " + param.getParamName() + " = " +
+		// param.getParamData());
+		// } else {
+		//
+		// }
+		// }
 
 		return false;
 	}
