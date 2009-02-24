@@ -53,9 +53,6 @@ public class RescaleFilter implements IFilter {
 		logger.debug("RescaleFilter.convert, changing constrast index to {} and brightness value to {}", contrast,
 				brightness);
 
-		// TODO Поисследовать, даст ли прирост скорости кэширование
-		// RescaleOp-а
-
 		// Warning!
 		// Do not try to define dest as new BufferedImage(source.getWidth(),
 		// source.getHeight(), source.getType());

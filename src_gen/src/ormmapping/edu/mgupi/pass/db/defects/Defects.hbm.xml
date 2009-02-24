@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+Licensee: Raidan Flk
+License Type: Evaluation
+-->
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="edu.mgupi.pass.db.defects.Defects" table="Defects" lazy="false">
+		<meta attribute="class-description">
+			&#1050;&#1072;&#1090;&#1072;&#1083;&#1086;&#1075; &#1076;&#1077;&#1092;&#1077;&#1082;&#1090;&#1086;&#1074;
+		</meta>
+		<id name="idDefect" column="IdDefect" type="integer" unsaved-value="0">
+			<generator class="native">
+			</generator>
+		</id>
+		<property name="beddingDepth" column="BeddingDepth" type="float" not-null="true" lazy="false">
+			<meta attribute="field-description">
+				&#1043;&#1083;&#1091;&#1073;&#1080;&#1085;&#1072; &#1079;&#1072;&#1083;&#1077;&#1075;&#1072;&#1085;&#1080;&#1103;, &#1084;&#1084;: &#1086;&#1090; 0 &#1076;&#1086; 10 &#1084;&#1084; &#1076;&#1083;&#1103; &#1074;&#1080;&#1093;&#1088;&#1077;&#1090;&#1086;&#1082;&#1086;&#1074;, &#1082; &#1087;&#1088;&#1080;&#1084;&#1077;&#1088;&#1091;. 
+		&#1043;&#1083;&#1091;&#1073;&#1080;&#1085;&#1072; &#1079;&#1072;&#1083;&#1077;&#1075;&#1072;&#1085;&#1080;&#1103; &#1079;&#1072;&#1076;&#1072;&#1077;&#1090;&#1089;&#1103; &#1076;&#1083;&#1103; &#1074;&#1089;&#1077;&#1093; &#1076;&#1077;&#1092;&#1077;&#1082;&#1090;&#1086;&#1074;.
+			</meta>
+		</property>
+		<property name="depth" column="Depth" type="float" not-null="true" lazy="false">
+			<meta attribute="field-description">
+				&#1043;&#1083;&#1091;&#1073;&#1080;&#1085;&#1072;, &#1084;&#1084;
+			</meta>
+		</property>
+		<property name="width" column="Width" type="float" not-null="true" lazy="false">
+			<meta attribute="field-description">
+				&#1064;&#1080;&#1088;&#1080;&#1085;&#1072; (&#1088;&#1072;&#1076;&#1080;&#1091;&#1089;), &#1084;&#1084; 
+			</meta>
+		</property>
+		<property name="length" column="Length" type="float" not-null="true" lazy="false">
+			<meta attribute="field-description">
+				&#1044;&#1083;&#1080;&#1085;&#1072;, &#1084;&#1084; 
+			</meta>
+		</property>
+		<many-to-one name="defectType" column="DefectTypesIdDefectType" class="edu.mgupi.pass.db.defects.DefectTypes" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy" access="field">
+		</many-to-one>
+	</class>
+</hibernate-mapping>

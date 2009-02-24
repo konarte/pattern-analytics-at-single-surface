@@ -22,11 +22,10 @@ public class TestSourceImpl implements ISource {
 	}
 
 	public void init() {
-		logger.debug("TestSourceImpl. Calling init method.");
-
 		if (init) {
 			throw new IllegalStateException("Internal error. Init already called.");
 		}
+		logger.debug("TestSourceImpl. Calling init method.");
 		init = true;
 	}
 

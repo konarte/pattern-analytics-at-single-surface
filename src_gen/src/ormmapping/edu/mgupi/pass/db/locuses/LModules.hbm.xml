@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+Licensee: Raidan Flk
+License Type: Evaluation
+-->
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="edu.mgupi.pass.db.locuses.LModules" table="LModules" lazy="false">
+		<meta attribute="class-description">
+			&#1050;&#1072;&#1090;&#1072;&#1083;&#1086;&#1075; &#1084;&#1086;&#1076;&#1091;&#1083;&#1077;&#1081; &#1072;&#1085;&#1072;&#1083;&#1080;&#1079;&#1072;
+		</meta>
+		<id name="idModule" column="IdModule" type="integer" unsaved-value="0">
+			<generator class="native">
+			</generator>
+		</id>
+		<property name="name" column="Name" type="string" length="255" not-null="false" lazy="false">
+			<meta attribute="field-description">
+				&#1053;&#1072;&#1079;&#1074;&#1072;&#1085;&#1080;&#1077; &#1084;&#1086;&#1076;&#1091;&#1083;&#1103;
+			</meta>
+		</property>
+		<property name="codename" column="Codename" type="string" length="255" not-null="false" lazy="false">
+			<meta attribute="field-description">
+				&#1059;&#1085;&#1080;&#1082;&#1072;&#1083;&#1100;&#1085;&#1099;&#1081; &#1082;&#1086;&#1076; &#1084;&#1086;&#1076;&#1091;&#1083;&#1103; (&#1087;&#1072;&#1082;&#1077;&#1090;+&#1080;&#1084;&#1103;)
+			</meta>
+		</property>
+	</class>
+</hibernate-mapping>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+Licensee: Raidan Flk
+License Type: Evaluation
+-->
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="edu.mgupi.pass.db.surfaces.Surfaces" table="Surfaces" lazy="false">
+		<meta attribute="class-description">
+			&#1050;&#1072;&#1090;&#1072;&#1083;&#1086;&#1075; &#1087;&#1086;&#1074;&#1077;&#1088;&#1093;&#1085;&#1086;&#1089;&#1090;&#1077;&#1081;
+		</meta>
+		<id name="idSurface" column="IdSurface" type="integer" unsaved-value="0">
+			<generator class="native">
+			</generator>
+		</id>
+		<property name="height" column="Height" type="float" not-null="true" lazy="false">
+			<meta attribute="field-description">
+				&#1042;&#1099;&#1089;&#1086;&#1090;&#1072;, &#1084;&#1084;
+			</meta>
+		</property>
+		<property name="width" column="Width" type="float" not-null="true" lazy="false">
+			<meta attribute="field-description">
+				&#1064;&#1080;&#1088;&#1080;&#1085;&#1072;, &#1084;&#1084;
+			</meta>
+		</property>
+		<property name="length" column="Length" type="float" not-null="true" lazy="false">
+			<meta attribute="field-description">
+				&#1044;&#1083;&#1080;&#1085;&#1072;, &#1084;&#1084;
+			</meta>
+		</property>
+		<property name="multiLayer" column="MultiLayer" type="boolean" length="1" not-null="true" lazy="false">
+			<meta attribute="field-description">
+				&#1052;&#1085;&#1086;&#1075;&#1086;&#1089;&#1083;&#1086;&#1081;&#1085;&#1099;&#1081; &#1086;&#1073;&#1098;&#1077;&#1082;&#1090; (&#1085;&#1072;&#1087;&#1088;&#1080;&#1084;&#1077;&#1088; &#1087;&#1077;&#1095;&#1072;&#1090;&#1085;&#1072;&#1103; &#1087;&#1083;&#1072;&#1090;&#1072;)
+			</meta>
+		</property>
+		<many-to-one name="surfaceType" column="SurfaceClassesIdSurfaceType" class="edu.mgupi.pass.db.surfaces.SurfaceClasses" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy" access="field">
+		</many-to-one>
+		<many-to-one name="surfaceMode" column="SurfaceTypesIdSurfaceMode" class="edu.mgupi.pass.db.surfaces.SurfaceTypes" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy" access="field">
+		</many-to-one>
+		<many-to-one name="type" column="SurfaceTypesIdSurfaceMode2" class="edu.mgupi.pass.db.surfaces.SurfaceTypes" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy" access="field">
+		</many-to-one>
+	</class>
+</hibernate-mapping>

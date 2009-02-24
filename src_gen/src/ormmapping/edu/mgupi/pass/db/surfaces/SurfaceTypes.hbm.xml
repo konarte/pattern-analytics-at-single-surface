@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+Licensee: Raidan Flk
+License Type: Evaluation
+-->
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="edu.mgupi.pass.db.surfaces.SurfaceTypes" table="SurfaceTypes" lazy="false">
+		<meta attribute="class-description">
+			&#1050;&#1086;&#1085;&#1092;&#1080;&#1075;&#1091;&#1088;&#1072;&#1094;&#1080;&#1103; &#1087;&#1086;&#1074;&#1077;&#1088;&#1093;&#1085;&#1086;&#1089;&#1090;&#1080;.
+			&#1044;&#1083;&#1103; &#1082;&#1072;&#1078;&#1076;&#1086;&#1075;&#1086; &#1090;&#1080;&#1087;&#1072; &#1091;&#1090;&#1086;&#1095;&#1085;&#1103;&#1077;&#1084;, &#1095;&#1090;&#1086; &#1101;&#1090;&#1086;.
+		</meta>
+		<id name="idSurfaceMode" column="IdSurfaceMode" type="integer" unsaved-value="0">
+			<generator class="native">
+			</generator>
+		</id>
+		<property name="name" column="Name" type="string" length="255" not-null="false" lazy="false"/>
+		<many-to-one name="surfaceClass" column="SurfaceClassesIdSurfaceType" class="edu.mgupi.pass.db.surfaces.SurfaceClasses" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy" access="field">
+		</many-to-one>
+		<many-to-one name="surfaceMaterial" column="MaterialsIdSurfaceMaterial" class="edu.mgupi.pass.db.surfaces.Materials" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy" access="field">
+		</many-to-one>
+	</class>
+</hibernate-mapping>
