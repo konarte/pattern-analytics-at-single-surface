@@ -63,7 +63,7 @@ public class ParamHelperTest {
 	}
 
 	@Test
-	public void testConvertParamsToValues() throws NoSuchParamException {
+	public void testConvertParamsToValues() throws ParamException {
 		ArrayList<Param> paramList = new ArrayList<Param>();
 		paramList.add(new Param("key1", "Ключ 1", TYPES.STRING, "14.55"));
 		paramList.add(new Param("key2", "Ключ 2", TYPES.INT, 6));

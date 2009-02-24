@@ -12,18 +12,44 @@ public class TestSourceImpl implements ISource {
 
 	private final static Logger logger = LoggerFactory.getLogger(TestSourceImpl.class);
 
-	public void init() {
-		logger.debug("Calling init method.");
+	private boolean init = false;
+
+	protected void finalize() throws Throwable {
+		if (!done) {
+			System.err.println("Finalize not called");
+			System.exit(1);
+		}
 	}
 
+	public void init() {
+		logger.debug("TestSourceImpl. Calling init method.");
+
+		if (init) {
+			throw new IllegalStateException("Internal error. Init already called.");
+		}
+		init = true;
+	}
+
+	private boolean done = false;
+
 	public void done() {
-		logger.debug("Calling done method.");
+		if (!init) {
+			throw new IllegalStateException("Internal error. Please, call init first.");
+		}
+		if (done) {
+			throw new IllegalStateException("Internal error. Done already called.");
+		}
+		logger.debug("TestSourceImpl. Calling done method.");
+		done = true;
 	}
 
 	private String imagePath = "test/82675284.jpg";
 
 	public SourceStore getSingleSource() throws IOException {
-		logger.debug("Calling getSingleSource.");
+		if (!init) {
+			throw new IllegalStateException("Internal error. Please, call init first.");
+		}
+		logger.debug("TestSourceImpl. Calling getSingleSource.");
 		File file = new File(imagePath);
 		return new SourceStore(file.getName(), ImageIO.read(file));
 	}
@@ -32,7 +58,7 @@ public class TestSourceImpl implements ISource {
 	//
 	// @Override
 	// public Collection<SourceStore> getSourcesList() throws IOException {
-	// logger.debug("Calling getSourceList.");
+	// logger.debug("TestSourceImpl. Calling getSourceList.");
 	// Collection<SourceStore> sources = new ArrayList<SourceStore>();
 	// for (File file : new File(imageDir).listFiles()) {
 	// sources.add(new SourceStore(file.getName(), ImageIO.read(file)));

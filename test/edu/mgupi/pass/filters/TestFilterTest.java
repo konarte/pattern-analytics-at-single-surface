@@ -1,4 +1,4 @@
-package edu.mgupi.pass.filters.service;
+package edu.mgupi.pass.filters;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -8,24 +8,24 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.ParamException;
-import edu.mgupi.pass.filters.ParamHelper;
 import edu.mgupi.pass.sources.TestSourceImpl;
 
-public class ResizeFilterTest {
+public class TestFilterTest {
 
-	private ResizeFilter filter = null;
+	private TestFilter filter = null;
 
 	@Before
 	public void setUp() throws Exception {
-		filter = new ResizeFilter();
+		filter = new TestFilter();
 	}
 
 	@After
@@ -46,19 +46,18 @@ public class ResizeFilterTest {
 		//
 	}
 
-	private void convertImage(BufferedImage image, int width, int height) throws IOException, ParamException {
-		ParamHelper.getParameterL("Width", filter).setValue(width);
-		ParamHelper.getParameterL("Height", filter).setValue(height);
+	private void convertImage(BufferedImage image) throws IOException, NoSuchParamException {
+		BufferedImage newImage = filter.convert(image);
 
-		Param param = ParamHelper.getParameterL("Method", filter.getParams());
-		for (int i = 0; i < param.getAllowed_values().length; i++) {
-			param.setValue(param.getAllowed_values()[i]);
+		ImageWriter writer = ImageIO.getImageWritersByFormatName("JPG").next();
+		writer.setOutput(ImageIO.createImageOutputStream(new File("tmp/test-filter.jpg")));
 
-			BufferedImage newImage = filter.convert(image);
+		ImageWriteParam iwp = writer.getDefaultWriteParam();
+		iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+		iwp.setCompressionQuality(0.90f);
 
-			ImageIO.write(newImage, "JPG", new File("tmp/resize-" + width + "-" + height + "-"
-					+ param.getVisual_values()[i] + ".jpg"));
-		}
+		writer.write(null, new IIOImage(newImage, null, null), iwp);
+		writer.dispose();
 
 	}
 
@@ -69,12 +68,15 @@ public class ResizeFilterTest {
 		try {
 
 			BufferedImage image = source.getSingleSource().getImage();
-
-			this.convertImage(image, 256, 256);
-			this.convertImage(image, 1024, 1024);
+			filter.onAttachToImage(image);
+			try {
+				this.convertImage(image);
+			} finally {
+				filter.onDetachFromImage(image);
+			}
 		} finally {
+
 			source.done();
 		}
 	}
-
 }
