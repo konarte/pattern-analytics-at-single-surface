@@ -15,8 +15,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.mgupi.pass.filters.NoSuchParamException;
 import edu.mgupi.pass.filters.Param;
+import edu.mgupi.pass.filters.ParamException;
 import edu.mgupi.pass.filters.ParamHelper;
 import edu.mgupi.pass.filters.java.ColorSpaceFilter;
 import edu.mgupi.pass.filters.java.GrayScaleFilter;
@@ -53,7 +53,7 @@ public class HistogramFilterTest {
 		//
 	}
 
-	private void saveImage(BufferedImage image, String addInfo) throws IOException, NoSuchParamException {
+	private void saveImage(BufferedImage image, String addInfo) throws IOException, ParamException {
 		BufferedImage newImage = filter.convert(image);
 
 		ImageIO.write(newImage, "JPG", new File("tmp/histogram-" + addInfo + ".jpg"));

@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.filters.IFilter;
-import edu.mgupi.pass.filters.NoSuchParamException;
 import edu.mgupi.pass.filters.Param;
+import edu.mgupi.pass.filters.ParamException;
 
 public class SimpleSmoothFilter implements IFilter {
 
@@ -36,7 +36,7 @@ public class SimpleSmoothFilter implements IFilter {
 			1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f };
 	private ConvolveOp op = new ConvolveOp(new Kernel(3, 3, elements));
 
-	public BufferedImage convert(BufferedImage source) throws NoSuchParamException {
+	public BufferedImage convert(BufferedImage source) throws ParamException {
 		if (source == null) {
 			throw new IllegalArgumentException("Internal error: image is null.");
 		}

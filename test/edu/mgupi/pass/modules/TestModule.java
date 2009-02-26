@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
@@ -52,6 +53,10 @@ public class TestModule implements IModule {
 		if (store == null) {
 			throw new IllegalArgumentException("Internal error. store must be not null.");
 		}
+		if (store.getProcessed()) {
+			throw new IllegalArgumentException(
+					"Internal error. Store was already processed! Attemt to reuse store object!");
+		}
 
 		String imageParams = "" + filteredImage.getWidth() + "x" + filteredImage.getHeight() + " : "
 				+ filteredImage.getType();
@@ -92,9 +97,11 @@ public class TestModule implements IModule {
 		store.getParams().add(param);
 
 		byteStream.close();
+
+		store.setProcessed(true);
 	}
 
-	public boolean compare(Locuses graph1, Locuses graph2) {
+	public boolean compare(Locuses graph1, Locuses graph2) throws ModuleException {
 		if (!init) {
 			throw new IllegalStateException("Internal error. Please, call init first.");
 		}
@@ -104,21 +111,47 @@ public class TestModule implements IModule {
 		if (graph2 == null) {
 			throw new IllegalArgumentException("Internal error. graph2 must be not null.");
 		}
-
-		java.util.Set<LocusModuleParams> params = graph1.getParams();
-		for (LocusModuleParams param : params) {
-			if (param.getParamName().equals("myParam1")) {
-				System.out.println("G1: " + param.getParamName() + " = " + new String(param.getParamData()));
-			} else {
-				try {
-					ImageIO.write(ImageIO.read(new ByteArrayInputStream(param.getParamData())), "PNG", new File(
-							"tmp/G1-myParam1-imageRestored.png"));
-
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
+		if (!graph1.getProcessed()) {
+			throw new IllegalArgumentException("Internal error. graph1 was not marked as processed!");
 		}
+		if (!graph2.getProcessed()) {
+			throw new IllegalArgumentException("Internal error. graph2 was not marked as processed!");
+		}
+
+		LocusModuleParams param_g1 = ModuleHelper.getParameter("myParam2", graph1);
+		LocusModuleParams param_g2 = ModuleHelper.getParameter("myParam2", graph2);
+
+		try {
+			ImageIO.write(ImageIO.read(new ByteArrayInputStream(param_g1.getParamData())), "PNG", new File(
+					"tmp/G1-myParam1-imageRestored.png"));
+			ImageIO.write(ImageIO.read(new ByteArrayInputStream(param_g2.getParamData())), "PNG", new File(
+					"tmp/G2-myParam1-imageRestored.png"));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		if (Arrays.equals(param_g1.getParamData(), param_g2.getParamData())) {
+			return true;
+		} else {
+			return false;
+		}
+
+		// java.util.Set<LocusModuleParams> params = graph1.getParams();
+		// for (LocusModuleParams param : params) {
+		// if (param.getParamName().equals("myParam1")) {
+		// System.out.println("G1: " + param.getParamName() + " = " + new
+		// String(param.getParamData()));
+		// } else if (param.getParamName().equals("myParam2")) {
+		// try {
+		// ImageIO.write(ImageIO.read(new
+		// ByteArrayInputStream(param.getParamData())), "PNG", new File(
+		// "tmp/G1-myParam1-imageRestored.png"));
+		//		
+		// } catch (IOException e) {
+		// throw new RuntimeException(e);
+		// }
+		// }
+		// }
 		//
 		// params = graph2.getParams();
 		// for (LocusModuleParams param : params) {
@@ -130,7 +163,7 @@ public class TestModule implements IModule {
 		// }
 		// }
 
-		return false;
+		// return false;
 	}
 
 }

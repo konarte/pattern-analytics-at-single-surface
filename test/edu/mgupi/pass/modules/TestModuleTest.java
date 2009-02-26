@@ -1,5 +1,7 @@
 package edu.mgupi.pass.modules;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.FileInputStream;
@@ -16,6 +18,8 @@ import edu.mgupi.pass.db.locuses.LocusSources;
 import edu.mgupi.pass.db.locuses.LocusSourcesFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
 import edu.mgupi.pass.db.locuses.LocusesFactory;
+import edu.mgupi.pass.filters.ParamException;
+import edu.mgupi.pass.filters.java.GrayScaleFilter;
 import edu.mgupi.pass.sources.SourceStore;
 import edu.mgupi.pass.sources.TestSourceImpl;
 
@@ -58,7 +62,7 @@ public class TestModuleTest {
 	}
 
 	@Test
-	public void testAnalyze() throws IOException, ClassNotFoundException {
+	public void testAnalyze() throws IOException, ClassNotFoundException, ModuleException, ParamException {
 
 		TestSourceImpl source = new TestSourceImpl();
 		source.init();
@@ -86,9 +90,32 @@ public class TestModuleTest {
 			FileInputStream input = new FileInputStream("tmp/locus-serialized.data");
 			ObjectInputStream in = new ObjectInputStream(input);
 			locus = (Locuses) in.readObject();
-			module.compare(locus, locus);
-
 			input.close();
+			
+
+			assertTrue(module.compare(locus, locus));
+
+			Locuses locus2 = LocusesFactory.createLocuses();
+			LocusSources locusSource2 = LocusSourcesFactory.createLocusSources();
+			locusSource2.setFilename(sourceStore.getName());
+			locusSource2.setSourceImage(sourceStore.getFileData());
+
+			locus2.setLocusSource(locusSource2);
+
+			module.analyze(sourceStore.getImage(), locus2);
+
+			assertTrue(module.compare(locus, locus2));
+
+			Locuses locus3 = LocusesFactory.createLocuses();
+			LocusSources locusSource3 = LocusSourcesFactory.createLocusSources();
+			locusSource3.setFilename(sourceStore.getName());
+			locusSource3.setSourceImage(sourceStore.getFileData());
+
+			locus3.setLocusSource(locusSource3);
+
+			module.analyze(new GrayScaleFilter().convert(sourceStore.getImage()), locus3);
+
+			assertFalse(module.compare(locus, locus3));
 
 			// Locuses locus2 = LocusesFactory.createLocuses();
 

@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.filters.IFilter;
-import edu.mgupi.pass.filters.NoSuchParamException;
 import edu.mgupi.pass.filters.Param;
+import edu.mgupi.pass.filters.ParamException;
 import edu.mgupi.pass.filters.Param.TYPES;
 
 public class RescaleFilter implements IFilter {
@@ -41,7 +41,7 @@ public class RescaleFilter implements IFilter {
 		return this.getName() + " (B " + BRIGHTNESS.getValue() + ", C " + CONTRAST.getValue() + ")";
 	}
 
-	public BufferedImage convert(BufferedImage source) throws NoSuchParamException {
+	public BufferedImage convert(BufferedImage source) throws ParamException {
 		if (source == null) {
 			throw new IllegalArgumentException("Internal error: image is null.");
 		}

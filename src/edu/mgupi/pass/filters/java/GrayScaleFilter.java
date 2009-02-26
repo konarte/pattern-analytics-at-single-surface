@@ -8,8 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.filters.IFilter;
-import edu.mgupi.pass.filters.NoSuchParamException;
 import edu.mgupi.pass.filters.Param;
+import edu.mgupi.pass.filters.ParamException;
 
 public class GrayScaleFilter implements IFilter {
 	private final static Logger logger = LoggerFactory.getLogger(GrayScaleFilter.class);
@@ -27,7 +27,7 @@ public class GrayScaleFilter implements IFilter {
 		return this.getName();
 	}
 
-	public BufferedImage convert(BufferedImage source) throws NoSuchParamException {
+	public BufferedImage convert(BufferedImage source) throws ParamException {
 		if (source == null) {
 			throw new IllegalArgumentException("Internal error: image is null.");
 		}
