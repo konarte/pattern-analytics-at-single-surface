@@ -58,9 +58,10 @@ License Type: Evaluation
 			<key column="LocusesIdLocus" not-null="false"/>
 			<one-to-many class="edu.mgupi.pass.db.locuses.LocusModuleParams"/>
 		</set>
-		<set name="Filters" lazy="true" cascade="save-update,lock" inverse="false">
+		<list name="Filters" lazy="true" cascade="save-update,lock" inverse="false">
 			<key column="LocusesIdLocus" not-null="false"/>
+			<index column="LocusesIndex" type="integer"/>
 			<one-to-many class="edu.mgupi.pass.db.locuses.LocusFilters"/>
-		</set>
+		</list>
 	</class>
 </hibernate-mapping>

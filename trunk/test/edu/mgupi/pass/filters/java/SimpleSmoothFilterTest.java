@@ -14,8 +14,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.mgupi.pass.filters.NoSuchParamException;
 import edu.mgupi.pass.filters.Param;
+import edu.mgupi.pass.filters.ParamException;
 import edu.mgupi.pass.sources.TestSourceImpl;
 
 public class SimpleSmoothFilterTest {
@@ -45,7 +45,7 @@ public class SimpleSmoothFilterTest {
 		//
 	}
 
-	private void convertImage(BufferedImage image) throws IOException, NoSuchParamException {
+	private void convertImage(BufferedImage image) throws IOException, ParamException {
 		BufferedImage newImage = filter.convert(image);
 
 		ImageIO.write(newImage, "JPG", new File("tmp/smooth.jpg"));

@@ -29,7 +29,7 @@ public interface IModule {
 	 * @param filteredImage
 	 * @param store
 	 */
-	void analyze(BufferedImage filteredImage, Locuses store) throws IOException;
+	void analyze(BufferedImage filteredImage, Locuses store) throws IOException, ModuleException;
 
 	/**
 	 * Method for comparing two different graphs. Method must return true if
@@ -42,7 +42,7 @@ public interface IModule {
 	 * @param graph2
 	 * @return
 	 */
-	boolean compare(Locuses graph1, Locuses graph2);
+	boolean compare(Locuses graph1, Locuses graph2) throws ModuleException;
 
 	/**
 	 * Final call of method. Will call once on program exit.

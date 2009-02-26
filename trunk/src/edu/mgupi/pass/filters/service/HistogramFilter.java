@@ -10,8 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.filters.IFilter;
-import edu.mgupi.pass.filters.NoSuchParamException;
 import edu.mgupi.pass.filters.Param;
+import edu.mgupi.pass.filters.ParamException;
 
 /**
  * Filter for create histograms. Support color and grey scale images.
@@ -40,7 +40,7 @@ public class HistogramFilter implements IFilter {
 
 	private static int HEIGHT = 256;
 
-	public BufferedImage convert(BufferedImage source) throws NoSuchParamException {
+	public BufferedImage convert(BufferedImage source) throws ParamException {
 
 		if (source == null) {
 			throw new IllegalArgumentException("Internal error: image is null.");

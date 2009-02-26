@@ -89,7 +89,7 @@ public class Locuses implements Serializable {
 	
 	private java.util.Set<edu.mgupi.pass.db.locuses.LocusModuleParams> params = new java.util.HashSet<edu.mgupi.pass.db.locuses.LocusModuleParams>();
 	
-	private java.util.Set<edu.mgupi.pass.db.locuses.LocusFilters> filters = new java.util.HashSet<edu.mgupi.pass.db.locuses.LocusFilters>();
+	private java.util.List<edu.mgupi.pass.db.locuses.LocusFilters> filters = new java.util.ArrayList<edu.mgupi.pass.db.locuses.LocusFilters>();
 	
 	private void setIdLocus(int value) {
 		this.idLocus = value;
@@ -228,11 +228,11 @@ public class Locuses implements Serializable {
 	}
 	
 	
-	public void setFilters(java.util.Set<edu.mgupi.pass.db.locuses.LocusFilters> value) {
+	public void setFilters(java.util.List<edu.mgupi.pass.db.locuses.LocusFilters> value) {
 		this.filters = value;
 	}
 	
-	public java.util.Set<edu.mgupi.pass.db.locuses.LocusFilters> getFilters() {
+	public java.util.List<edu.mgupi.pass.db.locuses.LocusFilters> getFilters() {
 		return filters;
 	}
 	
@@ -243,6 +243,16 @@ public class Locuses implements Serializable {
 	
 	public edu.mgupi.pass.db.sensors.Sensors getSensor() {
 		return sensor;
+	}
+	
+	private boolean processed;
+	
+	public boolean getProcessed() {
+		return processed;
+	}
+	
+	public void setProcessed(boolean aProcessed) {
+		processed = aProcessed;
 	}
 	
 	public String toString() {
