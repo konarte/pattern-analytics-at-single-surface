@@ -5,8 +5,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
@@ -62,19 +65,51 @@ public class ParamHelperTest {
 		this.testGetParameter(sampleMap);
 	}
 
+	private class MyFilter implements IFilter {
+		private List<Param> paramList = null;
+
+		public MyFilter(List<Param> paramList) {
+			this.paramList = paramList;
+		}
+
+		public Collection<Param> getParams() {
+			return this.paramList;
+		}
+
+		public BufferedImage convert(BufferedImage source) throws FilterException {
+			fail("Not implemented.");
+			return null;
+		}
+
+		public String getName() {
+			fail("Not implemented.");
+			return null;
+		}
+
+		public void onAttachToImage(BufferedImage source) {
+			fail("Not implemented.");
+		}
+
+		public void onDetachFromImage(BufferedImage source) {
+			fail("Not implemented.");
+		}
+	}
+
 	@Test
-	public void testConvertParamsToValues() throws ParamException {
-		ArrayList<Param> paramList = new ArrayList<Param>();
+	public void testConvertParamsToValues() throws FilterException {
+		List<Param> paramList = new ArrayList<Param>();
 		paramList.add(new Param("key1", "Ключ 1", TYPES.STRING, "14.55"));
 		paramList.add(new Param("key2", "Ключ 2", TYPES.INT, 6));
 		paramList.add(new Param("key3", "Ключ 3", TYPES.INT, 12.22));
 
 		paramList.get(paramList.size() - 1).setValue(44.56);
 
-		assertNotNull(ParamHelper.convertParamsToValues(paramList));
+		MyFilter myFilter = new MyFilter(paramList);
+
+		assertNotNull(ParamHelper.convertParamsToValues(myFilter));
 		assertNotNull(ParamHelper.convertParamsToValues(null));
 
-		this.testGetParameter(ParamHelper.convertParamsToValues(paramList));
+		this.testGetParameter(ParamHelper.convertParamsToValues(myFilter));
 	}
 
 	@Test
@@ -84,23 +119,35 @@ public class ParamHelperTest {
 		paramList.add(new Param("key2", "Ключ 2", TYPES.INT, 6));
 		paramList.add(new Param("key3", "Ключ 3", TYPES.INT, 12.22));
 
-		assertNotNull(ParamHelper.searchParameterL("key1", paramList));
-		assertNull(ParamHelper.searchParameterL("key1", null));
-		assertNull(ParamHelper.searchParameterL("key56", paramList));
+		MyFilter myFilter = new MyFilter(paramList);
+
+		assertNotNull(ParamHelper.searchParameter("key1", myFilter, false));
+		assertNull(ParamHelper.searchParameter("key1", null, false));
+		assertNull(ParamHelper.searchParameter("key56", myFilter, false));
 
 		try {
-			ParamHelper.searchParameterL(null, paramList);
+			ParamHelper.searchParameter(null, myFilter, false);
 			fail("No IllegalArgumentException");
 		} catch (IllegalArgumentException iae) {
 			System.out.println("Received expected exception: " + iae);
 		}
 
 		try {
-			ParamHelper.getParameterL("key66", paramList);
+			ParamHelper.searchParameter("key66", myFilter, true);
 			fail("No NoSuchParamException");
 		} catch (NoSuchParamException iae) {
 			System.out.println("Received expected exception: " + iae);
 		}
 	}
 
+	@Test
+	public void testConvertParamsToJSON() {
+		ArrayList<Param> paramList = new ArrayList<Param>();
+		paramList.add(new Param("key1", "Ключ 1", TYPES.STRING, "14.55"));
+		paramList.add(new Param("key2", "Ключ 2", TYPES.INT, 6));
+		paramList.add(new Param("key3", "Ключ 3", TYPES.INT, 12.22));
+
+		MyFilter myFilter = new MyFilter(paramList);
+		assertEquals("{\"key1\":\"14.55\",\"key2\":6,\"key3\":12.22}", ParamHelper.convertParamsToJSON(myFilter));
+	}
 }

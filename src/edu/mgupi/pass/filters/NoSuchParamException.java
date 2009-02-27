@@ -1,6 +1,6 @@
 package edu.mgupi.pass.filters;
 
-public class NoSuchParamException extends ParamException {
+public class NoSuchParamException extends FilterException {
 	/**
 	 * 
 	 */

@@ -23,7 +23,6 @@ public class LocusesDetachedCriteria extends AbstractORMDetachedCriteria {
 	public final IntegerExpression idLocus;
 	public final StringExpression name;
 	public final ByteArrayExpression thumbImage;
-	public final ByteArrayExpression histogram;
 	public final ByteArrayExpression filteredImage;
 	
 	public LocusesDetachedCriteria() {
@@ -31,7 +30,6 @@ public class LocusesDetachedCriteria extends AbstractORMDetachedCriteria {
 		idLocus = new IntegerExpression("idLocus", this.getDetachedCriteria());
 		name = new StringExpression("name", this.getDetachedCriteria());
 		thumbImage = new ByteArrayExpression("thumbImage", this.getDetachedCriteria());
-		histogram = new ByteArrayExpression("histogram", this.getDetachedCriteria());
 		filteredImage = new ByteArrayExpression("filteredImage", this.getDetachedCriteria());
 	}
 	
@@ -40,7 +38,6 @@ public class LocusesDetachedCriteria extends AbstractORMDetachedCriteria {
 		idLocus = new IntegerExpression("idLocus", this.getDetachedCriteria());
 		name = new StringExpression("name", this.getDetachedCriteria());
 		thumbImage = new ByteArrayExpression("thumbImage", this.getDetachedCriteria());
-		histogram = new ByteArrayExpression("histogram", this.getDetachedCriteria());
 		filteredImage = new ByteArrayExpression("filteredImage", this.getDetachedCriteria());
 	}
 	

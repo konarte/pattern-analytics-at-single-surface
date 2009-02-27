@@ -1,6 +1,6 @@
 package edu.mgupi.pass.filters;
 
-public class IllegalParameterValueException extends ParamException {
+public class IllegalParameterValueException extends FilterException {
 
 	/**
 	 * 

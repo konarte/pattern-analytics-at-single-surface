@@ -67,7 +67,7 @@ public class TestFilterTest {
 		source.init();
 		try {
 
-			BufferedImage image = source.getSingleSource().getImage();
+			BufferedImage image = source.getSingleSource().getSourceImage();
 			filter.onAttachToImage(image);
 			try {
 				this.convertImage(image);

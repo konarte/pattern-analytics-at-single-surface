@@ -50,6 +50,6 @@ public interface IFilter {
 	 *            parameter)
 	 * 
 	 */
-	BufferedImage convert(BufferedImage source) throws ParamException;
+	BufferedImage convert(BufferedImage source) throws FilterException;
 
 }

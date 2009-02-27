@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.ParamException;
+import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.sources.TestSourceImpl;
 
 public class GrayScaleFilterTest {
@@ -45,7 +45,7 @@ public class GrayScaleFilterTest {
 		//
 	}
 
-	private void convertImage(BufferedImage image) throws IOException, ParamException {
+	private void convertImage(BufferedImage image) throws IOException, FilterException {
 		BufferedImage newImage = filter.convert(image);
 
 		ImageIO.write(newImage, "JPG", new File("tmp/grayscale.jpg"));
@@ -57,7 +57,7 @@ public class GrayScaleFilterTest {
 		source.init();
 		try {
 
-			BufferedImage image = source.getSingleSource().getImage();
+			BufferedImage image = source.getSingleSource().getSourceImage();
 
 			this.convertImage(image);
 		} finally {

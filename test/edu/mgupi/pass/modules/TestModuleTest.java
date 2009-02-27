@@ -18,7 +18,7 @@ import edu.mgupi.pass.db.locuses.LocusSources;
 import edu.mgupi.pass.db.locuses.LocusSourcesFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
 import edu.mgupi.pass.db.locuses.LocusesFactory;
-import edu.mgupi.pass.filters.ParamException;
+import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.java.GrayScaleFilter;
 import edu.mgupi.pass.sources.SourceStore;
 import edu.mgupi.pass.sources.TestSourceImpl;
@@ -62,7 +62,7 @@ public class TestModuleTest {
 	}
 
 	@Test
-	public void testAnalyze() throws IOException, ClassNotFoundException, ModuleException, ParamException {
+	public void testAnalyze() throws IOException, ClassNotFoundException, ModuleException, FilterException {
 
 		TestSourceImpl source = new TestSourceImpl();
 		source.init();
@@ -77,7 +77,7 @@ public class TestModuleTest {
 
 			locus.setLocusSource(locusSource);
 
-			module.analyze(sourceStore.getImage(), locus);
+			module.analyze(sourceStore.getSourceImage(), locus);
 
 			FileOutputStream fileStream;
 			ObjectOutputStream out;
@@ -91,7 +91,6 @@ public class TestModuleTest {
 			ObjectInputStream in = new ObjectInputStream(input);
 			locus = (Locuses) in.readObject();
 			input.close();
-			
 
 			assertTrue(module.compare(locus, locus));
 
@@ -102,7 +101,7 @@ public class TestModuleTest {
 
 			locus2.setLocusSource(locusSource2);
 
-			module.analyze(sourceStore.getImage(), locus2);
+			module.analyze(sourceStore.getSourceImage(), locus2);
 
 			assertTrue(module.compare(locus, locus2));
 
@@ -113,7 +112,7 @@ public class TestModuleTest {
 
 			locus3.setLocusSource(locusSource3);
 
-			module.analyze(new GrayScaleFilter().convert(sourceStore.getImage()), locus3);
+			module.analyze(new GrayScaleFilter().convert(sourceStore.getSourceImage()), locus3);
 
 			assertFalse(module.compare(locus, locus3));
 

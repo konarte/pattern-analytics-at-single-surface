@@ -13,6 +13,6 @@ License Type: Evaluation
 			<generator class="native">
 			</generator>
 		</id>
-		<property name="name" column="Name" type="string" length="255" not-null="false" lazy="false"/>
+		<property name="name" column="Name" type="string" length="255" not-null="true" lazy="false"/>
 	</class>
 </hibernate-mapping>

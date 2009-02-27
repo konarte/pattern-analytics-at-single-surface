@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.ParamException;
+import edu.mgupi.pass.filters.FilterException;
 
 /**
  * Filter for create histograms. Support color and grey scale images.
@@ -40,7 +40,7 @@ public class HistogramFilter implements IFilter {
 
 	private static int HEIGHT = 256;
 
-	public BufferedImage convert(BufferedImage source) throws ParamException {
+	public BufferedImage convert(BufferedImage source) throws FilterException {
 
 		if (source == null) {
 			throw new IllegalArgumentException("Internal error: image is null.");
@@ -54,32 +54,32 @@ public class HistogramFilter implements IFilter {
 		int width = source.getWidth();
 
 		boolean gray = source.getType() == BufferedImage.TYPE_BYTE_GRAY;
-		int[][] hist = new int[3][256];
+		histogram = new int[3][256];
 
 		// Loading distribution of dots
 		Raster raster = source.getRaster();
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
-				hist[0][raster.getSample(i, j, 0)]++;
+				histogram[0][raster.getSample(i, j, 0)]++;
 				if (!gray) {
-					hist[1][raster.getSample(i, j, 1)]++;
-					hist[2][raster.getSample(i, j, 2)]++;
+					histogram[1][raster.getSample(i, j, 1)]++;
+					histogram[2][raster.getSample(i, j, 2)]++;
 				}
 			}
 		}
 		// Normalization
-		for (int i = 0; i < hist[0].length; i++) {
-			hist[0][i / (width * height)]++;
+		for (int i = 0; i < histogram[0].length; i++) {
+			histogram[0][i / (width * height)]++;
 			if (!gray) {
-				hist[1][i / (width * height)]++;
-				hist[2][i / (width * height)]++;
+				histogram[1][i / (width * height)]++;
+				histogram[2][i / (width * height)]++;
 			}
 		}
 
 		// Searching max
 		int max = 0;
 		for (int k = 0; k < (gray ? 1 : 3); k++) {
-			for (int value : hist[k]) {
+			for (int value : histogram[k]) {
 				if (value > max) {
 					max = value;
 				}
@@ -101,24 +101,33 @@ public class HistogramFilter implements IFilter {
 		gc.fillRect(0, 0, 256, HEIGHT);
 
 		gc.setColor(gray ? Color.BLACK : Color.RED);
-		for (int i = 0; i < hist[0].length; i++) {
-			gc.drawLine(i, HEIGHT, i, (int) (HEIGHT - (useDiv ? hist[0][i] / div : hist[0][i])));
+		for (int i = 0; i < histogram[0].length; i++) {
+			gc.drawLine(i, HEIGHT, i, (int) (HEIGHT - (useDiv ? histogram[0][i] / div : histogram[0][i])));
 		}
 		if (!gray) {
 			gc.setColor(Color.GREEN);
-			for (int i = 0; i < hist[1].length; i++) {
-				gc.drawLine(i, HEIGHT, i, (int) (HEIGHT - (useDiv ? hist[1][i] / div : hist[1][i])));
+			for (int i = 0; i < histogram[1].length; i++) {
+				gc.drawLine(i, HEIGHT, i, (int) (HEIGHT - (useDiv ? histogram[1][i] / div : histogram[1][i])));
 			}
 
 			gc.setColor(Color.BLUE);
-			for (int i = 0; i < hist[2].length; i++) {
-				gc.drawLine(i, HEIGHT, i, (int) (HEIGHT - (useDiv ? hist[2][i] / div : hist[2][i])));
+			for (int i = 0; i < histogram[2].length; i++) {
+				gc.drawLine(i, HEIGHT, i, (int) (HEIGHT - (useDiv ? histogram[2][i] / div : histogram[2][i])));
 			}
 		}
 
 		gc.dispose();
 
 		return dest;
+	}
+
+	private int[][] histogram;
+
+	public int[] getLastHistogramChannel() {
+		if (histogram == null) {
+			return null;
+		}
+		return histogram[0];
 	}
 
 	public void onAttachToImage(BufferedImage source) {

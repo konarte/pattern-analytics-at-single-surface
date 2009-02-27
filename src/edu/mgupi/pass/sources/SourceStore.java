@@ -4,12 +4,13 @@ import java.awt.image.BufferedImage;
 
 public class SourceStore {
 	private String name;
-	private BufferedImage image;
+	private BufferedImage sourceImage;
 	private byte[] fileData;
+	private int[] historgram;
 
-	public SourceStore(String imageName, BufferedImage image, byte[] fileData) {
+	public SourceStore(String imageName, BufferedImage sourceImage, byte[] fileData) {
 		this.name = imageName;
-		this.image = image;
+		this.sourceImage = sourceImage;
 		this.fileData = fileData;
 	}
 
@@ -21,7 +22,15 @@ public class SourceStore {
 		return name;
 	}
 
-	public BufferedImage getImage() {
-		return image;
+	public BufferedImage getSourceImage() {
+		return sourceImage;
+	}
+
+	public void setHistorgram(int[] historgram) {
+		this.historgram = historgram;
+	}
+
+	public int[] getHistorgram() {
+		return this.historgram;
 	}
 }

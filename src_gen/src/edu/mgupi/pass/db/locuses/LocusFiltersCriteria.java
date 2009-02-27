@@ -21,13 +21,11 @@ import org.orm.criteria.*;
 public class LocusFiltersCriteria extends AbstractORMCriteria {
 	public final IntegerExpression idLocusFilter;
 	public final StringExpression options;
-	public final IntegerExpression order;
 	
 	public LocusFiltersCriteria(Criteria criteria) {
 		super(criteria);
 		idLocusFilter = new IntegerExpression("idLocusFilter", this);
 		options = new StringExpression("options", this);
-		order = new IntegerExpression("order", this);
 	}
 	
 	public LocusFiltersCriteria(PersistentSession session) {

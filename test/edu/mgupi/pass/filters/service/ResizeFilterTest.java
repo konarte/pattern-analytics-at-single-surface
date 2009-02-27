@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.ParamException;
+import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.ParamHelper;
 import edu.mgupi.pass.sources.TestSourceImpl;
 
@@ -46,11 +46,11 @@ public class ResizeFilterTest {
 		//
 	}
 
-	private void convertImage(BufferedImage image, int width, int height) throws IOException, ParamException {
-		ParamHelper.getParameterL("Width", filter).setValue(width);
-		ParamHelper.getParameterL("Height", filter).setValue(height);
+	private void convertImage(BufferedImage image, int width, int height) throws IOException, FilterException {
+		ParamHelper.getParameter("Width", filter).setValue(width);
+		ParamHelper.getParameter("Height", filter).setValue(height);
 
-		Param param = ParamHelper.getParameterL("Method", filter.getParams());
+		Param param = ParamHelper.getParameter("Method", filter);
 		for (int i = 0; i < param.getAllowed_values().length; i++) {
 			param.setValue(param.getAllowed_values()[i]);
 
@@ -68,7 +68,7 @@ public class ResizeFilterTest {
 		source.init();
 		try {
 
-			BufferedImage image = source.getSingleSource().getImage();
+			BufferedImage image = source.getSingleSource().getSourceImage();
 
 			this.convertImage(image, 256, 256);
 			this.convertImage(image, 1024, 1024);

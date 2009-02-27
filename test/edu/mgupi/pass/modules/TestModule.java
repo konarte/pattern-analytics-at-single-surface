@@ -1,8 +1,6 @@
 package edu.mgupi.pass.modules;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -16,6 +14,12 @@ import edu.mgupi.pass.db.locuses.LocusModuleParams;
 import edu.mgupi.pass.db.locuses.LocusModuleParamsFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
 
+/**
+ * Test for module interface.
+ * 
+ * @author raidan
+ * 
+ */
 public class TestModule implements IModule {
 
 	private final static Logger logger = LoggerFactory.getLogger(TestModule.class);
@@ -68,10 +72,15 @@ public class TestModule implements IModule {
 
 		param = LocusModuleParamsFactory.createLocusModuleParams();
 		param.setParamName("myParam2");
+		param.setParamData(ModuleHelper.convertImageToPNGRaw(filteredImage));
+		store.getParams().add(param);
 
-		ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+		// ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
 
-		ImageIO.write(filteredImage, "PNG", byteStream);
+		// ImageIO.write(filteredImage, "PNG", byteStream);
+		// param.setParamData(byteStream.toByteArray());
+
+		// byteStream.close();
 
 		// ImageWriter writer =
 		// ImageIO.getImageWritersByFormatName("JPG").next();
@@ -92,11 +101,6 @@ public class TestModule implements IModule {
 		// GZIPOutputStream zipOut = new GZIPOutputStream(byteStream);
 		// zipOut.write(imageData);
 		// zipOut.close();
-
-		param.setParamData(byteStream.toByteArray());
-		store.getParams().add(param);
-
-		byteStream.close();
 
 		store.setProcessed(true);
 	}
@@ -122,9 +126,9 @@ public class TestModule implements IModule {
 		LocusModuleParams param_g2 = ModuleHelper.getParameter("myParam2", graph2);
 
 		try {
-			ImageIO.write(ImageIO.read(new ByteArrayInputStream(param_g1.getParamData())), "PNG", new File(
+			ImageIO.write(ModuleHelper.covertPNGRawToImage(param_g1.getParamData()), "PNG", new File(
 					"tmp/G1-myParam1-imageRestored.png"));
-			ImageIO.write(ImageIO.read(new ByteArrayInputStream(param_g2.getParamData())), "PNG", new File(
+			ImageIO.write(ModuleHelper.covertPNGRawToImage(param_g2.getParamData()), "PNG", new File(
 					"tmp/G2-myParam1-imageRestored.png"));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -164,6 +168,10 @@ public class TestModule implements IModule {
 		// }
 
 		// return false;
+	}
+
+	public String getName() {
+		return "Тестовый модуль анализа";
 	}
 
 }

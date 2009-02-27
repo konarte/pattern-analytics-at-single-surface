@@ -17,6 +17,8 @@ public interface IModule {
 	 * First call of module. Only once after instantiating.
 	 */
 	void init();
+	
+	String getName();
 
 	/**
 	 * Call when we need to analyze image. This method must convert image to
