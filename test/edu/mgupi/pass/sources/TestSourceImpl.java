@@ -43,7 +43,7 @@ public class TestSourceImpl implements ISource {
 		done = true;
 	}
 
-	private String imagePath = "test/82675284.jpg";
+	private String imagePath = "test/suslik_list.jpg";
 
 	public SourceStore getSingleSource() throws IOException {
 		if (!init) {

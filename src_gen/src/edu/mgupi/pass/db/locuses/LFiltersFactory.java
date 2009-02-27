@@ -19,65 +19,65 @@ import java.util.List;
 
 public class LFiltersFactory {
 	private static final org.apache.log4j.Logger _logger = org.apache.log4j.Logger.getLogger(LFiltersFactory.class);
-	public static LFilters loadLFiltersByORMID(int idModule) throws PersistentException {
+	public static LFilters loadLFiltersByORMID(int idLFilter) throws PersistentException {
 		try {
 			PersistentSession session = edu.mgupi.pass.db.surfaces.PassPersistentManager.instance().getSession();
-			return loadLFiltersByORMID(session, idModule);
+			return loadLFiltersByORMID(session, idLFilter);
 		}
 		catch (Exception e) {
-			_logger.error("loadLFiltersByORMID(int idModule)", e);
+			_logger.error("loadLFiltersByORMID(int idLFilter)", e);
 			throw new PersistentException(e);
 		}
 	}
 	
-	public static LFilters getLFiltersByORMID(int idModule) throws PersistentException {
+	public static LFilters getLFiltersByORMID(int idLFilter) throws PersistentException {
 		try {
 			PersistentSession session = edu.mgupi.pass.db.surfaces.PassPersistentManager.instance().getSession();
-			return getLFiltersByORMID(session, idModule);
+			return getLFiltersByORMID(session, idLFilter);
 		}
 		catch (Exception e) {
-			_logger.error("getLFiltersByORMID(int idModule)", e);
+			_logger.error("getLFiltersByORMID(int idLFilter)", e);
 			throw new PersistentException(e);
 		}
 	}
 	
-	public static LFilters loadLFiltersByORMID(int idModule, org.hibernate.LockMode lockMode) throws PersistentException {
+	public static LFilters loadLFiltersByORMID(int idLFilter, org.hibernate.LockMode lockMode) throws PersistentException {
 		try {
 			PersistentSession session = edu.mgupi.pass.db.surfaces.PassPersistentManager.instance().getSession();
-			return loadLFiltersByORMID(session, idModule, lockMode);
+			return loadLFiltersByORMID(session, idLFilter, lockMode);
 		}
 		catch (Exception e) {
-			_logger.error("loadLFiltersByORMID(int idModule, org.hibernate.LockMode lockMode)", e);
+			_logger.error("loadLFiltersByORMID(int idLFilter, org.hibernate.LockMode lockMode)", e);
 			throw new PersistentException(e);
 		}
 	}
 	
-	public static LFilters loadLFiltersByORMID(PersistentSession session, int idModule) throws PersistentException {
+	public static LFilters loadLFiltersByORMID(PersistentSession session, int idLFilter) throws PersistentException {
 		try {
-			return (LFilters) session.load(edu.mgupi.pass.db.locuses.LFilters.class, new Integer(idModule));
+			return (LFilters) session.load(edu.mgupi.pass.db.locuses.LFilters.class, new Integer(idLFilter));
 		}
 		catch (Exception e) {
-			_logger.error("loadLFiltersByORMID(PersistentSession session, int idModule)", e);
+			_logger.error("loadLFiltersByORMID(PersistentSession session, int idLFilter)", e);
 			throw new PersistentException(e);
 		}
 	}
 	
-	public static LFilters getLFiltersByORMID(PersistentSession session, int idModule) throws PersistentException {
+	public static LFilters getLFiltersByORMID(PersistentSession session, int idLFilter) throws PersistentException {
 		try {
-			return (LFilters) session.get(edu.mgupi.pass.db.locuses.LFilters.class, new Integer(idModule));
+			return (LFilters) session.get(edu.mgupi.pass.db.locuses.LFilters.class, new Integer(idLFilter));
 		}
 		catch (Exception e) {
-			_logger.error("getLFiltersByORMID(PersistentSession session, int idModule)", e);
+			_logger.error("getLFiltersByORMID(PersistentSession session, int idLFilter)", e);
 			throw new PersistentException(e);
 		}
 	}
 	
-	public static LFilters loadLFiltersByORMID(PersistentSession session, int idModule, org.hibernate.LockMode lockMode) throws PersistentException {
+	public static LFilters loadLFiltersByORMID(PersistentSession session, int idLFilter, org.hibernate.LockMode lockMode) throws PersistentException {
 		try {
-			return (LFilters) session.load(edu.mgupi.pass.db.locuses.LFilters.class, new Integer(idModule), lockMode);
+			return (LFilters) session.load(edu.mgupi.pass.db.locuses.LFilters.class, new Integer(idLFilter), lockMode);
 		}
 		catch (Exception e) {
-			_logger.error("loadLFiltersByORMID(PersistentSession session, int idModule, org.hibernate.LockMode lockMode)", e);
+			_logger.error("loadLFiltersByORMID(PersistentSession session, int idLFilter, org.hibernate.LockMode lockMode)", e);
 			throw new PersistentException(e);
 		}
 	}

@@ -67,22 +67,22 @@ public class LModules implements Serializable {
 		}
 	}
 	
-	private int idModule;
+	private int idLModule;
 	
 	private String name;
 	
 	private String codename;
 	
-	private void setIdModule(int value) {
-		this.idModule = value;
+	private void setIdLModule(int value) {
+		this.idLModule = value;
 	}
 	
-	public int getIdModule() {
-		return idModule;
+	public int getIdLModule() {
+		return idLModule;
 	}
 	
 	public int getORMID() {
-		return getIdModule();
+		return getIdLModule();
 	}
 	
 	/**
@@ -114,7 +114,7 @@ public class LModules implements Serializable {
 	}
 	
 	public String toString() {
-		return String.valueOf(getIdModule());
+		return String.valueOf(getIdLModule());
 	}
 	
 }

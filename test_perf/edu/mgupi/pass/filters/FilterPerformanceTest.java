@@ -42,6 +42,27 @@ import edu.mgupi.pass.util.Secundomer;
  * edu.mgupi.pass.filters.java.SimpleSharpFilter EVERYIMAGE Total: 3062 msec (100), avg = 30.62 msec/call *
  * </pre>
  * 
+ * 
+ * Intel Core 2 Duo E6750 (2.66 GHz), image 800x721, internal Eclipse 3.4 JUnit
+ * 4 runner, Java 1.6.0_12
+ * 
+ * <pre>
+ * == RESULT ==
+ * edu.mgupi.pass.filters.java.ColorSpaceFilter Total: 5000 msec (100), avg = 50.0 msec/call
+ * edu.mgupi.pass.filters.java.GrayScaleFilter Total: 641 msec (100), avg = 6.41 msec/call
+ * edu.mgupi.pass.filters.java.InvertFilter Total: 2140 msec (100), avg = 21.4 msec/call
+ * edu.mgupi.pass.filters.java.RescaleFilter Total: 6672 msec (100), avg = 66.72 msec/call
+ * edu.mgupi.pass.filters.java.SimpleSharpFilter Total: 3047 msec (100), avg = 30.47 msec/call
+ * edu.mgupi.pass.filters.java.SimpleSmoothFilter Total: 2985 msec (100), avg = 29.85 msec/call
+ * edu.mgupi.pass.filters.service.HistogramFilter Total: 2719 msec (100), avg = 27.19 msec/call
+ * edu.mgupi.pass.filters.service.ResizeFilter Total: 4062 msec (100), avg = 40.62 msec/call
+ * edu.mgupi.pass.filters.java.GrayScaleFilter CHAINSAW Total: 375 msec (100), avg = 3.75 msec/call
+ * edu.mgupi.pass.filters.java.GrayScaleFilter CHAINSAW EVERYIMAGE Total: 3359 msec (100), avg = 33.59 msec/call
+ * edu.mgupi.pass.filters.java.GrayScaleFilter EVERYIMAGE Total: 3359 msec (100), avg = 33.59 msec/call
+ * edu.mgupi.pass.filters.java.InvertFilter EVERYIMAGE Total: 4360 msec (100), avg = 43.6 msec/call
+ * edu.mgupi.pass.filters.java.SimpleSharpFilter EVERYIMAGE Total: 6281 msec (100), avg = 62.81 msec/call
+ * </pre>
+ * 
  * @author raidan
  * 
  */

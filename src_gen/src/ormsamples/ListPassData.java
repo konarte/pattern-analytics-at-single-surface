@@ -227,7 +227,7 @@ public class ListPassData {
 		System.out.println("Listing LModules by Criteria...");
 		edu.mgupi.pass.db.locuses.LModulesCriteria lModulesCriteria = new edu.mgupi.pass.db.locuses.LModulesCriteria();
 		// Please uncomment the follow line and fill in parameter(s) 
-		//lModulesCriteria.idModule.eq();
+		//lModulesCriteria.idLModule.eq();
 		lModulesCriteria.setMaxResults(ROW_COUNT);
 		edu.mgupi.pass.db.locuses.LModules[] edumgupipassdblocusesLModuleses = lModulesCriteria.listLModules();
 		length =edumgupipassdblocusesLModuleses== null ? 0 : Math.min(edumgupipassdblocusesLModuleses.length, ROW_COUNT); 
@@ -239,7 +239,7 @@ public class ListPassData {
 		System.out.println("Listing LFilters by Criteria...");
 		edu.mgupi.pass.db.locuses.LFiltersCriteria lFiltersCriteria = new edu.mgupi.pass.db.locuses.LFiltersCriteria();
 		// Please uncomment the follow line and fill in parameter(s) 
-		//lFiltersCriteria.idModule.eq();
+		//lFiltersCriteria.idLFilter.eq();
 		lFiltersCriteria.setMaxResults(ROW_COUNT);
 		edu.mgupi.pass.db.locuses.LFilters[] edumgupipassdblocusesLFilterses = lFiltersCriteria.listLFilters();
 		length =edumgupipassdblocusesLFilterses== null ? 0 : Math.min(edumgupipassdblocusesLFilterses.length, ROW_COUNT); 
