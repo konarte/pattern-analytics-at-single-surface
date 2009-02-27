@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.ParamException;
+import edu.mgupi.pass.filters.FilterException;
 
 public class InvertFilter implements IFilter {
 	private final static Logger logger = LoggerFactory.getLogger(InvertFilter.class);
@@ -28,7 +28,7 @@ public class InvertFilter implements IFilter {
 		return this.getName();
 	}
 
-	public BufferedImage convert(BufferedImage source) throws ParamException {
+	public BufferedImage convert(BufferedImage source) throws FilterException {
 		if (source == null) {
 			throw new IllegalArgumentException("Internal error: image is null.");
 		}

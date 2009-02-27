@@ -16,7 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.ParamException;
+import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.ParamHelper;
 import edu.mgupi.pass.sources.TestSourceImpl;
 
@@ -48,9 +48,9 @@ public class RescaleFilterTest {
 	}
 
 	private void convertImage(BufferedImage image, int brightness, int contrast, String name) throws IOException,
-			ParamException {
-		ParamHelper.getParameterL("Brightness", filter).setValue(brightness);
-		ParamHelper.getParameterL("Contrast", filter).setValue(contrast);
+			FilterException {
+		ParamHelper.getParameter("Brightness", filter).setValue(brightness);
+		ParamHelper.getParameter("Contrast", filter).setValue(contrast);
 
 		BufferedImage newImage = filter.convert(image);
 
@@ -63,13 +63,13 @@ public class RescaleFilterTest {
 		source.init();
 		try {
 
-			BufferedImage image = source.getSingleSource().getImage();
+			BufferedImage image = source.getSingleSource().getSourceImage();
 
 			this.convertImage(image, 40, 100, "color");
 			this.convertImage(image, 0, 140, "color");
 
 			ColorSpaceFilter cfilter = new ColorSpaceFilter();
-			ParamHelper.getParameterL("ColorMode", cfilter).setValue(ColorSpace.CS_GRAY);
+			ParamHelper.getParameter("ColorMode", cfilter).setValue(ColorSpace.CS_GRAY);
 
 			BufferedImage image2 = cfilter.convert(image);
 			this.convertImage(image2, 40, 100, "CS_GRAY");

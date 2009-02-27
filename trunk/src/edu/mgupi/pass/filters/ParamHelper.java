@@ -1,11 +1,49 @@
 package edu.mgupi.pass.filters;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.json.simple.JSONValue;
+
 public class ParamHelper {
-	public static Object getParameterM(String key, Map<String, Object> params) throws NoSuchParamException {
+
+	public static Param getParameter(String name, IFilter filter) throws NoSuchParamException {
+		return searchParameter(name, filter, true);
+	}
+
+	public static Param searchParameter(String name, IFilter filter) throws NoSuchParamException {
+		return searchParameter(name, filter, false);
+	}
+
+	protected static Param searchParameter(String name, IFilter filter, boolean mandatory) throws NoSuchParamException {
+		if (name == null) {
+			throw new IllegalArgumentException("Internal error. Name is null.");
+		}
+
+		if (filter == null) {
+			return null;
+		}
+		Collection<Param> paramList = filter.getParams();
+		if (paramList == null) {
+			return null;
+		}
+
+		for (Param param : paramList) {
+			if (name.equals(param.getName())) {
+				return param;
+			}
+		}
+
+		if (mandatory) {
+			throw new NoSuchParamException("Unable to find parameter '" + name + "' into parameters list '" + paramList
+					+ "'. This parameter is required.");
+		}
+
+		return null;
+	}
+
+	protected static Object getParameterM(String key, Map<String, Object> params) throws NoSuchParamException {
 		if (key == null) {
 			throw new IllegalArgumentException("Internal error. Key is null.");
 		}
@@ -21,43 +59,12 @@ public class ParamHelper {
 		return value;
 	}
 
-	public static Param getParameterL(String name, IFilter filter) throws NoSuchParamException {
-		return searchParameter(name, filter.getParams(), true);
-	}
-
-	public static Param getParameterL(String name, Collection<Param> paramList) throws NoSuchParamException {
-		return searchParameter(name, paramList, true);
-	}
-
-	public static Param searchParameterL(String name, Collection<Param> paramList) throws NoSuchParamException {
-		return searchParameter(name, paramList, false);
-	}
-
-	private static Param searchParameter(String name, Collection<Param> paramList, boolean mandatory)
-			throws NoSuchParamException {
-		if (paramList == null) {
-			return null;
+	protected static Map<String, Object> convertParamsToValues(IFilter filter) {
+		Map<String, Object> paramMap = new LinkedHashMap<String, Object>();
+		if (filter == null) {
+			return paramMap;
 		}
-
-		if (name == null) {
-			throw new IllegalArgumentException("Internal error. Name is null.");
-		}
-		for (Param param : paramList) {
-			if (name.equals(param.getName())) {
-				return param;
-			}
-		}
-
-		if (mandatory) {
-			throw new NoSuchParamException("Unable to find parameter '" + name + "' into parameters list '" + paramList
-					+ "'. This parameter is required.");
-		}
-
-		return null;
-	}
-
-	public static Map<String, Object> convertParamsToValues(Collection<Param> paramList) {
-		Map<String, Object> paramMap = new HashMap<String, Object>();
+		Collection<Param> paramList = filter.getParams();
 		if (paramList == null) {
 			return paramMap;
 		}
@@ -67,5 +74,13 @@ public class ParamHelper {
 		}
 
 		return paramMap;
+	}
+
+	public static String convertParamsToJSON(IFilter filter) {
+		if (filter == null) {
+			throw new IllegalArgumentException("Internal error. Filter is null.");
+		}
+
+		return JSONValue.toJSONString(convertParamsToValues(filter));
 	}
 }

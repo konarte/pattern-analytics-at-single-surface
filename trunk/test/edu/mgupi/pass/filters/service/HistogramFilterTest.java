@@ -16,7 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.ParamException;
+import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.ParamHelper;
 import edu.mgupi.pass.filters.java.ColorSpaceFilter;
 import edu.mgupi.pass.filters.java.GrayScaleFilter;
@@ -53,7 +53,7 @@ public class HistogramFilterTest {
 		//
 	}
 
-	private void saveImage(BufferedImage image, String addInfo) throws IOException, ParamException {
+	private void saveImage(BufferedImage image, String addInfo) throws IOException, FilterException {
 		BufferedImage newImage = filter.convert(image);
 
 		ImageIO.write(newImage, "JPG", new File("tmp/histogram-" + addInfo + ".jpg"));
@@ -64,7 +64,7 @@ public class HistogramFilterTest {
 		TestSourceImpl source = new TestSourceImpl();
 		source.init();
 		try {
-			BufferedImage image = source.getSingleSource().getImage();
+			BufferedImage image = source.getSingleSource().getSourceImage();
 			this.saveImage(image, "Color");
 
 			GrayScaleFilter grayscale = new GrayScaleFilter();
@@ -84,7 +84,7 @@ public class HistogramFilterTest {
 			this.saveImage(image2, "Invert to Grayscale");
 
 			ColorSpaceFilter cfilter = new ColorSpaceFilter();
-			Param colorMode = ParamHelper.getParameterL("ColorMode", cfilter);
+			Param colorMode = ParamHelper.getParameter("ColorMode", cfilter);
 
 			colorMode.setValue(ColorSpace.CS_LINEAR_RGB);
 			image2 = cfilter.convert(image);
@@ -103,8 +103,8 @@ public class HistogramFilterTest {
 			this.saveImage(image2, "CS_GRAY");
 
 			RescaleFilter rfilter = new RescaleFilter();
-			ParamHelper.getParameterL("Brightness", rfilter).setValue(40);
-			ParamHelper.getParameterL("Contrast", rfilter).setValue(100);
+			ParamHelper.getParameter("Brightness", rfilter).setValue(40);
+			ParamHelper.getParameter("Contrast", rfilter).setValue(100);
 			image = rfilter.convert(image2);
 
 			this.saveImage(image, "CS_GRAY 100-40");

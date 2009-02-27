@@ -10,7 +10,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.mgupi.pass.Secundomer;
 import edu.mgupi.pass.filters.java.ColorSpaceFilter;
 import edu.mgupi.pass.filters.java.GrayScaleFilter;
 import edu.mgupi.pass.filters.java.InvertFilter;
@@ -20,6 +19,7 @@ import edu.mgupi.pass.filters.java.SimpleSmoothFilter;
 import edu.mgupi.pass.filters.service.HistogramFilter;
 import edu.mgupi.pass.filters.service.ResizeFilter;
 import edu.mgupi.pass.sources.TestSourceImpl;
+import edu.mgupi.pass.util.Secundomer;
 
 /**
  * Intel Core 2 Duo E6750 (2.66 GHz), image 425x640, internal Eclipse 3.4 JUnit
@@ -67,20 +67,20 @@ public class FilterPerformanceTest {
 
 	private Collection<Secundomer> results = new ArrayList<Secundomer>();
 
-	private void testImpl(IFilter filter) throws IOException, ParamException {
+	private void testImpl(IFilter filter) throws IOException, FilterException {
 		this.testImpl(filter, false);
 	}
 
 	BufferedImage image2;
 
-	private void testImpl(IFilter filter, boolean readEveryImage) throws IOException, ParamException {
-		BufferedImage image = source.getSingleSource().getImage();
+	private void testImpl(IFilter filter, boolean readEveryImage) throws IOException, FilterException {
+		BufferedImage image = source.getSingleSource().getSourceImage();
 
 		Secundomer sec = new Secundomer(filter.getClass().getName() + (readEveryImage ? " EVERYIMAGE" : ""));
 		for (int i = 0; i < CNT; i++) {
 			sec.start();
 			if (readEveryImage) {
-				image = source.getSingleSource().getImage();
+				image = source.getSingleSource().getSourceImage();
 			}
 			image2 = filter.convert(image);
 			sec.stop();
@@ -89,71 +89,71 @@ public class FilterPerformanceTest {
 		results.add(sec);
 	}
 
-	public void testColorSpaceFilter() throws IOException, ParamException {
+	public void testColorSpaceFilter() throws IOException, FilterException {
 		ColorSpaceFilter filter = new ColorSpaceFilter();
-		ParamHelper.getParameterL("ColorMode", filter).setValue(ColorSpace.CS_GRAY);
+		ParamHelper.getParameter("ColorMode", filter).setValue(ColorSpace.CS_GRAY);
 		this.testImpl(filter);
 	}
 
-	public void testGrayScaleFilter() throws IOException, ParamException {
+	public void testGrayScaleFilter() throws IOException, FilterException {
 		GrayScaleFilter filter = new GrayScaleFilter();
 		this.testImpl(filter);
 	}
 
-	public void testGrayScaleFilterEveryImage() throws IOException, ParamException {
+	public void testGrayScaleFilterEveryImage() throws IOException, FilterException {
 		GrayScaleFilter filter = new GrayScaleFilter();
 		this.testImpl(filter, true);
 	}
 
-	public void testInvertFilter() throws IOException, ParamException {
+	public void testInvertFilter() throws IOException, FilterException {
 		InvertFilter filter = new InvertFilter();
 		this.testImpl(filter);
 	}
 
-	public void testInvertFilterEveryImage() throws IOException, ParamException {
+	public void testInvertFilterEveryImage() throws IOException, FilterException {
 		InvertFilter filter = new InvertFilter();
 		this.testImpl(filter, true);
 	}
 
-	public void testRescaleFilter() throws IOException, ParamException {
+	public void testRescaleFilter() throws IOException, FilterException {
 		RescaleFilter filter = new RescaleFilter();
-		ParamHelper.getParameterL("Brightness", filter).setValue(40);
+		ParamHelper.getParameter("Brightness", filter).setValue(40);
 		this.testImpl(filter);
 	}
 
-	public void testSimpleSharpFilter() throws IOException, ParamException {
+	public void testSimpleSharpFilter() throws IOException, FilterException {
 		SimpleSharpFilter filter = new SimpleSharpFilter();
 		this.testImpl(filter);
 	}
 
-	public void testSimpleSharpFilterEveryImage() throws IOException, ParamException {
+	public void testSimpleSharpFilterEveryImage() throws IOException, FilterException {
 		SimpleSharpFilter filter = new SimpleSharpFilter();
 		this.testImpl(filter, true);
 	}
 
-	public void testSimpleSmoothFilter() throws IOException, ParamException {
+	public void testSimpleSmoothFilter() throws IOException, FilterException {
 		SimpleSmoothFilter filter = new SimpleSmoothFilter();
 		this.testImpl(filter);
 	}
 
-	public void testHistogramFilter() throws IOException, ParamException {
+	public void testHistogramFilter() throws IOException, FilterException {
 		HistogramFilter filter = new HistogramFilter();
 		this.testImpl(filter);
 	}
 
-	public void testResizeFilter() throws IOException, ParamException {
+	public void testResizeFilter() throws IOException, FilterException {
 		ResizeFilter filter = new ResizeFilter();
-		ParamHelper.getParameterL("Width", filter).setValue(1024);
-		ParamHelper.getParameterL("Height", filter).setValue(768);
+		ParamHelper.getParameter("Width", filter).setValue(1024);
+		ParamHelper.getParameter("Height", filter).setValue(768);
 
 		this.testImpl(filter);
 	}
 
-	public void testGrayScaleFilterChainsaw(boolean readEveryImage) throws IOException, ParamException {
+	public void testGrayScaleFilterChainsaw(boolean readEveryImage) throws IOException, FilterException {
 		FilterChainsaw saw = new FilterChainsaw();
 
 		GrayScaleFilter filter = new GrayScaleFilter();
-		BufferedImage image = source.getSingleSource().getImage();
+		BufferedImage image = source.getSingleSource().getSourceImage();
 
 		saw.appendFilter(filter);
 
@@ -166,7 +166,7 @@ public class FilterPerformanceTest {
 		for (int i = 0; i < CNT; i++) {
 			sec.start();
 			if (readEveryImage) {
-				image = source.getSingleSource().getImage();
+				image = source.getSingleSource().getSourceImage();
 				saw.attachImage(image);
 			}
 			image2 = saw.filterSaw();
@@ -184,7 +184,7 @@ public class FilterPerformanceTest {
 	}
 
 	@Test
-	public void testAll() throws IOException, ParamException {
+	public void testAll() throws IOException, FilterException {
 		this.testColorSpaceFilter();
 		this.testGrayScaleFilter();
 		this.testInvertFilter();

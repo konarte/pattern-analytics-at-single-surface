@@ -73,7 +73,7 @@ public class Locuses implements Serializable {
 	
 	private byte[] thumbImage;
 	
-	private byte[] histogram;
+	private int[] histogram;
 	
 	private byte[] filteredImage;
 	
@@ -149,7 +149,7 @@ public class Locuses implements Serializable {
 	 * Формат хранения -- матрица (т.е. двумерный массив).
 	 * Размер гистограммы зависит от размера изображения.
 	 */
-	public void setHistogram(byte[] value) {
+	public void setHistogram(int[] value) {
 		this.histogram = value;
 	}
 	
@@ -159,7 +159,7 @@ public class Locuses implements Serializable {
 	 * Формат хранения -- матрица (т.е. двумерный массив).
 	 * Размер гистограммы зависит от размера изображения.
 	 */
-	public byte[] getHistogram() {
+	public int[] getHistogram() {
 		return histogram;
 	}
 	

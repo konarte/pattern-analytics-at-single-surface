@@ -13,12 +13,12 @@ License Type: Evaluation
 			<generator class="native">
 			</generator>
 		</id>
-		<property name="name" column="Name" type="string" length="255" not-null="false" lazy="false">
+		<property name="name" column="Name" type="string" length="255" not-null="true" lazy="false">
 			<meta attribute="field-description">
 				&#1053;&#1072;&#1079;&#1074;&#1072;&#1085;&#1080;&#1077; &#1084;&#1086;&#1076;&#1091;&#1083;&#1103;
 			</meta>
 		</property>
-		<property name="codename" column="Codename" type="string" length="255" not-null="false" lazy="false">
+		<property name="codename" column="Codename" type="string" length="255" not-null="true" lazy="false">
 			<meta attribute="field-description">
 				&#1059;&#1085;&#1080;&#1082;&#1072;&#1083;&#1100;&#1085;&#1099;&#1081; &#1082;&#1086;&#1076; &#1084;&#1086;&#1076;&#1091;&#1083;&#1103; (&#1087;&#1072;&#1082;&#1077;&#1090;+&#1080;&#1084;&#1103;)
 			</meta>

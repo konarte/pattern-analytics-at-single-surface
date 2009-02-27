@@ -22,20 +22,17 @@ import org.orm.criteria.*;
 public class LocusFiltersDetachedCriteria extends AbstractORMDetachedCriteria {
 	public final IntegerExpression idLocusFilter;
 	public final StringExpression options;
-	public final IntegerExpression order;
 	
 	public LocusFiltersDetachedCriteria() {
 		super(edu.mgupi.pass.db.locuses.LocusFilters.class, edu.mgupi.pass.db.locuses.LocusFiltersCriteria.class);
 		idLocusFilter = new IntegerExpression("idLocusFilter", this.getDetachedCriteria());
 		options = new StringExpression("options", this.getDetachedCriteria());
-		order = new IntegerExpression("order", this.getDetachedCriteria());
 	}
 	
 	public LocusFiltersDetachedCriteria(DetachedCriteria aDetachedCriteria) {
 		super(aDetachedCriteria, edu.mgupi.pass.db.locuses.LocusFiltersCriteria.class);
 		idLocusFilter = new IntegerExpression("idLocusFilter", this.getDetachedCriteria());
 		options = new StringExpression("options", this.getDetachedCriteria());
-		order = new IntegerExpression("order", this.getDetachedCriteria());
 	}
 	
 	public LFiltersDetachedCriteria createFilterCriteria() {

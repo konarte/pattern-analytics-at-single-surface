@@ -1,6 +1,12 @@
 package edu.mgupi.pass.modules;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Collection;
+
+import javax.imageio.ImageIO;
 
 import edu.mgupi.pass.db.locuses.LocusModuleParams;
 import edu.mgupi.pass.db.locuses.Locuses;
@@ -48,6 +54,18 @@ public class ModuleHelper {
 		}
 
 		return null;
+	}
+
+	public static byte[] convertImageToPNGRaw(BufferedImage image) throws IOException {
+		ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+		ImageIO.write(image, "PNG", byteStream);
+		byte[] data = byteStream.toByteArray();
+		byteStream.close();
+		return data;
+	}
+
+	public static BufferedImage covertPNGRawToImage(byte[] data) throws IOException {
+		return ImageIO.read(new ByteArrayInputStream(data));
 	}
 
 }

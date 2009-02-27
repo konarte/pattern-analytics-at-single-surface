@@ -13,8 +13,7 @@ License Type: Evaluation
 			<generator class="native">
 			</generator>
 		</id>
-		<property name="options" column="Options" type="string" length="255" not-null="false" lazy="false"/>
-		<property name="order" column="`Order`" type="integer" length="11" not-null="true" lazy="false"/>
+		<property name="options" column="Options" type="string" length="4096" not-null="true" lazy="false"/>
 		<many-to-one name="filter" column="LFiltersIdModule" class="edu.mgupi.pass.db.locuses.LFilters" cascade="save-update,lock" unique="true" not-null="true" lazy="no-proxy">
 		</many-to-one>
 	</class>

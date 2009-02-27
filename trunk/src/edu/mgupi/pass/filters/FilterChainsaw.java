@@ -2,6 +2,7 @@ package edu.mgupi.pass.filters;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -40,11 +41,33 @@ public class FilterChainsaw {
 	}
 
 	/**
-	 * Append new filter to new chain (in the end)
+	 * Append new filter (instantiating as class) to chain in the end
+	 * 
+	 * @param filterClass
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @see #appendFilter(IFilter)
+	 */
+	public void appendFilter(Class<? extends IFilter> filterClass) throws InstantiationException,
+			IllegalAccessException {
+		if (filterClass == null) {
+			throw new IllegalArgumentException("Internal error. filterClass must be not null.");
+		}
+
+		logger.debug("FilterChainsaw.appendFilter now appends filter as class {}", filterClass);
+		this.appendFilter(filterClass.newInstance());
+	}
+
+	/**
+	 * Append new filter to chain (in the end)
 	 * 
 	 * @param filter
 	 */
 	public void appendFilter(IFilter filter) {
+
+		if (filter == null) {
+			throw new IllegalArgumentException("Internal error. filter must be not null.");
+		}
 
 		logger.debug("FilterChainsaw.appendFilter now appends filter {}", filter);
 
@@ -99,6 +122,10 @@ public class FilterChainsaw {
 
 			return null;
 		}
+	}
+
+	public Collection<IFilter> getFilters() {
+		return this.filterList;
 	}
 
 	/**
@@ -160,7 +187,7 @@ public class FilterChainsaw {
 	 */
 	public void detachImage() {
 		if (image != null) {
-			logger.debug("FilterChainsaw.attachImage now detach image {}", image);
+			logger.debug("FilterChainsaw.detachImage now detach image {}", image);
 
 			for (IFilter filter : this.filterList) {
 				filter.onDetachFromImage(image);
@@ -169,13 +196,14 @@ public class FilterChainsaw {
 		}
 	}
 
+	private BufferedImage lastImage;
 	/**
 	 * Actual processing of image by prepared filter chain
 	 * 
 	 * @return
-	 * @throws ParamException
+	 * @throws FilterException
 	 */
-	public BufferedImage filterSaw() throws ParamException {
+	public BufferedImage filterSaw() throws FilterException {
 
 		if (image == null) {
 			throw new IllegalStateException("Internal error. Please, call attachImage first.");
@@ -183,13 +211,17 @@ public class FilterChainsaw {
 
 		logger.debug("FilterChainsaw.attachImage now SAW launch");
 
-		BufferedImage source = image;
+		lastImage = image;
 		BufferedImage dest = null;
 		for (IFilter filter : this.filterList) {
-			dest = filter.convert(source);
-			source = dest;
+			dest = filter.convert(lastImage);
+			lastImage = dest;
 		}
-		return source;
+		return lastImage;
+	}
+	
+	public BufferedImage getLastFilteredImage() {
+		return this.lastImage;		
 	}
 
 	public String toString() {

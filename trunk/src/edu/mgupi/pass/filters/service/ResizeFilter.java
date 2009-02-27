@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.ParamException;
+import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.Param.TYPES;
 
 public class ResizeFilter implements IFilter {
@@ -48,7 +48,7 @@ public class ResizeFilter implements IFilter {
 				+ INTERPOLATION_METHOD.getValue() + ")";
 	}
 
-	public BufferedImage convert(BufferedImage source) throws ParamException {
+	public BufferedImage convert(BufferedImage source) throws FilterException {
 
 		if (source == null) {
 			throw new IllegalArgumentException("Internal error: image is null.");

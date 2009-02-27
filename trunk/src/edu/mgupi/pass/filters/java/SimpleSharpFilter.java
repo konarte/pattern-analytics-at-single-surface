@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.ParamException;
+import edu.mgupi.pass.filters.FilterException;
 
 public class SimpleSharpFilter implements IFilter {
 
@@ -36,7 +36,7 @@ public class SimpleSharpFilter implements IFilter {
 			0.0f, -1.0f, 0.0f };
 	private ConvolveOp op = new ConvolveOp(new Kernel(3, 3, elements));
 
-	public BufferedImage convert(BufferedImage source) throws ParamException {
+	public BufferedImage convert(BufferedImage source) throws FilterException {
 		if (source == null) {
 			throw new IllegalArgumentException("Internal error: image is null.");
 		}

@@ -71,8 +71,6 @@ public class LocusFilters implements Serializable {
 	
 	private String options;
 	
-	private int order;
-	
 	private edu.mgupi.pass.db.locuses.LFilters filter;
 	
 	private void setIdLocusFilter(int value) {
@@ -93,14 +91,6 @@ public class LocusFilters implements Serializable {
 	
 	public String getOptions() {
 		return options;
-	}
-	
-	public void setOrder(int value) {
-		this.order = value;
-	}
-	
-	public int getOrder() {
-		return order;
 	}
 	
 	public void setFilter(edu.mgupi.pass.db.locuses.LFilters value) {

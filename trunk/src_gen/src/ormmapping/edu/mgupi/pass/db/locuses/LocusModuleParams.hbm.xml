@@ -13,7 +13,7 @@ License Type: Evaluation
 			<generator class="native">
 			</generator>
 		</id>
-		<property name="paramName" column="ParamName" type="string" length="255" not-null="false" lazy="false"/>
+		<property name="paramName" column="ParamName" type="string" length="255" not-null="true" lazy="false"/>
 		<property name="paramData" column="ParamData" type="blob" not-null="true" lazy="false"/>
 	</class>
 </hibernate-mapping>

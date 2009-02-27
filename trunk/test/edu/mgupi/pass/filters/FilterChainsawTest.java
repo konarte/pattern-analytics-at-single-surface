@@ -21,6 +21,12 @@ import edu.mgupi.pass.filters.java.ColorSpaceFilter;
 import edu.mgupi.pass.filters.java.RescaleFilter;
 import edu.mgupi.pass.sources.TestSourceImpl;
 
+/**
+ * Test for common chainsaw
+ * 
+ * @author raidan
+ * 
+ */
 public class FilterChainsawTest {
 
 	private FilterChainsaw chainsaw = null;
@@ -43,9 +49,9 @@ public class FilterChainsawTest {
 	}
 
 	@Test
-	public void testReset() {
-		chainsaw.appendFilter(new TestFilter());
-		chainsaw.appendFilter(new TestFilter());
+	public void testReset() throws InstantiationException, IllegalAccessException {
+		chainsaw.appendFilter(TestFilter.class);
+		chainsaw.appendFilter(TestFilter.class);
 
 		assertNotNull(chainsaw.getFilter(0));
 
@@ -63,7 +69,7 @@ public class FilterChainsawTest {
 	}
 
 	@Test
-	public void testAppendFilter() {
+	public void testAppendFilter() throws InstantiationException, IllegalAccessException {
 		TestFilter filter = new TestFilter();
 		TestFilter filter2 = new TestFilter();
 
@@ -76,6 +82,27 @@ public class FilterChainsawTest {
 		assertTrue(filter == chainsaw.getFilter(0));
 		assertTrue(filter2 == chainsaw.getFilter(1));
 
+		try {
+			chainsaw.appendFilter((IFilter) null);
+			fail("No IllegalArgumentException!");
+		} catch (IllegalArgumentException iae) {
+			System.out.println("Received expected exception: " + iae);
+		}
+
+		chainsaw.reset();
+
+		chainsaw.appendFilter(TestFilter.class);
+		chainsaw.appendFilter(ColorSpaceFilter.class);
+
+		assertTrue(TestFilter.class == chainsaw.getFilter(0).getClass());
+		assertTrue(ColorSpaceFilter.class == chainsaw.getFilter(1).getClass());
+
+		try {
+			chainsaw.appendFilter((Class<IFilter>) null);
+			fail("No IllegalArgumentException!");
+		} catch (IllegalArgumentException iae) {
+			System.out.println("Received expected exception: " + iae);
+		}
 	}
 
 	@Test
@@ -175,11 +202,11 @@ public class FilterChainsawTest {
 	}
 
 	@Test
-	public void testAttachAndDetach() throws ParamException {
+	public void testAttachAndDetach() throws FilterException, InstantiationException, IllegalAccessException {
 		BufferedImage image = new BufferedImage(256, 256, BufferedImage.TYPE_INT_RGB);
 
-		chainsaw.appendFilter(new TestFilter());
-		chainsaw.appendFilter(new TestFilter());
+		chainsaw.appendFilter(TestFilter.class);
+		chainsaw.appendFilter(TestFilter.class);
 
 		chainsaw.attachImage(image);
 		assertTrue(((TestFilter) chainsaw.getFilter(0)).isAttached());
@@ -252,7 +279,7 @@ public class FilterChainsawTest {
 
 	}
 
-	private void convertImage(BufferedImage image, String addText) throws IOException, ParamException {
+	private void convertImage(BufferedImage image, String addText) throws IOException, FilterException {
 		BufferedImage newImage = chainsaw.filterSaw();
 
 		ImageIO.write(newImage, "JPG", new File("tmp/saw" + chainsaw + addText + ".jpg"));
@@ -260,22 +287,22 @@ public class FilterChainsawTest {
 	}
 
 	@Test
-	public void testCommonFilterSaw() throws ParamException, IOException {
+	public void testCommonFilterSaw() throws FilterException, IOException {
 		TestSourceImpl source = new TestSourceImpl();
 		source.init();
 		try {
 
-			BufferedImage image = source.getSingleSource().getImage();
+			BufferedImage image = source.getSingleSource().getSourceImage();
 			chainsaw.attachImage(image);
 
 			this.convertImage(image, "");
 
 			ColorSpaceFilter color = new ColorSpaceFilter();
-			ParamHelper.getParameterL("ColorMode", color).setValue(ColorSpace.CS_GRAY);
+			ParamHelper.getParameter("ColorMode", color).setValue(ColorSpace.CS_GRAY);
 			chainsaw.appendFilter(color);
 
 			RescaleFilter rescale = new RescaleFilter();
-			ParamHelper.getParameterL("Brightness", rescale).setValue(40);
+			ParamHelper.getParameter("Brightness", rescale).setValue(40);
 			chainsaw.appendFilter(rescale);
 
 			this.convertImage(image, "1");

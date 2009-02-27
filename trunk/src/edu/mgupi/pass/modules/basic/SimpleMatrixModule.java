@@ -31,4 +31,8 @@ public class SimpleMatrixModule implements IModule {
 		return false;
 	}
 
+	public String getName() {
+		return "Анализ матриц";
+	}
+
 }

@@ -22,7 +22,6 @@ public class LocusesCriteria extends AbstractORMCriteria {
 	public final IntegerExpression idLocus;
 	public final StringExpression name;
 	public final ByteArrayExpression thumbImage;
-	public final ByteArrayExpression histogram;
 	public final ByteArrayExpression filteredImage;
 	
 	public LocusesCriteria(Criteria criteria) {
@@ -30,7 +29,6 @@ public class LocusesCriteria extends AbstractORMCriteria {
 		idLocus = new IntegerExpression("idLocus", this);
 		name = new StringExpression("name", this);
 		thumbImage = new ByteArrayExpression("thumbImage", this);
-		histogram = new ByteArrayExpression("histogram", this);
 		filteredImage = new ByteArrayExpression("filteredImage", this);
 	}
 	

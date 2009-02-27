@@ -46,7 +46,7 @@ public class TestSourceImplTest {
 		try {
 			source.init();
 			SourceStore store = source.getSingleSource();
-			System.out.println("Image " + store.getName() + " (" + store.getImage().toString() + ")");
+			System.out.println("Image " + store.getName() + " (" + store.getSourceImage().toString() + ")");
 		} finally {
 			source.done();
 		}
