@@ -9,7 +9,7 @@ License Type: Evaluation
 		<meta attribute="class-description">
 			&#1050;&#1072;&#1090;&#1072;&#1083;&#1086;&#1075; &#1084;&#1086;&#1076;&#1091;&#1083;&#1077;&#1081; &#1072;&#1085;&#1072;&#1083;&#1080;&#1079;&#1072;
 		</meta>
-		<id name="idModule" column="IdModule" type="integer" unsaved-value="0">
+		<id name="idLFilter" column="IdLFilter" type="integer" unsaved-value="0">
 			<generator class="native">
 			</generator>
 		</id>

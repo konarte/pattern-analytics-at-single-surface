@@ -67,22 +67,22 @@ public class LFilters implements Serializable {
 		}
 	}
 	
-	private int idModule;
+	private int idLFilter;
 	
 	private String name;
 	
 	private String codename;
 	
-	private void setIdModule(int value) {
-		this.idModule = value;
+	private void setIdLFilter(int value) {
+		this.idLFilter = value;
 	}
 	
-	public int getIdModule() {
-		return idModule;
+	public int getIdLFilter() {
+		return idLFilter;
 	}
 	
 	public int getORMID() {
-		return getIdModule();
+		return getIdLFilter();
 	}
 	
 	/**
@@ -114,7 +114,7 @@ public class LFilters implements Serializable {
 	}
 	
 	public String toString() {
-		return String.valueOf(getIdModule());
+		return String.valueOf(getIdLFilter());
 	}
 	
 }

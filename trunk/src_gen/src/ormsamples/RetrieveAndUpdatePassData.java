@@ -111,13 +111,13 @@ public class RetrieveAndUpdatePassData {
 		System.out.println("Retrieving LModules by LModulesCriteria");
 		edu.mgupi.pass.db.locuses.LModulesCriteria lModulesCriteria = new edu.mgupi.pass.db.locuses.LModulesCriteria();
 		// Please uncomment the follow line and fill in parameter(s)
-		//lModulesCriteria.idModule.eq();
+		//lModulesCriteria.idLModule.eq();
 		System.out.println(lModulesCriteria.uniqueLModules());
 		
 		System.out.println("Retrieving LFilters by LFiltersCriteria");
 		edu.mgupi.pass.db.locuses.LFiltersCriteria lFiltersCriteria = new edu.mgupi.pass.db.locuses.LFiltersCriteria();
 		// Please uncomment the follow line and fill in parameter(s)
-		//lFiltersCriteria.idModule.eq();
+		//lFiltersCriteria.idLFilter.eq();
 		System.out.println(lFiltersCriteria.uniqueLFilters());
 		
 		System.out.println("Retrieving Locuses by LocusesCriteria");

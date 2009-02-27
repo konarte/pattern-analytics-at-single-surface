@@ -19,65 +19,65 @@ import java.util.List;
 
 public class LModulesFactory {
 	private static final org.apache.log4j.Logger _logger = org.apache.log4j.Logger.getLogger(LModulesFactory.class);
-	public static LModules loadLModulesByORMID(int idModule) throws PersistentException {
+	public static LModules loadLModulesByORMID(int idLModule) throws PersistentException {
 		try {
 			PersistentSession session = edu.mgupi.pass.db.surfaces.PassPersistentManager.instance().getSession();
-			return loadLModulesByORMID(session, idModule);
+			return loadLModulesByORMID(session, idLModule);
 		}
 		catch (Exception e) {
-			_logger.error("loadLModulesByORMID(int idModule)", e);
+			_logger.error("loadLModulesByORMID(int idLModule)", e);
 			throw new PersistentException(e);
 		}
 	}
 	
-	public static LModules getLModulesByORMID(int idModule) throws PersistentException {
+	public static LModules getLModulesByORMID(int idLModule) throws PersistentException {
 		try {
 			PersistentSession session = edu.mgupi.pass.db.surfaces.PassPersistentManager.instance().getSession();
-			return getLModulesByORMID(session, idModule);
+			return getLModulesByORMID(session, idLModule);
 		}
 		catch (Exception e) {
-			_logger.error("getLModulesByORMID(int idModule)", e);
+			_logger.error("getLModulesByORMID(int idLModule)", e);
 			throw new PersistentException(e);
 		}
 	}
 	
-	public static LModules loadLModulesByORMID(int idModule, org.hibernate.LockMode lockMode) throws PersistentException {
+	public static LModules loadLModulesByORMID(int idLModule, org.hibernate.LockMode lockMode) throws PersistentException {
 		try {
 			PersistentSession session = edu.mgupi.pass.db.surfaces.PassPersistentManager.instance().getSession();
-			return loadLModulesByORMID(session, idModule, lockMode);
+			return loadLModulesByORMID(session, idLModule, lockMode);
 		}
 		catch (Exception e) {
-			_logger.error("loadLModulesByORMID(int idModule, org.hibernate.LockMode lockMode)", e);
+			_logger.error("loadLModulesByORMID(int idLModule, org.hibernate.LockMode lockMode)", e);
 			throw new PersistentException(e);
 		}
 	}
 	
-	public static LModules loadLModulesByORMID(PersistentSession session, int idModule) throws PersistentException {
+	public static LModules loadLModulesByORMID(PersistentSession session, int idLModule) throws PersistentException {
 		try {
-			return (LModules) session.load(edu.mgupi.pass.db.locuses.LModules.class, new Integer(idModule));
+			return (LModules) session.load(edu.mgupi.pass.db.locuses.LModules.class, new Integer(idLModule));
 		}
 		catch (Exception e) {
-			_logger.error("loadLModulesByORMID(PersistentSession session, int idModule)", e);
+			_logger.error("loadLModulesByORMID(PersistentSession session, int idLModule)", e);
 			throw new PersistentException(e);
 		}
 	}
 	
-	public static LModules getLModulesByORMID(PersistentSession session, int idModule) throws PersistentException {
+	public static LModules getLModulesByORMID(PersistentSession session, int idLModule) throws PersistentException {
 		try {
-			return (LModules) session.get(edu.mgupi.pass.db.locuses.LModules.class, new Integer(idModule));
+			return (LModules) session.get(edu.mgupi.pass.db.locuses.LModules.class, new Integer(idLModule));
 		}
 		catch (Exception e) {
-			_logger.error("getLModulesByORMID(PersistentSession session, int idModule)", e);
+			_logger.error("getLModulesByORMID(PersistentSession session, int idLModule)", e);
 			throw new PersistentException(e);
 		}
 	}
 	
-	public static LModules loadLModulesByORMID(PersistentSession session, int idModule, org.hibernate.LockMode lockMode) throws PersistentException {
+	public static LModules loadLModulesByORMID(PersistentSession session, int idLModule, org.hibernate.LockMode lockMode) throws PersistentException {
 		try {
-			return (LModules) session.load(edu.mgupi.pass.db.locuses.LModules.class, new Integer(idModule), lockMode);
+			return (LModules) session.load(edu.mgupi.pass.db.locuses.LModules.class, new Integer(idLModule), lockMode);
 		}
 		catch (Exception e) {
-			_logger.error("loadLModulesByORMID(PersistentSession session, int idModule, org.hibernate.LockMode lockMode)", e);
+			_logger.error("loadLModulesByORMID(PersistentSession session, int idLModule, org.hibernate.LockMode lockMode)", e);
 			throw new PersistentException(e);
 		}
 	}

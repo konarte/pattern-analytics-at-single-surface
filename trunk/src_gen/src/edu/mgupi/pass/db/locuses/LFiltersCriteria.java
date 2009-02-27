@@ -19,13 +19,13 @@ import org.orm.PersistentSession;
 import org.orm.criteria.*;
 
 public class LFiltersCriteria extends AbstractORMCriteria {
-	public final IntegerExpression idModule;
+	public final IntegerExpression idLFilter;
 	public final StringExpression name;
 	public final StringExpression codename;
 	
 	public LFiltersCriteria(Criteria criteria) {
 		super(criteria);
-		idModule = new IntegerExpression("idModule", this);
+		idLFilter = new IntegerExpression("idLFilter", this);
 		name = new StringExpression("name", this);
 		codename = new StringExpression("codename", this);
 	}

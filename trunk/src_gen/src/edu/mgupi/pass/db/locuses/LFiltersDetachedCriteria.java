@@ -20,20 +20,20 @@ import org.orm.PersistentSession;
 import org.orm.criteria.*;
 
 public class LFiltersDetachedCriteria extends AbstractORMDetachedCriteria {
-	public final IntegerExpression idModule;
+	public final IntegerExpression idLFilter;
 	public final StringExpression name;
 	public final StringExpression codename;
 	
 	public LFiltersDetachedCriteria() {
 		super(edu.mgupi.pass.db.locuses.LFilters.class, edu.mgupi.pass.db.locuses.LFiltersCriteria.class);
-		idModule = new IntegerExpression("idModule", this.getDetachedCriteria());
+		idLFilter = new IntegerExpression("idLFilter", this.getDetachedCriteria());
 		name = new StringExpression("name", this.getDetachedCriteria());
 		codename = new StringExpression("codename", this.getDetachedCriteria());
 	}
 	
 	public LFiltersDetachedCriteria(DetachedCriteria aDetachedCriteria) {
 		super(aDetachedCriteria, edu.mgupi.pass.db.locuses.LFiltersCriteria.class);
-		idModule = new IntegerExpression("idModule", this.getDetachedCriteria());
+		idLFilter = new IntegerExpression("idLFilter", this.getDetachedCriteria());
 		name = new StringExpression("name", this.getDetachedCriteria());
 		codename = new StringExpression("codename", this.getDetachedCriteria());
 	}
