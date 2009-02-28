@@ -15,9 +15,14 @@ package edu.mgupi.pass.db.defects;
 
 import org.orm.*;
 import java.io.Serializable;
+import javax.persistence.*;
 /**
  * Классы дефектов (поверхностый, внутренний)
  */
+@Entity
+@org.hibernate.annotations.Proxy(lazy=false)
+@Table(name="DefectClasses")
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public class DefectClasses implements Serializable {
 	private static final org.apache.log4j.Logger _logger = org.apache.log4j.Logger.getLogger(DefectClasses.class);
 	public DefectClasses() {
@@ -67,8 +72,13 @@ public class DefectClasses implements Serializable {
 		}
 	}
 	
+	@Column(name="IdDefectClass", nullable=false)	
+	@Id	
+	@GeneratedValue(generator="V0A1070D311FBD12FCAD01C0B")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FCAD01C0B", strategy="native")	
 	private int idDefectClass;
 	
+	@Column(name="Name", nullable=false, length=255)	
 	private String name;
 	
 	private void setIdDefectClass(int value) {

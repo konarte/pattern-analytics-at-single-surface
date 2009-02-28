@@ -43,7 +43,7 @@ public class Utils {
 	 * @param buffer
 	 * @param replaceWhat
 	 * @param replaceTo
-	 * @return
+	 * @return string with replaces
 	 */
 	public final static String replaceAll(String buffer, String replaceWhat, String replaceTo) {
 		if (buffer == null || replaceWhat == null) {
@@ -60,7 +60,7 @@ public class Utils {
 	 * @param buffer
 	 * @param replaceWhat
 	 * @param replaceTo
-	 * @return
+	 * @return string with replaces
 	 */
 	public final static StringBuilder replaceAll(StringBuilder buffer, String replaceWhat, String replaceTo) {
 		if (buffer == null || replaceWhat == null) {

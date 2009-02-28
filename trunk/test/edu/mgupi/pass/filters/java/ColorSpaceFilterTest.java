@@ -16,9 +16,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.FilterException;
-import edu.mgupi.pass.filters.ParamHelper;
+import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.sources.TestSourceImpl;
 
 public class ColorSpaceFilterTest {
@@ -50,7 +49,7 @@ public class ColorSpaceFilterTest {
 	}
 
 	private void convertImage(BufferedImage image, int space, String name) throws IOException, FilterException {
-		ParamHelper.getParameter("ColorMode", filter).setValue(space);
+		filter.getCOLOR_MODE().setValue(space);
 		BufferedImage newImage = filter.convert(image);
 		logger.info("Image converted to " + name + " SUCCESSFULLY (image type is " + newImage.getType() + ")");
 
@@ -69,7 +68,7 @@ public class ColorSpaceFilterTest {
 
 			ImageIO.write(image, "JPG", new File("tmp/ORIGINAL.jpg"));
 
-			Param param = ParamHelper.getParameter("ColorMode", filter);
+			Param param = filter.getCOLOR_MODE();
 			for (int i = 0; i < param.getAllowed_values().length; i++) {
 				try {
 					this.convertImage(image, (Integer) param.getAllowed_values()[i], param.getVisual_values()[i]);

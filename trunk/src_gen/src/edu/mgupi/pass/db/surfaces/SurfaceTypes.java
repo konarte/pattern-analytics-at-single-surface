@@ -15,10 +15,15 @@ package edu.mgupi.pass.db.surfaces;
 
 import org.orm.*;
 import java.io.Serializable;
+import javax.persistence.*;
 /**
  * Конфигурация поверхности.
  * Для каждого типа уточняем, что это.
  */
+@Entity
+@org.hibernate.annotations.Proxy(lazy=false)
+@Table(name="SurfaceTypes")
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public class SurfaceTypes implements Serializable {
 	private static final org.apache.log4j.Logger _logger = org.apache.log4j.Logger.getLogger(SurfaceTypes.class);
 	public SurfaceTypes() {
@@ -68,12 +73,25 @@ public class SurfaceTypes implements Serializable {
 		}
 	}
 	
+	@Column(name="IdSurfaceMode", nullable=false)	
+	@Id	
+	@GeneratedValue(generator="V0A1070D311FBD12FC8E01C09")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FC8E01C09", strategy="native")	
 	private int idSurfaceMode;
 	
+	@Column(name="Name", nullable=false, length=255)	
 	private String name;
 	
+	@OneToOne(targetEntity=edu.mgupi.pass.db.surfaces.SurfaceClasses.class)	
+	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
+	@JoinColumns({ @JoinColumn(name="SurfaceClassesIdSurfaceType") })	
+	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.surfaces.SurfaceClasses surfaceClass;
 	
+	@OneToOne(targetEntity=edu.mgupi.pass.db.surfaces.Materials.class)	
+	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
+	@JoinColumns({ @JoinColumn(name="MaterialsIdSurfaceMaterial") })	
+	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.surfaces.Materials surfaceMaterial;
 	
 	private void setIdSurfaceMode(int value) {

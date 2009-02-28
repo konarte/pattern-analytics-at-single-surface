@@ -15,6 +15,7 @@ package edu.mgupi.pass.db.sensors;
 
 import org.orm.*;
 import java.io.Serializable;
+import javax.persistence.*;
 /**
  * ¬ид датчика (вид системы контрол€).
  * 
@@ -26,6 +27,10 @@ import java.io.Serializable;
  * например подкл соотв базу данных по системе контрол€ и датчикам Ц 
  * пока  делаем только вихретоковую)
  */
+@Entity
+@org.hibernate.annotations.Proxy(lazy=false)
+@Table(name="SensorClasses")
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public class SensorClasses implements Serializable {
 	private static final org.apache.log4j.Logger _logger = org.apache.log4j.Logger.getLogger(SensorClasses.class);
 	public SensorClasses() {
@@ -75,8 +80,13 @@ public class SensorClasses implements Serializable {
 		}
 	}
 	
+	@Column(name="IdSensorClass", nullable=false)	
+	@Id	
+	@GeneratedValue(generator="V0A1070D311FBD12FD5901C15")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FD5901C15", strategy="native")	
 	private int idSensorClass;
 	
+	@Column(name="Name", nullable=true, length=255)	
 	private String name;
 	
 	private void setIdSensorClass(int value) {

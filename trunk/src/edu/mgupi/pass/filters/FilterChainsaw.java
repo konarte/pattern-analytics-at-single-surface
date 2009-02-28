@@ -9,7 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class for chained operation with filters. Main principle is
+ * Class for chained operation with image. This is simple chain, where all
+ * filters applied on image in turn, one after another.
+ * 
+ * No parallel or independent filtering!
  * 
  * @author raidan
  * 
@@ -19,14 +22,21 @@ public class FilterChainsaw {
 
 	private List<IFilter> filterList = new ArrayList<IFilter>();
 
-	public void done() {
-		logger.debug("FilterChainsaw.done");
-
+	/**
+	 * Normally, we do not need actually closing our chain. Cause these chains
+	 * do not removing during all program execution (this is how I planned).
+	 * 
+	 * @see #reset()
+	 */
+	protected void finalize() throws Throwable {
 		this.reset();
 	}
 
 	/**
-	 * Method for reset chain of filters
+	 * Method for reset chain of filters. If filter implements
+	 * {@link IFilterInitiable} interface -- we call its method done.
+	 * 
+	 * @see IFilterInitiable#done()
 	 */
 	public void reset() {
 		logger.debug("FilterChainsaw.reset");
@@ -41,11 +51,16 @@ public class FilterChainsaw {
 	}
 
 	/**
-	 * Append new filter (instantiating as class) to chain in the end
+	 * Append new filter (instantiating as class) to chain in the end. This
+	 * method must be common usable in interface.
 	 * 
 	 * @param filterClass
+	 *            {@link IFilter} class for instantiate. Must be not null.
 	 * @throws InstantiationException
+	 *             standard exception for {@link Class#newInstance()} method.
 	 * @throws IllegalAccessException
+	 *             standard exception for {@link Class#newInstance()} method.
+	 * 
 	 * @see #appendFilter(IFilter)
 	 */
 	public void appendFilter(Class<? extends IFilter> filterClass) throws InstantiationException,
@@ -59,9 +74,13 @@ public class FilterChainsaw {
 	}
 
 	/**
-	 * Append new filter to chain (in the end)
+	 * Append new filter to chain (in the end). If filter instance implements
+	 * {@link IFilterInitiable} interface we call its method init.
 	 * 
 	 * @param filter
+	 *            instance of {@link IFilter} class. Must be not null.
+	 * 
+	 * @see IFilterInitiable#init()
 	 */
 	public void appendFilter(IFilter filter) {
 
@@ -77,15 +96,19 @@ public class FilterChainsaw {
 			((IFilterInitiable) filter).init();
 		}
 
-		if (this.image != null) {
-			filter.onAttachToImage(image);
+		if (this.sourceImage != null && filter instanceof IFilterAttachable) {
+			((IFilterAttachable) filter).onAttachToImage(sourceImage);
 		}
 	}
 
 	/**
-	 * Remove filter from specified position
+	 * Remove filter from specified position. If filter implements
+	 * {@link IFilterInitiable} interface -- we call its method done.
 	 * 
 	 * @param pos
+	 *            we remove filter from this position.
+	 * 
+	 * @see IFilterInitiable#done()
 	 */
 	public void removeFilter(int pos) {
 
@@ -93,8 +116,8 @@ public class FilterChainsaw {
 			IFilter filter = filterList.get(pos);
 			logger.debug("FilterChainsaw.appendFilter now remove filter {}", filter);
 
-			if (this.image != null) {
-				filter.onDetachFromImage(image);
+			if (this.sourceImage != null && filter instanceof IFilterAttachable) {
+				((IFilterAttachable) filter).onDetachFromImage(sourceImage);
 			}
 			if (filter instanceof IFilterInitiable) {
 				((IFilterInitiable) filter).done();
@@ -109,7 +132,9 @@ public class FilterChainsaw {
 	 * Get filter from specified position
 	 * 
 	 * @param pos
-	 * @return
+	 *            we get filter from this position.
+	 * 
+	 * @return filter instance for specified position.
 	 */
 	public IFilter getFilter(int pos) {
 		if (pos >= 0 && pos < filterList.size()) {
@@ -124,14 +149,21 @@ public class FilterChainsaw {
 		}
 	}
 
+	/**
+	 * Return current registered filters. Actually, I don't want to care about
+	 * modifying given collection.
+	 * 
+	 * @return current collection of filters.
+	 */
 	public Collection<IFilter> getFilters() {
 		return this.filterList;
 	}
 
 	/**
-	 * Move filter up (i.e. to the begin of processing chain)
+	 * Move filter up (i.e. up to the begin of processing chain)
 	 * 
 	 * @param pos
+	 *            position will be move up.
 	 */
 	public void moveUp(int pos) {
 		if (pos > 0 && pos < filterList.size()) {
@@ -146,9 +178,10 @@ public class FilterChainsaw {
 	}
 
 	/**
-	 * Move filter down (to the end of processing chain)
+	 * Move filter down (up to the end of processing chain)
 	 * 
 	 * @param pos
+	 *            position will be move down.
 	 */
 	public void moveDown(int pos) {
 		if (pos >= 0 && pos < filterList.size() - 1) {
@@ -162,68 +195,91 @@ public class FilterChainsaw {
 		}
 	}
 
-	private BufferedImage image = null;
+	private BufferedImage sourceImage = null;
 
 	/**
-	 * Start processing new image
+	 * Start processing new image.
 	 * 
 	 * @param image
+	 *            instance of BufferedImage. Must be not null.
 	 */
 	public void attachImage(BufferedImage image) {
-		if (this.image != null) {
+		if (this.sourceImage != null) {
 			throw new IllegalStateException("Internal error. Please, detach previous image.");
 		}
 
 		logger.debug("FilterChainsaw.attachImage now attach image {}", image);
 
-		this.image = image;
+		this.sourceImage = image;
 		for (IFilter filter : this.filterList) {
-			filter.onAttachToImage(image);
+			if (filter instanceof IFilterAttachable) {
+				((IFilterAttachable) filter).onAttachToImage(image);
+			}
 		}
 	}
 
 	/**
-	 * End processing image
+	 * End processing image. Main idea -- we can do many filtering operations
+	 * for every image (i.e. we can change parameters of filters, append new
+	 * filters, etc.) to ensure all OK. This is reason for separated operation
+	 * -- {@link #attachImage(BufferedImage)} for attach :),
+	 * {@link #filterSaw()} for filtering and detachImage when we done
+	 * processing this image.
 	 */
 	public void detachImage() {
-		if (image != null) {
-			logger.debug("FilterChainsaw.detachImage now detach image {}", image);
+		if (sourceImage != null) {
+			logger.debug("FilterChainsaw.detachImage now detach image {}", sourceImage);
 
 			for (IFilter filter : this.filterList) {
-				filter.onDetachFromImage(image);
+				if (filter instanceof IFilterAttachable) {
+					((IFilterAttachable) filter).onDetachFromImage(sourceImage);
+				}
 			}
-			image = null;
+			sourceImage = null;
 		}
 	}
 
-	private BufferedImage lastImage;
+	private BufferedImage lastFilteredImage;
+
 	/**
-	 * Actual processing of image by prepared filter chain
+	 * Actual processing of image by prepared filter chain.
 	 * 
-	 * @return
+	 * @return filtered image we registered in
+	 *         {@link #attachImage(BufferedImage)}.
+	 * 
 	 * @throws FilterException
+	 *             if any filter throws this exception.
 	 */
 	public BufferedImage filterSaw() throws FilterException {
 
-		if (image == null) {
+		if (sourceImage == null) {
 			throw new IllegalStateException("Internal error. Please, call attachImage first.");
 		}
 
 		logger.debug("FilterChainsaw.attachImage now SAW launch");
 
-		lastImage = image;
+		lastFilteredImage = sourceImage;
 		BufferedImage dest = null;
 		for (IFilter filter : this.filterList) {
-			dest = filter.convert(lastImage);
-			lastImage = dest;
+			dest = filter.convert(lastFilteredImage);
+			lastFilteredImage = dest;
 		}
-		return lastImage;
-	}
-	
-	public BufferedImage getLastFilteredImage() {
-		return this.lastImage;		
+		return lastFilteredImage;
 	}
 
+	/**
+	 * Return last filtered image we proceed by our chain
+	 * 
+	 * @return last filtered image (or null if we never called
+	 *         {@link #filterSaw()})
+	 */
+	public BufferedImage getLastFilteredImage() {
+		return this.lastFilteredImage;
+	}
+
+	/**
+	 * Represent registered chain of filters as string (their names).
+	 */
 	public String toString() {
 		StringBuilder buffer = new StringBuilder();
 

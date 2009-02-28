@@ -15,9 +15,14 @@ package edu.mgupi.pass.db.locuses;
 
 import org.orm.*;
 import java.io.Serializable;
+import javax.persistence.*;
 /**
  * Каталог примененных фильтров к годографу
  */
+@Entity
+@org.hibernate.annotations.Proxy(lazy=false)
+@Table(name="LocusFilters")
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public class LocusFilters implements Serializable {
 	private static final org.apache.log4j.Logger _logger = org.apache.log4j.Logger.getLogger(LocusFilters.class);
 	public LocusFilters() {
@@ -67,10 +72,19 @@ public class LocusFilters implements Serializable {
 		}
 	}
 	
+	@Column(name="IdLocusFilter", nullable=false)	
+	@Id	
+	@GeneratedValue(generator="V0A1070D311FBD12FD2A01C12")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FD2A01C12", strategy="native")	
 	private int idLocusFilter;
 	
+	@Column(name="Options", nullable=false, length=4096)	
 	private String options;
 	
+	@OneToOne(targetEntity=edu.mgupi.pass.db.locuses.LFilters.class)	
+	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
+	@JoinColumns({ @JoinColumn(name="LFiltersIdLFilter") })	
+	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.locuses.LFilters filter;
 	
 	private void setIdLocusFilter(int value) {

@@ -15,9 +15,14 @@ package edu.mgupi.pass.db.defects;
 
 import org.orm.*;
 import java.io.Serializable;
+import javax.persistence.*;
 /**
  * Каталог дефектов
  */
+@Entity
+@org.hibernate.annotations.Proxy(lazy=false)
+@Table(name="Defects")
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public class Defects implements Serializable {
 	private static final org.apache.log4j.Logger _logger = org.apache.log4j.Logger.getLogger(Defects.class);
 	public Defects() {
@@ -67,16 +72,28 @@ public class Defects implements Serializable {
 		}
 	}
 	
+	@Column(name="IdDefect", nullable=false)	
+	@Id	
+	@GeneratedValue(generator="V0A1070D311FBD12FCCC01C0D")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FCCC01C0D", strategy="native")	
 	private int idDefect;
 	
+	@Column(name="BeddingDepth", nullable=false)	
 	private float beddingDepth;
 	
+	@Column(name="Depth", nullable=false)	
 	private float depth;
 	
+	@Column(name="Width", nullable=false)	
 	private float width;
 	
+	@Column(name="Length", nullable=false)	
 	private float length;
 	
+	@OneToOne(targetEntity=edu.mgupi.pass.db.defects.DefectTypes.class)	
+	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
+	@JoinColumns({ @JoinColumn(name="DefectTypesIdDefectType") })	
+	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.defects.DefectTypes defectType;
 	
 	private void setIdDefect(int value) {

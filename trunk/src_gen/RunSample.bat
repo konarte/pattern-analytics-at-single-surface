@@ -3,7 +3,7 @@ if "%OS%"=="Windows_NT" @setlocal
 if "%OS%"=="WINNT" @setlocal
 
 set _CLASSES=classes
-set _CLASSPATH=%CLASSPATH%;"lib\orm.jar"
+set _CLASSPATH=%CLASSPATH%;"lib\orm.jar;lib\annotations.jar"
 set _ARGS=
 
 if "%JAVA_HOME%" == "" goto noJavaHome

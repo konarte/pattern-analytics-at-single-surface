@@ -15,12 +15,17 @@ package edu.mgupi.pass.db.surfaces;
 
 import org.orm.*;
 import java.io.Serializable;
+import javax.persistence.*;
 /**
  * Материалы поверхностей.
  * 
  * Далее я бы захерачил все физ-хим свойства, включая атомную структуру в картинках, 
  * но это для будущего анализатора материи, пока ограничимся «электрикой»
  */
+@Entity
+@org.hibernate.annotations.Proxy(lazy=false)
+@Table(name="Materials")
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public class Materials implements Serializable {
 	private static final org.apache.log4j.Logger _logger = org.apache.log4j.Logger.getLogger(Materials.class);
 	public Materials() {
@@ -103,14 +108,25 @@ public class Materials implements Serializable {
 		}
 	}
 	
+	@Column(name="IdSurfaceMaterial", nullable=false)	
+	@Id	
+	@GeneratedValue(generator="V0A1070D311FBD12FC9D01C0A")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FC9D01C0A", strategy="native")	
 	private int idSurfaceMaterial;
 	
+	@Column(name="Name", nullable=false, length=255)	
 	private String name;
 	
+	@Column(name="ElectricalConduction", nullable=false)	
 	private float electricalConduction;
 	
+	@Column(name="MagneticConductivity", nullable=false)	
 	private float magneticConductivity;
 	
+	@OneToOne(targetEntity=edu.mgupi.pass.db.sensors.Sensors.class)	
+	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
+	@JoinColumns({ @JoinColumn(name="SensorsIdSensor") })	
+	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.sensors.Sensors sensor;
 	
 	private void setIdSurfaceMaterial(int value) {

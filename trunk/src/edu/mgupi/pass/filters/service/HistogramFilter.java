@@ -9,9 +9,9 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.FilterException;
 
 /**
  * Filter for create histograms. Support color and grey scale images.
@@ -130,13 +130,4 @@ public class HistogramFilter implements IFilter {
 		return histogram[0];
 	}
 
-	public void onAttachToImage(BufferedImage source) {
-		logger.trace("HistogramFilter.onAttach");
-		// do nothing
-	}
-
-	public void onDetachFromImage(BufferedImage source) {
-		logger.trace("HistogramFilter.onDetach");
-		// do nothing
-	}
 }

@@ -8,9 +8,9 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.FilterException;
 
 public class InvertFilter implements IFilter {
 	private final static Logger logger = LoggerFactory.getLogger(InvertFilter.class);
@@ -50,16 +50,6 @@ public class InvertFilter implements IFilter {
 
 		return lop.filter(source, null);
 
-	}
-
-	public void onAttachToImage(BufferedImage source) {
-		logger.trace("InvertFilter.onAttach");
-		// do nothing
-	}
-
-	public void onDetachFromImage(BufferedImage source) {
-		logger.trace("InvertFilter.onDetach");
-		// do nothing
 	}
 
 }

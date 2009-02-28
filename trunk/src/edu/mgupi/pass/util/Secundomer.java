@@ -14,9 +14,12 @@ public class Secundomer {
 	private long total;
 	private int cnt;
 
-	public Secundomer() {
-		//
-	}
+	private long min = Long.MAX_VALUE;
+	private long max = Long.MIN_VALUE;
+
+	// private Secundomer() {
+	// //
+	// }
 
 	private String name;
 
@@ -37,8 +40,13 @@ public class Secundomer {
 	 */
 	public void stop() {
 		if (started) {
-			this.total += System.currentTimeMillis() - time;
+			long diff = System.currentTimeMillis() - time;
+			this.total += diff;
 			this.time = 0;
+
+			this.min = Math.min(this.min, diff);
+			this.max = Math.max(this.max, diff);
+
 			cnt++;
 			started = false;
 		}
@@ -68,7 +76,8 @@ public class Secundomer {
 	}
 
 	public String toString() {
-		return (name == null ? "" : name + " ") + "Total: " + this.getTotalTime() + " msec (" + this.getTotalCalls()
-				+ "), avg = " + ((float) this.getTotalTime() / (float) this.getTotalCalls()) + " msec/call";
+		return (name == null ? "" : name + ". ") + "Total: " + this.getTotalTime() + " msec (" + this.getTotalCalls()
+				+ "), avg = " + ((float) this.getTotalTime() / (float) this.getTotalCalls()) + " msec/call"
+				+ (this.cnt > 1 ? (", min = " + this.min + " msec, max = " + this.max + " msec") : "");
 	}
 }

@@ -17,7 +17,12 @@ public interface IModule {
 	 * First call of module. Only once after instantiating.
 	 */
 	void init();
-	
+
+	/**
+	 * Return name of module.
+	 * 
+	 * @return human readable name.
+	 */
 	String getName();
 
 	/**
@@ -30,6 +35,13 @@ public interface IModule {
 	 * 
 	 * @param filteredImage
 	 * @param store
+	 *            it is instance of {@link Locuses} class, filled with all
+	 *            neccessary data (histogram, using filters, thumb image etc.).
+	 *            You must use {@link Locuses#getParams()} for set (and store
+	 *            into database) specified parameters.
+	 * 
+	 * @throws IOException
+	 * @throws ModuleException
 	 */
 	void analyze(BufferedImage filteredImage, Locuses store) throws IOException, ModuleException;
 
@@ -40,9 +52,19 @@ public interface IModule {
 	 * 
 	 * This method can be called remotely, but you don't need to care about.
 	 * 
+	 * You must use {@link Locuses#getParams()} for get stored parameters (you
+	 * know their names, you saved these parameters in
+	 * {@link #analyze(BufferedImage, Locuses)} method).
+	 * 
 	 * @param graph1
+	 *            first locus to compare.
 	 * @param graph2
-	 * @return
+	 *            second locus to compare.
+	 * @return true if these locuses are the same and false, if not. Criteria
+	 *         for "the same or not" -- specific for every class.
+	 * 
+	 * @throws ModuleException
+	 *             if anything goes wrong.
 	 */
 	boolean compare(Locuses graph1, Locuses graph2) throws ModuleException;
 

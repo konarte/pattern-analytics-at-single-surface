@@ -113,7 +113,7 @@ public class ClassesHelper {
 	 * <p>
 	 * Если классы не будут найдены — будет возвращен пустой список.
 	 * 
-	 * @param instanceOf
+	 * @param packageFrom
 	 *            начиная с какого пакеты выбираем классы
 	 * @return список классов, которые находятся в указанном пакете
 	 */
@@ -129,7 +129,7 @@ public class ClassesHelper {
 	 * <p>
 	 * Если классы не будут найдены — будет возвращен пустой список.
 	 * 
-	 * @param instanceOf
+	 * @param packageFrom
 	 *            начиная с какого пакеты выбираем классы
 	 * @param instanceOf
 	 *            класс или интерфейс

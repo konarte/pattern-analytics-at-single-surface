@@ -8,9 +8,9 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.Param.TYPES;
 
 public class RescaleFilter implements IFilter {
@@ -62,13 +62,13 @@ public class RescaleFilter implements IFilter {
 		return rescale.filter(source, dest);
 	}
 
-	public void onAttachToImage(BufferedImage source) {
-		logger.trace("SimpleSharpFilter.onAttach");
-		// do nothing
+	public Param getBRIGHTNESS() {
+		return BRIGHTNESS;
 	}
 
-	public void onDetachFromImage(BufferedImage source) {
-		logger.trace("SimpleSharpFilter.onDetach");
-		// do nothing
+	public Param getCONTRAST() {
+		return CONTRAST;
 	}
+
+	
 }

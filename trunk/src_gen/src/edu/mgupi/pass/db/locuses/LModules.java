@@ -15,9 +15,14 @@ package edu.mgupi.pass.db.locuses;
 
 import org.orm.*;
 import java.io.Serializable;
+import javax.persistence.*;
 /**
  * Каталог модулей анализа
  */
+@Entity
+@org.hibernate.annotations.Proxy(lazy=false)
+@Table(name="LModules")
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public class LModules implements Serializable {
 	private static final org.apache.log4j.Logger _logger = org.apache.log4j.Logger.getLogger(LModules.class);
 	public LModules() {
@@ -67,10 +72,16 @@ public class LModules implements Serializable {
 		}
 	}
 	
+	@Column(name="IdLModule", nullable=false)	
+	@Id	
+	@GeneratedValue(generator="V0A1070D311FBD12FCEB01C0E")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FCEB01C0E", strategy="native")	
 	private int idLModule;
 	
+	@Column(name="Name", nullable=false, length=255)	
 	private String name;
 	
+	@Column(name="Codename", nullable=false, length=255)	
 	private String codename;
 	
 	private void setIdLModule(int value) {

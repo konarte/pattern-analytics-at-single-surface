@@ -15,6 +15,11 @@ package edu.mgupi.pass.db.sensors;
 
 import org.orm.*;
 import java.io.Serializable;
+import javax.persistence.*;
+@Entity
+@org.hibernate.annotations.Proxy(lazy=false)
+@Table(name="Sensors")
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public class Sensors implements Serializable {
 	private static final org.apache.log4j.Logger _logger = org.apache.log4j.Logger.getLogger(Sensors.class);
 	public Sensors() {
@@ -97,10 +102,21 @@ public class Sensors implements Serializable {
 		}
 	}
 	
+	@Column(name="IdSensor", nullable=false)	
+	@Id	
+	@GeneratedValue(generator="V0A1070D311FBD12FD4901C14")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FD4901C14", strategy="native")	
 	private int idSensor;
 	
+	@OneToOne(targetEntity=edu.mgupi.pass.db.sensors.SensorTypes.class)	
+	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
+	@JoinColumns({ @JoinColumn(name="SensorTypesIdSensorType") })	
+	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.sensors.SensorTypes sensorType;
 	
+	@OneToOne(mappedBy="sensor", targetEntity=edu.mgupi.pass.db.surfaces.Materials.class)	
+	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
+	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.surfaces.Materials mpathMaterial;
 	
 	private void setIdSensor(int value) {

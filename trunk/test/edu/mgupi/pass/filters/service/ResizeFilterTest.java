@@ -14,9 +14,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.FilterException;
-import edu.mgupi.pass.filters.ParamHelper;
+import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.sources.TestSourceImpl;
 
 public class ResizeFilterTest {
@@ -47,10 +46,10 @@ public class ResizeFilterTest {
 	}
 
 	private void convertImage(BufferedImage image, int width, int height) throws IOException, FilterException {
-		ParamHelper.getParameter("Width", filter).setValue(width);
-		ParamHelper.getParameter("Height", filter).setValue(height);
+		filter.getWIDTH().setValue(width);
+		filter.getHEIGHT().setValue(height);
 
-		Param param = ParamHelper.getParameter("Method", filter);
+		Param param = filter.getINTERPOLATION_METHOD();
 		for (int i = 0; i < param.getAllowed_values().length; i++) {
 			param.setValue(param.getAllowed_values()[i]);
 
