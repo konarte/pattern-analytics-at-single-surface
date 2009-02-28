@@ -14,12 +14,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.FilterException;
+import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.sources.TestSourceImpl;
 
 public class InvertFilterTest {
-	
+
 	private InvertFilter filter = null;
 
 	@Before

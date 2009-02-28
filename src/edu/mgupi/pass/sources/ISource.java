@@ -19,7 +19,9 @@ public interface ISource {
 	 * Return source images to process. Must return only single source. Note,
 	 * that we do not need any parameters to input (cause this is not our case).
 	 * 
-	 * @return SourceStore object
+	 * @return SourceStore object.
+	 * 
+	 * @throws IOException
 	 */
 	SourceStore getSingleSource() throws IOException;
 

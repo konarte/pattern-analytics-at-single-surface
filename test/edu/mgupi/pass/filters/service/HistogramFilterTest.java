@@ -15,9 +15,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.FilterException;
-import edu.mgupi.pass.filters.ParamHelper;
+import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.java.ColorSpaceFilter;
 import edu.mgupi.pass.filters.java.GrayScaleFilter;
 import edu.mgupi.pass.filters.java.InvertFilter;
@@ -84,13 +83,12 @@ public class HistogramFilterTest {
 			this.saveImage(image2, "Invert to Grayscale");
 
 			ColorSpaceFilter cfilter = new ColorSpaceFilter();
-			Param colorMode = ParamHelper.getParameter("ColorMode", cfilter);
 
-			colorMode.setValue(ColorSpace.CS_LINEAR_RGB);
+			cfilter.getCOLOR_MODE().setValue(ColorSpace.CS_LINEAR_RGB);
 			image2 = cfilter.convert(image);
 			this.saveImage(image2, "Linear RGB");
 
-			colorMode.setValue(ColorSpace.CS_GRAY);
+			cfilter.getCOLOR_MODE().setValue(ColorSpace.CS_GRAY);
 			image3 = cfilter.convert(image2);
 			this.saveImage(image3, "Linear RGB to CS_GRAY");
 
@@ -98,13 +96,13 @@ public class HistogramFilterTest {
 			// image2 = cfilter.convert(image, null, paramMap1);
 			// this.convertImage(image2, paramMap1, "sRGB");
 
-			colorMode.setValue(ColorSpace.CS_GRAY);
+			cfilter.getCOLOR_MODE().setValue(ColorSpace.CS_GRAY);
 			image2 = cfilter.convert(image);
 			this.saveImage(image2, "CS_GRAY");
 
 			RescaleFilter rfilter = new RescaleFilter();
-			ParamHelper.getParameter("Brightness", rfilter).setValue(40);
-			ParamHelper.getParameter("Contrast", rfilter).setValue(100);
+			rfilter.getBRIGHTNESS().setValue(40);
+			rfilter.getCONTRAST().setValue(100);
 			image = rfilter.convert(image2);
 
 			this.saveImage(image, "CS_GRAY 100-40");

@@ -15,9 +15,14 @@ package edu.mgupi.pass.db.locuses;
 
 import org.orm.*;
 import java.io.Serializable;
+import javax.persistence.*;
 /**
  * Каталог параметров примененного модуля к годографу
  */
+@Entity
+@org.hibernate.annotations.Proxy(lazy=false)
+@Table(name="LocusModuleParams")
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public class LocusModuleParams implements Serializable {
 	private static final org.apache.log4j.Logger _logger = org.apache.log4j.Logger.getLogger(LocusModuleParams.class);
 	public LocusModuleParams() {
@@ -67,10 +72,16 @@ public class LocusModuleParams implements Serializable {
 		}
 	}
 	
+	@Column(name="IdModuleParam", nullable=false)	
+	@Id	
+	@GeneratedValue(generator="V0A1070D311FBD12FD3A01C13")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FD3A01C13", strategy="native")	
 	private int idModuleParam;
 	
+	@Column(name="ParamName", nullable=false, length=255)	
 	private String paramName;
 	
+	@Column(name="ParamData", nullable=false)	
 	private byte[] paramData;
 	
 	private void setIdModuleParam(int value) {

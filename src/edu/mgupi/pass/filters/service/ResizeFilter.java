@@ -9,12 +9,13 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.mgupi.pass.filters.IFilter;
-import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.FilterException;
+import edu.mgupi.pass.filters.IFilter;
+import edu.mgupi.pass.filters.IFilterAttachable;
+import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.Param.TYPES;
 
-public class ResizeFilter implements IFilter {
+public class ResizeFilter implements IFilter, IFilterAttachable {
 
 	private final static Logger logger = LoggerFactory.getLogger(ResizeFilter.class);
 
@@ -97,4 +98,17 @@ public class ResizeFilter implements IFilter {
 		logger.trace("ResizeFilter.onDetach");
 		// do nothing
 	}
+
+	public Param getWIDTH() {
+		return WIDTH;
+	}
+
+	public Param getHEIGHT() {
+		return HEIGHT;
+	}
+
+	public Param getINTERPOLATION_METHOD() {
+		return INTERPOLATION_METHOD;
+	}
+
 }

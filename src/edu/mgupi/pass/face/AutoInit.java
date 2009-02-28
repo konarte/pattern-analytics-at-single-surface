@@ -22,21 +22,52 @@ import edu.mgupi.pass.db.surfaces.PassPersistentManager;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.modules.IModule;
 import edu.mgupi.pass.util.ClassesHelper;
+import edu.mgupi.pass.util.Const;
 
 /**
- * Common db-initialization class for PASS system
+ * Common db-initialization class for PASS system.
+ * 
+ * Support three type of operation: create database schema, create records for
+ * existing filters and modules, finally drop database schema (full drop!).
  * 
  * @author raidan
- *
+ * 
  */
 public class AutoInit {
 
+	private void initSchema() throws Exception {
+		System.out.println("Creating new database schema...");
+		ORMDatabaseInitiator.createSchema(PassPersistentManager.instance());
+		System.out.println("Done. Successfully created.");
+	}
+
+	private boolean dropSchema() throws Exception {
+		System.out.println("Dropping existing database schema...");
+		System.out.println("Are you sure to drop table(s)? (Y/N)");
+		java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
+		if (reader.readLine().trim().toUpperCase().equals("Y")) {
+			ORMDatabaseInitiator.dropSchema(PassPersistentManager.instance());
+			System.out.println("Done. Successfully dropped.");
+			return true;
+		} else {
+			System.out.println("Done. Cancel drop.");
+			return false;
+
+		}
+	}
+
+	/**
+	 * Initiation -- create records with filters and modules
+	 * 
+	 * @throws Exception
+	 */
 	private void initRows() throws Exception {
 
-		PersistentTransaction t = PassPersistentManager.instance().getSession().beginTransaction();
+		PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
 
 		try {
 
+			// Filters first
 			Collection<Class<?>> filterClasses = ClassesHelper.getAvailableClasses(IFilter.class);
 
 			StringBuilder items = new StringBuilder();
@@ -63,6 +94,9 @@ public class AutoInit {
 				items.append("'").append(codename).append("'");
 			}
 
+			// Now we must clear non-existed filters (records with codenames not
+			// present in our classes).
+			// And only if that filters not using in table data
 			if (items.length() > 0) {
 				for (LFilters checkFilter : LFiltersFactory
 						.listLFiltersByQuery("codename not in (" + items + ")", null)) {
@@ -77,6 +111,7 @@ public class AutoInit {
 				}
 			}
 
+			// Processing modules, the same way
 			items = new StringBuilder();
 			Collection<Class<?>> moduleClasses = ClassesHelper.getAvailableClasses(IModule.class);
 			System.out.println("Registering modules (" + moduleClasses.size() + " expected)...");
@@ -102,6 +137,7 @@ public class AutoInit {
 				items.append("'").append(codename).append("'");
 			}
 
+			// And removing unnecessary modules
 			if (items.length() > 0) {
 				for (LModules checkModule : LModulesFactory
 						.listLModulesByQuery("codename not in (" + items + ")", null)) {
@@ -116,18 +152,18 @@ public class AutoInit {
 				}
 			}
 
-			t.commit();
+			transaction.commit();
 
 			System.out.println("Done. Commit.");
 		} catch (Exception e) {
-			t.rollback();
+			transaction.rollback();
 			throw e;
 		}
 
 	}
 
 	public static void main(String[] args) throws Exception {
-		System.out.println("Pattern Analytics at Single Surface v.0.1");
+		System.out.println(Const.PROGRAM_NAME + " v." + Const.PROGRAM_VERSION);
 		System.out.println("auto-init module");
 
 		Options options = new Options();
@@ -135,9 +171,9 @@ public class AutoInit {
 				.addOption(
 						"type",
 						true,
-						"[create|drop|init] -- allowed operations; 'create' will create new database installation, "
+						"[create|drop|init|full-cycle] -- allowed operations; 'create' will create new database installation, "
 								+ "'drop' will totally clear this database  and 'init' scans applied filters and modules and will register "
-								+ "them in database");
+								+ "them in database; finally 'full-cycle' will call 'drop', 'create' and 'init'");
 
 		CommandLineParser parser = new PosixParser();
 		CommandLine cmd = parser.parse(options, args);
@@ -145,23 +181,23 @@ public class AutoInit {
 		try {
 
 			String value = cmd.getOptionValue("type");
+
+			AutoInit init = new AutoInit();
 			if ("create".equals(value)) {
-				System.out.println("Creating new database schema...");
-				ORMDatabaseInitiator.createSchema(edu.mgupi.pass.db.surfaces.PassPersistentManager.instance());
-				System.out.println("Done. Successfully created.");
+				init.initSchema();
 			} else if ("drop".equals(value)) {
-				System.out.println("Dropping existing database schema...");
-				System.out.println("Are you sure to drop table(s)? (Y/N)");
-				java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
-				if (reader.readLine().trim().toUpperCase().equals("Y")) {
-					ORMDatabaseInitiator.dropSchema(edu.mgupi.pass.db.surfaces.PassPersistentManager.instance());
-					System.out.println("Done. Successfully dropped.");
-				} else {
-					System.out.println("Done. Cancel drop.");
-				}
+				init.dropSchema();
 			} else if ("init".equals(value)) {
-				new AutoInit().initRows();
+				init.initRows();
+			} else if ("full-cycle".equals(value)) {
+				System.out.println("Full-cycle processing...");
+				if (init.dropSchema()) {
+					init.initSchema();
+					init.initRows();
+				}
 			} else {
+				// show help
+
 				HelpFormatter formatter = new HelpFormatter();
 				formatter.printHelp("java -classpath=... edu.mgupi.pass.face.AutoInit", options);
 			}

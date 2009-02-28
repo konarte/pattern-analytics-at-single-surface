@@ -32,18 +32,14 @@ public class FilterChainsawTest {
 	private FilterChainsaw chainsaw = null;
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		chainsaw = new FilterChainsaw();
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown() {
 		if (chainsaw != null) {
-			try {
-				chainsaw.done();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			chainsaw.reset();
 			chainsaw = null;
 		}
 	}
@@ -298,11 +294,11 @@ public class FilterChainsawTest {
 			this.convertImage(image, "");
 
 			ColorSpaceFilter color = new ColorSpaceFilter();
-			ParamHelper.getParameter("ColorMode", color).setValue(ColorSpace.CS_GRAY);
+			color.getCOLOR_MODE().setValue(ColorSpace.CS_GRAY);
 			chainsaw.appendFilter(color);
 
 			RescaleFilter rescale = new RescaleFilter();
-			ParamHelper.getParameter("Brightness", rescale).setValue(40);
+			rescale.getBRIGHTNESS().setValue(40);
 			chainsaw.appendFilter(rescale);
 
 			this.convertImage(image, "1");

@@ -15,9 +15,14 @@ package edu.mgupi.pass.db.surfaces;
 
 import org.orm.*;
 import java.io.Serializable;
+import javax.persistence.*;
 /**
  * Каталог поверхностей
  */
+@Entity
+@org.hibernate.annotations.Proxy(lazy=false)
+@Table(name="Surfaces")
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public class Surfaces implements Serializable {
 	private static final org.apache.log4j.Logger _logger = org.apache.log4j.Logger.getLogger(Surfaces.class);
 	public Surfaces() {
@@ -67,20 +72,40 @@ public class Surfaces implements Serializable {
 		}
 	}
 	
+	@Column(name="IdSurface", nullable=false)	
+	@Id	
+	@GeneratedValue(generator="V0A1070D311FBD12FC7E01C08")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FC7E01C08", strategy="native")	
 	private int idSurface;
 	
+	@Column(name="Height", nullable=false)	
 	private float height;
 	
+	@Column(name="Width", nullable=false)	
 	private float width;
 	
+	@Column(name="Length", nullable=false)	
 	private float length;
 	
+	@Column(name="MultiLayer", nullable=false, length=1)	
 	private boolean multiLayer;
 	
+	@OneToOne(targetEntity=edu.mgupi.pass.db.surfaces.SurfaceClasses.class)	
+	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
+	@JoinColumns({ @JoinColumn(name="SurfaceClassesIdSurfaceType") })	
+	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.surfaces.SurfaceClasses surfaceType;
 	
+	@OneToOne(targetEntity=edu.mgupi.pass.db.surfaces.SurfaceTypes.class)	
+	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
+	@JoinColumns({ @JoinColumn(name="SurfaceTypesIdSurfaceMode") })	
+	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.surfaces.SurfaceTypes surfaceMode;
 	
+	@OneToOne(targetEntity=edu.mgupi.pass.db.surfaces.SurfaceTypes.class)	
+	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
+	@JoinColumns({ @JoinColumn(name="SurfaceTypesIdSurfaceMode2") })	
+	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.surfaces.SurfaceTypes type;
 	
 	private void setIdSurface(int value) {

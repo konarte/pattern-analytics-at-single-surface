@@ -15,9 +15,14 @@ package edu.mgupi.pass.db.surfaces;
 
 import org.orm.*;
 import java.io.Serializable;
+import javax.persistence.*;
 /**
  * ‘ормы поверхностей (тело вращени€, плоскость)
  */
+@Entity
+@org.hibernate.annotations.Proxy(lazy=false)
+@Table(name="SurfaceClasses")
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public class SurfaceClasses implements Serializable {
 	private static final org.apache.log4j.Logger _logger = org.apache.log4j.Logger.getLogger(SurfaceClasses.class);
 	public SurfaceClasses() {
@@ -67,10 +72,17 @@ public class SurfaceClasses implements Serializable {
 		}
 	}
 	
+	@Column(name="IdSurfaceType", nullable=false)	
+	@Id	
+	@GeneratedValue(generator="V0A1070D311FBD12FC7E01C07")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FC7E01C07", strategy="native")	
 	private int idSurfaceType;
 	
+	@Column(name="Name", nullable=false, length=255)	
 	private String name;
 	
+	@Column(name="SurfaceImage", nullable=true)	
+	@Basic(fetch=FetchType.LAZY)	
 	private byte[] surfaceImage;
 	
 	private void setIdSurfaceType(int value) {

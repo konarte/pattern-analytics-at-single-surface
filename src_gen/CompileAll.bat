@@ -4,7 +4,7 @@ if "%OS%"=="WINNT" @setlocal
 
 set _SOURCEPATH=src
 set _CLASSES=classes
-set _CLASSPATH=%CLASSPATH%;"lib\orm.jar"
+set _CLASSPATH=%CLASSPATH%;"lib\orm.jar;lib\annotations.jar"
 if "%JAVA_HOME%" == "" goto noJavaHome
 if not exist "%JAVA_HOME%\bin\java.exe" goto noJavaHome
 goto javaHome

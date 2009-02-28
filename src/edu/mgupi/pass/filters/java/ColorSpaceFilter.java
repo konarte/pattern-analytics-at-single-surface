@@ -9,9 +9,9 @@ import java.util.LinkedHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.FilterException;
 
 public class ColorSpaceFilter implements IFilter {
 
@@ -63,13 +63,8 @@ public class ColorSpaceFilter implements IFilter {
 		return new ColorConvertOp(destColorSpace, null).filter(source, null);
 	}
 
-	public void onAttachToImage(BufferedImage source) {
-		logger.trace("ColorSpaceFilter.onAttach");
-		// do nothing
+	public Param getCOLOR_MODE() {
+		return COLOR_MODE;
 	}
 
-	public void onDetachFromImage(BufferedImage source) {
-		logger.trace("ColorSpaceFilter.onDetach");
-		// do nothing
-	}
 }

@@ -15,9 +15,14 @@ package edu.mgupi.pass.db.locuses;
 
 import org.orm.*;
 import java.io.Serializable;
+import javax.persistence.*;
 /**
  * Каталог годографов
  */
+@Entity
+@org.hibernate.annotations.Proxy(lazy=false)
+@Table(name="Locuses")
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public class Locuses implements Serializable {
 	private static final org.apache.log4j.Logger _logger = org.apache.log4j.Logger.getLogger(Locuses.class);
 	public Locuses() {
@@ -67,28 +72,68 @@ public class Locuses implements Serializable {
 		}
 	}
 	
+	@Column(name="IdLocus", nullable=false)	
+	@Id	
+	@GeneratedValue(generator="V0A1070D311FBD12FD0B01C10")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FD0B01C10", strategy="native")	
 	private int idLocus;
 	
+	@Column(name="Name", nullable=false, length=255)	
 	private String name;
 	
+	@Column(name="ThumbImage", nullable=false)	
+	@Basic(fetch=FetchType.LAZY)	
 	private byte[] thumbImage;
 	
+	@Column(name="Histogram", nullable=false)	
+	@Basic(fetch=FetchType.LAZY)	
 	private int[] histogram;
 	
+	@Column(name="FilteredImage", nullable=false)	
+	@Basic(fetch=FetchType.LAZY)	
 	private byte[] filteredImage;
 	
+	@OneToOne(targetEntity=edu.mgupi.pass.db.locuses.LModules.class)	
+	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
+	@JoinColumns({ @JoinColumn(name="LModulesIdLModule") })	
+	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.locuses.LModules module;
 	
+	@OneToOne(targetEntity=edu.mgupi.pass.db.surfaces.Surfaces.class)	
+	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
+	@JoinColumns({ @JoinColumn(name="SurfacesIdSurface") })	
+	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.surfaces.Surfaces surface;
 	
+	@OneToOne(targetEntity=edu.mgupi.pass.db.defects.Defects.class)	
+	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
+	@JoinColumns({ @JoinColumn(name="DefectsIdDefect") })	
+	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.defects.Defects defect;
 	
+	@OneToOne(targetEntity=edu.mgupi.pass.db.locuses.LocusSources.class)	
+	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
+	@JoinColumns({ @JoinColumn(name="LocusSourcesIdLocusSource") })	
+	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.locuses.LocusSources locusSource;
 	
+	@OneToOne(targetEntity=edu.mgupi.pass.db.sensors.Sensors.class)	
+	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
+	@JoinColumns({ @JoinColumn(name="SensorsIdSensor") })	
+	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.sensors.Sensors sensor;
 	
+	@OneToMany(targetEntity=edu.mgupi.pass.db.locuses.LocusModuleParams.class)	
+	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
+	@JoinColumn(name="LocusesIdLocus", nullable=true)	
+	@org.hibernate.annotations.LazyCollection(org.hibernate.annotations.LazyCollectionOption.TRUE)	
 	private java.util.Set<edu.mgupi.pass.db.locuses.LocusModuleParams> params = new java.util.HashSet<edu.mgupi.pass.db.locuses.LocusModuleParams>();
 	
+	@OneToMany(targetEntity=edu.mgupi.pass.db.locuses.LocusFilters.class)	
+	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
+	@JoinColumn(name="LocusesIdLocus", nullable=true)	
+	@org.hibernate.annotations.IndexColumn(name="LocusesIndex")	
+	@org.hibernate.annotations.LazyCollection(org.hibernate.annotations.LazyCollectionOption.TRUE)	
 	private java.util.List<edu.mgupi.pass.db.locuses.LocusFilters> filters = new java.util.ArrayList<edu.mgupi.pass.db.locuses.LocusFilters>();
 	
 	private void setIdLocus(int value) {
@@ -245,6 +290,7 @@ public class Locuses implements Serializable {
 		return sensor;
 	}
 	
+	@Transient	
 	private boolean processed;
 	
 	public boolean getProcessed() {

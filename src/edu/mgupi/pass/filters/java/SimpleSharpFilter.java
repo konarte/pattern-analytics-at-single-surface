@@ -8,9 +8,9 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.FilterException;
 
 public class SimpleSharpFilter implements IFilter {
 
@@ -48,13 +48,4 @@ public class SimpleSharpFilter implements IFilter {
 		return op.filter(source, dest);
 	}
 
-	public void onAttachToImage(BufferedImage source) {
-		logger.trace("SimpleSharpFilter.onAttach");
-		// do nothing
-	}
-
-	public void onDetachFromImage(BufferedImage source) {
-		logger.trace("SimpleSharpFilter.onDetach");
-		// do nothing
-	}
 }

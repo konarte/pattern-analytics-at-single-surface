@@ -17,6 +17,7 @@ import org.orm.*;
 import org.orm.cfg.JDBCConnectionSetting;
 import org.hibernate.*;
 import java.util.Properties;
+import org.hibernate.cfg.*;
 
 public class PassPersistentManager extends PersistentManager {
 	private static final String PROJECT_NAME = "Pass";
@@ -29,6 +30,29 @@ public class PassPersistentManager extends PersistentManager {
 	private PassPersistentManager() throws PersistentException {
 		super(_connectionSetting, _sessionType, _timeToAlive, new String[] {}, _extraProperties);
 		setFlushMode(FlushMode.AUTO);
+	}
+	
+	@Override
+	public Configuration createConfiguration() {
+		AnnotationConfiguration configuration = new AnnotationConfiguration();
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.surfaces.SurfaceClasses.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.surfaces.Surfaces.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.surfaces.SurfaceTypes.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.surfaces.Materials.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.defects.DefectClasses.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.defects.DefectTypes.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.defects.Defects.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LModules.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LFilters.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.Locuses.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LocusSources.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LocusFilters.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LocusModuleParams.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.sensors.Sensors.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.sensors.SensorClasses.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.sensors.SensorTypes.class);
+		configuration.buildMappings();
+		return configuration;
 	}
 	
 	public String getProjectName() {

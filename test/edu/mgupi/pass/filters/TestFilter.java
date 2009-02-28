@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.filters.Param.TYPES;
 
-public class TestFilter implements IFilter, IFilterInitiable {
+public class TestFilter implements IFilter, IFilterInitiable, IFilterAttachable {
 
 	private final static Logger logger = LoggerFactory.getLogger(TestFilter.class);
 
