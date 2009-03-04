@@ -31,9 +31,9 @@ public class TestSourceImplTest {
 		} catch (IllegalStateException ise) {
 			System.out.println("Received expected exception: " + ise);
 		}
-		source.done();
+		source.close();
 		try {
-			source.done();
+			source.close();
 			fail("No IllegalStateException!");
 		} catch (IllegalStateException ise) {
 			System.out.println("Received expected exception: " + ise);
@@ -48,7 +48,7 @@ public class TestSourceImplTest {
 			SourceStore store = source.getSingleSource();
 			System.out.println("Image " + store.getName() + " (" + store.getSourceImage().toString() + ")");
 		} finally {
-			source.done();
+			source.close();
 		}
 	}
 }

@@ -72,7 +72,7 @@ public class ResizeFilterTest {
 			this.convertImage(image, 256, 256);
 			this.convertImage(image, 1024, 1024);
 		} finally {
-			source.done();
+			source.close();
 		}
 	}
 

@@ -61,7 +61,7 @@ public class SimpleSmoothFilterTest {
 
 			this.convertImage(image);
 		} finally {
-			source.done();
+			source.close();
 		}
 	}
 

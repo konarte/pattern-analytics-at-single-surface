@@ -36,7 +36,7 @@ public class TestModuleTest {
 	@After
 	public void tearDown() throws Exception {
 		if (module != null) {
-			module.done();
+			module.close();
 			module = null;
 		}
 	}
@@ -50,9 +50,9 @@ public class TestModuleTest {
 			System.out.println("Received expected exception: " + ise);
 		}
 
-		module.done();
+		module.close();
 		try {
-			module.done();
+			module.close();
 			fail("No IllegalStateException!");
 		} catch (IllegalStateException ise) {
 			System.out.println("Received expected exception: " + ise);
@@ -124,7 +124,7 @@ public class TestModuleTest {
 			// fileStream.close();
 
 		} finally {
-			source.done();
+			source.close();
 		}
 
 	}

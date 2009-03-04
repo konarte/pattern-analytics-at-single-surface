@@ -78,7 +78,7 @@ public class FilterPerformanceTest {
 	@After
 	public void tearDown() throws Exception {
 		if (source != null) {
-			source.done();
+			source.close();
 			source = null;
 		}
 	}

@@ -8,6 +8,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.util.IInitiable;
+
 /**
  * Class for chained operation with image. This is simple chain, where all
  * filters applied on image in turn, one after another.
@@ -28,23 +30,23 @@ public class FilterChainsaw {
 	 * 
 	 * @see #reset()
 	 */
-	protected void finalize() throws Throwable {
+	public void close() {
 		this.reset();
 	}
 
 	/**
 	 * Method for reset chain of filters. If filter implements
-	 * {@link IFilterInitiable} interface -- we call its method done.
+	 * {@link IInitiable} interface -- we call its method
+	 * {@link IInitiable#close()}.
 	 * 
-	 * @see IFilterInitiable#done()
 	 */
 	public void reset() {
 		logger.debug("FilterChainsaw.reset");
 
 		this.detachImage();
 		for (IFilter filter : filterList) {
-			if (filter instanceof IFilterInitiable) {
-				((IFilterInitiable) filter).done();
+			if (filter instanceof IInitiable) {
+				((IInitiable) filter).close();
 			}
 		}
 		filterList.clear();
@@ -75,12 +77,12 @@ public class FilterChainsaw {
 
 	/**
 	 * Append new filter to chain (in the end). If filter instance implements
-	 * {@link IFilterInitiable} interface we call its method init.
+	 * {@link IInitiable} interface we call its method {@link IInitiable#init()}
+	 * .
 	 * 
 	 * @param filter
 	 *            instance of {@link IFilter} class. Must be not null.
 	 * 
-	 * @see IFilterInitiable#init()
 	 */
 	public void appendFilter(IFilter filter) {
 
@@ -92,8 +94,8 @@ public class FilterChainsaw {
 
 		filterList.add(filter);
 
-		if (filter instanceof IFilterInitiable) {
-			((IFilterInitiable) filter).init();
+		if (filter instanceof IInitiable) {
+			((IInitiable) filter).init();
 		}
 
 		if (this.sourceImage != null && filter instanceof IFilterAttachable) {
@@ -103,12 +105,12 @@ public class FilterChainsaw {
 
 	/**
 	 * Remove filter from specified position. If filter implements
-	 * {@link IFilterInitiable} interface -- we call its method done.
+	 * {@link IInitiable} interface -- we call its method
+	 * {@link IInitiable#close()}.
 	 * 
 	 * @param pos
 	 *            we remove filter from this position.
 	 * 
-	 * @see IFilterInitiable#done()
 	 */
 	public void removeFilter(int pos) {
 
@@ -119,8 +121,8 @@ public class FilterChainsaw {
 			if (this.sourceImage != null && filter instanceof IFilterAttachable) {
 				((IFilterAttachable) filter).onDetachFromImage(sourceImage);
 			}
-			if (filter instanceof IFilterInitiable) {
-				((IFilterInitiable) filter).done();
+			if (filter instanceof IInitiable) {
+				((IInitiable) filter).close();
 			}
 			filterList.remove(pos);
 		} else {

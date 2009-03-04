@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import edu.mgupi.pass.db.locuses.LocusModuleParams;
 import edu.mgupi.pass.db.locuses.LocusModuleParamsFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
+import edu.mgupi.pass.util.IInitiable;
 
 /**
  * Test for module interface.
@@ -20,7 +21,14 @@ import edu.mgupi.pass.db.locuses.Locuses;
  * @author raidan
  * 
  */
-public class TestModule implements IModule {
+public class TestModule implements IModule, IInitiable {
+
+	protected void finalize() throws Throwable {
+		if (!close) {
+			throw new RuntimeException("Method close not called!");
+		}
+
+	}
 
 	private final static Logger logger = LoggerFactory.getLogger(TestModule.class);
 
@@ -34,17 +42,17 @@ public class TestModule implements IModule {
 		init = true;
 	}
 
-	private boolean done = false;
+	private boolean close = false;
 
-	public void done() {
+	public void close() {
 		if (!init) {
 			throw new IllegalStateException("Internal error. Please, call init first.");
 		}
-		if (done) {
+		if (close) {
 			throw new IllegalStateException("Internal error. Done already called.");
 		}
-		logger.debug("TestModule.done");
-		done = true;
+		logger.debug("TestModule.close");
+		close = true;
 	}
 
 	public void analyze(BufferedImage filteredImage, Locuses store) throws IOException {

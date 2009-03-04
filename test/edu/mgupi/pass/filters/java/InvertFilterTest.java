@@ -61,7 +61,7 @@ public class InvertFilterTest {
 
 			this.convertImage(image);
 		} finally {
-			source.done();
+			source.close();
 		}
 	}
 }

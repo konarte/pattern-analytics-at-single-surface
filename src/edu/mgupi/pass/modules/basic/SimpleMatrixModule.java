@@ -17,8 +17,8 @@ public class SimpleMatrixModule implements IModule {
 		logger.debug("SimpleMatrixModule.init");
 	}
 
-	public void done() {
-		logger.debug("SimpleMatrixModule.done");
+	public void close() {
+		logger.debug("SimpleMatrixModule.close");
 	}
 
 	public void analyze(BufferedImage filteredImage, Locuses store) throws IOException {

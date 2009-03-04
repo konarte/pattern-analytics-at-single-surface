@@ -11,8 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.filters.Param.TYPES;
+import edu.mgupi.pass.util.IInitiable;
 
-public class TestFilter implements IFilter, IFilterInitiable, IFilterAttachable {
+public class TestFilter implements IFilter, IInitiable, IFilterAttachable {
 
 	private final static Logger logger = LoggerFactory.getLogger(TestFilter.class);
 
@@ -49,7 +50,7 @@ public class TestFilter implements IFilter, IFilterInitiable, IFilterAttachable 
 		return init;
 	}
 
-	public void done() {
+	public void close() {
 		if (!init) {
 			throw new IllegalStateException("Internal error. Called done without init.");
 		}

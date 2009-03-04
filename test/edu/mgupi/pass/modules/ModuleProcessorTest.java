@@ -13,6 +13,7 @@ import edu.mgupi.pass.filters.FilterChainsaw;
 import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.service.ResizeFilter;
 import edu.mgupi.pass.sources.TestSourceImpl;
+import edu.mgupi.pass.util.SecundomerList;
 
 public class ModuleProcessorTest {
 
@@ -26,7 +27,7 @@ public class ModuleProcessorTest {
 	@After
 	public void tearDown() throws Exception {
 		if (processor != null) {
-			processor.done();
+			processor.close();
 			processor = null;
 		}
 	}
@@ -49,12 +50,18 @@ public class ModuleProcessorTest {
 
 			processor.setChainsaw(mainSaw);
 
-			processor.startProcessing(source.getSingleSource());
-			processor.finishProcessing();
+			try {
+				processor.startProcessing(source.getSingleSource());
+			} finally {
+				processor.finishProcessing();
+			}
+
 		} finally {
 			transaction.rollback();
-			source.done();
+			source.close();
 		}
+
+		SecundomerList.printToOutput(System.out);
 	}
 
 }

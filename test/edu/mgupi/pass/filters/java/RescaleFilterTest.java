@@ -73,7 +73,7 @@ public class RescaleFilterTest {
 			BufferedImage image2 = cfilter.convert(image);
 			this.convertImage(image2, 40, 100, "CS_GRAY");
 		} finally {
-			source.done();
+			source.close();
 		}
 	}
 
