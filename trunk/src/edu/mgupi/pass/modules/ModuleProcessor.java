@@ -29,6 +29,7 @@ import edu.mgupi.pass.filters.service.HistogramFilter;
 import edu.mgupi.pass.filters.service.ResizeFilter;
 import edu.mgupi.pass.sources.SourceStore;
 import edu.mgupi.pass.util.Const;
+import edu.mgupi.pass.util.IInitiable;
 import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
 
@@ -77,22 +78,33 @@ public class ModuleProcessor {
 
 	// private FilterChainsaw
 
-	public void done() {
-		logger.debug("ModuleProcessor.done");
+	public void close() {
+		logger.debug("ModuleProcessor.close");
 
 		this.reset();
+
+		if (thumbFilters != null) {
+			thumbFilters.close();
+			thumbFilters = null;
+		}
+		if (histoFilters != null) {
+			histoFilters.close();
+			histoFilters = null;
+		}
 	}
 
 	public void reset() {
 		logger.debug("ModuleProcessor.reset");
 
 		if (this.module != null) {
-			this.module.done();
+			if (this.module instanceof IInitiable) {
+				((IInitiable) this.module).close();
+			}
 			this.module = null;
 		}
 
 		if (this.filters != null) {
-			this.filters.reset();
+			this.filters.close();
 			this.filters = null;
 		}
 	}
@@ -112,7 +124,9 @@ public class ModuleProcessor {
 		this.reset();
 
 		this.module = moduleClass.newInstance();
-		this.module.init();
+		if (this.module instanceof IInitiable) {
+			((IInitiable) this.module).init();
+		}
 	}
 
 	public void setChainsaw(FilterChainsaw filters) {
@@ -148,7 +162,7 @@ public class ModuleProcessor {
 			LocusSources lSource = LocusSourcesFactory.createLocusSources();
 			lSource.setFilename(store.getName());
 			lSource.setSourceImage(store.getFileData());
-			lSource.save();
+			// lSource.save();
 			locus.setLocusSource(lSource);
 		} finally {
 			STORE_ORIGINAL_IMAGE.stop();
@@ -252,7 +266,7 @@ public class ModuleProcessor {
 				}
 
 				locusFilter.setFilter(dbFilter);
-				locusFilter.save();
+				// locusFilter.save();
 
 				lFilters.add(locusFilter);
 			}

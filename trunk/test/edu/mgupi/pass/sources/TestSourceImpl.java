@@ -32,7 +32,7 @@ public class TestSourceImpl implements ISource {
 
 	private boolean done = false;
 
-	public void done() {
+	public void close() {
 		if (!init) {
 			throw new IllegalStateException("Internal error. Please, call init first.");
 		}

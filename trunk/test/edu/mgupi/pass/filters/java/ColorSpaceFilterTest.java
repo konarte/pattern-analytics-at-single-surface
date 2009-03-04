@@ -82,7 +82,7 @@ public class ColorSpaceFilterTest {
 				throw savedE;
 			}
 		} finally {
-			source.done();
+			source.close();
 		}
 	}
 }

@@ -61,7 +61,7 @@ public class GrayScaleFilterTest {
 
 			this.convertImage(image);
 		} finally {
-			source.done();
+			source.close();
 		}
 	}
 }

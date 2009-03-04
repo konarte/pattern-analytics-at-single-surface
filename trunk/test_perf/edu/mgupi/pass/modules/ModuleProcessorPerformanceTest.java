@@ -64,7 +64,7 @@ public class ModuleProcessorPerformanceTest {
 	@After
 	public void tearDown() throws Exception {
 		if (processor != null) {
-			processor.done();
+			processor.close();
 			processor = null;
 		}
 	}
@@ -100,7 +100,7 @@ public class ModuleProcessorPerformanceTest {
 		} finally {
 			System.out.println("Rollback");
 			transaction.rollback();
-			source.done();
+			source.close();
 		}
 	}
 

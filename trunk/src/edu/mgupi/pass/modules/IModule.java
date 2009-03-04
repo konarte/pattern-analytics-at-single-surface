@@ -14,11 +14,6 @@ import edu.mgupi.pass.db.locuses.Locuses;
 public interface IModule {
 
 	/**
-	 * First call of module. Only once after instantiating.
-	 */
-	void init();
-
-	/**
 	 * Return name of module.
 	 * 
 	 * @return human readable name.
@@ -68,8 +63,4 @@ public interface IModule {
 	 */
 	boolean compare(Locuses graph1, Locuses graph2) throws ModuleException;
 
-	/**
-	 * Final call of method. Will call once on program exit.
-	 */
-	void done();
 }

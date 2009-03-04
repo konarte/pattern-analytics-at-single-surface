@@ -76,7 +76,7 @@ public class TestFilterTest {
 			}
 		} finally {
 
-			source.done();
+			source.close();
 		}
 	}
 }

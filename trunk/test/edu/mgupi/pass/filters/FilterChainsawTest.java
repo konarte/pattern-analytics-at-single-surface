@@ -39,7 +39,7 @@ public class FilterChainsawTest {
 	@After
 	public void tearDown() {
 		if (chainsaw != null) {
-			chainsaw.reset();
+			chainsaw.close();
 			chainsaw = null;
 		}
 	}
@@ -312,7 +312,7 @@ public class FilterChainsawTest {
 			chainsaw.detachImage();
 
 		} finally {
-			source.done();
+			source.close();
 		}
 	}
 

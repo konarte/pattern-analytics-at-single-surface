@@ -39,5 +39,5 @@ public interface ISource {
 	/**
 	 * Final method for close all prepared connections/hardware calls/etc.
 	 */
-	void done();
+	void close();
 }

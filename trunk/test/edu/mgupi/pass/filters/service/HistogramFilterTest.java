@@ -108,7 +108,7 @@ public class HistogramFilterTest {
 			this.saveImage(image, "CS_GRAY 100-40");
 
 		} finally {
-			source.done();
+			source.close();
 		}
 	}
 
