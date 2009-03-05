@@ -1,5 +1,7 @@
 package edu.mgupi.pass.util;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.File;
 import java.util.Collection;
 
@@ -20,6 +22,8 @@ public class UtilsTest {
 	@Test
 	public void testListFiles() {
 		Collection<File> files = Utils.listFiles("bin", ".class");
+		assertNotNull(files);
+		
 		for (File file : files) {
 			System.out.println(file.getName());
 		}

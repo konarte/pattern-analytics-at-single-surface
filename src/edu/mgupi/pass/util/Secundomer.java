@@ -1,7 +1,8 @@
 package edu.mgupi.pass.util;
 
 /**
- * Primitive for time counting.
+ * Primitive for time counting. Cycle counting and print total, min, max, speed,
+ * etc.
  * 
  * @author raidan
  * 
@@ -17,26 +18,38 @@ public class Secundomer {
 	private long min = Long.MAX_VALUE;
 	private long max = Long.MIN_VALUE;
 
-	// private Secundomer() {
-	// //
-	// }
-
 	private String name;
 
 	public Secundomer(String name) {
 		this.name = name;
 	}
+	
+	/**
+	 * Return given name.
+	 * 
+	 * @return name of secundomer.
+	 */
+	public String getName() {
+		return this.name;
+	}
 
 	/**
-	 * Start
+	 * Start new cycle. If counter does not stopped already -- we stop them now
+	 * before new cycle.
 	 */
 	public void start() {
+
+		if (started) {
+			this.stop();
+			this.start();
+		}
+
 		this.time = System.currentTimeMillis();
 		started = true;
 	}
 
 	/**
-	 * Stop
+	 * Stop current cycle.
 	 */
 	public void stop() {
 		if (started) {
@@ -52,6 +65,9 @@ public class Secundomer {
 		}
 	}
 
+	/**
+	 * Full reset of secundomer class.
+	 */
 	public void reset() {
 		if (!started) {
 			this.total = 0;
@@ -63,14 +79,19 @@ public class Secundomer {
 	}
 
 	/**
-	 * Return time between all start and stop calls in msec
+	 * Return time between all start and stop calls in msec.
 	 * 
-	 * @return time between all start and stops
+	 * @return time between all start and stops.
 	 */
 	public int getTotalTime() {
 		return (int) this.total;
 	}
 
+	/**
+	 * Return number of total start/stop cycles.
+	 * 
+	 * @return total number of calls.
+	 */
 	public int getTotalCalls() {
 		return this.cnt;
 	}
