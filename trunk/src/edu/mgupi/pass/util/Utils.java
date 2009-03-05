@@ -5,6 +5,13 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Common utils class. In common, this class is not required to test.
+ * 
+ * @author raidan
+ * 
+ */
+
 public class Utils {
 	public static List<File> listFiles(final String dir, final String ext) {
 		return listFiles(dir, new FileFilter() {

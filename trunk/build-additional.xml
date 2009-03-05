@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<project name="pass" basedir=".">
+	<!-- Common definition -->
+
+	<!-- Actual tasks -->
+	<target name="common">
+		<buildnumber file="src/mybuild.properties"/>
+	</target>
+
+</project>
