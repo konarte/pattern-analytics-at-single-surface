@@ -21,7 +21,6 @@ public class SimpleSmoothFilter implements IFilter {
 	}
 
 	public Collection<Param> getParams() {
-		logger.debug("SimpleSmoothFilter.getParams. Nothing to return.");
 		return null;
 	}
 
@@ -41,7 +40,7 @@ public class SimpleSmoothFilter implements IFilter {
 			throw new IllegalArgumentException("Internal error: image is null.");
 		}
 
-		logger.debug("SimpleSmoothFilter.convert, smoothing image");
+		logger.debug("Smoothing image");
 
 		BufferedImage dest = new BufferedImage(source.getWidth(), source.getHeight(), source.getType());
 		return op.filter(source, dest);

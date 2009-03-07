@@ -38,7 +38,6 @@ public class ColorSpaceFilter implements IFilter {
 	}
 
 	public Collection<Param> getParams() {
-		logger.debug("ColorSpaceFilter.getParams return {} items", params.size());
 		return params;
 	}
 
@@ -55,8 +54,8 @@ public class ColorSpaceFilter implements IFilter {
 		ColorSpace sourceColorSpace = source.getColorModel().getColorSpace();
 		ColorSpace destColorSpace = ColorSpace.getInstance(destMode);
 
-		logger.debug("ColorSpaceFilter.convert, converting image from color space {} to {}.", sourceColorSpace
-				.getType(), destColorSpace.getType());
+		logger.debug("Converting image from color space {} to {}.", sourceColorSpace.getType(), destColorSpace
+				.getType());
 
 		// TODO Поисследовать, даст ли прирост скорости кэширование
 		// ColorConvertOp-а

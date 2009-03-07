@@ -41,7 +41,7 @@ public class FilterChainsaw {
 	 * 
 	 */
 	public void reset() {
-		logger.debug("FilterChainsaw.reset");
+		logger.debug("Reset all registered filters");
 
 		this.detachImage();
 		for (IFilter filter : filterList) {
@@ -71,7 +71,7 @@ public class FilterChainsaw {
 			throw new IllegalArgumentException("Internal error. filterClass must be not null.");
 		}
 
-		logger.debug("FilterChainsaw.appendFilter now appends filter as class {}", filterClass);
+		logger.debug("Appending filter as class {}", filterClass);
 		this.appendFilter(filterClass.newInstance());
 	}
 
@@ -90,7 +90,7 @@ public class FilterChainsaw {
 			throw new IllegalArgumentException("Internal error. filter must be not null.");
 		}
 
-		logger.debug("FilterChainsaw.appendFilter now appends filter {}", filter);
+		logger.debug("Appending filter as instance {}", filter);
 
 		filterList.add(filter);
 
@@ -116,7 +116,7 @@ public class FilterChainsaw {
 
 		if (pos >= 0 && pos < filterList.size()) {
 			IFilter filter = filterList.get(pos);
-			logger.debug("FilterChainsaw.appendFilter now remove filter {}", filter);
+			logger.debug("Removing filter {}", filter);
 
 			if (this.sourceImage != null && filter instanceof IFilterAttachable) {
 				((IFilterAttachable) filter).onDetachFromImage(sourceImage);
@@ -141,11 +141,11 @@ public class FilterChainsaw {
 	public IFilter getFilter(int pos) {
 		if (pos >= 0 && pos < filterList.size()) {
 
-			logger.trace("FilterChainsaw.getFilter now get filter index {}", pos);
+			logger.trace("Return filter at index {}", pos);
 
 			return filterList.get(pos);
 		} else {
-			logger.trace("FilterChainsaw.getFilter, but pos {} is not in range", pos);
+			logger.trace("Requsted position {} is not in range", pos);
 
 			return null;
 		}
@@ -169,13 +169,13 @@ public class FilterChainsaw {
 	 */
 	public void moveUp(int pos) {
 		if (pos > 0 && pos < filterList.size()) {
-			logger.trace("FilterChainsaw.moveUp now move up index {}", pos);
+			logger.trace("Moving index {} up", pos);
 
 			IFilter old = filterList.get(pos - 1);
 			filterList.set(pos - 1, filterList.get(pos));
 			filterList.set(pos, old);
 		} else {
-			logger.trace("FilterChainsaw.moveUp, but pos {} is not in range", pos);
+			logger.trace("Can't move up, position {} is not in range", pos);
 		}
 	}
 
@@ -187,13 +187,13 @@ public class FilterChainsaw {
 	 */
 	public void moveDown(int pos) {
 		if (pos >= 0 && pos < filterList.size() - 1) {
-			logger.trace("FilterChainsaw.moveDown now move down index {}", pos);
+			logger.trace("Moving index {} down", pos);
 
 			IFilter old = filterList.get(pos + 1);
 			filterList.set(pos + 1, filterList.get(pos));
 			filterList.set(pos, old);
 		} else {
-			logger.trace("FilterChainsaw.moveDown, but pos {} is not in range", pos);
+			logger.trace("Can't move down, position {} is not in range", pos);
 		}
 	}
 
@@ -210,7 +210,7 @@ public class FilterChainsaw {
 			throw new IllegalStateException("Internal error. Please, detach previous image.");
 		}
 
-		logger.debug("FilterChainsaw.attachImage now attach image {}", image);
+		logger.debug("Attaching image {}", image);
 
 		this.sourceImage = image;
 		for (IFilter filter : this.filterList) {
@@ -230,7 +230,7 @@ public class FilterChainsaw {
 	 */
 	public void detachImage() {
 		if (sourceImage != null) {
-			logger.debug("FilterChainsaw.detachImage now detach image {}", sourceImage);
+			logger.debug("Deataching image {}", sourceImage);
 
 			for (IFilter filter : this.filterList) {
 				if (filter instanceof IFilterAttachable) {
@@ -258,7 +258,7 @@ public class FilterChainsaw {
 			throw new IllegalStateException("Internal error. Please, call attachImage first.");
 		}
 
-		logger.debug("FilterChainsaw.attachImage now SAW launch");
+		logger.debug("Actual filtering");
 
 		lastFilteredImage = sourceImage;
 		BufferedImage dest = null;

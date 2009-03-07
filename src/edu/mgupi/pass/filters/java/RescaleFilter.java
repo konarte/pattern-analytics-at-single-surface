@@ -33,7 +33,6 @@ public class RescaleFilter implements IFilter {
 	}
 
 	public Collection<Param> getParams() {
-		logger.debug("RescaleFilter.getParams return {} items", params.size());
 		return params;
 	}
 
@@ -49,7 +48,7 @@ public class RescaleFilter implements IFilter {
 		float brightness = (float) (Integer) BRIGHTNESS.getValue();
 		float contrast = ((float) (Integer) CONTRAST.getValue()) / 100.f;
 
-		logger.debug("RescaleFilter.convert, changing constrast index to {} and brightness value to {}", contrast,
+		logger.debug("Changing constrast index to {} and brightness value to {}", contrast,
 				brightness);
 
 		// Warning!

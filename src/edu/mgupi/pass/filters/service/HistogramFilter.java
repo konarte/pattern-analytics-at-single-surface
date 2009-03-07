@@ -30,7 +30,6 @@ public class HistogramFilter implements IFilter {
 	}
 
 	public Collection<Param> getParams() {
-		logger.debug("HistogramFilter.getParams. Nothing to return.");
 		return null;
 	}
 
@@ -46,7 +45,7 @@ public class HistogramFilter implements IFilter {
 			throw new IllegalArgumentException("Internal error: image is null.");
 		}
 
-		logger.debug("HistogramFilter.convert, building histogram");
+		logger.debug("Building histogram 256x{}", HEIGHT);
 
 		BufferedImage dest = new BufferedImage(256, HEIGHT, BufferedImage.TYPE_INT_RGB);
 

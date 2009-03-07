@@ -26,8 +26,8 @@ public class TestSourceImpl implements ISource {
 		if (init) {
 			throw new IllegalStateException("Internal error. Init already called.");
 		}
-		logger.debug("TestSourceImpl. Calling init method.");
 		init = true;
+		logger.debug("Source initiated");
 	}
 
 	private boolean done = false;
@@ -39,8 +39,8 @@ public class TestSourceImpl implements ISource {
 		if (done) {
 			throw new IllegalStateException("Internal error. Done already called.");
 		}
-		logger.debug("TestSourceImpl. Calling done method.");
 		done = true;
+		logger.debug("Source closed");
 	}
 
 	private String imagePath = "test/suslik_list.jpg";
@@ -50,7 +50,8 @@ public class TestSourceImpl implements ISource {
 		if (!init) {
 			throw new IllegalStateException("Internal error. Please, call init first.");
 		}
-		logger.debug("TestSourceImpl. Calling getSingleSource.");
+		logger.debug("Return new source from {}", imagePath);
+		
 		File file = new File(imagePath);
 
 		FileInputStream input = new FileInputStream(file);
