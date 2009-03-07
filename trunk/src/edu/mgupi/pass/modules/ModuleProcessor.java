@@ -79,7 +79,6 @@ public class ModuleProcessor {
 	// private FilterChainsaw
 
 	public void close() {
-		logger.debug("ModuleProcessor.close");
 
 		this.reset();
 
@@ -91,10 +90,12 @@ public class ModuleProcessor {
 			histoFilters.close();
 			histoFilters = null;
 		}
+		
+		logger.debug("ModuleProcessor closed");
 	}
 
 	public void reset() {
-		logger.debug("ModuleProcessor.reset");
+		logger.debug("Reset");
 
 		if (this.module != null) {
 			if (this.module instanceof IInitiable) {
@@ -120,7 +121,7 @@ public class ModuleProcessor {
 			return;
 		}
 
-		logger.debug("ModuleProcessor.registerModule as class {}", moduleClass);
+		logger.debug("Registering module as class {}", moduleClass);
 		this.reset();
 
 		this.module = moduleClass.newInstance();
@@ -130,7 +131,7 @@ public class ModuleProcessor {
 	}
 
 	public void setChainsaw(FilterChainsaw filters) {
-		logger.debug("ModuleProcessor.setChainsaw");
+		logger.debug("Set main filter chain {}", filters);
 		this.filters = filters;
 	}
 
@@ -150,9 +151,9 @@ public class ModuleProcessor {
 			throw new IllegalArgumentException("Internal error. Store must be not null.");
 		}
 
-		logger.debug("ModuleProcessor.processSource for new store {}", store);
+		logger.debug("Start processing for new store {}", store);
 
-		logger.debug("ModuleProcessor.processSource now create new locus");
+		logger.debug("Creating new locus");
 		Locuses locus = LocusesFactory.createLocuses();
 		locus.setName(store.getName());
 		this.fillLocusData(locus);
@@ -173,14 +174,14 @@ public class ModuleProcessor {
 			FILTERING.start();
 			try {
 				this.filters.attachImage(image);
-				logger.debug("ModuleProcessor.processSource now filter image");
+				logger.debug("Filtering image, cause main filter chain is setup");
 				image = this.filters.filterSaw();
 			} finally {
 				FILTERING.stop();
 			}
 		}
 
-		logger.debug("ModuleProcessor.processSource now build histograms and thumb-image");
+		logger.debug("Now we building histograms and thumb-image");
 		STORE_FILTERED_IMAGE.start();
 		try {
 			locus.setFilteredImage(ModuleHelper.convertImageToPNGRaw(image));
@@ -206,7 +207,7 @@ public class ModuleProcessor {
 			FILTERING_HISTO.stop();
 		}
 
-		logger.debug("ModuleProcessor.processSource now analyze image by module {}", this.module);
+		logger.debug("Time to analyze image by registered module {}", this.module);
 		ANAZYLE.start();
 		try {
 			this.module.analyze(image, locus);
@@ -232,7 +233,7 @@ public class ModuleProcessor {
 	private Secundomer FILTERS_DATA = SecundomerList.registerSecundomer("Filling filters data from database");
 
 	private void fillLocusData(Locuses locus) throws PersistentException, FilterException {
-		logger.debug("ModuleProcessor.processSource now fill data");
+		logger.debug("Filling data from database");
 
 		LOCUS_DATA.start();
 		try {

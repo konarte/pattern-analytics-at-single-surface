@@ -14,11 +14,11 @@ public class SimpleMatrixModule implements IModule {
 	private final static Logger logger = LoggerFactory.getLogger(SimpleMatrixModule.class);
 
 	public void init() {
-		logger.debug("SimpleMatrixModule.init");
+		logger.debug("SMM initiated");
 	}
 
 	public void close() {
-		logger.debug("SimpleMatrixModule.close");
+		logger.debug("SMM closed");
 	}
 
 	public void analyze(BufferedImage filteredImage, Locuses store) throws IOException {

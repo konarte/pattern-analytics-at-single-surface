@@ -19,7 +19,6 @@ public class GrayScaleFilter implements IFilter {
 	}
 
 	public Collection<Param> getParams() {
-		logger.debug("GrayScaleFilter.getParams. Nothing to return.");
 		return null;
 	}
 
@@ -32,7 +31,7 @@ public class GrayScaleFilter implements IFilter {
 			throw new IllegalArgumentException("Internal error: image is null.");
 		}
 
-		logger.debug("GrayScaleFilter.convert, grayscaling image");
+		logger.debug("Grayscaling image");
 
 		BufferedImage dest = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
 		Graphics2D graphics2D = dest.createGraphics();

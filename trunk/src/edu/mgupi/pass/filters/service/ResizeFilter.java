@@ -40,7 +40,6 @@ public class ResizeFilter implements IFilter, IFilterAttachable {
 	}
 
 	public Collection<Param> getParams() {
-		logger.debug("ResizeFilter.getParams return {} items", params.size());
 		return params;
 	}
 
@@ -59,8 +58,8 @@ public class ResizeFilter implements IFilter, IFilterAttachable {
 		int thumbHeight = (Integer) HEIGHT.getValue();
 		Object interpolationMethod = INTERPOLATION_METHOD.getValue();
 
-		logger.debug("ResizeFilter.convert, resizing image to {}x{}, method {}", new Object[] { thumbWidth,
-				thumbHeight, interpolationMethod });
+		logger.debug("Resizing image to {}x{}, method {}",
+				new Object[] { thumbWidth, thumbHeight, interpolationMethod });
 
 		/*
 		 * Based of thumb maker by Marco Schmidt
@@ -88,14 +87,14 @@ public class ResizeFilter implements IFilter, IFilterAttachable {
 	}
 
 	public void onAttachToImage(BufferedImage source) {
-		logger.trace("ResizeFilter.onAttach. Set new default values {}x{}", source.getWidth(), source.getHeight());
+		logger.trace("Sets new default values {}x{}", source.getWidth(), source.getHeight());
 		WIDTH.setDefault_(source.getWidth());
 		HEIGHT.setDefault_(source.getHeight());
 		// do nothing
 	}
 
 	public void onDetachFromImage(BufferedImage source) {
-		logger.trace("ResizeFilter.onDetach");
+		logger.trace("No action on detach");
 		// do nothing
 	}
 

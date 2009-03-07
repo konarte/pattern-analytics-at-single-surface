@@ -24,6 +24,7 @@ import edu.mgupi.pass.util.IInitiable;
 public class TestModule implements IModule, IInitiable {
 
 	protected void finalize() throws Throwable {
+		logger.debug("Checking properly finalyzed method");
 		if (!close) {
 			throw new RuntimeException("Method close not called!");
 		}
@@ -35,11 +36,11 @@ public class TestModule implements IModule, IInitiable {
 	private boolean init = false;
 
 	public void init() {
-		logger.debug("TestModule.init");
 		if (init) {
 			throw new IllegalStateException("Internal error. Init already called.");
 		}
 		init = true;
+		logger.debug("Module initiated");
 	}
 
 	private boolean close = false;
@@ -51,8 +52,8 @@ public class TestModule implements IModule, IInitiable {
 		if (close) {
 			throw new IllegalStateException("Internal error. Done already called.");
 		}
-		logger.debug("TestModule.close");
 		close = true;
+		logger.debug("Module closed");
 	}
 
 	public void analyze(BufferedImage filteredImage, Locuses store) throws IOException {

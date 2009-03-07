@@ -21,7 +21,6 @@ public class SimpleSharpFilter implements IFilter {
 	}
 
 	public Collection<Param> getParams() {
-		logger.debug("SimpleSharpFilter.getParams. Nothing to return.");
 		return null;
 	}
 
@@ -41,7 +40,7 @@ public class SimpleSharpFilter implements IFilter {
 			throw new IllegalArgumentException("Internal error: image is null.");
 		}
 
-		logger.debug("SimpleSharpFilter.convert, sharping image");
+		logger.debug("Sharping image");
 
 		BufferedImage dest = new BufferedImage(source.getWidth(), source.getHeight(), source.getType());
 

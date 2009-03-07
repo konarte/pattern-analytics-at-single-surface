@@ -20,7 +20,6 @@ public class InvertFilter implements IFilter {
 	}
 
 	public Collection<Param> getParams() {
-		logger.debug("InvertFilter.getParams. Nothing to return.");
 		return null;
 	}
 
@@ -33,7 +32,7 @@ public class InvertFilter implements IFilter {
 			throw new IllegalArgumentException("Internal error: image is null.");
 		}
 
-		logger.debug("InvertFilter.convert, inverting image");
+		logger.debug("Inverting image");
 
 		// if (dest == null) {
 		// dest = new BufferedImage(source.getWidth(), source.getHeight(),
