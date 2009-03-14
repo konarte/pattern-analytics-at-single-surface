@@ -8,8 +8,8 @@
  */
 
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package edu.mgupi.pass.db.sensors;
 
@@ -36,8 +36,8 @@ public class SensorsDetachedCriteria extends AbstractORMDetachedCriteria {
 		return new SensorTypesDetachedCriteria(createCriteria("sensorType"));
 	}
 	
-	public edu.mgupi.pass.db.surfaces.MaterialsDetachedCriteria createMpathMaterialCriteria() {
-		return new edu.mgupi.pass.db.surfaces.MaterialsDetachedCriteria(createCriteria("mpathMaterial"));
+	public edu.mgupi.pass.db.surfaces.MaterialsDetachedCriteria createSensorMaterialCriteria() {
+		return new edu.mgupi.pass.db.surfaces.MaterialsDetachedCriteria(createCriteria("sensorMaterial"));
 	}
 	
 	public Sensors uniqueSensors(PersistentSession session) {

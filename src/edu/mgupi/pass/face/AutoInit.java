@@ -14,8 +14,8 @@ import edu.mgupi.pass.db.locuses.LFilters;
 import edu.mgupi.pass.db.locuses.LFiltersFactory;
 import edu.mgupi.pass.db.locuses.LModules;
 import edu.mgupi.pass.db.locuses.LModulesFactory;
-import edu.mgupi.pass.db.locuses.LocusFilters;
-import edu.mgupi.pass.db.locuses.LocusFiltersFactory;
+import edu.mgupi.pass.db.locuses.LocusFilterOptions;
+import edu.mgupi.pass.db.locuses.LocusFilterOptionsFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
 import edu.mgupi.pass.db.locuses.LocusesFactory;
 import edu.mgupi.pass.db.surfaces.PassPersistentManager;
@@ -36,9 +36,13 @@ import edu.mgupi.pass.util.Const;
 public class AutoInit {
 
 	private void initSchema() throws Exception {
-		System.out.println("Creating new database schema...");
-		ORMDatabaseInitiator.createSchema(PassPersistentManager.instance());
-		System.out.println("Done. Successfully created.");
+		try {
+			System.out.println("Creating new database schema...");
+			ORMDatabaseInitiator.createSchema(PassPersistentManager.instance());
+			System.out.println("Done. Successfully created.");
+		} finally {
+			PassPersistentManager.instance().disposePersistentManager();
+		}
 	}
 
 	private boolean dropSchema() throws Exception {
@@ -46,9 +50,13 @@ public class AutoInit {
 		System.out.println("Are you sure to drop table(s)? (Y/N)");
 		java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
 		if (reader.readLine().trim().toUpperCase().equals("Y")) {
-			ORMDatabaseInitiator.dropSchema(PassPersistentManager.instance());
-			System.out.println("Done. Successfully dropped.");
-			return true;
+			try {
+				ORMDatabaseInitiator.dropSchema(PassPersistentManager.instance());
+				System.out.println("Done. Successfully dropped.");
+				return true;
+			} finally {
+				PassPersistentManager.instance().disposePersistentManager();
+			}
 		} else {
 			System.out.println("Done. Cancel drop.");
 			return false;
@@ -63,101 +71,107 @@ public class AutoInit {
 	 */
 	private void initRows() throws Exception {
 
-		PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
-
 		try {
 
-			// Filters first
-			Collection<Class<?>> filterClasses = ClassesHelper.getAvailableClasses(IFilter.class);
+			PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
 
-			StringBuilder items = new StringBuilder();
-			System.out.println("Registering filters (" + filterClasses.size() + " expected)...");
-			for (Class<?> clazz : filterClasses) {
-				IFilter filter = (IFilter) clazz.newInstance();
-				String codename = filter.getClass().getCanonicalName();
+			try {
 
-				System.out.print("Checking filter class " + codename + " (" + filter.getName() + ")...");
+				// Filters first
+				Collection<Class<?>> filterClasses = ClassesHelper.getAvailableClasses(IFilter.class);
 
-				LFilters dbFilter = LFiltersFactory.loadLFiltersByQuery("codename = '" + codename + "'", null);
-				if (dbFilter == null) {
-					System.out.println(" CREATE");
-					dbFilter = LFiltersFactory.createLFilters();
-					dbFilter.setName(filter.getName());
-					dbFilter.setCodename(codename);
-					dbFilter.save();
-				} else {
-					System.out.println(" SKIP");
+				StringBuilder items = new StringBuilder();
+				System.out.println("Registering filters (" + filterClasses.size() + " expected)...");
+				for (Class<?> clazz : filterClasses) {
+					IFilter filter = (IFilter) clazz.newInstance();
+					String codename = filter.getClass().getCanonicalName();
+
+					System.out.print("Checking filter class " + codename + " (" + filter.getName() + ")...");
+
+					LFilters dbFilter = LFiltersFactory.loadLFiltersByQuery("codename = '" + codename + "'", null);
+					if (dbFilter == null) {
+						System.out.println(" CREATE");
+						dbFilter = LFiltersFactory.createLFilters();
+						dbFilter.setName(filter.getName());
+						dbFilter.setCodename(codename);
+						dbFilter.save();
+					} else {
+						System.out.println(" SKIP");
+					}
+					if (items.length() > 0) {
+						items.append(", ");
+					}
+					items.append("'").append(codename).append("'");
 				}
+
+				// Now we must clear non-existed filters (records with codenames
+				// not
+				// present in our classes).
+				// And only if that filters not using in table data
 				if (items.length() > 0) {
-					items.append(", ");
-				}
-				items.append("'").append(codename).append("'");
-			}
-
-			// Now we must clear non-existed filters (records with codenames not
-			// present in our classes).
-			// And only if that filters not using in table data
-			if (items.length() > 0) {
-				for (LFilters checkFilter : LFiltersFactory
-						.listLFiltersByQuery("codename not in (" + items + ")", null)) {
-					LocusFilters found = LocusFiltersFactory.loadLocusFiltersByQuery("LFiltersIdLFilter = "
-							+ checkFilter.getIdLFilter(), null);
-					if (found == null) {
-						System.out.println("Filter " + checkFilter.getCodename() + " (" + checkFilter.getName()
-								+ ") stored in database does not have reference "
-								+ "in LocusFilters table. Removing unexisted class reference.");
-						checkFilter.delete();
+					for (LFilters checkFilter : LFiltersFactory.listLFiltersByQuery("codename not in (" + items + ")",
+							null)) {
+						LocusFilterOptions found = LocusFilterOptionsFactory.loadLocusFilterOptionsByQuery(
+								"LFiltersIdLFilter = " + checkFilter.getIdLFilter(), null);
+						if (found == null) {
+							System.out.println("Filter " + checkFilter.getCodename() + " (" + checkFilter.getName()
+									+ ") stored in database does not have reference "
+									+ "in LocusFilters table. Removing unexisted class reference.");
+							checkFilter.delete();
+						}
 					}
 				}
-			}
 
-			// Processing modules, the same way
-			items = new StringBuilder();
-			Collection<Class<?>> moduleClasses = ClassesHelper.getAvailableClasses(IModule.class);
-			System.out.println("Registering modules (" + moduleClasses.size() + " expected)...");
-			for (Class<?> clazz : moduleClasses) {
-				IModule module = (IModule) clazz.newInstance();
-				String codename = module.getClass().getCanonicalName();
+				// Processing modules, the same way
+				items = new StringBuilder();
+				Collection<Class<?>> moduleClasses = ClassesHelper.getAvailableClasses(IModule.class);
+				System.out.println("Registering modules (" + moduleClasses.size() + " expected)...");
+				for (Class<?> clazz : moduleClasses) {
+					IModule module = (IModule) clazz.newInstance();
+					String codename = module.getClass().getCanonicalName();
 
-				System.out.print("Checking module class " + codename + " (" + module.getName() + ")...");
+					System.out.print("Checking module class " + codename + " (" + module.getName() + ")...");
 
-				LModules dbModule = LModulesFactory.loadLModulesByQuery("codename = '" + codename + "'", null);
-				if (dbModule == null) {
-					System.out.println(" CREATE");
-					dbModule = LModulesFactory.createLModules();
-					dbModule.setName(module.getName());
-					dbModule.setCodename(codename);
-					dbModule.save();
-				} else {
-					System.out.println(" SKIP (already exists)");
+					LModules dbModule = LModulesFactory.loadLModulesByQuery("codename = '" + codename + "'", null);
+					if (dbModule == null) {
+						System.out.println(" CREATE");
+						dbModule = LModulesFactory.createLModules();
+						dbModule.setName(module.getName());
+						dbModule.setCodename(codename);
+						dbModule.save();
+					} else {
+						System.out.println(" SKIP (already exists)");
+					}
+					if (items.length() > 0) {
+						items.append(", ");
+					}
+					items.append("'").append(codename).append("'");
 				}
+
+				// And removing unnecessary modules
 				if (items.length() > 0) {
-					items.append(", ");
-				}
-				items.append("'").append(codename).append("'");
-			}
-
-			// And removing unnecessary modules
-			if (items.length() > 0) {
-				for (LModules checkModule : LModulesFactory
-						.listLModulesByQuery("codename not in (" + items + ")", null)) {
-					Locuses found = LocusesFactory.loadLocusesByQuery("LModulesIDLModule = "
-							+ checkModule.getIdLModule(), null);
-					if (found == null) {
-						System.out.println("Module " + checkModule.getCodename() + " (" + checkModule.getName()
-								+ ") stored in database does not have reference "
-								+ "in Locuses table. Removing unexisted class reference.");
-						checkModule.delete();
+					for (LModules checkModule : LModulesFactory.listLModulesByQuery("codename not in (" + items + ")",
+							null)) {
+						Locuses found = LocusesFactory.loadLocusesByQuery("LModulesIDLModule = "
+								+ checkModule.getIdLModule(), null);
+						if (found == null) {
+							System.out.println("Module " + checkModule.getCodename() + " (" + checkModule.getName()
+									+ ") stored in database does not have reference "
+									+ "in Locuses table. Removing unexisted class reference.");
+							checkModule.delete();
+						}
 					}
 				}
+
+				transaction.commit();
+
+				System.out.println("Done. Commit.");
+			} catch (Exception e) {
+				transaction.rollback();
+				throw e;
 			}
-
-			transaction.commit();
-
-			System.out.println("Done. Commit.");
-		} catch (Exception e) {
-			transaction.rollback();
-			throw e;
+		} finally {
+			PassPersistentManager.instance().disposePersistentManager();
 		}
 
 	}
@@ -169,40 +183,35 @@ public class AutoInit {
 		Options options = new Options();
 		options
 				.addOption(
-						"type",
+						"cmd",
 						true,
-						"[create|drop|init|full-cycle] -- allowed operations; 'create' will create new database installation, "
+						"[create|drop|init|full-recreate] -- allowed operations; 'create' will create new database installation, "
 								+ "'drop' will totally clear this database  and 'init' scans applied filters and modules and will register "
-								+ "them in database; finally 'full-cycle' will call 'drop', 'create' and 'init'");
+								+ "them in database; finally 'full-recreate' will call 'drop', 'create' and 'init'");
 
 		CommandLineParser parser = new PosixParser();
 		CommandLine cmd = parser.parse(options, args);
 
-		try {
+		String command = cmd.getOptionValue("cmd");
 
-			String value = cmd.getOptionValue("type");
-
-			AutoInit init = new AutoInit();
-			if ("create".equals(value)) {
+		AutoInit init = new AutoInit();
+		if ("create".equals(command)) {
+			init.initSchema();
+		} else if ("drop".equals(command)) {
+			init.dropSchema();
+		} else if ("init".equals(command)) {
+			init.initRows();
+		} else if ("full-recreate".equals(command)) {
+			System.out.println("Full-cycle processing...");
+			if (init.dropSchema()) {
 				init.initSchema();
-			} else if ("drop".equals(value)) {
-				init.dropSchema();
-			} else if ("init".equals(value)) {
 				init.initRows();
-			} else if ("full-cycle".equals(value)) {
-				System.out.println("Full-cycle processing...");
-				if (init.dropSchema()) {
-					init.initSchema();
-					init.initRows();
-				}
-			} else {
-				// show help
-
-				HelpFormatter formatter = new HelpFormatter();
-				formatter.printHelp("java -classpath=... edu.mgupi.pass.face.AutoInit", options);
 			}
-		} finally {
-			PassPersistentManager.instance().disposePersistentManager();
+		} else {
+			// show help
+			init = null;
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp("java -classpath=... edu.mgupi.pass.face.AutoInit", options);
 		}
 	}
 }

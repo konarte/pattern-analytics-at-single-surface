@@ -8,8 +8,8 @@
  */
 
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package edu.mgupi.pass.db.surfaces;
 
@@ -73,11 +73,11 @@ public class SurfaceTypes implements Serializable {
 		}
 	}
 	
-	@Column(name="IdSurfaceMode", nullable=false)	
+	@Column(name="IdSurfaceType", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D311FBD12FC8E01C09")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FC8E01C09", strategy="native")	
-	private int idSurfaceMode;
+	@GeneratedValue(generator="V0A1070D312006D6FD6E0B580")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312006D6FD6E0B580", strategy="native")	
+	private int idSurfaceType;
 	
 	@Column(name="Name", nullable=false, length=255)	
 	private String name;
@@ -94,16 +94,16 @@ public class SurfaceTypes implements Serializable {
 	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.surfaces.Materials surfaceMaterial;
 	
-	private void setIdSurfaceMode(int value) {
-		this.idSurfaceMode = value;
+	private void setIdSurfaceType(int value) {
+		this.idSurfaceType = value;
 	}
 	
-	public int getIdSurfaceMode() {
-		return idSurfaceMode;
+	public int getIdSurfaceType() {
+		return idSurfaceType;
 	}
 	
 	public int getORMID() {
-		return getIdSurfaceMode();
+		return getIdSurfaceType();
 	}
 	
 	public void setName(String value) {
@@ -131,7 +131,7 @@ public class SurfaceTypes implements Serializable {
 	}
 	
 	public String toString() {
-		return String.valueOf(getIdSurfaceMode());
+		return String.valueOf(getIdSurfaceType());
 	}
 	
 }

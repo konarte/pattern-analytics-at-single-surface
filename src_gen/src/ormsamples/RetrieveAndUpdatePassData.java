@@ -1,6 +1,6 @@
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package ormsamples;
 
@@ -42,9 +42,9 @@ public class RetrieveAndUpdatePassData {
 			edu.mgupi.pass.db.locuses.LocusSources ledumgupipassdblocusesLocusSources = edu.mgupi.pass.db.locuses.LocusSourcesFactory.loadLocusSourcesByQuery(null, null);
 			// Update the properties of the persistent object
 			ledumgupipassdblocusesLocusSources.save();
-			edu.mgupi.pass.db.locuses.LocusFilters ledumgupipassdblocusesLocusFilters = edu.mgupi.pass.db.locuses.LocusFiltersFactory.loadLocusFiltersByQuery(null, null);
+			edu.mgupi.pass.db.locuses.LocusFilterOptions ledumgupipassdblocusesLocusFilterOptions = edu.mgupi.pass.db.locuses.LocusFilterOptionsFactory.loadLocusFilterOptionsByQuery(null, null);
 			// Update the properties of the persistent object
-			ledumgupipassdblocusesLocusFilters.save();
+			ledumgupipassdblocusesLocusFilterOptions.save();
 			edu.mgupi.pass.db.locuses.LocusModuleParams ledumgupipassdblocusesLocusModuleParams = edu.mgupi.pass.db.locuses.LocusModuleParamsFactory.loadLocusModuleParamsByQuery(null, null);
 			// Update the properties of the persistent object
 			ledumgupipassdblocusesLocusModuleParams.save();
@@ -81,7 +81,7 @@ public class RetrieveAndUpdatePassData {
 		System.out.println("Retrieving SurfaceTypes by SurfaceTypesCriteria");
 		edu.mgupi.pass.db.surfaces.SurfaceTypesCriteria surfaceTypesCriteria = new edu.mgupi.pass.db.surfaces.SurfaceTypesCriteria();
 		// Please uncomment the follow line and fill in parameter(s)
-		//surfaceTypesCriteria.idSurfaceMode.eq();
+		//surfaceTypesCriteria.idSurfaceType.eq();
 		System.out.println(surfaceTypesCriteria.uniqueSurfaceTypes());
 		
 		System.out.println("Retrieving Materials by MaterialsCriteria");
@@ -132,11 +132,11 @@ public class RetrieveAndUpdatePassData {
 		//locusSourcesCriteria.idLocusSource.eq();
 		System.out.println(locusSourcesCriteria.uniqueLocusSources());
 		
-		System.out.println("Retrieving LocusFilters by LocusFiltersCriteria");
-		edu.mgupi.pass.db.locuses.LocusFiltersCriteria locusFiltersCriteria = new edu.mgupi.pass.db.locuses.LocusFiltersCriteria();
+		System.out.println("Retrieving LocusFilterOptions by LocusFilterOptionsCriteria");
+		edu.mgupi.pass.db.locuses.LocusFilterOptionsCriteria locusFilterOptionsCriteria = new edu.mgupi.pass.db.locuses.LocusFilterOptionsCriteria();
 		// Please uncomment the follow line and fill in parameter(s)
-		//locusFiltersCriteria.idLocusFilter.eq();
-		System.out.println(locusFiltersCriteria.uniqueLocusFilters());
+		//locusFilterOptionsCriteria.idLocusFilter.eq();
+		System.out.println(locusFilterOptionsCriteria.uniqueLocusFilterOptions());
 		
 		System.out.println("Retrieving LocusModuleParams by LocusModuleParamsCriteria");
 		edu.mgupi.pass.db.locuses.LocusModuleParamsCriteria locusModuleParamsCriteria = new edu.mgupi.pass.db.locuses.LocusModuleParamsCriteria();

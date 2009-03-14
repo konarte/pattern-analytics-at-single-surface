@@ -8,8 +8,8 @@
  */
 
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package edu.mgupi.pass.db.locuses;
 
@@ -74,8 +74,8 @@ public class LocusModuleParams implements Serializable {
 	
 	@Column(name="IdModuleParam", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D311FBD12FD3A01C13")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FD3A01C13", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312006D6FE190B58A")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312006D6FE190B58A", strategy="native")	
 	private int idModuleParam;
 	
 	@Column(name="ParamName", nullable=false, length=255)	

@@ -8,8 +8,8 @@
  */
 
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package edu.mgupi.pass.db.surfaces;
 
@@ -38,10 +38,6 @@ public class MaterialsCriteria extends AbstractORMCriteria {
 	
 	public MaterialsCriteria() throws PersistentException {
 		this(edu.mgupi.pass.db.surfaces.PassPersistentManager.instance().getSession());
-	}
-	
-	public edu.mgupi.pass.db.sensors.SensorsCriteria createSensorCriteria() {
-		return new edu.mgupi.pass.db.sensors.SensorsCriteria(createCriteria("sensor"));
 	}
 	
 	public Materials uniqueMaterials() {

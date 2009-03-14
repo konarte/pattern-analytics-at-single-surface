@@ -8,8 +8,8 @@
  */
 
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package edu.mgupi.pass.db.surfaces;
 
@@ -20,18 +20,18 @@ import org.orm.PersistentSession;
 import org.orm.criteria.*;
 
 public class SurfaceTypesDetachedCriteria extends AbstractORMDetachedCriteria {
-	public final IntegerExpression idSurfaceMode;
+	public final IntegerExpression idSurfaceType;
 	public final StringExpression name;
 	
 	public SurfaceTypesDetachedCriteria() {
 		super(edu.mgupi.pass.db.surfaces.SurfaceTypes.class, edu.mgupi.pass.db.surfaces.SurfaceTypesCriteria.class);
-		idSurfaceMode = new IntegerExpression("idSurfaceMode", this.getDetachedCriteria());
+		idSurfaceType = new IntegerExpression("idSurfaceType", this.getDetachedCriteria());
 		name = new StringExpression("name", this.getDetachedCriteria());
 	}
 	
 	public SurfaceTypesDetachedCriteria(DetachedCriteria aDetachedCriteria) {
 		super(aDetachedCriteria, edu.mgupi.pass.db.surfaces.SurfaceTypesCriteria.class);
-		idSurfaceMode = new IntegerExpression("idSurfaceMode", this.getDetachedCriteria());
+		idSurfaceType = new IntegerExpression("idSurfaceType", this.getDetachedCriteria());
 		name = new StringExpression("name", this.getDetachedCriteria());
 	}
 	

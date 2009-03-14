@@ -12,8 +12,8 @@ import edu.mgupi.pass.db.locuses.LFilters;
 import edu.mgupi.pass.db.locuses.LFiltersFactory;
 import edu.mgupi.pass.db.locuses.LModules;
 import edu.mgupi.pass.db.locuses.LModulesFactory;
-import edu.mgupi.pass.db.locuses.LocusFilters;
-import edu.mgupi.pass.db.locuses.LocusFiltersFactory;
+import edu.mgupi.pass.db.locuses.LocusFilterOptions;
+import edu.mgupi.pass.db.locuses.LocusFilterOptionsFactory;
 import edu.mgupi.pass.db.locuses.LocusSources;
 import edu.mgupi.pass.db.locuses.LocusSourcesFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
@@ -254,10 +254,10 @@ public class ModuleProcessor {
 				return; //
 			}
 
-			List<LocusFilters> lFilters = locus.getFilters();
+			List<LocusFilterOptions> lFilters = locus.getFilters();
 
 			for (IFilter filter : this.filters.getFilters()) {
-				LocusFilters locusFilter = LocusFiltersFactory.createLocusFilters();
+				LocusFilterOptions locusFilter = LocusFilterOptionsFactory.createLocusFilterOptions();
 				locusFilter.setOptions(ParamHelper.convertParamsToJSON(filter));
 
 				String codename = filter.getClass().getCanonicalName();

@@ -8,8 +8,8 @@
  */
 
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package edu.mgupi.pass.db.sensors;
 
@@ -69,43 +69,10 @@ public class Sensors implements Serializable {
 		}
 	}
 	
-	public boolean deleteAndDissociate()throws PersistentException {
-		try {
-			if(getMpathMaterial() != null) {
-				getMpathMaterial().setSensor(null);
-			}
-			
-			return delete();
-		}
-		catch(Exception e) {
-			_logger.error("deleteAndDissociate()", e);
-			throw new PersistentException(e);
-		}
-	}
-	
-	public boolean deleteAndDissociate(org.orm.PersistentSession session)throws PersistentException {
-		try {
-			if(getMpathMaterial() != null) {
-				getMpathMaterial().setSensor(null);
-			}
-			
-			try {
-				session.delete(this);
-				return true;
-			} catch (Exception e) {
-				return false;
-			}
-		}
-		catch(Exception e) {
-			_logger.error("deleteAndDissociate(org.orm.PersistentSession session)", e);
-			throw new PersistentException(e);
-		}
-	}
-	
 	@Column(name="IdSensor", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D311FBD12FD4901C14")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FD4901C14", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312006D6FE290B58B")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312006D6FE290B58B", strategy="native")	
 	private int idSensor;
 	
 	@OneToOne(targetEntity=edu.mgupi.pass.db.sensors.SensorTypes.class)	
@@ -114,10 +81,11 @@ public class Sensors implements Serializable {
 	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.sensors.SensorTypes sensorType;
 	
-	@OneToOne(mappedBy="sensor", targetEntity=edu.mgupi.pass.db.surfaces.Materials.class)	
+	@OneToOne(targetEntity=edu.mgupi.pass.db.surfaces.Materials.class)	
 	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
+	@JoinColumns({ @JoinColumn(name="MaterialsIdSurfaceMaterial") })	
 	@Basic(fetch=FetchType.LAZY)	
-	private edu.mgupi.pass.db.surfaces.Materials mpathMaterial;
+	private edu.mgupi.pass.db.surfaces.Materials sensorMaterial;
 	
 	private void setIdSensor(int value) {
 		this.idSensor = value;
@@ -139,12 +107,12 @@ public class Sensors implements Serializable {
 		return sensorType;
 	}
 	
-	public void setMpathMaterial(edu.mgupi.pass.db.surfaces.Materials value) {
-		this.mpathMaterial = value;
+	public void setSensorMaterial(edu.mgupi.pass.db.surfaces.Materials value) {
+		this.sensorMaterial = value;
 	}
 	
-	public edu.mgupi.pass.db.surfaces.Materials getMpathMaterial() {
-		return mpathMaterial;
+	public edu.mgupi.pass.db.surfaces.Materials getSensorMaterial() {
+		return sensorMaterial;
 	}
 	
 	public String toString() {

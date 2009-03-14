@@ -8,8 +8,8 @@
  */
 
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package edu.mgupi.pass.db.surfaces;
 
@@ -74,8 +74,8 @@ public class Surfaces implements Serializable {
 	
 	@Column(name="IdSurface", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D311FBD12FC7E01C08")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FC7E01C08", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312006D6FD5E0B57F")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312006D6FD5E0B57F", strategy="native")	
 	private int idSurface;
 	
 	@Column(name="Height", nullable=false)	
@@ -98,13 +98,13 @@ public class Surfaces implements Serializable {
 	
 	@OneToOne(targetEntity=edu.mgupi.pass.db.surfaces.SurfaceTypes.class)	
 	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
-	@JoinColumns({ @JoinColumn(name="SurfaceTypesIdSurfaceMode") })	
+	@JoinColumns({ @JoinColumn(name="SurfaceTypesIdSurfaceType") })	
 	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.surfaces.SurfaceTypes surfaceMode;
 	
 	@OneToOne(targetEntity=edu.mgupi.pass.db.surfaces.SurfaceTypes.class)	
 	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
-	@JoinColumns({ @JoinColumn(name="SurfaceTypesIdSurfaceMode2") })	
+	@JoinColumns({ @JoinColumn(name="SurfaceTypesIdSurfaceType2") })	
 	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.surfaces.SurfaceTypes type;
 	

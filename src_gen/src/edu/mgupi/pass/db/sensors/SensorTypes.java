@@ -8,8 +8,8 @@
  */
 
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package edu.mgupi.pass.db.sensors;
 
@@ -80,8 +80,8 @@ public class SensorTypes implements Serializable {
 	
 	@Column(name="IdSensorType", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D311FBD12FD6801C16")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FD6801C16", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312006D6FE480B58D")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312006D6FE480B58D", strategy="native")	
 	private int idSensorType;
 	
 	@Column(name="Name", nullable=false, length=255)	
