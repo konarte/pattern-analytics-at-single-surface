@@ -8,8 +8,8 @@
  */
 
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package edu.mgupi.pass.db.surfaces;
 
@@ -74,8 +74,8 @@ public class SurfaceClasses implements Serializable {
 	
 	@Column(name="IdSurfaceType", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D311FBD12FC7E01C07")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FC7E01C07", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312006D6FD4E0B57E")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312006D6FD4E0B57E", strategy="native")	
 	private int idSurfaceType;
 	
 	@Column(name="Name", nullable=false, length=255)	

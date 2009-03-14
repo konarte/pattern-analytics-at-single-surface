@@ -8,8 +8,8 @@
  */
 
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package edu.mgupi.pass.db.locuses;
 
@@ -74,8 +74,8 @@ public class LocusSources implements Serializable {
 	
 	@Column(name="IdLocusSource", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D311FBD12FD1A01C11")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FD1A01C11", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312006D6FDEB0B588")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312006D6FDEB0B588", strategy="native")	
 	private int idLocusSource;
 	
 	@Column(name="Filename", nullable=false, length=255)	

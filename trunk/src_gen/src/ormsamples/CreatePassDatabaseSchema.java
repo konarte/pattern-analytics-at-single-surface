@@ -1,6 +1,6 @@
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package ormsamples;
 

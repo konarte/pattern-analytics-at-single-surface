@@ -8,8 +8,8 @@
  */
 
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package edu.mgupi.pass.db.defects;
 
@@ -74,8 +74,8 @@ public class DefectClasses implements Serializable {
 	
 	@Column(name="IdDefectClass", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D311FBD12FCAD01C0B")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FCAD01C0B", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312006D6FD8D0B582")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312006D6FD8D0B582", strategy="native")	
 	private int idDefectClass;
 	
 	@Column(name="Name", nullable=false, length=255)	

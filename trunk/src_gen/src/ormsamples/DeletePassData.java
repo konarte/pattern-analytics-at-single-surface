@@ -1,6 +1,6 @@
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package ormsamples;
 
@@ -31,8 +31,8 @@ public class DeletePassData {
 			ledumgupipassdblocusesLocuses.delete();
 			edu.mgupi.pass.db.locuses.LocusSources ledumgupipassdblocusesLocusSources = edu.mgupi.pass.db.locuses.LocusSourcesFactory.loadLocusSourcesByQuery(null, null);
 			ledumgupipassdblocusesLocusSources.delete();
-			edu.mgupi.pass.db.locuses.LocusFilters ledumgupipassdblocusesLocusFilters = edu.mgupi.pass.db.locuses.LocusFiltersFactory.loadLocusFiltersByQuery(null, null);
-			ledumgupipassdblocusesLocusFilters.delete();
+			edu.mgupi.pass.db.locuses.LocusFilterOptions ledumgupipassdblocusesLocusFilterOptions = edu.mgupi.pass.db.locuses.LocusFilterOptionsFactory.loadLocusFilterOptionsByQuery(null, null);
+			ledumgupipassdblocusesLocusFilterOptions.delete();
 			edu.mgupi.pass.db.locuses.LocusModuleParams ledumgupipassdblocusesLocusModuleParams = edu.mgupi.pass.db.locuses.LocusModuleParamsFactory.loadLocusModuleParamsByQuery(null, null);
 			ledumgupipassdblocusesLocusModuleParams.delete();
 			edu.mgupi.pass.db.sensors.Sensors ledumgupipassdbsensorsSensors = edu.mgupi.pass.db.sensors.SensorsFactory.loadSensorsByQuery(null, null);

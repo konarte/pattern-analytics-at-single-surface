@@ -8,8 +8,8 @@
  */
 
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package edu.mgupi.pass.db.locuses;
 
@@ -64,8 +64,8 @@ public class LocusesCriteria extends AbstractORMCriteria {
 		return new LocusModuleParamsCriteria(createCriteria("params"));
 	}
 	
-	public LocusFiltersCriteria createFiltersCriteria() {
-		return new LocusFiltersCriteria(createCriteria("filters"));
+	public LocusFilterOptionsCriteria createFiltersCriteria() {
+		return new LocusFilterOptionsCriteria(createCriteria("filters"));
 	}
 	
 	public Locuses uniqueLocuses() {

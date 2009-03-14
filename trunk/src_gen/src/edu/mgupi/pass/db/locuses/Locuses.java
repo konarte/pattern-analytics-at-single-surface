@@ -8,8 +8,8 @@
  */
 
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package edu.mgupi.pass.db.locuses;
 
@@ -74,8 +74,8 @@ public class Locuses implements Serializable {
 	
 	@Column(name="IdLocus", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D311FBD12FD0B01C10")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FD0B01C10", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312006D6FDDB0B587")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312006D6FDDB0B587", strategy="native")	
 	private int idLocus;
 	
 	@Column(name="Name", nullable=false, length=255)	
@@ -129,12 +129,12 @@ public class Locuses implements Serializable {
 	@org.hibernate.annotations.LazyCollection(org.hibernate.annotations.LazyCollectionOption.TRUE)	
 	private java.util.Set<edu.mgupi.pass.db.locuses.LocusModuleParams> params = new java.util.HashSet<edu.mgupi.pass.db.locuses.LocusModuleParams>();
 	
-	@OneToMany(targetEntity=edu.mgupi.pass.db.locuses.LocusFilters.class)	
+	@OneToMany(targetEntity=edu.mgupi.pass.db.locuses.LocusFilterOptions.class)	
 	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
 	@JoinColumn(name="LocusesIdLocus", nullable=true)	
 	@org.hibernate.annotations.IndexColumn(name="LocusesIndex")	
 	@org.hibernate.annotations.LazyCollection(org.hibernate.annotations.LazyCollectionOption.TRUE)	
-	private java.util.List<edu.mgupi.pass.db.locuses.LocusFilters> filters = new java.util.ArrayList<edu.mgupi.pass.db.locuses.LocusFilters>();
+	private java.util.List<edu.mgupi.pass.db.locuses.LocusFilterOptions> filters = new java.util.ArrayList<edu.mgupi.pass.db.locuses.LocusFilterOptions>();
 	
 	private void setIdLocus(int value) {
 		this.idLocus = value;
@@ -273,11 +273,11 @@ public class Locuses implements Serializable {
 	}
 	
 	
-	public void setFilters(java.util.List<edu.mgupi.pass.db.locuses.LocusFilters> value) {
+	public void setFilters(java.util.List<edu.mgupi.pass.db.locuses.LocusFilterOptions> value) {
 		this.filters = value;
 	}
 	
-	public java.util.List<edu.mgupi.pass.db.locuses.LocusFilters> getFilters() {
+	public java.util.List<edu.mgupi.pass.db.locuses.LocusFilterOptions> getFilters() {
 		return filters;
 	}
 	

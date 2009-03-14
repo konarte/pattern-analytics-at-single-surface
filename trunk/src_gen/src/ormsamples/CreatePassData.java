@@ -1,6 +1,6 @@
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package ormsamples;
 
@@ -19,7 +19,7 @@ public class CreatePassData {
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : surfaceMaterial, surfaceClass, name
 			ledumgupipassdbsurfacesSurfaceTypes.save();
 			edu.mgupi.pass.db.surfaces.Materials ledumgupipassdbsurfacesMaterials = edu.mgupi.pass.db.surfaces.MaterialsFactory.createMaterials();
-			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : sensor, magneticConductivity, electricalConduction, name
+			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : magneticConductivity, electricalConduction, name
 			ledumgupipassdbsurfacesMaterials.save();
 			edu.mgupi.pass.db.defects.DefectClasses ledumgupipassdbdefectsDefectClasses = edu.mgupi.pass.db.defects.DefectClassesFactory.createDefectClasses();
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : name
@@ -42,17 +42,17 @@ public class CreatePassData {
 			edu.mgupi.pass.db.locuses.LocusSources ledumgupipassdblocusesLocusSources = edu.mgupi.pass.db.locuses.LocusSourcesFactory.createLocusSources();
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : sourceImage, filename
 			ledumgupipassdblocusesLocusSources.save();
-			edu.mgupi.pass.db.locuses.LocusFilters ledumgupipassdblocusesLocusFilters = edu.mgupi.pass.db.locuses.LocusFiltersFactory.createLocusFilters();
-			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : filter, options
-			ledumgupipassdblocusesLocusFilters.save();
+			edu.mgupi.pass.db.locuses.LocusFilterOptions ledumgupipassdblocusesLocusFilterOptions = edu.mgupi.pass.db.locuses.LocusFilterOptionsFactory.createLocusFilterOptions();
+			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : filter
+			ledumgupipassdblocusesLocusFilterOptions.save();
 			edu.mgupi.pass.db.locuses.LocusModuleParams ledumgupipassdblocusesLocusModuleParams = edu.mgupi.pass.db.locuses.LocusModuleParamsFactory.createLocusModuleParams();
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : paramData, paramName
 			ledumgupipassdblocusesLocusModuleParams.save();
 			edu.mgupi.pass.db.sensors.Sensors ledumgupipassdbsensorsSensors = edu.mgupi.pass.db.sensors.SensorsFactory.createSensors();
-			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : mpathMaterial, sensorType
+			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : sensorMaterial, sensorType
 			ledumgupipassdbsensorsSensors.save();
 			edu.mgupi.pass.db.sensors.SensorClasses ledumgupipassdbsensorsSensorClasses = edu.mgupi.pass.db.sensors.SensorClassesFactory.createSensorClasses();
-			// Initialize the properties of the persistent object here
+			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : name
 			ledumgupipassdbsensorsSensorClasses.save();
 			edu.mgupi.pass.db.sensors.SensorTypes ledumgupipassdbsensorsSensorTypes = edu.mgupi.pass.db.sensors.SensorTypesFactory.createSensorTypes();
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : sensorClass, name

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
-Licensee: Raidan Flk
-License Type: Evaluation
+Licensee: Anonymous
+License Type: Purchased
 -->
 <project name="Pass" default="instrument">
 	<description>
@@ -105,7 +105,7 @@ License Type: Evaluation
 				<include name="edu\mgupi\pass\db\locuses\LFilters.class"/>
 				<include name="edu\mgupi\pass\db\locuses\Locuses.class"/>
 				<include name="edu\mgupi\pass\db\locuses\LocusSources.class"/>
-				<include name="edu\mgupi\pass\db\locuses\LocusFilters.class"/>
+				<include name="edu\mgupi\pass\db\locuses\LocusFilterOptions.class"/>
 				<include name="edu\mgupi\pass\db\locuses\LocusModuleParams.class"/>
 				<include name="edu\mgupi\pass\db\sensors\Sensors.class"/>
 				<include name="edu\mgupi\pass\db\sensors\SensorClasses.class"/>

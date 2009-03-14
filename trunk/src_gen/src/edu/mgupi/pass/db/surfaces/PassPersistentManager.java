@@ -8,8 +8,8 @@
  */
 
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package edu.mgupi.pass.db.surfaces;
 
@@ -46,7 +46,7 @@ public class PassPersistentManager extends PersistentManager {
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LFilters.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.Locuses.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LocusSources.class);
-		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LocusFilters.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LocusFilterOptions.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LocusModuleParams.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.sensors.Sensors.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.sensors.SensorClasses.class);

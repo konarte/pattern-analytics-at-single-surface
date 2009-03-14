@@ -1,6 +1,6 @@
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package ormsamples;
 
@@ -97,11 +97,11 @@ public class ListPassData {
 		}
 		System.out.println(length + " record(s) retrieved.");
 		
-		System.out.println("Listing LocusFilters...");
-		edu.mgupi.pass.db.locuses.LocusFilters[] edumgupipassdblocusesLocusFilterses = edu.mgupi.pass.db.locuses.LocusFiltersFactory.listLocusFiltersByQuery(null, null);
-		length = Math.min(edumgupipassdblocusesLocusFilterses.length, ROW_COUNT);
+		System.out.println("Listing LocusFilterOptions...");
+		edu.mgupi.pass.db.locuses.LocusFilterOptions[] edumgupipassdblocusesLocusFilterOptionses = edu.mgupi.pass.db.locuses.LocusFilterOptionsFactory.listLocusFilterOptionsByQuery(null, null);
+		length = Math.min(edumgupipassdblocusesLocusFilterOptionses.length, ROW_COUNT);
 		for (int i = 0; i < length; i++) {
-			System.out.println(edumgupipassdblocusesLocusFilterses[i]);
+			System.out.println(edumgupipassdblocusesLocusFilterOptionses[i]);
 		}
 		System.out.println(length + " record(s) retrieved.");
 		
@@ -167,7 +167,7 @@ public class ListPassData {
 		System.out.println("Listing SurfaceTypes by Criteria...");
 		edu.mgupi.pass.db.surfaces.SurfaceTypesCriteria surfaceTypesCriteria = new edu.mgupi.pass.db.surfaces.SurfaceTypesCriteria();
 		// Please uncomment the follow line and fill in parameter(s) 
-		//surfaceTypesCriteria.idSurfaceMode.eq();
+		//surfaceTypesCriteria.idSurfaceType.eq();
 		surfaceTypesCriteria.setMaxResults(ROW_COUNT);
 		edu.mgupi.pass.db.surfaces.SurfaceTypes[] edumgupipassdbsurfacesSurfaceTypeses = surfaceTypesCriteria.listSurfaceTypes();
 		length =edumgupipassdbsurfacesSurfaceTypeses== null ? 0 : Math.min(edumgupipassdbsurfacesSurfaceTypeses.length, ROW_COUNT); 
@@ -272,17 +272,17 @@ public class ListPassData {
 		}
 		System.out.println(length + " LocusSources record(s) retrieved."); 
 		
-		System.out.println("Listing LocusFilters by Criteria...");
-		edu.mgupi.pass.db.locuses.LocusFiltersCriteria locusFiltersCriteria = new edu.mgupi.pass.db.locuses.LocusFiltersCriteria();
+		System.out.println("Listing LocusFilterOptions by Criteria...");
+		edu.mgupi.pass.db.locuses.LocusFilterOptionsCriteria locusFilterOptionsCriteria = new edu.mgupi.pass.db.locuses.LocusFilterOptionsCriteria();
 		// Please uncomment the follow line and fill in parameter(s) 
-		//locusFiltersCriteria.idLocusFilter.eq();
-		locusFiltersCriteria.setMaxResults(ROW_COUNT);
-		edu.mgupi.pass.db.locuses.LocusFilters[] edumgupipassdblocusesLocusFilterses = locusFiltersCriteria.listLocusFilters();
-		length =edumgupipassdblocusesLocusFilterses== null ? 0 : Math.min(edumgupipassdblocusesLocusFilterses.length, ROW_COUNT); 
+		//locusFilterOptionsCriteria.idLocusFilter.eq();
+		locusFilterOptionsCriteria.setMaxResults(ROW_COUNT);
+		edu.mgupi.pass.db.locuses.LocusFilterOptions[] edumgupipassdblocusesLocusFilterOptionses = locusFilterOptionsCriteria.listLocusFilterOptions();
+		length =edumgupipassdblocusesLocusFilterOptionses== null ? 0 : Math.min(edumgupipassdblocusesLocusFilterOptionses.length, ROW_COUNT); 
 		for (int i = 0; i < length; i++) {
-			 System.out.println(edumgupipassdblocusesLocusFilterses[i]);
+			 System.out.println(edumgupipassdblocusesLocusFilterOptionses[i]);
 		}
-		System.out.println(length + " LocusFilters record(s) retrieved."); 
+		System.out.println(length + " LocusFilterOptions record(s) retrieved."); 
 		
 		System.out.println("Listing LocusModuleParams by Criteria...");
 		edu.mgupi.pass.db.locuses.LocusModuleParamsCriteria locusModuleParamsCriteria = new edu.mgupi.pass.db.locuses.LocusModuleParamsCriteria();

@@ -8,8 +8,8 @@
  */
 
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package edu.mgupi.pass.db.surfaces;
 
@@ -39,10 +39,6 @@ public class MaterialsDetachedCriteria extends AbstractORMDetachedCriteria {
 		name = new StringExpression("name", this.getDetachedCriteria());
 		electricalConduction = new FloatExpression("electricalConduction", this.getDetachedCriteria());
 		magneticConductivity = new FloatExpression("magneticConductivity", this.getDetachedCriteria());
-	}
-	
-	public edu.mgupi.pass.db.sensors.SensorsDetachedCriteria createSensorCriteria() {
-		return new edu.mgupi.pass.db.sensors.SensorsDetachedCriteria(createCriteria("sensor"));
 	}
 	
 	public Materials uniqueMaterials(PersistentSession session) {

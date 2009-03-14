@@ -8,8 +8,8 @@
  */
 
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package edu.mgupi.pass.db.surfaces;
 
@@ -75,43 +75,10 @@ public class Materials implements Serializable {
 		}
 	}
 	
-	public boolean deleteAndDissociate()throws PersistentException {
-		try {
-			if(getSensor() != null) {
-				getSensor().setMpathMaterial(null);
-			}
-			
-			return delete();
-		}
-		catch(Exception e) {
-			_logger.error("deleteAndDissociate()", e);
-			throw new PersistentException(e);
-		}
-	}
-	
-	public boolean deleteAndDissociate(org.orm.PersistentSession session)throws PersistentException {
-		try {
-			if(getSensor() != null) {
-				getSensor().setMpathMaterial(null);
-			}
-			
-			try {
-				session.delete(this);
-				return true;
-			} catch (Exception e) {
-				return false;
-			}
-		}
-		catch(Exception e) {
-			_logger.error("deleteAndDissociate(org.orm.PersistentSession session)", e);
-			throw new PersistentException(e);
-		}
-	}
-	
 	@Column(name="IdSurfaceMaterial", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D311FBD12FC9D01C0A")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D311FBD12FC9D01C0A", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312006D6FD7D0B581")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312006D6FD7D0B581", strategy="native")	
 	private int idSurfaceMaterial;
 	
 	@Column(name="Name", nullable=false, length=255)	
@@ -122,12 +89,6 @@ public class Materials implements Serializable {
 	
 	@Column(name="MagneticConductivity", nullable=false)	
 	private float magneticConductivity;
-	
-	@OneToOne(targetEntity=edu.mgupi.pass.db.sensors.Sensors.class)	
-	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
-	@JoinColumns({ @JoinColumn(name="SensorsIdSensor") })	
-	@Basic(fetch=FetchType.LAZY)	
-	private edu.mgupi.pass.db.sensors.Sensors sensor;
 	
 	private void setIdSurfaceMaterial(int value) {
 		this.idSurfaceMaterial = value;
@@ -175,14 +136,6 @@ public class Materials implements Serializable {
 	 */
 	public float getMagneticConductivity() {
 		return magneticConductivity;
-	}
-	
-	public void setSensor(edu.mgupi.pass.db.sensors.Sensors value) {
-		this.sensor = value;
-	}
-	
-	public edu.mgupi.pass.db.sensors.Sensors getSensor() {
-		return sensor;
 	}
 	
 	public String toString() {

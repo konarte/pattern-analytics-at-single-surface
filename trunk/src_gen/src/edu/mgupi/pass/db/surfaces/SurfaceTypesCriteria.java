@@ -8,8 +8,8 @@
  */
 
 /**
- * Licensee: Raidan Flk
- * License Type: Evaluation
+ * Licensee: Anonymous
+ * License Type: Purchased
  */
 package edu.mgupi.pass.db.surfaces;
 
@@ -19,12 +19,12 @@ import org.orm.PersistentSession;
 import org.orm.criteria.*;
 
 public class SurfaceTypesCriteria extends AbstractORMCriteria {
-	public final IntegerExpression idSurfaceMode;
+	public final IntegerExpression idSurfaceType;
 	public final StringExpression name;
 	
 	public SurfaceTypesCriteria(Criteria criteria) {
 		super(criteria);
-		idSurfaceMode = new IntegerExpression("idSurfaceMode", this);
+		idSurfaceType = new IntegerExpression("idSurfaceType", this);
 		name = new StringExpression("name", this);
 	}
 	
