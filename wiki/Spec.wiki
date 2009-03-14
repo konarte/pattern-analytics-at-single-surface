@@ -20,17 +20,17 @@
 
 == 4.3 Установка системы ==
 
-Выбираем дистрибутив mysql исходя из применяемого нами оборудования([86, x64 и т.п.)
+Выбираем дистрибутив MySQL исходя из применяемого нами оборудования(x86, x64 и т.п.)
 После установки запускаем мастер настройки сервера и выбираем в настройках(номера это номера вкладок мастера)
 
-1 - Detailed configuration
-2 - Developer machine
-3 - Non-transactional Database Only 
-4 - Decision Support (до 20 подключений) потом можно OLTP до 500
-5 - Enable TCP\IP on 3306
-6 - Manual Select Character Set on UTF8
-7 - Insttall as win service, include bin directory in win PATH
-8 - root password - любой, главное запомнить
+  # Detailed configuration
+  # Developer machine
+  # Non-transactional Database Only 
+  # Decision Support (до 20 подключений) потом можно OLTP до 500
+  # Enable TCP\IP on 3306
+  # Manual Select Character Set on UTF8
+  # Insttall as win service, include bin directory in win PATH
+  # root password - любой, главное запомнить
 
 Далее запускаем скрипт и создаем базу со следующими параметрами сервера MySQL:
   * Необходимо создать схему pass_db, пользователя pass и назначить ему пароль adesroot
