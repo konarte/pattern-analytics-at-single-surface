@@ -55,12 +55,13 @@ public interface IModule {
 	 *            first locus to compare.
 	 * @param graph2
 	 *            second locus to compare.
-	 * @return true if these locuses are the same and false, if not. Criteria
-	 *         for "the same or not" -- specific for every class.
+	 * @return range from 0 to 1, where 0 -- locuses are not the same at any
+	 *         kind of criteria, 1 -- there are the same (other numbers is a
+	 *         measure of alike)
 	 * 
 	 * @throws ModuleException
 	 *             if anything goes wrong.
 	 */
-	boolean compare(Locuses graph1, Locuses graph2) throws ModuleException;
+	float compare(Locuses graph1, Locuses graph2) throws ModuleException;
 
 }

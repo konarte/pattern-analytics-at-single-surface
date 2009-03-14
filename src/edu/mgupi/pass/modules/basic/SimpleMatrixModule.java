@@ -26,9 +26,9 @@ public class SimpleMatrixModule implements IModule {
 
 	}
 
-	public boolean compare(Locuses graph1, Locuses graph2) {
+	public float compare(Locuses graph1, Locuses graph2) {
 		// TODO Auto-generated method stub
-		return false;
+		return 0;
 	}
 
 	public String getName() {
