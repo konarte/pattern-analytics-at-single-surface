@@ -92,7 +92,7 @@ public class TestModuleTest {
 			locus = (Locuses) in.readObject();
 			input.close();
 
-			assertTrue(module.compare(locus, locus));
+			assertTrue(module.compare(locus, locus) == 1);
 
 			Locuses locus2 = LocusesFactory.createLocuses();
 			LocusSources locusSource2 = LocusSourcesFactory.createLocusSources();
@@ -103,7 +103,7 @@ public class TestModuleTest {
 
 			module.analyze(sourceStore.getSourceImage(), locus2);
 
-			assertTrue(module.compare(locus, locus2));
+			assertTrue(module.compare(locus, locus2) == 1);
 
 			Locuses locus3 = LocusesFactory.createLocuses();
 			LocusSources locusSource3 = LocusSourcesFactory.createLocusSources();
@@ -114,7 +114,7 @@ public class TestModuleTest {
 
 			module.analyze(new GrayScaleFilter().convert(sourceStore.getSourceImage()), locus3);
 
-			assertFalse(module.compare(locus, locus3));
+			assertFalse(module.compare(locus, locus3) == 1);
 
 			// Locuses locus2 = LocusesFactory.createLocuses();
 

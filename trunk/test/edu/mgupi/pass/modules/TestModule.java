@@ -114,7 +114,7 @@ public class TestModule implements IModule, IInitiable {
 		store.setProcessed(true);
 	}
 
-	public boolean compare(Locuses graph1, Locuses graph2) throws ModuleException {
+	public float compare(Locuses graph1, Locuses graph2) throws ModuleException {
 		if (!init) {
 			throw new IllegalStateException("Internal error. Please, call init first.");
 		}
@@ -144,9 +144,9 @@ public class TestModule implements IModule, IInitiable {
 		}
 
 		if (Arrays.equals(param_g1.getParamData(), param_g2.getParamData())) {
-			return true;
+			return 1;
 		} else {
-			return false;
+			return 0;
 		}
 
 		// java.util.Set<LocusModuleParams> params = graph1.getParams();
