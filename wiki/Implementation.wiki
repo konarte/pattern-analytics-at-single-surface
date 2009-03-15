@@ -24,7 +24,9 @@
 
 == 2.2 Описание таблиц ==
 
-http://pattern-analytics-at-single-surface.googlecode.com/svn/wiki/model-report/index.html
+http://pattern-analytics-at-single-surface.googlecode.com/svn/wiki/model-report/images/edumgupipassdb.png
+
+См. http://code.google.com/p/pattern-analytics-at-single-surface/source/browse/#svn/wiki/model-report
 
 
 _Надо не забыть, чтобы последняя введенная цифра запоминалась, когда много вводишь всего._
