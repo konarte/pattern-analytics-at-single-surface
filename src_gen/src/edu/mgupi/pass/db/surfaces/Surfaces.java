@@ -74,8 +74,8 @@ public class Surfaces implements Serializable {
 	
 	@Column(name="IdSurface", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312009D42DF9029DD")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312009D42DF9029DD", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31200A31A84600B8C")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31200A31A84600B8C", strategy="native")	
 	private int idSurface;
 	
 	@Column(name="Height", nullable=false)	
@@ -90,23 +90,11 @@ public class Surfaces implements Serializable {
 	@Column(name="MultiLayer", nullable=false, length=1)	
 	private boolean multiLayer;
 	
-	@OneToOne(targetEntity=edu.mgupi.pass.db.surfaces.SurfaceClasses.class)	
-	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
-	@JoinColumns({ @JoinColumn(name="SurfaceClassesIdSurfaceType") })	
-	@Basic(fetch=FetchType.LAZY)	
-	private edu.mgupi.pass.db.surfaces.SurfaceClasses surfaceType;
-	
 	@OneToOne(targetEntity=edu.mgupi.pass.db.surfaces.SurfaceTypes.class)	
 	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
 	@JoinColumns({ @JoinColumn(name="SurfaceTypesIdSurfaceType") })	
 	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.surfaces.SurfaceTypes surfaceMode;
-	
-	@OneToOne(targetEntity=edu.mgupi.pass.db.surfaces.SurfaceTypes.class)	
-	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
-	@JoinColumns({ @JoinColumn(name="SurfaceTypesIdSurfaceType2") })	
-	@Basic(fetch=FetchType.LAZY)	
-	private edu.mgupi.pass.db.surfaces.SurfaceTypes type;
 	
 	private void setIdSurface(int value) {
 		this.idSurface = value;
@@ -176,28 +164,12 @@ public class Surfaces implements Serializable {
 		return multiLayer;
 	}
 	
-	public void setSurfaceType(edu.mgupi.pass.db.surfaces.SurfaceClasses value) {
-		this.surfaceType = value;
-	}
-	
-	public edu.mgupi.pass.db.surfaces.SurfaceClasses getSurfaceType() {
-		return surfaceType;
-	}
-	
 	public void setSurfaceMode(edu.mgupi.pass.db.surfaces.SurfaceTypes value) {
 		this.surfaceMode = value;
 	}
 	
 	public edu.mgupi.pass.db.surfaces.SurfaceTypes getSurfaceMode() {
 		return surfaceMode;
-	}
-	
-	public void setType(edu.mgupi.pass.db.surfaces.SurfaceTypes value) {
-		this.type = value;
-	}
-	
-	public edu.mgupi.pass.db.surfaces.SurfaceTypes getType() {
-		return type;
 	}
 	
 	public String toString() {

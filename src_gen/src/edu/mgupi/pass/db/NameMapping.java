@@ -19,6 +19,12 @@ import javax.persistence.*;
 /**
  * ћаппинг наименований кодовых названий в JSON-параметрах 
  * реальным наименовани€м.
+ * 
+ * “.е. дл€ каждого nameType задаетс€ такой набор name/title, который позвол€ет 
+ * однозначно идентифицировать все параметры, разрешенные к размещению 
+ * в пол€х additionalOptions и заодно показывает их видимое наименование.
+ * 
+ * ¬ будущем мы здесь разместим поле определ€ющее тип данных, допустимые значени€ и т.д.
  */
 @Entity
 @org.hibernate.annotations.Proxy(lazy=false)
@@ -75,8 +81,8 @@ public class NameMapping implements Serializable {
 	
 	@Column(name="ID", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312009D42DDA029DB")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312009D42DDA029DB", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31200A31A82600B8A")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31200A31A82600B8A", strategy="native")	
 	private int ID;
 	
 	@Column(name="NameType", nullable=false, length=11)	
