@@ -1,6 +1,7 @@
 package edu.mgupi.pass.face;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -15,6 +16,8 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
@@ -41,7 +44,7 @@ public class AboutDialog extends JDialog {
 	 * 
 	 */
 	private void initialize() {
-		this.setSize(300, 200);
+		this.setSize(300, 246);
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.setTitle("О программе...");
 		this.setContentPane(getJContentPane());
@@ -105,6 +108,8 @@ public class AboutDialog extends JDialog {
 	private String VERSION = ResourceBundle.getBundle("app").getString("version"); // @jve:decl-index=0:
 	private String BUILD = ResourceBundle.getBundle("mybuild").getString("build.number"); // @jve:decl-index=0:
 	private JLabel jLabelAuthor = null;
+	private JScrollPane jScrollPane = null;
+	private JTextArea jTextArea = null;
 
 	/**
 	 * This method initializes jPanel1
@@ -113,12 +118,26 @@ public class AboutDialog extends JDialog {
 	 */
 	private JPanel getJPanel1() {
 		if (jPanel1 == null) {
+			GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
+			gridBagConstraints4.fill = GridBagConstraints.BOTH;
+			gridBagConstraints4.gridy = 2;
+			gridBagConstraints4.weightx = 1.0;
+			gridBagConstraints4.weighty = 1.0;
+			gridBagConstraints4.insets = new Insets(0, 15, 0, 15);
+			gridBagConstraints4.gridx = 0;
 			GridBagConstraints gridBagConstraints11 = new GridBagConstraints();
 			gridBagConstraints11.gridx = 0;
-			gridBagConstraints11.insets = new Insets(15, 0, 0, 0);
-			gridBagConstraints11.gridy = 2;
+			gridBagConstraints11.insets = new Insets(10, 0, 10, 0);
+			gridBagConstraints11.fill = GridBagConstraints.HORIZONTAL;
+			gridBagConstraints11.weightx = 1.0D;
+			gridBagConstraints11.anchor = GridBagConstraints.CENTER;
+			gridBagConstraints11.gridwidth = 1;
+			gridBagConstraints11.gridy = 3;
 			jLabelAuthor = new JLabel();
-			jLabelAuthor.setText("Author: raidan");
+			jLabelAuthor.setText("<html><hr><center>Author: raidan<br>Design: raidan</center></html>");
+			jLabelAuthor.setHorizontalAlignment(SwingConstants.CENTER);
+			jLabelAuthor.setHorizontalTextPosition(SwingConstants.TRAILING);
+			jLabelAuthor.setPreferredSize(new Dimension(200, 40));
 			GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
 			gridBagConstraints1.insets = new Insets(0, 0, 0, 0);
 			gridBagConstraints1.gridy = 1;
@@ -140,8 +159,38 @@ public class AboutDialog extends JDialog {
 			jPanel1.add(jLabelProgramTitle, gridBagConstraints);
 			jPanel1.add(jLabelVersion, gridBagConstraints1);
 			jPanel1.add(jLabelAuthor, gridBagConstraints11);
+			jPanel1.add(getJScrollPane(), gridBagConstraints4);
 		}
 		return jPanel1;
 	}
 
-}
+	/**
+	 * This method initializes jScrollPane
+	 * 
+	 * @return javax.swing.JScrollPane
+	 */
+	private JScrollPane getJScrollPane() {
+		if (jScrollPane == null) {
+			jScrollPane = new JScrollPane();
+			jScrollPane.setViewportView(getJTextArea());
+		}
+		return jScrollPane;
+	}
+
+	/**
+	 * This method initializes jTextArea
+	 * 
+	 * @return javax.swing.JTextArea
+	 */
+	private JTextArea getJTextArea() {
+		if (jTextArea == null) {
+			jTextArea = new JTextArea();
+			jTextArea.setEditable(false);
+			jTextArea.setFont(new Font("Dialog", Font.PLAIN, 12));
+			jTextArea.setText("Database connection: MySQL JDBC Type 4\n" + "User: normal\n" + "Free memory: 51 MB\n"
+					+ "---------------------\n" + "Modules: 1\n" + "Filters: 18");
+		}
+		return jTextArea;
+	}
+
+} // @jve:decl-index=0:visual-constraint="10,10"

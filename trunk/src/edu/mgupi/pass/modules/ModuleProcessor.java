@@ -90,7 +90,7 @@ public class ModuleProcessor {
 			histoFilters.close();
 			histoFilters = null;
 		}
-		
+
 		logger.debug("ModuleProcessor closed");
 	}
 

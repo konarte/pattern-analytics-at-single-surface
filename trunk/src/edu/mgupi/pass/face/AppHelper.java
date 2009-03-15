@@ -48,7 +48,7 @@ public class AppHelper {
 		frame.setVisible(true);
 		return frame;
 	}
-	
+
 	public JFrame closeFrame(Class<? extends JFrame> windowType) {
 		if (windowType == null) {
 			throw new IllegalArgumentException("Internal error. 'windowType' must be not not null.");

@@ -23,7 +23,7 @@ public class Secundomer {
 	public Secundomer(String name) {
 		this.name = name;
 	}
-	
+
 	/**
 	 * Return given name.
 	 * 
