@@ -68,7 +68,7 @@ http://pattern-analytics-at-single-surface.googlecode.com/svn/wiki/doc/common-ar
 Ввод параметров изображения может вестись параллельно с просмотром изображения. Во время ввода параметров пользователь выбирает дефект, датчик и поверхность которые будут привязаны к годографу (годограф в отрыве от вышеозначенных вещей быть не может).
 
 
-== 3.4 Архитектура БД ==
+== 3.4 Архитектура данных ==
 
 
 http://pattern-analytics-at-single-surface.googlecode.com/svn/wiki/model-report/images/edumgupipassdb.png
