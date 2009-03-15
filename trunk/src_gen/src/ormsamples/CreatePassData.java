@@ -16,7 +16,7 @@ public class CreatePassData {
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : name
 			ledumgupipassdbsurfacesSurfaceClasses.save();
 			edu.mgupi.pass.db.surfaces.Surfaces ledumgupipassdbsurfacesSurfaces = edu.mgupi.pass.db.surfaces.SurfacesFactory.createSurfaces();
-			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : type, surfaceMode, surfaceType, multiLayer, length, width, height
+			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : surfaceMode, multiLayer, length, width, height
 			ledumgupipassdbsurfacesSurfaces.save();
 			edu.mgupi.pass.db.surfaces.SurfaceTypes ledumgupipassdbsurfacesSurfaceTypes = edu.mgupi.pass.db.surfaces.SurfaceTypesFactory.createSurfaceTypes();
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : surfaceMaterial, surfaceClass, name
@@ -40,7 +40,7 @@ public class CreatePassData {
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : codename, name
 			ledumgupipassdblocusesLFilters.save();
 			edu.mgupi.pass.db.locuses.Locuses ledumgupipassdblocusesLocuses = edu.mgupi.pass.db.locuses.LocusesFactory.createLocuses();
-			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : sensor, locusSource, defect, surface, module, filteredImage, histogram, thumbImage, name
+			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : sensor, locusSource, surface, module, filteredImage, histogram, thumbImage, name
 			ledumgupipassdblocusesLocuses.save();
 			edu.mgupi.pass.db.locuses.LocusSources ledumgupipassdblocusesLocusSources = edu.mgupi.pass.db.locuses.LocusSourcesFactory.createLocusSources();
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : sourceImage, filename

@@ -74,8 +74,8 @@ public class LocusFilterOptions implements Serializable {
 	
 	@Column(name="IdLocusFilter", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312009D42E96029E7")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312009D42E96029E7", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31200A31A8E200B96")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31200A31A8E200B96", strategy="native")	
 	private int idLocusFilter;
 	
 	@Column(name="Options", nullable=true, length=4096)	
