@@ -48,8 +48,7 @@ public class RescaleFilter implements IFilter {
 		float brightness = (float) (Integer) BRIGHTNESS.getValue();
 		float contrast = ((float) (Integer) CONTRAST.getValue()) / 100.f;
 
-		logger.debug("Changing constrast index to {} and brightness value to {}", contrast,
-				brightness);
+		logger.debug("Changing constrast index to {} and brightness value to {}", contrast, brightness);
 
 		// Warning!
 		// Do not try to define dest as new BufferedImage(source.getWidth(),
@@ -69,5 +68,4 @@ public class RescaleFilter implements IFilter {
 		return CONTRAST;
 	}
 
-	
 }

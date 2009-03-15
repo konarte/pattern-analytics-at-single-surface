@@ -50,7 +50,7 @@ public class Application {
 					+ "application with '-nolaf' key", "Invalid look and feel", JOptionPane.WARNING_MESSAGE);
 		}
 
-		JFrame frame = new MainFrame();
+		MainFrame frame = new MainFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		frame.setVisible(true);
