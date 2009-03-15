@@ -22,12 +22,14 @@ public class DefectTypesCriteria extends AbstractORMCriteria {
 	public final IntegerExpression idDefectType;
 	public final StringExpression name;
 	public final ByteArrayExpression defectImage;
+	public final StringExpression additionalOptions;
 	
 	public DefectTypesCriteria(Criteria criteria) {
 		super(criteria);
 		idDefectType = new IntegerExpression("idDefectType", this);
 		name = new StringExpression("name", this);
 		defectImage = new ByteArrayExpression("defectImage", this);
+		additionalOptions = new StringExpression("additionalOptions", this);
 	}
 	
 	public DefectTypesCriteria(PersistentSession session) {

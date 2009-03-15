@@ -21,15 +21,18 @@ import org.orm.criteria.*;
 
 public class SensorsDetachedCriteria extends AbstractORMDetachedCriteria {
 	public final IntegerExpression idSensor;
+	public final StringExpression name;
 	
 	public SensorsDetachedCriteria() {
 		super(edu.mgupi.pass.db.sensors.Sensors.class, edu.mgupi.pass.db.sensors.SensorsCriteria.class);
 		idSensor = new IntegerExpression("idSensor", this.getDetachedCriteria());
+		name = new StringExpression("name", this.getDetachedCriteria());
 	}
 	
 	public SensorsDetachedCriteria(DetachedCriteria aDetachedCriteria) {
 		super(aDetachedCriteria, edu.mgupi.pass.db.sensors.SensorsCriteria.class);
 		idSensor = new IntegerExpression("idSensor", this.getDetachedCriteria());
+		name = new StringExpression("name", this.getDetachedCriteria());
 	}
 	
 	public SensorTypesDetachedCriteria createSensorTypeCriteria() {

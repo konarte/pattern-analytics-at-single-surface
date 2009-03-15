@@ -9,6 +9,9 @@ public class CreatePassData {
 	public void createTestData() throws PersistentException {
 		PersistentTransaction t = edu.mgupi.pass.db.surfaces.PassPersistentManager.instance().getSession().beginTransaction();
 		try {
+			edu.mgupi.pass.db.NameMapping ledumgupipassdbNameMapping = edu.mgupi.pass.db.NameMappingFactory.createNameMapping();
+			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : nameType
+			ledumgupipassdbNameMapping.save();
 			edu.mgupi.pass.db.surfaces.SurfaceClasses ledumgupipassdbsurfacesSurfaceClasses = edu.mgupi.pass.db.surfaces.SurfaceClassesFactory.createSurfaceClasses();
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : name
 			ledumgupipassdbsurfacesSurfaceClasses.save();
@@ -49,7 +52,7 @@ public class CreatePassData {
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : paramData, paramName
 			ledumgupipassdblocusesLocusModuleParams.save();
 			edu.mgupi.pass.db.sensors.Sensors ledumgupipassdbsensorsSensors = edu.mgupi.pass.db.sensors.SensorsFactory.createSensors();
-			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : sensorMaterial, sensorType
+			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : sensorMaterial, sensorType, name
 			ledumgupipassdbsensorsSensors.save();
 			edu.mgupi.pass.db.sensors.SensorClasses ledumgupipassdbsensorsSensorClasses = edu.mgupi.pass.db.sensors.SensorClassesFactory.createSensorClasses();
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : name

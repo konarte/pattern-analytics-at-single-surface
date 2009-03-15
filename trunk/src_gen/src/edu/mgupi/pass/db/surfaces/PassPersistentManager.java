@@ -35,6 +35,7 @@ public class PassPersistentManager extends PersistentManager {
 	@Override
 	public Configuration createConfiguration() {
 		AnnotationConfiguration configuration = new AnnotationConfiguration();
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.NameMapping.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.surfaces.SurfaceClasses.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.surfaces.Surfaces.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.surfaces.SurfaceTypes.class);

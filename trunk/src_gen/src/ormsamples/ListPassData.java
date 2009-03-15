@@ -9,9 +9,17 @@ public class ListPassData {
 	private static final int ROW_COUNT = 100;
 	
 	public void listTestData() throws PersistentException {
+		System.out.println("Listing NameMapping...");
+		edu.mgupi.pass.db.NameMapping[] edumgupipassdbNameMappings = edu.mgupi.pass.db.NameMappingFactory.listNameMappingByQuery(null, null);
+		int length = Math.min(edumgupipassdbNameMappings.length, ROW_COUNT);
+		for (int i = 0; i < length; i++) {
+			System.out.println(edumgupipassdbNameMappings[i]);
+		}
+		System.out.println(length + " record(s) retrieved.");
+		
 		System.out.println("Listing SurfaceClasses...");
 		edu.mgupi.pass.db.surfaces.SurfaceClasses[] edumgupipassdbsurfacesSurfaceClasseses = edu.mgupi.pass.db.surfaces.SurfaceClassesFactory.listSurfaceClassesByQuery(null, null);
-		int length = Math.min(edumgupipassdbsurfacesSurfaceClasseses.length, ROW_COUNT);
+		length = Math.min(edumgupipassdbsurfacesSurfaceClasseses.length, ROW_COUNT);
 		for (int i = 0; i < length; i++) {
 			System.out.println(edumgupipassdbsurfacesSurfaceClasseses[i]);
 		}
@@ -140,13 +148,25 @@ public class ListPassData {
 	}
 	
 	public void listByCriteria() throws PersistentException  {
+		System.out.println("Listing NameMapping by Criteria...");
+		edu.mgupi.pass.db.NameMappingCriteria nameMappingCriteria = new edu.mgupi.pass.db.NameMappingCriteria();
+		// Please uncomment the follow line and fill in parameter(s) 
+		//nameMappingCriteria.ID.eq();
+		nameMappingCriteria.setMaxResults(ROW_COUNT);
+		edu.mgupi.pass.db.NameMapping[] edumgupipassdbNameMappings = nameMappingCriteria.listNameMapping();
+		int length =edumgupipassdbNameMappings== null ? 0 : Math.min(edumgupipassdbNameMappings.length, ROW_COUNT); 
+		for (int i = 0; i < length; i++) {
+			 System.out.println(edumgupipassdbNameMappings[i]);
+		}
+		System.out.println(length + " NameMapping record(s) retrieved."); 
+		
 		System.out.println("Listing SurfaceClasses by Criteria...");
 		edu.mgupi.pass.db.surfaces.SurfaceClassesCriteria surfaceClassesCriteria = new edu.mgupi.pass.db.surfaces.SurfaceClassesCriteria();
 		// Please uncomment the follow line and fill in parameter(s) 
 		//surfaceClassesCriteria.idSurfaceType.eq();
 		surfaceClassesCriteria.setMaxResults(ROW_COUNT);
 		edu.mgupi.pass.db.surfaces.SurfaceClasses[] edumgupipassdbsurfacesSurfaceClasseses = surfaceClassesCriteria.listSurfaceClasses();
-		int length =edumgupipassdbsurfacesSurfaceClasseses== null ? 0 : Math.min(edumgupipassdbsurfacesSurfaceClasseses.length, ROW_COUNT); 
+		length =edumgupipassdbsurfacesSurfaceClasseses== null ? 0 : Math.min(edumgupipassdbsurfacesSurfaceClasseses.length, ROW_COUNT); 
 		for (int i = 0; i < length; i++) {
 			 System.out.println(edumgupipassdbsurfacesSurfaceClasseses[i]);
 		}

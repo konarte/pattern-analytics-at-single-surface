@@ -71,9 +71,12 @@ public class Sensors implements Serializable {
 	
 	@Column(name="IdSensor", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312006D6FE290B58B")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312006D6FE290B58B", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312009D42EB5029E9")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312009D42EB5029E9", strategy="native")	
 	private int idSensor;
+	
+	@Column(name="Name", nullable=false, length=255)	
+	private String name;
 	
 	@OneToOne(targetEntity=edu.mgupi.pass.db.sensors.SensorTypes.class)	
 	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
@@ -97,6 +100,20 @@ public class Sensors implements Serializable {
 	
 	public int getORMID() {
 		return getIdSensor();
+	}
+	
+	/**
+	 * Название модели датчика
+	 */
+	public void setName(String value) {
+		this.name = value;
+	}
+	
+	/**
+	 * Название модели датчика
+	 */
+	public String getName() {
+		return name;
 	}
 	
 	public void setSensorType(edu.mgupi.pass.db.sensors.SensorTypes value) {

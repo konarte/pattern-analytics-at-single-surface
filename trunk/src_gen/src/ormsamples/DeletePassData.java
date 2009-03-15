@@ -9,6 +9,8 @@ public class DeletePassData {
 	public void deleteTestData() throws PersistentException {
 		PersistentTransaction t = edu.mgupi.pass.db.surfaces.PassPersistentManager.instance().getSession().beginTransaction();
 		try {
+			edu.mgupi.pass.db.NameMapping ledumgupipassdbNameMapping = edu.mgupi.pass.db.NameMappingFactory.loadNameMappingByQuery(null, null);
+			ledumgupipassdbNameMapping.delete();
 			edu.mgupi.pass.db.surfaces.SurfaceClasses ledumgupipassdbsurfacesSurfaceClasses = edu.mgupi.pass.db.surfaces.SurfaceClassesFactory.loadSurfaceClassesByQuery(null, null);
 			ledumgupipassdbsurfacesSurfaceClasses.delete();
 			edu.mgupi.pass.db.surfaces.Surfaces ledumgupipassdbsurfacesSurfaces = edu.mgupi.pass.db.surfaces.SurfacesFactory.loadSurfacesByQuery(null, null);

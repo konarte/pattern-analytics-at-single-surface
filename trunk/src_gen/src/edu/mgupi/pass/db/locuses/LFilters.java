@@ -74,8 +74,8 @@ public class LFilters implements Serializable {
 	
 	@Column(name="IdLFilter", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312006D6FDCB0B586")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312006D6FDCB0B586", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312009D42E67029E4")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312009D42E67029E4", strategy="native")	
 	private int idLFilter;
 	
 	@Column(name="Name", nullable=false, length=255)	

@@ -23,12 +23,14 @@ public class DefectTypesDetachedCriteria extends AbstractORMDetachedCriteria {
 	public final IntegerExpression idDefectType;
 	public final StringExpression name;
 	public final ByteArrayExpression defectImage;
+	public final StringExpression additionalOptions;
 	
 	public DefectTypesDetachedCriteria() {
 		super(edu.mgupi.pass.db.defects.DefectTypes.class, edu.mgupi.pass.db.defects.DefectTypesCriteria.class);
 		idDefectType = new IntegerExpression("idDefectType", this.getDetachedCriteria());
 		name = new StringExpression("name", this.getDetachedCriteria());
 		defectImage = new ByteArrayExpression("defectImage", this.getDetachedCriteria());
+		additionalOptions = new StringExpression("additionalOptions", this.getDetachedCriteria());
 	}
 	
 	public DefectTypesDetachedCriteria(DetachedCriteria aDetachedCriteria) {
@@ -36,6 +38,7 @@ public class DefectTypesDetachedCriteria extends AbstractORMDetachedCriteria {
 		idDefectType = new IntegerExpression("idDefectType", this.getDetachedCriteria());
 		name = new StringExpression("name", this.getDetachedCriteria());
 		defectImage = new ByteArrayExpression("defectImage", this.getDetachedCriteria());
+		additionalOptions = new StringExpression("additionalOptions", this.getDetachedCriteria());
 	}
 	
 	public DefectClassesDetachedCriteria createDefectClassCriteria() {
