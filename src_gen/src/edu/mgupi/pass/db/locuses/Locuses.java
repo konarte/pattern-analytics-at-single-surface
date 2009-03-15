@@ -74,8 +74,8 @@ public class Locuses implements Serializable {
 	
 	@Column(name="IdLocus", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312006D6FDDB0B587")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312006D6FDDB0B587", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312009D42E76029E5")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312009D42E76029E5", strategy="native")	
 	private int idLocus;
 	
 	@Column(name="Name", nullable=false, length=255)	

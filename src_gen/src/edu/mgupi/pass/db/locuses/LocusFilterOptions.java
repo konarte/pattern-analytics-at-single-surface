@@ -74,8 +74,8 @@ public class LocusFilterOptions implements Serializable {
 	
 	@Column(name="IdLocusFilter", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312006D6FE0A0B589")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312006D6FE0A0B589", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312009D42E96029E7")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312009D42E96029E7", strategy="native")	
 	private int idLocusFilter;
 	
 	@Column(name="Options", nullable=true, length=4096)	
@@ -99,10 +99,16 @@ public class LocusFilterOptions implements Serializable {
 		return getIdLocusFilter();
 	}
 	
+	/**
+	 * Параметры фильтра в JSON-формате
+	 */
 	public void setOptions(String value) {
 		this.options = value;
 	}
 	
+	/**
+	 * Параметры фильтра в JSON-формате
+	 */
 	public String getOptions() {
 		return options;
 	}

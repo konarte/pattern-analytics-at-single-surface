@@ -9,6 +9,9 @@ public class RetrieveAndUpdatePassData {
 	public void retrieveAndUpdateTestData() throws PersistentException {
 		PersistentTransaction t = edu.mgupi.pass.db.surfaces.PassPersistentManager.instance().getSession().beginTransaction();
 		try {
+			edu.mgupi.pass.db.NameMapping ledumgupipassdbNameMapping = edu.mgupi.pass.db.NameMappingFactory.loadNameMappingByQuery(null, null);
+			// Update the properties of the persistent object
+			ledumgupipassdbNameMapping.save();
 			edu.mgupi.pass.db.surfaces.SurfaceClasses ledumgupipassdbsurfacesSurfaceClasses = edu.mgupi.pass.db.surfaces.SurfaceClassesFactory.loadSurfaceClassesByQuery(null, null);
 			// Update the properties of the persistent object
 			ledumgupipassdbsurfacesSurfaceClasses.save();
@@ -66,6 +69,12 @@ public class RetrieveAndUpdatePassData {
 	}
 	
 	public void retrieveByCriteria() throws PersistentException {
+		System.out.println("Retrieving NameMapping by NameMappingCriteria");
+		edu.mgupi.pass.db.NameMappingCriteria nameMappingCriteria = new edu.mgupi.pass.db.NameMappingCriteria();
+		// Please uncomment the follow line and fill in parameter(s)
+		//nameMappingCriteria.ID.eq();
+		System.out.println(nameMappingCriteria.uniqueNameMapping());
+		
 		System.out.println("Retrieving SurfaceClasses by SurfaceClassesCriteria");
 		edu.mgupi.pass.db.surfaces.SurfaceClassesCriteria surfaceClassesCriteria = new edu.mgupi.pass.db.surfaces.SurfaceClassesCriteria();
 		// Please uncomment the follow line and fill in parameter(s)

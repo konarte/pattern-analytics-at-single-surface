@@ -20,10 +20,12 @@ import org.orm.criteria.*;
 
 public class SensorsCriteria extends AbstractORMCriteria {
 	public final IntegerExpression idSensor;
+	public final StringExpression name;
 	
 	public SensorsCriteria(Criteria criteria) {
 		super(criteria);
 		idSensor = new IntegerExpression("idSensor", this);
+		name = new StringExpression("name", this);
 	}
 	
 	public SensorsCriteria(PersistentSession session) {

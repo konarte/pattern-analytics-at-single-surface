@@ -75,8 +75,8 @@ public class DefectTypes implements Serializable {
 	
 	@Column(name="IdDefectType", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312006D6FD9C0B583")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312006D6FD9C0B583", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312009D42E38029E1")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312009D42E38029E1", strategy="native")	
 	private int idDefectType;
 	
 	@Column(name="Name", nullable=false, length=255)	
@@ -85,6 +85,9 @@ public class DefectTypes implements Serializable {
 	@Column(name="DefectImage", nullable=true)	
 	@Basic(fetch=FetchType.LAZY)	
 	private byte[] defectImage;
+	
+	@Column(name="AdditionalOptions", nullable=true, length=4096)	
+	private String additionalOptions;
 	
 	@OneToOne(targetEntity=edu.mgupi.pass.db.defects.DefectClasses.class)	
 	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
@@ -130,6 +133,26 @@ public class DefectTypes implements Serializable {
 	 */
 	public byte[] getDefectImage() {
 		return defectImage;
+	}
+	
+	/**
+	 * ƒополнительные параметры типа дефекта в JSON-формате.
+	 * 
+	 * —оответствие кодовых названий (латиницей) наименовани€м на человеческом
+	 * €зыке задаетс€ в таблице NameMapping
+	 */
+	public void setAdditionalOptions(String value) {
+		this.additionalOptions = value;
+	}
+	
+	/**
+	 * ƒополнительные параметры типа дефекта в JSON-формате.
+	 * 
+	 * —оответствие кодовых названий (латиницей) наименовани€м на человеческом
+	 * €зыке задаетс€ в таблице NameMapping
+	 */
+	public String getAdditionalOptions() {
+		return additionalOptions;
 	}
 	
 	public void setDefectClass(edu.mgupi.pass.db.defects.DefectClasses value) {

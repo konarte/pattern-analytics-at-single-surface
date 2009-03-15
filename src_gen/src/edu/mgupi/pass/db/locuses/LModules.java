@@ -74,8 +74,8 @@ public class LModules implements Serializable {
 	
 	@Column(name="IdLModule", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312006D6FDBC0B585")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312006D6FDBC0B585", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312009D42E57029E3")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312009D42E57029E3", strategy="native")	
 	private int idLModule;
 	
 	@Column(name="Name", nullable=false, length=255)	
