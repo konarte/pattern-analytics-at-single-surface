@@ -6,4 +6,8 @@ public interface ProgressInterface {
 	void setProgress(int value);
 
 	void stopProgress();
+
+	void printMessage(String message);
+
+	void clearMessage();
 }

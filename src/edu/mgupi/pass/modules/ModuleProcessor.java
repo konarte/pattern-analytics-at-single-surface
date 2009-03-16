@@ -45,7 +45,7 @@ public class ModuleProcessor {
 	private FilterChainsaw thumbFilters;
 	private FilterChainsaw histoFilters;
 
-	private HistogramFilter histo;
+	private HistogramFilter histogramFilter;
 
 	/**
 	 * Common constructor. We immediate create two chains -- for thumb and for
@@ -63,14 +63,14 @@ public class ModuleProcessor {
 		resize.getWIDTH().setValue(Const.THUMB_WIDTH);
 		resize.getHEIGHT().setValue(Const.THUMB_HEIGHT);
 
-		histo = new HistogramFilter();
+		histogramFilter = new HistogramFilter();
 
 		thumbFilters = new FilterChainsaw();
 		thumbFilters.appendFilter(resize);
 
 		histoFilters = new FilterChainsaw();
 		histoFilters.appendFilter(GrayScaleFilter.class);
-		histoFilters.appendFilter(histo);
+		histoFilters.appendFilter(histogramFilter);
 	}
 
 	private IModule module;
@@ -122,6 +122,9 @@ public class ModuleProcessor {
 		}
 
 		logger.debug("Registering module as class {}", moduleClass);
+		
+		// Well, reset out ModelProcessor
+		// This is OK
 		this.reset();
 
 		this.module = moduleClass.newInstance();
@@ -133,6 +136,22 @@ public class ModuleProcessor {
 	public void setChainsaw(FilterChainsaw filters) {
 		logger.debug("Set main filter chain {}", filters);
 		this.filters = filters;
+	}
+
+	private BufferedImage lastProcessedImage;
+	private BufferedImage lastThumbImage;
+	private BufferedImage lastHistogramImage;
+
+	public BufferedImage getLastProcessedImage() {
+		return lastProcessedImage;
+	}
+
+	public BufferedImage getLastThumbImage() {
+		return lastThumbImage;
+	}
+
+	public BufferedImage getLastHistogramImage() {
+		return lastHistogramImage;
 	}
 
 	private Secundomer STORE_ORIGINAL_IMAGE = SecundomerList.registerSecundomer("Saving original image AS IS");
@@ -184,6 +203,7 @@ public class ModuleProcessor {
 		logger.debug("Now we building histograms and thumb-image");
 		STORE_FILTERED_IMAGE.start();
 		try {
+			this.lastProcessedImage = image;
 			locus.setFilteredImage(ModuleHelper.convertImageToPNGRaw(image));
 		} finally {
 			STORE_FILTERED_IMAGE.stop();
@@ -192,7 +212,8 @@ public class ModuleProcessor {
 		FILTERING_THUMB.start();
 		try {
 			thumbFilters.attachImage(image);
-			locus.setThumbImage(ModuleHelper.convertImageToPNGRaw(thumbFilters.filterSaw()));
+			this.lastThumbImage = thumbFilters.filterSaw();
+			locus.setThumbImage(ModuleHelper.convertImageToPNGRaw(this.lastThumbImage));
 		} finally {
 			FILTERING_THUMB.stop();
 		}
@@ -200,9 +221,9 @@ public class ModuleProcessor {
 		FILTERING_HISTO.start();
 		try {
 			histoFilters.attachImage(image);
-			histoFilters.filterSaw();
-			store.setHistorgram(histo.getLastHistogramChannel());
-			locus.setHistogram(histo.getLastHistogramChannel());
+			this.lastHistogramImage = histoFilters.filterSaw();
+			store.setHistogram(histogramFilter.getLastHistogramChannel());
+			locus.setHistogram(histogramFilter.getLastHistogramChannel());
 		} finally {
 			FILTERING_HISTO.stop();
 		}
@@ -283,4 +304,13 @@ public class ModuleProcessor {
 	public FilterChainsaw getFilters() {
 		return this.filters;
 	}
+
+	public FilterChainsaw getThumbFilters() {
+		return thumbFilters;
+	}
+
+	public FilterChainsaw getHistoFilters() {
+		return histoFilters;
+	}
+
 }

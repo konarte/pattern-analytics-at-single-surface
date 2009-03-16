@@ -2,6 +2,7 @@ package edu.mgupi.pass.face;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -9,7 +10,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.util.ResourceBundle;
 
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
@@ -20,6 +20,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+
+import edu.mgupi.pass.util.Const;
 
 public class AboutDialog extends JDialog {
 
@@ -44,8 +46,8 @@ public class AboutDialog extends JDialog {
 	 * 
 	 */
 	private void initialize() {
-		this.setSize(300, 246);
-		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		this.setSize(353, 299);
+		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		this.setTitle("О программе...");
 		this.setContentPane(getJContentPane());
 	}
@@ -73,8 +75,8 @@ public class AboutDialog extends JDialog {
 	private JPanel getJPanel() {
 		if (jPanel == null) {
 			jPanel = new JPanel();
-			jPanel.setLayout(new GridBagLayout());
-			jPanel.add(getJButtonOK(), new GridBagConstraints());
+			jPanel.setLayout(new FlowLayout());
+			jPanel.add(getJButtonOK(), null);
 		}
 		return jPanel;
 	}
@@ -95,7 +97,7 @@ public class AboutDialog extends JDialog {
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent e) {
-					AboutDialog.this.dispose();
+					AboutDialog.this.setVisible(false);
 				}
 			});
 			jButtonOK.setHorizontalAlignment(SwingConstants.CENTER);
@@ -105,8 +107,6 @@ public class AboutDialog extends JDialog {
 		return jButtonOK;
 	}
 
-	private String VERSION = ResourceBundle.getBundle("app").getString("version"); // @jve:decl-index=0:
-	private String BUILD = ResourceBundle.getBundle("mybuild").getString("build.number"); // @jve:decl-index=0:
 	private JLabel jLabelAuthor = null;
 	private JScrollPane jScrollPane = null;
 	private JTextArea jTextArea = null;
@@ -149,7 +149,7 @@ public class AboutDialog extends JDialog {
 			gridBagConstraints.weightx = 0.0D;
 			gridBagConstraints.gridx = 0;
 			jLabelVersion = new JLabel();
-			jLabelVersion.setText("Version " + VERSION + ", build " + BUILD);
+			jLabelVersion.setText("Version " + Const.VERSION + ", build " + Const.BUILD);
 			jLabelProgramTitle = new JLabel();
 			jLabelProgramTitle.setText("Pattern Analytics at Single Surface");
 			jLabelProgramTitle.setFont(new Font("Dialog", Font.BOLD, 12));

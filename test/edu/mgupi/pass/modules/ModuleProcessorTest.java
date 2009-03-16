@@ -1,16 +1,12 @@
 package edu.mgupi.pass.modules;
 
-import java.io.IOException;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.orm.PersistentException;
 import org.orm.PersistentTransaction;
 
 import edu.mgupi.pass.db.surfaces.PassPersistentManager;
 import edu.mgupi.pass.filters.FilterChainsaw;
-import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.service.ResizeFilter;
 import edu.mgupi.pass.sources.TestSourceImpl;
 import edu.mgupi.pass.util.SecundomerList;
@@ -33,8 +29,7 @@ public class ModuleProcessorTest {
 	}
 
 	@Test
-	public void testCommonWork() throws InstantiationException, IllegalAccessException, FilterException, IOException,
-			ModuleException, PersistentException {
+	public void testCommonWork() throws Exception {
 		PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
 		TestSourceImpl source = new TestSourceImpl();
 		source.init();
@@ -59,6 +54,31 @@ public class ModuleProcessorTest {
 		} finally {
 			transaction.rollback();
 			source.close();
+			PassPersistentManager.instance().disposePersistentManager();
+		}
+
+		SecundomerList.printToOutput(System.out);
+	}
+
+	@Test
+	public void testEmptyFilters() throws Exception {
+		PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
+		TestSourceImpl source = new TestSourceImpl();
+		source.init();
+		try {
+
+			processor.registerModule(TestModule.class);
+
+			try {
+				processor.startProcessing(source.getSingleSource());
+			} finally {
+				processor.finishProcessing();
+			}
+
+		} finally {
+			transaction.rollback();
+			source.close();
+			PassPersistentManager.instance().disposePersistentManager();
 		}
 
 		SecundomerList.printToOutput(System.out);

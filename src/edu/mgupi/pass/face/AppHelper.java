@@ -1,12 +1,26 @@
 package edu.mgupi.pass.face;
 
+import java.awt.Component;
+import java.awt.Dialog;
+import java.awt.Frame;
+import java.awt.Window;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AppHelper {
+
+	private final static Logger logger = LoggerFactory.getLogger(AppHelper.class);
+
 	private AppHelper() {
 		//
 	}
@@ -20,49 +34,96 @@ public class AppHelper {
 		return instance;
 	}
 
-	private Map<Class<? extends JFrame>, JFrame> framesCollection = new HashMap<Class<? extends JFrame>, JFrame>();
+	private Map<Class<? extends Window>, Window> windowsCollection = new HashMap<Class<? extends Window>, Window>();
 
-	private synchronized JFrame getFrame(Class<? extends JFrame> windowType) {
-		JFrame frame = framesCollection.get(windowType);
-		if (frame == null) {
+	private synchronized Window getWindow(Class<? extends Window> windowType, Frame owner) {
+		Window window = windowsCollection.get(windowType);
+
+		if (window == null) {
 			try {
-				frame = windowType.newInstance();
+				if (owner == null) {
+					window = windowType.newInstance();
+				} else {
+					window = windowType.getConstructor(Frame.class).newInstance(owner);
+				}
 			} catch (Exception e) {
+				logger.error("Error when creating window instance", e);
 				JOptionPane.showMessageDialog(null, "Unexpected error when creating instance of '" + windowType
-						+ "'. Please, consult with developers.", "Error when creating frame",
+						+ "'. Please, consult with developers (" + e + ")", "Error when creating frame",
 						JOptionPane.WARNING_MESSAGE);
 			}
-			frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-			framesCollection.put(windowType, frame);
+			windowsCollection.put(windowType, window);
 		}
-		return frame;
+		return window;
 	}
 
-	public JFrame openFrame(Class<? extends JFrame> windowType) {
+	public Window createWindow(Class<? extends Window> windowType) {
+		return createWindow(windowType, null);
+	}
 
+	public Window createWindow(Class<? extends Window> windowType, Frame owner) {
 		if (windowType == null) {
 			throw new IllegalArgumentException("Internal error. 'windowType' must be not not null.");
 		}
 
-		JFrame frame = this.getFrame(windowType);
+		Window frame = this.getWindow(windowType, owner);
+		if (owner != null && (frame instanceof Dialog)) {
+			frame.setLocationRelativeTo(owner);
+		}
+		return frame;
+	}
+
+	public Window openWindow(Class<? extends Window> windowType) {
+		return this.openWindow(windowType, null);
+	}
+
+	public Window openWindow(Class<? extends Window> windowType, Frame owner) {
+		Window frame = this.createWindow(windowType, owner);
 		frame.setVisible(true);
 		return frame;
 	}
 
-	public JFrame closeFrame(Class<? extends JFrame> windowType) {
-		if (windowType == null) {
-			throw new IllegalArgumentException("Internal error. 'windowType' must be not not null.");
+	public void updateUI(String className) throws ClassNotFoundException, InstantiationException,
+			IllegalAccessException, UnsupportedLookAndFeelException {
+
+		// Updating all opened components
+		UIManager.setLookAndFeel(className);
+		for (Window window : windowsCollection.values()) {
+			SwingUtilities.updateComponentTreeUI(window);
 		}
-		return this.closeFrame(this.getFrame(windowType));
+		for (Component c : components) {
+			SwingUtilities.updateComponentTreeUI(c);
+		}
+
 	}
 
-	public JFrame closeFrame(JFrame frame) {
+	private Collection<Component> components = new ArrayList<Component>();
 
-		if (frame == null) {
-			throw new IllegalArgumentException("Internal error. 'frame' must be not not null.");
-		}
-
-		frame.setVisible(false);
-		return frame;
+	public void registerAdditionalComponent(Component c) {
+		components.add(c);
 	}
+
+	public void unregisterAdditionalComponent(Component c) {
+		components.remove(c);
+	}
+
+	//
+	// public Window closeWindow(Class<? extends Window> windowType) {
+	// if (windowType == null) {
+	// throw new
+	// IllegalArgumentException("Internal error. 'windowType' must be not not null.");
+	// }
+	// return this.closeWindow(this.getWindow(windowType));
+	// }
+	//
+	// public Window closeWindow(Window frame) {
+	//
+	// if (frame == null) {
+	// throw new
+	// IllegalArgumentException("Internal error. 'frame' must be not not null.");
+	// }
+	//
+	// frame.setVisible(false);
+	// return frame;
+	// }
 }
