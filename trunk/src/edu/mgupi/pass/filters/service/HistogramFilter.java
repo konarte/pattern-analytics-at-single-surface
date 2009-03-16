@@ -26,7 +26,7 @@ public class HistogramFilter implements IFilter {
 	private final static Logger logger = LoggerFactory.getLogger(HistogramFilter.class);
 
 	public String getName() {
-		return "Гистограмма";
+		return "Гистограмма 256x256";
 	}
 
 	public Collection<Param> getParams() {

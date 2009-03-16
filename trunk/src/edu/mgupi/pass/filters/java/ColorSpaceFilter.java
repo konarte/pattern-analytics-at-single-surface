@@ -18,7 +18,7 @@ public class ColorSpaceFilter implements IFilter {
 	private final static Logger logger = LoggerFactory.getLogger(ColorSpaceFilter.class);
 
 	public String getName() {
-		return "Изменение цветовой модели";
+		return "Смена цветовой модели";
 	}
 
 	private Collection<Param> params;

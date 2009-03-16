@@ -17,7 +17,7 @@ public class TestSourceImpl implements ISource {
 
 	protected void finalize() throws Throwable {
 		if (!done) {
-			System.err.println("Finalize not called");
+			logger.error("Close not called. Terminating application immediately.");
 			System.exit(1);
 		}
 	}

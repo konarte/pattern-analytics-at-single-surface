@@ -15,7 +15,7 @@ public class GrayScaleFilter implements IFilter {
 	private final static Logger logger = LoggerFactory.getLogger(GrayScaleFilter.class);
 
 	public String getName() {
-		return "Перевод в серый цвет";
+		return "Серый цвет";
 	}
 
 	public Collection<Param> getParams() {

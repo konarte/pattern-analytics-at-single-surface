@@ -4,17 +4,16 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
-import java.io.File;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
-import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -33,14 +32,22 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
-import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.TitledBorder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import edu.mgupi.pass.modules.ModuleProcessor;
+import edu.mgupi.pass.modules.basic.SimpleMatrixModule;
+import edu.mgupi.pass.sources.SourceStore;
+import edu.mgupi.pass.sources.visual.SingleFilePick;
 import edu.mgupi.pass.util.Const;
 
 public class MainFrame extends JFrame implements ProgressInterface {
+
+	private final static Logger logger = LoggerFactory.getLogger(MainFrame.class);
 
 	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
@@ -53,37 +60,91 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JMenu jMenuDatabase = null;
 	private JMenuItem jMenuItemMaterials = null;
 
+	// ------------
+	private SingleFilePick singleFilePicker = null; // @jve:decl-index=0:
+	private ImageFrameTemplate histogramFrame = null; // @jve:decl-index=0:visual-constraint="820,10"
+	private ModuleProcessor mainModuleProcessor = null; // @jve:decl-index=0:
+
 	/**
 	 * This is the default constructor
+	 * 
+	 * @throws Exception
 	 */
-	public MainFrame() {
+	public MainFrame() throws Exception {
 		super();
 		initialize();
 	}
 
-	private BufferedImage commonImage = null; // @jve:decl-index=0:
+	private String basicWindowName = "Pattern Analytics at Single Surface v." + Const.VERSION + " b." + Const.BUILD; // @jve:decl-index=0:
 
 	/**
 	 * This method initializes this
 	 * 
 	 */
-	private void initialize() {
+	private void initialize() throws Exception {
 		this.setJMenuBar(getJmainMenuBar());
 		this.setContentPane(getJContentPane());
-		this.setTitle("Pattern Analytics at Single Surface");
-		this.setMinimumSize(new Dimension(800, 700));
-		this.setBounds(new Rectangle(150, 150, 800, 700));
-
-		try {
-			this.commonImage = ImageIO.read(new File("test/suslik_list.jpg"));
-
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		this.setTitle(basicWindowName);
+		this.setMinimumSize(new Dimension(600, 720));
+		this.setBounds(new Rectangle(150, 150, 800, 720));
 
 		// ----------------
-		MainFrame.this.switchScaleCheckBox();
+
+		this.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				if (singleFilePicker != null) {
+					singleFilePicker.close();
+				}
+				logger.debug("Application terminating...");
+			}
+		});
+
+		mainModuleProcessor = new ModuleProcessor();
+		mainModuleProcessor.registerModule(SimpleMatrixModule.class);
+
+		histogramFrame = (ImageFrameTemplate) AppHelper.getInstance().createWindow(ImageFrameTemplate.class);
+		histogramFrame.registerControlCheckbox(this.jCheckBoxHistogram);
+		histogramFrame.setTitle(mainModuleProcessor.getHistoFilters().toString());
+
+		singleFilePicker = new SingleFilePick();
+		singleFilePicker.init();
+
+		// MainFrame.this.switchScaleCheckBox();
+
+		// TestSourceImpl source = new TestSourceImpl();
+		// source.init();
+		// this.startProcessing(source.getSingleSource());
+		// source.close();
+
+		logger.debug("Main frame init done.");
+	}
+
+	private void startProcessing(SourceStore source) throws Exception {
+
+		if (source == null) {
+			logger.debug("Nothing to process...");
+			// JOptionPane.showMessageDialog(null,
+			// "Internal error. Received null source.", "Internal error",
+			// JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		logger.debug("Start loading source " + source.getName());
+
+		this.setTitle(basicWindowName + " -- " + source.getName());
+
+		// This is must be safe!!!!
+		// I can stop wherever I want!
+		mainModuleProcessor.finishProcessing();
+
+		// Main cycle
+		mainModuleProcessor.startProcessing(source);
+		this.jLabelImageInfo.setText("" + mainModuleProcessor.getLastProcessedImage().getWidth() + "x"
+				+ mainModuleProcessor.getLastProcessedImage().getHeight() + " "
+				+ mainModuleProcessor.getLastProcessedImage().getColorModel().getPixelSize() + " bpp");
+		// Locuses locus = mainModuleProcessor.startProcessing(source);
+		this.jPanelImage.setImage(mainModuleProcessor.getLastProcessedImage());
+		this.histogramFrame.setImage(mainModuleProcessor.getLastHistogramImage());
 	}
 
 	/**
@@ -95,8 +156,8 @@ public class MainFrame extends JFrame implements ProgressInterface {
 		if (jContentPane == null) {
 			jContentPane = new JPanel();
 			jContentPane.setLayout(new BorderLayout());
-			jContentPane.add(getJPanelStatus(), BorderLayout.SOUTH);
 			jContentPane.add(getJPanelCommon(), BorderLayout.CENTER);
+			jContentPane.add(getJPanelStatus(), BorderLayout.SOUTH);
 		}
 		return jContentPane;
 	}
@@ -143,8 +204,25 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JMenuItem getJMenuItemOpen() {
 		if (jMenuItemOpen == null) {
 			jMenuItemOpen = new JMenuItem();
-			jMenuItemOpen.setAction(new NoAction());
+			jMenuItemOpen.setAction(new AbstractAction() {
+
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent e) {
+					try {
+						MainFrame.this.startProcessing(MainFrame.this.singleFilePicker.getSingleSource());
+					} catch (Exception e1) {
+						logger.error("Error when picking new image for processing", e1);
+						JOptionPane.showMessageDialog(null, "Error when opening image: " + e1, "Error",
+								JOptionPane.ERROR_MESSAGE);
+					}
+				}
+			});
 			jMenuItemOpen.setText("Открыть");
+			jMenuItemOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
 			jMenuItemOpen.setActionCommand("open");
 		}
 		return jMenuItemOpen;
@@ -173,7 +251,17 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JMenuItem getJMenuItemSettings() {
 		if (jMenuItemSettings == null) {
 			jMenuItemSettings = new JMenuItem();
-			jMenuItemSettings.setAction(new NoAction());
+			jMenuItemSettings.setAction(new AbstractAction() {
+
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent e) {
+					AppHelper.getInstance().openWindow(SettingsDialog.class, MainFrame.this);
+				}
+			});
 			jMenuItemSettings.setText("Настройки...");
 			jMenuItemSettings.setActionCommand("settings");
 		}
@@ -245,7 +333,6 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JCheckBox jCheckBoxScale = null;
 	private JProgressBar jProgressBarMain = null;
 	private JLabel jLabelTmp = null;
-	private JButton jButtonTmp = null;
 	private JPanel jPanelCommon = null;
 	private JPanel jPanelLeft = null;
 	private JScrollPane jScrollPaneImage = null;
@@ -272,7 +359,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JCheckBox jCheckBoxHistogram = null;
 	private JPanel jPanelLeftOthers = null;
 	private JButton jButtonProcess = null;
-	private JPanel jPanelImage = null;
+	private ImagePanel jPanelImage = null;
 
 	/**
 	 * This method initializes jMenuHelp
@@ -286,6 +373,8 @@ public class MainFrame extends JFrame implements ProgressInterface {
 			jMenuHelp.add(getJMenuItemHelp());
 			jMenuHelp.addSeparator();
 			jMenuHelp.add(getJMenuItemAbout());
+			jMenuHelp.addSeparator();
+			jMenuHelp.add(getJMenuTest());
 		}
 		return jMenuHelp;
 	}
@@ -322,9 +411,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent e) {
-					AboutDialog about = new AboutDialog(MainFrame.this);
-					about.setLocationRelativeTo(MainFrame.this);
-					about.setVisible(true);
+					AppHelper.getInstance().openWindow(AboutDialog.class, MainFrame.this);
 				}
 			});
 			jMenuItemAbout.setText("О программе...");
@@ -333,7 +420,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 		return jMenuItemAbout;
 	}
 
-	private class NoAction extends AbstractAction {
+	public static class NoAction extends AbstractAction {
 
 		/**
 	 *
@@ -352,6 +439,12 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	 */
 	private JPanel getJPanelStatus() {
 		if (jPanelStatus == null) {
+			GridBagConstraints gridBagConstraints110 = new GridBagConstraints();
+			gridBagConstraints110.gridx = 3;
+			gridBagConstraints110.insets = new Insets(0, 15, 0, 15);
+			gridBagConstraints110.gridy = 0;
+			jLabelImageInfo = new JLabel();
+			jLabelImageInfo.setText("");
 			GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
 			gridBagConstraints3.gridx = 1;
 			gridBagConstraints3.weightx = 1.0D;
@@ -360,7 +453,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 			jLabelTmp.setText("");
 			jLabelTmp.setVisible(true);
 			GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
-			gridBagConstraints2.gridx = 3;
+			gridBagConstraints2.gridx = 4;
 			gridBagConstraints2.fill = GridBagConstraints.NONE;
 			gridBagConstraints2.anchor = GridBagConstraints.EAST;
 
@@ -382,12 +475,21 @@ public class MainFrame extends JFrame implements ProgressInterface {
 			jPanelStatus.add(jStatus, gridBagConstraints);
 			jPanelStatus.add(jLabelTmp, gridBagConstraints3);
 			jPanelStatus.add(getJProgressBarMain(), gridBagConstraints1);
+			jPanelStatus.add(jLabelImageInfo, gridBagConstraints110);
 			jPanelStatus.add(getJCheckBoxScale(), gridBagConstraints2);
 		}
 		return jPanelStatus;
 	}
 
-	private boolean fitImageToWindowSize = false;
+	private JPanel jPanelModule = null;
+	private JComboBox jComboBoxModules = null;
+	private JCheckBox jCheckBoxModuleGraphic = null;
+
+	private JMenu jMenuTest = null;
+
+	private JMenuItem jMenuItemProgress = null;
+
+	private JLabel jLabelImageInfo = null;
 
 	/**
 	 * This method initializes jCheckBoxScale
@@ -397,17 +499,12 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JCheckBox getJCheckBoxScale() {
 		if (jCheckBoxScale == null) {
 			jCheckBoxScale = new JCheckBox();
-			jCheckBoxScale.setAction(new AbstractAction() {
-
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public void actionPerformed(ActionEvent e) {
-					MainFrame.this.switchScaleCheckBox();
-				}
-			});
+			if (jPanelImage != null) {
+				jPanelImage.registerFitButton(jCheckBoxScale);
+			} else {
+				JOptionPane.showMessageDialog(null, "Internal error. Expected panelImage layout not initialized yet.",
+						"Invalid layout programming", JOptionPane.ERROR_MESSAGE);
+			}
 			jCheckBoxScale.setText("Масштаб под размеры окна");
 			jCheckBoxScale.setHorizontalAlignment(SwingConstants.LEADING);
 			jCheckBoxScale.setMnemonic(KeyEvent.VK_UNDEFINED);
@@ -416,29 +513,9 @@ public class MainFrame extends JFrame implements ProgressInterface {
 		return jCheckBoxScale;
 	}
 
-	private void switchScaleCheckBox() {
-		MainFrame.this.fitImageToWindowSize = jCheckBoxScale.isSelected();
-		if (MainFrame.this.fitImageToWindowSize) {
-
-			jPanelImage.setPreferredSize(new Dimension((int) jScrollPaneImage.getVisibleRect().getWidth(),
-					(int) jScrollPaneImage.getVisibleRect().getHeight()));
-			jPanelImage.setBounds(jScrollPaneImage.getBounds());
-			jScrollPaneImage.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-			jScrollPaneImage.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-		} else {
-			int width = commonImage.getWidth();
-			int height = commonImage.getHeight();
-
-			width = Const.MAIN_IMAGE_WIDTH > width ? width : Const.MAIN_IMAGE_WIDTH;
-			height = Const.MAIN_IMAGE_HEIGHT > height ? height : Const.MAIN_IMAGE_HEIGHT;
-
-			jPanelImage.setPreferredSize(new Dimension(width, height));
-			jPanelImage.setBounds(0, 0, width, height);
-			jScrollPaneImage.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-			jScrollPaneImage.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-		}
-		jPanelImage.repaint();
-	}
+	// private void switchScaleCheckBox() {
+	// jPanelImage.setFitMode(jCheckBoxScale.isSelected());
+	// }
 
 	/**
 	 * This method initializes jProgressBarMain
@@ -470,48 +547,6 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	public void stopProgress() {
 		this.jProgressBarMain.setVisible(false);
 		this.jLabelTmp.setVisible(true);
-	}
-
-	/**
-	 * This method initializes jButtonTmp
-	 * 
-	 * @return javax.swing.JButton
-	 */
-	private JButton getJButtonTmp() {
-		if (jButtonTmp == null) {
-			jButtonTmp = new JButton();
-			jButtonTmp.setAction(new AbstractAction() {
-
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public void actionPerformed(ActionEvent e) {
-
-					new Thread(new Runnable() {
-
-						public void run() {
-							jButtonTmp.setEnabled(false);
-							MainFrame.this.startProgress(100);
-							MainFrame.this.setProgress(15);
-							try {
-								Thread.sleep(1500);
-							} catch (InterruptedException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							}
-							MainFrame.this.stopProgress();
-							jButtonTmp.setEnabled(true);
-						};
-					}).start();
-
-				}
-			});
-			jButtonTmp.setHorizontalAlignment(SwingConstants.CENTER);
-			jButtonTmp.setText("Тест ProgressBar");
-		}
-		return jButtonTmp;
 	}
 
 	/**
@@ -552,6 +587,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 			jPanelLeft.setLayout(new BoxLayout(getJPanelLeft(), BoxLayout.Y_AXIS));
 			jPanelLeft.setPreferredSize(new Dimension(200, 200));
 			jPanelLeft.setMinimumSize(new Dimension(200, 200));
+			jPanelLeft.add(getJPanelModule(), null);
 			jPanelLeft.add(getJPanelFilters(), null);
 			jPanelLeft.add(getJPanelSensors(), null);
 			jPanelLeft.add(getJPanelSurface(), null);
@@ -619,6 +655,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JList getJListFilters() {
 		if (jListFilters == null) {
 			jListFilters = new JList(new String[] { "GrayScale Filter", "AutoSharp Filter", "Invert Filter" });
+			jListFilters.setPreferredSize(new Dimension(93, 50));
 		}
 		return jListFilters;
 	}
@@ -657,7 +694,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JScrollPane getJScrollPaneFilters() {
 		if (jScrollPaneFilters == null) {
 			jScrollPaneFilters = new JScrollPane();
-			jScrollPaneFilters.setPreferredSize(new Dimension(85, 100));
+			jScrollPaneFilters.setPreferredSize(new Dimension(85, 120));
 			jScrollPaneFilters.setViewportView(getJListFilters());
 		}
 		return jScrollPaneFilters;
@@ -736,7 +773,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JTextArea getJTextAreaSensors() {
 		if (jTextAreaSensors == null) {
 			jTextAreaSensors = new JTextArea();
-			jTextAreaSensors.setText("Название: вихревой датчик\nТип: многокатушечный\nЧуть-чуть о датчике");
+			jTextAreaSensors.setText("Название: вихревой датчик\nЧуть-чуть о датчике");
 			jTextAreaSensors.setEditable(false);
 		}
 		return jTextAreaSensors;
@@ -867,7 +904,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JTextArea getJTextAreaSurface() {
 		if (jTextAreaSurface == null) {
 			jTextAreaSurface = new JTextArea();
-			jTextAreaSurface.setText("Название: плоскость\nМатериал: сиськи\nЧуть-чуть о поверхности");
+			jTextAreaSurface.setText("Название: плоскость\nЧуть-чуть о поверхности");
 			jTextAreaSurface.setEditable(false);
 		}
 		return jTextAreaSurface;
@@ -919,7 +956,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JTextArea getJTextAreaDefect() {
 		if (jTextAreaDefect == null) {
 			jTextAreaDefect = new JTextArea();
-			jTextAreaDefect.setText("Название: поверхностный\nТип: окалина\nЧуть-чуть о дефекте");
+			jTextAreaDefect.setText("Название: поверхностный\nЧуть-чуть о дефекте");
 			jTextAreaDefect.setEditable(false);
 		}
 		return jTextAreaDefect;
@@ -946,6 +983,17 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JCheckBox getJCheckBoxHistogram() {
 		if (jCheckBoxHistogram == null) {
 			jCheckBoxHistogram = new JCheckBox();
+			jCheckBoxHistogram.setAction(new AbstractAction() {
+
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent e) {
+					histogramFrame.setVisible(jCheckBoxHistogram.isSelected());
+				}
+			});
 			jCheckBoxHistogram.setText("Гистограмма");
 		}
 		return jCheckBoxHistogram;
@@ -964,17 +1012,8 @@ public class MainFrame extends JFrame implements ProgressInterface {
 			gridBagConstraints24.insets = new Insets(15, 15, 15, 15);
 			gridBagConstraints24.anchor = GridBagConstraints.NORTH;
 			gridBagConstraints24.gridy = 1;
-			GridBagConstraints gridBagConstraints22 = new GridBagConstraints();
-			gridBagConstraints22.insets = new Insets(0, 0, 0, 0);
-			gridBagConstraints22.gridy = 0;
-			gridBagConstraints22.fill = GridBagConstraints.NONE;
-			gridBagConstraints22.anchor = GridBagConstraints.NORTHWEST;
-			gridBagConstraints22.weightx = 1.0D;
-			gridBagConstraints22.gridx = 0;
 			jPanelLeftOthers = new JPanel();
 			jPanelLeftOthers.setLayout(new GridBagLayout());
-			jPanelLeftOthers.add(getJCheckBoxHistogram(), gridBagConstraints22);
-			jPanelLeftOthers.add(getJButtonTmp(), gridBagConstraints24);
 			jPanelLeftOthers.add(getJButtonProcess(), gridBagConstraints24);
 		}
 		return jPanelLeftOthers;
@@ -989,6 +1028,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 		if (jButtonProcess == null) {
 			jButtonProcess = new JButton();
 			jButtonProcess.setText("Распознать...");
+			jButtonProcess.setEnabled(false);
 		}
 		return jButtonProcess;
 	}
@@ -998,48 +1038,134 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	 * 
 	 * @return javax.swing.JPanel
 	 */
-	private JPanel getJPanelImage() {
+	private ImagePanel getJPanelImage() {
 		if (jPanelImage == null) {
 			jPanelImage = new ImagePanel();
-			// jPanelImage = new JPanel();
 			jPanelImage.setLayout(new GridBagLayout());
 			jPanelImage.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
 		}
 		return jPanelImage;
 	};
 
-	class ImagePanel extends JPanel {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
+	/**
+	 * This method initializes jPanelModule
+	 * 
+	 * @return javax.swing.JPanel
+	 */
+	private JPanel getJPanelModule() {
+		if (jPanelModule == null) {
+			GridBagConstraints gridBagConstraints26 = new GridBagConstraints();
+			gridBagConstraints26.gridx = 1;
+			gridBagConstraints26.anchor = GridBagConstraints.WEST;
+			gridBagConstraints26.gridy = 1;
+			GridBagConstraints gridBagConstraints22 = new GridBagConstraints();
+			gridBagConstraints22.anchor = GridBagConstraints.WEST;
+			gridBagConstraints22.insets = new Insets(0, 0, 0, 0);
+			gridBagConstraints22.gridx = 0;
+			gridBagConstraints22.gridy = 1;
+			gridBagConstraints22.weightx = 1.0D;
+			gridBagConstraints22.fill = GridBagConstraints.NONE;
+			GridBagConstraints gridBagConstraints25 = new GridBagConstraints();
+			gridBagConstraints25.fill = GridBagConstraints.HORIZONTAL;
+			gridBagConstraints25.anchor = GridBagConstraints.WEST;
+			gridBagConstraints25.gridwidth = 3;
+			gridBagConstraints25.weightx = 1.0;
+			jPanelModule = new JPanel();
+			jPanelModule.setLayout(new GridBagLayout());
+			jPanelModule.setBorder(BorderFactory.createTitledBorder(null, "Модуль анализа изображения",
+					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
+					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			jPanelModule.setMaximumSize(new Dimension(200, 50));
+			jPanelModule.add(getJComboBoxModules(), gridBagConstraints25);
+			jPanelModule.add(getJCheckBoxHistogram(), gridBagConstraints22);
+			jPanelModule.add(getJCheckBoxModuleGraphic(), gridBagConstraints26);
+		}
+		return jPanelModule;
+	}
 
-		protected void paintComponent(Graphics g) {
-			super.paintComponent(g);
-			if (commonImage != null) {
+	/**
+	 * This method initializes jComboBoxModules
+	 * 
+	 * @return javax.swing.JComboBox
+	 */
+	private JComboBox getJComboBoxModules() {
+		if (jComboBoxModules == null) {
+			jComboBoxModules = new JComboBox(new String[] { "Simple Module", "TestModule" });
+		}
+		return jComboBoxModules;
+	}
 
-				if (fitImageToWindowSize) {
-					/*
-					 * Based of thumb maker by Marco Schmidt
-					 */
-					int thumbWidth = this.getWidth();
-					int thumbHeight = this.getHeight();
-					double thumbRatio = (double) thumbWidth / (double) thumbHeight;
-					int imageWidth = commonImage.getWidth();
-					int imageHeight = commonImage.getHeight();
-					double imageRatio = (double) imageWidth / (double) imageHeight;
-					if (thumbRatio < imageRatio) {
-						thumbHeight = (int) (thumbWidth / imageRatio);
-					} else {
-						thumbWidth = (int) (thumbHeight * imageRatio);
-					}
+	/**
+	 * This method initializes jCheckBoxModuleGraphic
+	 * 
+	 * @return javax.swing.JCheckBox
+	 */
+	private JCheckBox getJCheckBoxModuleGraphic() {
+		if (jCheckBoxModuleGraphic == null) {
+			jCheckBoxModuleGraphic = new JCheckBox();
+			jCheckBoxModuleGraphic.setText("Модуль");
+		}
+		return jCheckBoxModuleGraphic;
+	}
 
-					g.drawImage(MainFrame.this.commonImage, 0, 0, thumbWidth, thumbHeight, null);
+	/**
+	 * This method initializes jMenuTest
+	 * 
+	 * @return javax.swing.JMenu
+	 */
+	private JMenu getJMenuTest() {
+		if (jMenuTest == null) {
+			jMenuTest = new JMenu();
+			jMenuTest.setText("Тест");
+			jMenuTest.add(getJMenuItemProgress());
+		}
+		return jMenuTest;
+	}
 
-				} else {
-					g.drawImage(MainFrame.this.commonImage, 0, 0, null);
+	/**
+	 * This method initializes jMenuItemProgress
+	 * 
+	 * @return javax.swing.JMenuItem
+	 */
+	private JMenuItem getJMenuItemProgress() {
+		if (jMenuItemProgress == null) {
+			jMenuItemProgress = new JMenuItem();
+			jMenuItemProgress.setAction(new AbstractAction() {
+
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent e) {
+					new Thread(new Runnable() {
+
+						public void run() {
+							MainFrame.this.startProgress(100);
+							MainFrame.this.setProgress(15);
+							try {
+								Thread.sleep(1500);
+							} catch (InterruptedException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+							MainFrame.this.stopProgress();
+						};
+					}).start();
 				}
-			}
-		};
+			});
+			jMenuItemProgress.setText("Тест ProgressBar");
+		}
+		return jMenuItemProgress;
+	}
+
+	public void clearMessage() {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void printMessage(String message) {
+		// TODO Auto-generated method stub
+
 	}
 }

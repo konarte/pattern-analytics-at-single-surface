@@ -6,7 +6,7 @@ public class SourceStore {
 	private String name;
 	private BufferedImage sourceImage;
 	private byte[] fileData;
-	private int[] historgram;
+	private int[] histogram;
 
 	public SourceStore(String imageName, BufferedImage sourceImage, byte[] fileData) {
 		this.name = imageName;
@@ -26,11 +26,11 @@ public class SourceStore {
 		return sourceImage;
 	}
 
-	public void setHistorgram(int[] historgram) {
-		this.historgram = historgram;
+	public void setHistogram(int[] histogram) {
+		this.histogram = histogram;
 	}
 
-	public int[] getHistorgram() {
-		return this.historgram;
+	public int[] getHistogram() {
+		return this.histogram;
 	}
 }
