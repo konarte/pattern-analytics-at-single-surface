@@ -47,7 +47,7 @@ import edu.mgupi.pass.util.Const;
 
 public class MainFrame extends JFrame implements ProgressInterface {
 
-	private final static Logger logger = LoggerFactory.getLogger(MainFrame.class);
+	private final static Logger logger = LoggerFactory.getLogger(MainFrame.class); // @jve:decl-index=0:
 
 	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
@@ -90,10 +90,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				if (singleFilePicker != null) {
-					singleFilePicker.close();
-				}
-				logger.debug("Application terminating...");
+				MainFrame.this.closeImpl();
 			}
 		});
 
@@ -115,6 +112,13 @@ public class MainFrame extends JFrame implements ProgressInterface {
 		// source.close();
 
 		logger.debug("Main frame init done.");
+	}
+
+	private void closeImpl() {
+		logger.debug("Application terminating...");
+		if (singleFilePicker != null) {
+			singleFilePicker.close();
+		}
 	}
 
 	protected void startProcessing(SourceStore source) throws Exception {
@@ -286,10 +290,9 @@ public class MainFrame extends JFrame implements ProgressInterface {
 
 				public void actionPerformed(ActionEvent e) {
 					// When this frame closed -- we totally exit the application
-					MainFrame.this.dispose();
 
-					// We can catch this situation on listening
-					// WindowEvent.WINDOW_CLOSED event
+					MainFrame.this.closeImpl();
+					System.exit(0);
 				}
 			});
 			jMenuItemExit.setText("Выход");
