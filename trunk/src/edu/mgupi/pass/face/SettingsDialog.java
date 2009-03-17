@@ -60,6 +60,7 @@ public class SettingsDialog extends JDialog {
 		this.setContentPane(getJContentPane());
 
 		// -------------------
+
 		this.resetSettings();
 	}
 
@@ -112,6 +113,7 @@ public class SettingsDialog extends JDialog {
 					SettingsDialog.this.saveSettings();
 				}
 			});
+			jButtonOK.setName("ok");
 			jButtonOK.setText("OK");
 		}
 		return jButtonOK;
@@ -136,6 +138,7 @@ public class SettingsDialog extends JDialog {
 					SettingsDialog.this.cancelSettings();
 				}
 			});
+			jButtonCancel.setName("cancel");
 			jButtonCancel.setText("Отмена");
 		}
 		return jButtonCancel;
@@ -235,6 +238,7 @@ public class SettingsDialog extends JDialog {
 				lafs.put(laf.getName(), laf.getClassName());
 			}
 			jComboBoxLaF = new JComboBox(lafs.keySet().toArray(new String[0]));
+			jComboBoxLaF.setName("laf");
 
 		}
 		return jComboBoxLaF;

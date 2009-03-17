@@ -34,7 +34,7 @@ public class AppHelper {
 		return instance;
 	}
 
-	private Map<Class<? extends Window>, Window> windowsCollection = new HashMap<Class<? extends Window>, Window>();
+	private volatile Map<Class<? extends Window>, Window> windowsCollection = new HashMap<Class<? extends Window>, Window>();
 
 	private synchronized Window getWindow(Class<? extends Window> windowType, Frame owner) {
 		Window window = windowsCollection.get(windowType);
@@ -55,6 +55,10 @@ public class AppHelper {
 			windowsCollection.put(windowType, window);
 		}
 		return window;
+	}
+
+	public Window searchWindow(Class<? extends Window> windowType) {
+		return windowsCollection.get(windowType);
 	}
 
 	public Window createWindow(Class<? extends Window> windowType) {

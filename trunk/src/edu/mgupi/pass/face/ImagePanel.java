@@ -1,9 +1,13 @@
 package edu.mgupi.pass.face;
 
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.AbstractAction;
@@ -71,6 +75,8 @@ public class ImagePanel extends JPanel {
 
 			parent = (JScrollPane) parentContainer;
 		}
+
+		// We must redefine scrollPane constants
 		if (this.fitImageToWindowSize) {
 			this.setPreferredSize(new Dimension((int) parent.getVisibleRect().getWidth(), (int) parent.getVisibleRect()
 					.getHeight()));
@@ -94,6 +100,7 @@ public class ImagePanel extends JPanel {
 
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
+
 		if (myImage != null) {
 
 			if (this.fitImageToWindowSize) {
@@ -117,6 +124,19 @@ public class ImagePanel extends JPanel {
 			} else {
 				g.drawImage(this.myImage, 0, 0, null);
 			}
+		} else {
+
+			// Simple visual cake :)
+			String text = "No image";
+
+			Graphics2D graphics2D = (Graphics2D) g;
+			graphics2D.setFont(new Font("Courier", Font.PLAIN, 22));
+			graphics2D.setColor(Color.BLACK);
+			Rectangle2D rect = graphics2D.getFontMetrics().getStringBounds(text, g);
+
+			graphics2D.drawString(text, this.getWidth() / 2 - (int) rect.getCenterX(), this.getHeight() / 2
+					- (int) rect.getCenterY());
+
 		}
 	};
 }

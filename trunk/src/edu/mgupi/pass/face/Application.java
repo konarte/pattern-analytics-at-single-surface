@@ -12,9 +12,11 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.UIManager.LookAndFeelInfo;
 
+import org.orm.PersistentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.db.surfaces.PassPersistentManager;
 import edu.mgupi.pass.filters.IllegalParameterValueException;
 import edu.mgupi.pass.filters.NoSuchParamException;
 
@@ -55,12 +57,12 @@ public class Application {
 	private final static String LOCK_FILE = "app.lock";
 
 	private void run() throws IllegalParameterValueException, NoSuchParamException, InstantiationException,
-			IllegalAccessException, IOException {
+			IllegalAccessException, IOException, PersistentException {
 
 		final FileChannel channel = new FileOutputStream(LOCK_FILE, false).getChannel();
 		final FileLock lock = channel.tryLock();
 		if (lock == null) {
-			JOptionPane.showMessageDialog(null, "Another instance of jNoteXP already runned. Please, "
+			JOptionPane.showMessageDialog(null, "Another instance of PASS already runned. Please, "
 					+ "close other application.", "Unable to start", JOptionPane.ERROR_MESSAGE);
 			System.exit(0);
 
@@ -88,6 +90,9 @@ public class Application {
 							+ "application with '-nolaf' key (" + e + ")", "Invalid look and feel",
 							JOptionPane.WARNING_MESSAGE);
 		}
+
+		logger.debug("Initializing Hibernate...");
+		PassPersistentManager.instance();
 
 		MainFrame frame = (MainFrame) AppHelper.getInstance().openWindow(MainFrame.class);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
