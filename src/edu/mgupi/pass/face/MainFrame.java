@@ -64,7 +64,8 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private SingleFilePick singleFilePicker = null; // @jve:decl-index=0:
 	private ImageFrameTemplate histogramFrame = null; // @jve:decl-index=0:visual-constraint="820,10"
 	private ModuleProcessor mainModuleProcessor = null; // @jve:decl-index=0:
-
+	
+	
 	/**
 	 * This is the default constructor
 	 * 
@@ -119,7 +120,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 		logger.debug("Main frame init done.");
 	}
 
-	private void startProcessing(SourceStore source) throws Exception {
+	protected void startProcessing(SourceStore source) throws Exception {
 
 		if (source == null) {
 			logger.debug("Nothing to process...");
@@ -223,6 +224,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 			});
 			jMenuItemOpen.setText("Открыть");
 			jMenuItemOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
+			jMenuItemOpen.setName("open");
 			jMenuItemOpen.setActionCommand("open");
 		}
 		return jMenuItemOpen;
@@ -238,6 +240,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 			jMenuItemOpenMass = new JMenuItem();
 			jMenuItemOpenMass.setAction(new NoAction());
 			jMenuItemOpenMass.setText("Массовая загрузка");
+			jMenuItemOpenMass.setName("openmass");
 			jMenuItemOpenMass.setActionCommand("openMass");
 		}
 		return jMenuItemOpenMass;
@@ -263,6 +266,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 				}
 			});
 			jMenuItemSettings.setText("Настройки...");
+			jMenuItemSettings.setName("settings");
 			jMenuItemSettings.setActionCommand("settings");
 		}
 		return jMenuItemSettings;
@@ -292,6 +296,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 				}
 			});
 			jMenuItemExit.setText("Выход");
+			jMenuItemExit.setName("exit");
 			jMenuItemExit.setActionCommand("exit");
 		}
 		return jMenuItemExit;
@@ -390,6 +395,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 			jMenuItemHelp.setAction(new NoAction());
 			jMenuItemHelp.setText("Помощь");
 			jMenuItemHelp.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
+			jMenuItemHelp.setName("help");
 			jMenuItemHelp.setActionCommand("help");
 		}
 		return jMenuItemHelp;
@@ -415,6 +421,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 				}
 			});
 			jMenuItemAbout.setText("О программе...");
+			jMenuItemAbout.setName("about");
 			jMenuItemAbout.setActionCommand("about");
 		}
 		return jMenuItemAbout;
@@ -508,6 +515,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 			jCheckBoxScale.setText("Масштаб под размеры окна");
 			jCheckBoxScale.setHorizontalAlignment(SwingConstants.LEADING);
 			jCheckBoxScale.setMnemonic(KeyEvent.VK_UNDEFINED);
+			jCheckBoxScale.setName("fitButton");
 			jCheckBoxScale.setHorizontalTextPosition(SwingConstants.TRAILING);
 		}
 		return jCheckBoxScale;
@@ -994,6 +1002,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 					histogramFrame.setVisible(jCheckBoxHistogram.isSelected());
 				}
 			});
+			jCheckBoxHistogram.setName("histogram");
 			jCheckBoxHistogram.setText("Гистограмма");
 		}
 		return jCheckBoxHistogram;
@@ -1091,6 +1100,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JComboBox getJComboBoxModules() {
 		if (jComboBoxModules == null) {
 			jComboBoxModules = new JComboBox(new String[] { "Simple Module", "TestModule" });
+			jComboBoxModules.setName("module");
 		}
 		return jComboBoxModules;
 	}
@@ -1104,6 +1114,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 		if (jCheckBoxModuleGraphic == null) {
 			jCheckBoxModuleGraphic = new JCheckBox();
 			jCheckBoxModuleGraphic.setText("Модуль");
+			jCheckBoxModuleGraphic.setName("moduleImage");
 		}
 		return jCheckBoxModuleGraphic;
 	}
