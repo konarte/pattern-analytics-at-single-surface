@@ -417,7 +417,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 
 				public void actionPerformed(ActionEvent e) {
 					JOptionPane.showMessageDialog(null, "<html><h2>" + Const.FULL_PROGRAM_NAME + "</h2>"
-							+ "<b>Scient contest:</b> Konart<br><b>Code, design:</b> raidan"
+							+ "<b>Science content:</b> Konart<br><b>Code, design:</b> raidan"
 							+ "<br><hr>(c) raidan, Konart 2009" + "</html>", "О программе...",
 							JOptionPane.INFORMATION_MESSAGE);
 
