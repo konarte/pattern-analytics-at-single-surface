@@ -64,8 +64,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private SingleFilePick singleFilePicker = null; // @jve:decl-index=0:
 	private ImageFrameTemplate histogramFrame = null; // @jve:decl-index=0:visual-constraint="820,10"
 	private ModuleProcessor mainModuleProcessor = null; // @jve:decl-index=0:
-	
-	
+
 	/**
 	 * This is the default constructor
 	 * 
@@ -76,8 +75,6 @@ public class MainFrame extends JFrame implements ProgressInterface {
 		initialize();
 	}
 
-	private String basicWindowName = "Pattern Analytics at Single Surface v." + Const.VERSION + " b." + Const.BUILD; // @jve:decl-index=0:
-
 	/**
 	 * This method initializes this
 	 * 
@@ -85,7 +82,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private void initialize() throws Exception {
 		this.setJMenuBar(getJmainMenuBar());
 		this.setContentPane(getJContentPane());
-		this.setTitle(basicWindowName);
+		this.setTitle(Const.FULL_PROGRAM_NAME);
 		this.setMinimumSize(new Dimension(600, 720));
 		this.setBounds(new Rectangle(150, 150, 800, 720));
 
@@ -132,7 +129,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 
 		logger.debug("Start loading source " + source.getName());
 
-		this.setTitle(basicWindowName + " -- " + source.getName());
+		this.setTitle(Const.FULL_PROGRAM_NAME + " -- " + source.getName());
 
 		// This is must be safe!!!!
 		// I can stop wherever I want!
@@ -417,7 +414,13 @@ public class MainFrame extends JFrame implements ProgressInterface {
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent e) {
-					AppHelper.getInstance().openWindow(AboutDialog.class, MainFrame.this);
+					JOptionPane.showMessageDialog(null, "<html><h2>" + Const.FULL_PROGRAM_NAME + "</h2>"
+							+ "<b>Scient contest:</b> Konart<br><b>Code, design:</b> raidan"
+							+ "<br><hr>(c) raidan, Konart 2009" + "</html>", "О программе...",
+							JOptionPane.INFORMATION_MESSAGE);
+
+					// AppHelper.getInstance().openWindow(AboutDialog.class,
+					// MainFrame.this);
 				}
 			});
 			jMenuItemAbout.setText("О программе...");

@@ -134,7 +134,7 @@ public class AboutDialog extends JDialog {
 			gridBagConstraints11.gridwidth = 1;
 			gridBagConstraints11.gridy = 3;
 			jLabelAuthor = new JLabel();
-			jLabelAuthor.setText("<html><hr><center>Author: raidan<br>Design: raidan</center></html>");
+			jLabelAuthor.setText("<html><hr><center>Design, code: raidan<br>Science contest: Konart</center></html>");
 			jLabelAuthor.setHorizontalAlignment(SwingConstants.CENTER);
 			jLabelAuthor.setHorizontalTextPosition(SwingConstants.TRAILING);
 			jLabelAuthor.setPreferredSize(new Dimension(200, 40));
@@ -151,7 +151,7 @@ public class AboutDialog extends JDialog {
 			jLabelVersion = new JLabel();
 			jLabelVersion.setText("Version " + Const.VERSION + ", build " + Const.BUILD);
 			jLabelProgramTitle = new JLabel();
-			jLabelProgramTitle.setText("Pattern Analytics at Single Surface");
+			jLabelProgramTitle.setText(Const.PROGRAM_NAME);
 			jLabelProgramTitle.setFont(new Font("Dialog", Font.BOLD, 12));
 			jPanel1 = new JPanel();
 			jPanel1.setLayout(new GridBagLayout());

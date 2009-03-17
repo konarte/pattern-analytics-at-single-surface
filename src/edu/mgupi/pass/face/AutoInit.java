@@ -177,7 +177,7 @@ public class AutoInit {
 	}
 
 	public static void main(String[] args) throws Exception {
-		System.out.println(Const.PROGRAM_NAME + " v." + Const.PROGRAM_VERSION);
+		System.out.println(Const.FULL_PROGRAM_NAME);
 		System.out.println("auto-init module");
 
 		Options options = new Options();
