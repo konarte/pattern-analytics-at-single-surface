@@ -103,8 +103,8 @@ public class Application {
 		splash.setSplashText("Загрузка приложения...");
 		MainFrame frame = (MainFrame) AppHelper.getInstance().openWindow(MainFrame.class);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		splash.setVisible(false);
+
+		splash.dispose();
 		frame.setVisible(true);
 		
 		logger.debug("Application PASS ready...");

@@ -6,5 +6,59 @@
 	<target name="common">
 		<buildnumber file="src/mybuild.properties"/>
 	</target>
+	
+	
+	<patternset id="full.jar.set">
+		<include name="**/*.class" />
+		<include name="**/*.properties" />
+		<include name="**/*.jpg" />
+		<include name="**/*.xml" />
+
+		<exclude name="**/test/**/*" />
+		<exclude name="**/test?/**/*" />
+		<exclude name="**/*-test.properties" />
+		<exclude name="**/*Test.class" />
+	</patternset> 
+	
+	<property name="basicJar" value="pass.jar" /> 
+	
+	<target name="pack">
+
+		<sync todir="target/lib" includeEmptyDirs="true">
+			<fileset dir="lib/">
+				<include name="**/*.jar" />
+			</fileset>
+			<fileset dir="src_gen/lib/">
+				<include name="**/*.jar" />
+			</fileset>
+			<preserveintarget>
+				<include name=".svn/**" />
+			</preserveintarget>
+		</sync>
+
+		<fileset dir="target/lib" id="libs">
+			<include name="*.jar" />
+		</fileset>
+		
+		<dirname property="current-dir" file="target"/>
+
+		<pathconvert pathsep=" " property="libs_list" refid="libs">
+			<map from="${current-dir}\target\" to="" />
+		</pathconvert>
+
+		<delete file="target/${basicJar}" failonerror="false" />
+		<jar destfile="target/${basicJar}">
+			<fileset dir="bin">
+				<patternset refid="full.jar.set" />
+			</fileset>
+			<manifest>
+				<attribute name="Built-by" value="raidan" />
+				<attribute name="Main-Class" value="edu.mgupi.pass.face.Application" />
+				<attribute name="Class-Path" value="${libs_list}" />
+			</manifest>
+		</jar>
+
+	</target>
+ 
 
 </project>
