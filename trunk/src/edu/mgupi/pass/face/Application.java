@@ -82,6 +82,10 @@ public class Application {
 			}
 		}));
 
+		SplashWindow splash = new SplashWindow();
+		splash.setVisible(true);
+		splash.setSplashText("Применение Look And Feel...");
+
 		try {
 			this.changeLookAndFeel();
 		} catch (Exception e) {
@@ -91,13 +95,21 @@ public class Application {
 							JOptionPane.WARNING_MESSAGE);
 		}
 
+		splash.setSplashText("Подключение и инициализация БД...");
+
 		logger.debug("Initializing Hibernate...");
 		PassPersistentManager.instance();
 
+		splash.setSplashText("Загрузка приложения...");
 		MainFrame frame = (MainFrame) AppHelper.getInstance().openWindow(MainFrame.class);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		splash.setVisible(false);
 		frame.setVisible(true);
+		
 		logger.debug("Application PASS ready...");
+		
+		
 	}
 
 	public static void main(String[] args) throws Exception {

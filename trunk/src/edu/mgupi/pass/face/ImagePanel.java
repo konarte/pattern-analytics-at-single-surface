@@ -12,7 +12,6 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.AbstractAction;
 import javax.swing.JCheckBox;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
@@ -67,9 +66,14 @@ public class ImagePanel extends JPanel {
 		if (parent == null) {
 			Container parentContainer = this.getParent();
 			if (parentContainer == null || !((parentContainer = parentContainer.getParent()) instanceof JScrollPane)) {
-				JOptionPane.showMessageDialog(null, "Internal error. Inappropriate layout mode -- "
-						+ "ImagePanel does not on JScrollPane.", "Invalid layout programming",
-						JOptionPane.ERROR_MESSAGE);
+				// if (!noScrollPane) {
+				// JOptionPane.showMessageDialog(null,
+				// "Internal error. Inappropriate layout mode -- "
+				// + "ImagePanel does not on JScrollPane.",
+				// "Invalid layout programming",
+				// JOptionPane.ERROR_MESSAGE);
+				// }
+				// otherwise, we don't care
 				return;
 			}
 
