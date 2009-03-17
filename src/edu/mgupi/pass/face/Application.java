@@ -20,22 +20,56 @@ import edu.mgupi.pass.db.surfaces.PassPersistentManager;
 import edu.mgupi.pass.filters.IllegalParameterValueException;
 import edu.mgupi.pass.filters.NoSuchParamException;
 
+/**
+ * Entry class for application. We set up file-lock (to prevent multiple
+ * instancing of application), change Look And Feel and open main window.
+ * 
+ * @author raidan
+ * 
+ */
 public class Application {
 
 	private final static Logger logger = LoggerFactory.getLogger(Application.class);
 
 	private Application() {
-		//
+		// Not allowed for any other instances
 	}
 
 	// Choose Windows Look and Feel by default
-	private final static String PREFFERED_LOOK_AND_FEEL = "Windows";
+	private final static String PREFFERED_LOOK_AND_FEEL;
+	static {
+		String OS = System.getProperty("os.name");
+		String VERSION = System.getProperty("os.version");
+		// Well, I don't know how to do this automatically :)
+		if (OS != null && VERSION != null) {
+			if (OS.startsWith("Windows") && (VERSION.startsWith("3.") || VERSION.startsWith("4."))) {
+				// Classic skin for Windows 95, 98, Me
+				PREFFERED_LOOK_AND_FEEL = "Windows Classic";
+			} else if (OS.startsWith("Windows")) {
+				// Windows 200, XP, 2003, Vista, other
+				PREFFERED_LOOK_AND_FEEL = "Windows";
+			} else if (OS.startsWith("Mac OS")) {
+				// Mac OS
+				PREFFERED_LOOK_AND_FEEL = "Nimbus";
+			} else {
+				PREFFERED_LOOK_AND_FEEL = null;
+			}
+		} else {
+			PREFFERED_LOOK_AND_FEEL = null;
+		}
 
+	}
+
+	// Changing Look And Feel, depends on current OS
 	private void changeLookAndFeel() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
 			UnsupportedLookAndFeelException {
-		try {
-			// If not found -- we don't care ^_^
 
+		// If unexpected OS -- keep LaF by default
+		if (PREFFERED_LOOK_AND_FEEL == null) {
+			return;
+		}
+
+		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 				if (PREFFERED_LOOK_AND_FEEL.equals(info.getName())) {
 					logger.debug("Applying look and feel {}({})", info.getName(), info.getClassName());
@@ -45,6 +79,7 @@ public class Application {
 				}
 			}
 		} catch (Exception e) {
+			// If not found -- we don't care ^_^
 			// OK, choose cross-platform LaF
 			logger.debug("Applying stardard look and feel by exception ({})", UIManager
 					.getCrossPlatformLookAndFeelClassName());
@@ -54,6 +89,7 @@ public class Application {
 
 	}
 
+	// Name for file-lock
 	private final static String LOCK_FILE = "app.lock";
 
 	private void run() throws IllegalParameterValueException, NoSuchParamException, InstantiationException,
@@ -106,10 +142,9 @@ public class Application {
 
 		splash.dispose();
 		frame.setVisible(true);
-		
+
 		logger.debug("Application PASS ready...");
-		
-		
+
 	}
 
 	public static void main(String[] args) throws Exception {

@@ -3,8 +3,13 @@
 	<!-- Common definition -->
 
 	<!-- Actual tasks -->
-	<target name="common">
+	<target name="updateBuildNumber">
 		<buildnumber file="src/mybuild.properties"/>
+		<copy todir="bin">
+			<fileset dir="src">
+				<include name="mybuild.properties" />
+			</fileset>
+		</copy>
 	</target>
 	
 	
@@ -22,7 +27,7 @@
 	
 	<property name="basicJar" value="pass.jar" /> 
 	
-	<target name="pack">
+	<target name="packJar">
 
 		<sync todir="target/lib" includeEmptyDirs="true">
 			<fileset dir="lib/">
@@ -59,6 +64,6 @@
 		</jar>
 
 	</target>
- 
+	
 
 </project>

@@ -149,7 +149,7 @@ public class AboutDialog extends JDialog {
 			gridBagConstraints.weightx = 0.0D;
 			gridBagConstraints.gridx = 0;
 			jLabelVersion = new JLabel();
-			jLabelVersion.setText("Version " + Const.VERSION + ", build " + Const.BUILD);
+			jLabelVersion.setText("Version " + Const.VERSION + ", development build " + Const.BUILD);
 			jLabelProgramTitle = new JLabel();
 			jLabelProgramTitle.setText(Const.PROGRAM_NAME);
 			jLabelProgramTitle.setFont(new Font("Dialog", Font.BOLD, 12));

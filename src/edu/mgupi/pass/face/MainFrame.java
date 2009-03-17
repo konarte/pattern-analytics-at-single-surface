@@ -33,7 +33,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
-import javax.swing.border.BevelBorder;
 import javax.swing.border.TitledBorder;
 
 import org.slf4j.Logger;
@@ -1057,7 +1056,6 @@ public class MainFrame extends JFrame implements ProgressInterface {
 		if (jPanelImage == null) {
 			jPanelImage = new ImagePanel();
 			jPanelImage.setLayout(new GridBagLayout());
-			jPanelImage.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
 		}
 		return jPanelImage;
 	};
