@@ -1,14 +1,19 @@
 package edu.mgupi.pass.modules;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+
+import javax.imageio.ImageIO;
 
 import org.junit.After;
 import org.junit.Before;
@@ -79,13 +84,22 @@ public class TestModuleTest {
 
 			module.analyze(sourceStore.getSourceImage(), locus);
 
+			BufferedImage moduleImage = ModuleHelper.getTemporaryModuleImage(locus);
+			locus.setProcessed(true);
+
+			assertNotNull(moduleImage);
+
 			FileOutputStream fileStream;
 			ObjectOutputStream out;
+
+			new File("tmp").mkdir();
 
 			fileStream = new FileOutputStream("tmp/locus-serialized.data");
 			out = new ObjectOutputStream(fileStream);
 			out.writeObject(locus);
 			fileStream.close();
+
+			ImageIO.write(moduleImage, "PNG", new File("tmp/locus-module-return.png"));
 
 			FileInputStream input = new FileInputStream("tmp/locus-serialized.data");
 			ObjectInputStream in = new ObjectInputStream(input);
@@ -93,6 +107,9 @@ public class TestModuleTest {
 			input.close();
 
 			assertTrue(module.compare(locus, locus) == 1);
+			assertNotNull(ModuleHelper.getTemporaryModuleImage(locus));
+			ImageIO.write(ModuleHelper.getTemporaryModuleImage(locus), "PNG", new File(
+					"tmp/locus-module-return-restored.png"));
 
 			Locuses locus2 = LocusesFactory.createLocuses();
 			LocusSources locusSource2 = LocusSourcesFactory.createLocusSources();
@@ -102,8 +119,13 @@ public class TestModuleTest {
 			locus2.setLocusSource(locusSource2);
 
 			module.analyze(sourceStore.getSourceImage(), locus2);
+			moduleImage = ModuleHelper.getTemporaryModuleImage(locus2);
+			locus2.setProcessed(true);
+
+			ImageIO.write(moduleImage, "PNG", new File("tmp/locus-module-return2.png"));
 
 			assertTrue(module.compare(locus, locus2) == 1);
+			assertNotNull(moduleImage);
 
 			Locuses locus3 = LocusesFactory.createLocuses();
 			LocusSources locusSource3 = LocusSourcesFactory.createLocusSources();
@@ -113,8 +135,13 @@ public class TestModuleTest {
 			locus3.setLocusSource(locusSource3);
 
 			module.analyze(new GrayScaleFilter().convert(sourceStore.getSourceImage()), locus3);
+			moduleImage = ModuleHelper.getTemporaryModuleImage(locus3);
+			locus3.setProcessed(true);
 
 			assertFalse(module.compare(locus, locus3) == 1);
+			assertNotNull(moduleImage);
+
+			ImageIO.write(moduleImage, "PNG", new File("tmp/locus-module-return3-gray.png"));
 
 			// Locuses locus2 = LocusesFactory.createLocuses();
 

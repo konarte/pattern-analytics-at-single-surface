@@ -1,5 +1,9 @@
 package edu.mgupi.pass.modules;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -56,7 +60,7 @@ public class TestModule implements IModule, IInitiable {
 		logger.debug("Module closed");
 	}
 
-	public void analyze(BufferedImage filteredImage, Locuses store) throws IOException {
+	public void analyze(BufferedImage filteredImage, Locuses store) throws IOException, ModuleException {
 		if (!init) {
 			throw new IllegalStateException("Internal error. Please, call init first.");
 		}
@@ -111,7 +115,28 @@ public class TestModule implements IModule, IInitiable {
 		// zipOut.write(imageData);
 		// zipOut.close();
 
-		store.setProcessed(true);
+		BufferedImage dest = new BufferedImage(256, 256, filteredImage.getType());
+		Graphics2D graphics2D = dest.createGraphics();
+		graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		graphics2D.drawImage(filteredImage, 0, 0, 256, 256, null);
+
+		graphics2D.setFont(new Font("Courier", Font.PLAIN, 22));
+		graphics2D.setColor(Color.BLACK);
+
+		// graphics2D.setStroke(new BasicStroke(3.0f));
+
+		String text = "HELLO!";
+		graphics2D.setColor(Color.WHITE);
+		graphics2D.fillRect(20, 35 - graphics2D.getFontMetrics().getHeight() + 5, graphics2D.getFontMetrics()
+				.charsWidth(text.toCharArray(), 0, text.length()), graphics2D.getFontMetrics().getHeight());
+
+		graphics2D.setColor(Color.BLACK);
+		graphics2D.drawString(text, 20, 35);
+
+		graphics2D.dispose();
+
+		logger.debug("Saving temporary image to store: " + dest);
+		ModuleHelper.putTemporaryModuleImage(store, dest);
 	}
 
 	public float compare(Locuses graph1, Locuses graph2) throws ModuleException {
@@ -135,6 +160,7 @@ public class TestModule implements IModule, IInitiable {
 		LocusModuleParams param_g2 = ModuleHelper.getParameter("myParam2", graph2);
 
 		try {
+			new File("tmp").mkdir();
 			ImageIO.write(ModuleHelper.covertPNGRawToImage(param_g1.getParamData()), "PNG", new File(
 					"tmp/G1-myParam1-imageRestored.png"));
 			ImageIO.write(ModuleHelper.covertPNGRawToImage(param_g2.getParamData()), "PNG", new File(

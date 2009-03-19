@@ -2,6 +2,7 @@ package edu.mgupi.pass.face;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -9,6 +10,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -34,12 +36,17 @@ import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.db.locuses.LModules;
+import edu.mgupi.pass.db.locuses.LModulesFactory;
+import edu.mgupi.pass.db.locuses.Locuses;
+import edu.mgupi.pass.modules.IModule;
+import edu.mgupi.pass.modules.ModuleHelper;
 import edu.mgupi.pass.modules.ModuleProcessor;
-import edu.mgupi.pass.modules.basic.SimpleMatrixModule;
 import edu.mgupi.pass.sources.SourceStore;
 import edu.mgupi.pass.sources.visual.SingleFilePick;
 import edu.mgupi.pass.util.Const;
@@ -60,9 +67,11 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JMenuItem jMenuItemMaterials = null;
 
 	// ------------
-	private SingleFilePick singleFilePicker = null; // @jve:decl-index=0:
-	private ImageFrameTemplate histogramFrame = null; // @jve:decl-index=0:visual-constraint="820,10"
-	private ModuleProcessor mainModuleProcessor = null; // @jve:decl-index=0:
+	protected SingleFilePick singleFilePicker = null;  //  @jve:decl-index=0:
+	protected ImageFrameTemplate histogramFrame = null;
+	protected ImageFrameTemplate moduleFrame = null;
+	protected ModuleProcessor mainModuleProcessor = null; // @jve:decl-index=0:
+	protected LModules[] moduleList = null;
 
 	/**
 	 * This is the default constructor
@@ -79,6 +88,11 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	 * 
 	 */
 	private void initialize() throws Exception {
+		// Loading model data
+		this.loadModelImpl();
+
+		// Initializing interface
+
 		this.setJMenuBar(getJmainMenuBar());
 		this.setContentPane(getJContentPane());
 		this.setTitle(Const.FULL_PROGRAM_NAME);
@@ -87,6 +101,19 @@ public class MainFrame extends JFrame implements ProgressInterface {
 
 		// ----------------
 
+		this.initImpl();
+	}
+
+	private void loadModelImpl() throws Exception {
+		moduleList = LModulesFactory.listLModulesByQuery(null, null);
+
+		if (moduleList == null || moduleList.length == 0) {
+			throw new Exception("No analyze modules found. Unable to work. Please, fill table 'LModules'.");
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void initImpl() throws Exception {
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				MainFrame.this.closeImpl();
@@ -94,21 +121,20 @@ public class MainFrame extends JFrame implements ProgressInterface {
 		});
 
 		mainModuleProcessor = new ModuleProcessor();
-		mainModuleProcessor.registerModule(SimpleMatrixModule.class);
 
 		histogramFrame = (ImageFrameTemplate) AppHelper.getInstance().createWindow(ImageFrameTemplate.class);
 		histogramFrame.registerControlCheckbox(this.jCheckBoxHistogram);
 		histogramFrame.setTitle(mainModuleProcessor.getHistoFilters().toString());
 
+		moduleFrame = (ImageFrameTemplate) AppHelper.getInstance().createWindow(ImageFrameTemplate.class);
+		moduleFrame.registerControlCheckbox(this.jCheckBoxModuleGraphic);
+		moduleFrame.setTitle("Модуль не выбран");
+
 		singleFilePicker = new SingleFilePick();
 		singleFilePicker.init();
 
-		// MainFrame.this.switchScaleCheckBox();
-
-		// TestSourceImpl source = new TestSourceImpl();
-		// source.init();
-		// this.startProcessing(source.getSingleSource());
-		// source.close();
+		LModules item = (LModules) jComboBoxModules.getSelectedItem();
+		MainFrame.this.setModule((Class<IModule>) Class.forName(item.getCodename()));
 
 		logger.debug("Main frame init done.");
 	}
@@ -119,6 +145,8 @@ public class MainFrame extends JFrame implements ProgressInterface {
 			singleFilePicker.close();
 		}
 	}
+
+	private Locuses myLocus = null; // @jve:decl-index=0:
 
 	protected void startProcessing(SourceStore source) throws Exception {
 
@@ -137,15 +165,34 @@ public class MainFrame extends JFrame implements ProgressInterface {
 		// This is must be safe!!!!
 		// I can stop wherever I want!
 		mainModuleProcessor.finishProcessing();
+		myLocus = null;
 
 		// Main cycle
-		mainModuleProcessor.startProcessing(source);
+		myLocus = mainModuleProcessor.startProcessing(source);
 		this.jLabelImageInfo.setText("" + mainModuleProcessor.getLastProcessedImage().getWidth() + "x"
 				+ mainModuleProcessor.getLastProcessedImage().getHeight() + " "
 				+ mainModuleProcessor.getLastProcessedImage().getColorModel().getPixelSize() + " bpp");
 		// Locuses locus = mainModuleProcessor.startProcessing(source);
 		this.jPanelImage.setImage(mainModuleProcessor.getLastProcessedImage());
 		this.histogramFrame.setImage(mainModuleProcessor.getLastHistogramImage());
+		this.moduleFrame.setImage(ModuleHelper.getTemporaryModuleImage(this.myLocus));
+
+	}
+
+	protected void setModule(Class<? extends IModule> newModule) throws Exception {
+
+		if (newModule == null) {
+			throw new IllegalArgumentException("Internal error. Parameter 'newModule' must be not null.");
+		}
+
+		logger.debug("Applying module {}", newModule);
+
+		this.mainModuleProcessor.setModule(newModule);
+		this.moduleFrame.setTitle(this.mainModuleProcessor.getModule().getName());
+
+		if (myLocus != null) {
+			this.moduleFrame.setImage(ModuleHelper.getTemporaryModuleImage(this.myLocus));
+		}
 	}
 
 	/**
@@ -342,8 +389,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JScrollPane jScrollPaneImage = null;
 	private JPanel jPanelFilters = null;
 	private JList jListFilters = null;
-	private JButton jButtonFilterAdd = null;
-	private JButton jButtonFilterDelete = null;
+	private JButton jButtonFiltersChange = null;
 	private JScrollPane jScrollPaneFilters = null;
 	private JPanel jPanelSensors = null;
 	private JComboBox jComboBoxSensor = null;
@@ -640,9 +686,6 @@ public class MainFrame extends JFrame implements ProgressInterface {
 			gridBagConstraints10.gridwidth = 3;
 			gridBagConstraints10.gridheight = 1;
 			gridBagConstraints10.weightx = 1.0D;
-			GridBagConstraints gridBagConstraints9 = new GridBagConstraints();
-			gridBagConstraints9.gridx = 1;
-			gridBagConstraints9.gridy = 1;
 			GridBagConstraints gridBagConstraints8 = new GridBagConstraints();
 			gridBagConstraints8.gridy = 1;
 			gridBagConstraints8.insets = new Insets(0, 0, 0, 0);
@@ -654,8 +697,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
 			jPanelFilters.setPreferredSize(new Dimension(183, 120));
 			jPanelFilters.add(getJScrollPaneFilters(), gridBagConstraints10);
-			jPanelFilters.add(getJButtonFilterAdd(), gridBagConstraints8);
-			jPanelFilters.add(getJButtonFilterDelete(), gridBagConstraints9);
+			jPanelFilters.add(getJButtonFiltersChange(), gridBagConstraints8);
 		}
 		return jPanelFilters;
 	}
@@ -674,29 +716,16 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	}
 
 	/**
-	 * This method initializes jButtonFilterAdd
+	 * This method initializes jButtonFiltersChange
 	 * 
 	 * @return javax.swing.JButton
 	 */
-	private JButton getJButtonFilterAdd() {
-		if (jButtonFilterAdd == null) {
-			jButtonFilterAdd = new JButton();
-			jButtonFilterAdd.setText("Добавить");
+	private JButton getJButtonFiltersChange() {
+		if (jButtonFiltersChange == null) {
+			jButtonFiltersChange = new JButton();
+			jButtonFiltersChange.setText("Изменить");
 		}
-		return jButtonFilterAdd;
-	}
-
-	/**
-	 * This method initializes jButtonFilterDelete
-	 * 
-	 * @return javax.swing.JButton
-	 */
-	private JButton getJButtonFilterDelete() {
-		if (jButtonFilterDelete == null) {
-			jButtonFilterDelete = new JButton();
-			jButtonFilterDelete.setText("Удалить");
-		}
-		return jButtonFilterDelete;
+		return jButtonFiltersChange;
 	}
 
 	/**
@@ -996,17 +1025,6 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JCheckBox getJCheckBoxHistogram() {
 		if (jCheckBoxHistogram == null) {
 			jCheckBoxHistogram = new JCheckBox();
-			jCheckBoxHistogram.setAction(new AbstractAction() {
-
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public void actionPerformed(ActionEvent e) {
-					histogramFrame.setVisible(jCheckBoxHistogram.isSelected());
-				}
-			});
 			jCheckBoxHistogram.setName("histogram");
 			jCheckBoxHistogram.setText("Гистограмма");
 		}
@@ -1103,8 +1121,39 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	 */
 	private JComboBox getJComboBoxModules() {
 		if (jComboBoxModules == null) {
-			jComboBoxModules = new JComboBox(new String[] { "Simple Module", "TestModule" });
+			jComboBoxModules = new JComboBox(moduleList);
 			jComboBoxModules.setName("module");
+			jComboBoxModules.addActionListener(new ActionListener() {
+
+				@SuppressWarnings("unchecked")
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					LModules item = (LModules) jComboBoxModules.getSelectedItem();
+					try {
+						MainFrame.this.setModule((Class<IModule>) Class.forName(item.getCodename()));
+					} catch (Exception e1) {
+						String name = item.getCodename() + " (" + item.getName() + ")";
+						logger.error("Error when select module " + name, e1);
+						JOptionPane.showMessageDialog(null, "Ошибка при подключении модуля " + name + ": " + e1,
+								"Error", JOptionPane.ERROR_MESSAGE);
+					}
+				}
+			});
+
+			jComboBoxModules.setRenderer(new BasicComboBoxRenderer() {
+
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
+						boolean cellHasFocus) {
+					return super.getListCellRendererComponent(list, ((LModules) value).getName(), index, isSelected,
+							cellHasFocus);
+				}
+			});
 		}
 		return jComboBoxModules;
 	}

@@ -52,6 +52,8 @@ public class RescaleFilterTest {
 		filter.getCONTRAST().setValue(contrast);
 
 		BufferedImage newImage = filter.convert(image);
+		
+		new File("tmp").mkdir();
 
 		ImageIO.write(newImage, "JPG", new File("tmp/" + name + "-" + contrast + "-" + brightness + ".jpg"));
 	}

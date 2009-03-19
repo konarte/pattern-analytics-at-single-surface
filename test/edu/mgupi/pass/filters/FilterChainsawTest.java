@@ -278,6 +278,8 @@ public class FilterChainsawTest {
 	private void convertImage(BufferedImage image, String addText) throws IOException, FilterException {
 		BufferedImage newImage = chainsaw.filterSaw();
 
+		new File("tmp").mkdir();
+
 		ImageIO.write(newImage, "JPG", new File("tmp/saw" + chainsaw + addText + ".jpg"));
 
 	}

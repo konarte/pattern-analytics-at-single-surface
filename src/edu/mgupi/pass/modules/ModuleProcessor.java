@@ -2,7 +2,11 @@ package edu.mgupi.pass.modules;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.orm.PersistentException;
 import org.slf4j.Logger;
@@ -14,6 +18,7 @@ import edu.mgupi.pass.db.locuses.LModules;
 import edu.mgupi.pass.db.locuses.LModulesFactory;
 import edu.mgupi.pass.db.locuses.LocusFilterOptions;
 import edu.mgupi.pass.db.locuses.LocusFilterOptionsFactory;
+import edu.mgupi.pass.db.locuses.LocusModuleParams;
 import edu.mgupi.pass.db.locuses.LocusSources;
 import edu.mgupi.pass.db.locuses.LocusSourcesFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
@@ -78,9 +83,23 @@ public class ModuleProcessor {
 
 	// private FilterChainsaw
 
-	public void close() {
+	public void close() throws PersistentException {
 
-		this.reset();
+		// ;)
+		this.finishProcessing();
+
+		for (IModule module : cachedModules.values()) {
+			if (module instanceof IInitiable) {
+				((IInitiable) module).close();
+			}
+		}
+		this.module = null;
+		this.cachedModules.clear();
+
+		if (this.filters != null) {
+			this.filters.close();
+			this.filters = null;
+		}
 
 		if (thumbFilters != null) {
 			thumbFilters.close();
@@ -94,24 +113,17 @@ public class ModuleProcessor {
 		logger.debug("ModuleProcessor closed");
 	}
 
-	public void reset() {
-		logger.debug("Reset");
+	//
+	// public void reset() {
+	// logger.debug("Reset");
+	//
+	//		
+	// }
 
-		if (this.module != null) {
-			if (this.module instanceof IInitiable) {
-				((IInitiable) this.module).close();
-			}
-			this.module = null;
-		}
+	private Map<Class<? extends IModule>, IModule> cachedModules = new HashMap<Class<? extends IModule>, IModule>();
 
-		if (this.filters != null) {
-			this.filters.close();
-			this.filters = null;
-		}
-	}
-
-	public void registerModule(Class<? extends IModule> moduleClass) throws InstantiationException,
-			IllegalAccessException {
+	public void setModule(Class<? extends IModule> moduleClass) throws InstantiationException, IllegalAccessException,
+			IOException, ModuleException {
 		if (moduleClass == null) {
 			throw new IllegalArgumentException("Internal error. moduleClass must be not null.");
 		}
@@ -119,17 +131,49 @@ public class ModuleProcessor {
 		if (this.module != null && moduleClass == this.module.getClass()) {
 			logger.debug("ModuleProcessor.registerModule class {} already set", moduleClass);
 			return;
+
+		}
+		logger.debug("Registering module as class {}", moduleClass);
+
+		IModule instance = cachedModules.get(moduleClass);
+		if (instance == null) {
+			logger.debug("Creating new instance");
+			instance = moduleClass.newInstance();
+			if (instance instanceof IInitiable) {
+				((IInitiable) instance).init();
+			}
+			cachedModules.put(moduleClass, instance);
+		} else {
+			logger.debug("Using cached instance");
 		}
 
-		logger.debug("Registering module as class {}", moduleClass);
-		
-		// Well, reset out ModelProcessor
-		// This is OK
-		this.reset();
+		this.module = instance;
+		if (lastLocus != null) {
 
-		this.module = moduleClass.newInstance();
-		if (this.module instanceof IInitiable) {
-			((IInitiable) this.module).init();
+			Set<LocusModuleParams> params = this.cachedInstanceParams.get(instance);
+			if (params != null) {
+
+				logger
+						.debug("Skip analyzing. Using cached values " + params + " for instance "
+								+ this.module.getName());
+				lastLocus.setParams(params);
+
+			} else {
+				logger.debug("Do analyze after set new module");
+
+				// Reset temporary image!
+				// Because some modules does not provide it :)
+
+				lastLocus.setProcessed(false);
+				lastLocus.setParams(new HashSet<LocusModuleParams>());
+				this.module.analyze(lastProcessedImage, lastLocus);
+				lastLocus.setProcessed(true);
+
+				logger.debug("Caching parameters for instance {} : {}", this.module.getName(), lastLocus.getParams());
+				this.cachedInstanceParams.put(this.module, lastLocus.getParams());
+
+			}
+
 		}
 	}
 
@@ -160,6 +204,9 @@ public class ModuleProcessor {
 	private Secundomer FILTERING_THUMB = SecundomerList.registerSecundomer("Filter image by internal thumb chain");
 	private Secundomer FILTERING_HISTO = SecundomerList.registerSecundomer("Filter image by internal histogram chain");
 	private Secundomer ANAZYLE = SecundomerList.registerSecundomer("Analyze image by registered module");
+
+	private Locuses lastLocus = null;
+	private Map<IModule, Set<LocusModuleParams>> cachedInstanceParams = new HashMap<IModule, Set<LocusModuleParams>>();
 
 	public Locuses startProcessing(SourceStore store) throws FilterException, IOException, ModuleException,
 			PersistentException {
@@ -237,17 +284,35 @@ public class ModuleProcessor {
 		}
 
 		locus.setProcessed(true);
-		// locus.save();
+		lastLocus = locus;
+
+		// Cache params (for switched modules)
+		logger.debug("Caching parameters for instance {} : {}", this.module.getName(), locus.getParams());
+		cachedInstanceParams.put(this.module, locus.getParams());
 
 		return locus;
 	}
 
-	public void finishProcessing() {
+	public void finishProcessing() throws PersistentException {
+		lastLocus = null;
+		lastProcessedImage = null;
+		lastThumbImage = null;
+		lastHistogramImage = null;
+
+		for (Set<LocusModuleParams> params : cachedInstanceParams.values()) {
+			for (LocusModuleParams param : params) {
+				param.delete();
+			}
+		}
+
+		cachedInstanceParams.clear();
+
 		if (filters != null) {
 			filters.detachImage();
 		}
 		thumbFilters.detachImage();
 		histoFilters.detachImage();
+
 	}
 
 	private Secundomer LOCUS_DATA = SecundomerList.registerSecundomer("Filling locus data from database");

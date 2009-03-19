@@ -77,7 +77,7 @@ public class ModuleProcessorPerformanceTest {
 		source.init();
 		try {
 
-			processor.registerModule(TestModule.class);
+			processor.setModule(TestModule.class);
 
 			FilterChainsaw mainSaw = new FilterChainsaw();
 			ResizeFilter resize = new ResizeFilter();

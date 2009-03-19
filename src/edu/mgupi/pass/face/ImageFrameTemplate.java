@@ -4,10 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 
+import javax.swing.AbstractAction;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -15,7 +17,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.WindowConstants;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ImageFrameTemplate extends JDialog {
+
+	private final static Logger logger = LoggerFactory.getLogger(ImageFrameTemplate.class);
 
 	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
@@ -37,6 +44,7 @@ public class ImageFrameTemplate extends JDialog {
 	 */
 	private void initialize() {
 		this.setSize(309, 331);
+		this.setName("nameFrameTemplate");
 		this.setMinimumSize(new Dimension(150, 80));
 		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		this.setResizable(true);
@@ -48,15 +56,32 @@ public class ImageFrameTemplate extends JDialog {
 	private JPanel jPanelScaleBox = null;
 	private JCheckBox jCheckBoxScaleBox = null;
 
-	public void registerControlCheckbox(JCheckBox controlCheckBox) {
+	public void registerControlCheckbox(final JCheckBox controlCheckBox) {
 
 		if (registeredAlready) {
-			JOptionPane.showMessageDialog(null, "Internal error. Seems like dialog " + this
-					+ " already registered to control box.", "Internal error.", JOptionPane.ERROR_MESSAGE);
+			logger.error("Error when registering " + controlCheckBox + " for " + this);
+			JOptionPane.showMessageDialog(null, "Internal error. Seems like dialog " + this.getName()
+					+ " already registered to another control box.", "Internal error.", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
 		this.addWindowListener(new OnHideWindowAdapter(controlCheckBox));
+		
+		String text = controlCheckBox.getText();
+		String name = controlCheckBox.getName(); 
+		controlCheckBox.setAction(new AbstractAction() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent e) {
+				ImageFrameTemplate.this.setVisible(controlCheckBox.isSelected());
+			}
+		});
+		controlCheckBox.setText(text);
+		controlCheckBox.setName(name);
 		registeredAlready = true;
 	}
 
@@ -159,6 +184,10 @@ public class ImageFrameTemplate extends JDialog {
 			jCheckBoxScaleBox.setText("Масштаб под размеры окна");
 		}
 		return jCheckBoxScaleBox;
+	}
+	
+	public boolean hasImage() {
+		return this.jPanelImage != null && this.jPanelImage.hasImage();
 	}
 
 } // @jve:decl-index=0:visual-constraint="10,10"
