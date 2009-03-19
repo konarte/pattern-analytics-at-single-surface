@@ -12,13 +12,10 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.UIManager.LookAndFeelInfo;
 
-import org.orm.PersistentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.db.surfaces.PassPersistentManager;
-import edu.mgupi.pass.filters.IllegalParameterValueException;
-import edu.mgupi.pass.filters.NoSuchParamException;
 
 /**
  * Entry class for application. We set up file-lock (to prevent multiple
@@ -92,8 +89,7 @@ public class Application {
 	// Name for file-lock
 	private final static String LOCK_FILE = "app.lock";
 
-	private void run() throws IllegalParameterValueException, NoSuchParamException, InstantiationException,
-			IllegalAccessException, IOException, PersistentException {
+	private void run() throws Exception {
 
 		final FileChannel channel = new FileOutputStream(LOCK_FILE, false).getChannel();
 		final FileLock lock = channel.tryLock();
@@ -119,8 +115,8 @@ public class Application {
 		}));
 
 		SplashWindow splash = new SplashWindow();
+		splash.setSplashText("Загрузка...");
 		splash.setVisible(true);
-		splash.setSplashText("Применение Look And Feel...");
 
 		try {
 			this.changeLookAndFeel();
@@ -136,11 +132,18 @@ public class Application {
 		logger.debug("Initializing Hibernate...");
 		PassPersistentManager.instance();
 
+		MainFrame frame = null;
 		splash.setSplashText("Загрузка приложения...");
-		MainFrame frame = (MainFrame) AppHelper.getInstance().openWindow(MainFrame.class);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		try {
+			frame = (MainFrame) AppHelper.getInstance().openWindow(MainFrame.class);
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			splash.setVisible(false);
+			splash.dispose();
+		}
 
-		splash.dispose();
 		frame.setVisible(true);
 
 		logger.debug("Application PASS ready...");

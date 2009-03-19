@@ -1,6 +1,8 @@
 package edu.mgupi.pass.face;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -15,6 +17,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.modules.TestModule;
+import edu.mgupi.pass.modules.basic.SimpleMatrixModule;
 import edu.mgupi.pass.sources.TestSourceImpl;
 
 public class MainFrameTest {
@@ -42,9 +46,16 @@ public class MainFrameTest {
 			source = null;
 		}
 		if (frame != null) {
-			frame.setVisible(false);
+			SwingTestHelper.addWork(new WorkSet() {
+				public void workImpl() throws Exception {
+					frame.setVisible(false);
+					frame.dispose();
+				}
+			});
+
 			frame = null;
 		}
+		AppHelper.reset();
 	}
 
 	@Test
@@ -83,32 +94,32 @@ public class MainFrameTest {
 				fitButton.doClick();
 			}
 		});
-		
+
 		SwingTestHelper.addWork(new WorkSet() {
 			public void workImpl() throws Exception {
 				frame.setBounds(100, 200, 1024, 768);
 			}
 		});
-		
+
 		SwingTestHelper.addWork(new WorkSet() {
 			public void workImpl() throws Exception {
 				frame.setBounds(100, 200, 600, 600);
 			}
 		});
-		
+
 		// Return default style
 		SwingTestHelper.addWork(new WorkSet() {
 			public void workImpl() throws Exception {
 				fitButton.doClick();
 			}
 		});
-		
+
 		SwingTestHelper.addWork(new WorkSet() {
 			public void workImpl() throws Exception {
 				frame.setBounds(100, 200, 1024, 768);
 			}
 		});
-		
+
 		SwingTestHelper.addWork(new WorkSet() {
 			public void workImpl() throws Exception {
 				frame.setBounds(100, 200, 600, 600);
@@ -175,9 +186,11 @@ public class MainFrameTest {
 	}
 
 	@Test
-	public void testHelpfulWindows() throws Exception {
+	public void testMainHelpfulWindows() throws Exception {
 
+		assertFalse(this.frame.histogramFrame.hasImage());
 		this.frame.startProcessing(source.getSingleSource());
+		assertTrue(this.frame.histogramFrame.hasImage());
 
 		final JCheckBox histogram = (JCheckBox) SwingTestHelper.getChildNamed(frame, "histogram");
 		assertNotNull(histogram);
@@ -189,6 +202,72 @@ public class MainFrameTest {
 			}
 		});
 
+		assertNotNull(frame.histogramFrame);
+		assertTrue(frame.histogramFrame.isVisible());
+
+		SwingTestHelper.addWork(new WorkSet() {
+			public void workImpl() throws Exception {
+				frame.histogramFrame.setLocation(300, 400);
+			}
+		});
+
+		final JCheckBox moduleImage = (JCheckBox) SwingTestHelper.getChildNamed(frame, "moduleImage");
+		assertNotNull(moduleImage);
+		moduleImage.setSelected(false);
+
+		SwingTestHelper.addWork(new WorkSet() {
+			public void workImpl() throws Exception {
+				moduleImage.doClick();
+			}
+		});
+
+		assertNotNull(frame.moduleFrame);
+		assertTrue(frame.moduleFrame.isVisible());
+
+		SwingTestHelper.addWork(new WorkSet() {
+			public void workImpl() throws Exception {
+				frame.moduleFrame.setLocation(300, 600);
+			}
+		});
+
 	}
 
+	@Test
+	public void testChangeModulesPostModule() throws Exception {
+		assertFalse(this.frame.moduleFrame.hasImage());
+		this.frame.startProcessing(source.getSingleSource());
+
+		frame.setModule(SimpleMatrixModule.class);
+		assertFalse(this.frame.moduleFrame.hasImage());
+
+		this.frame.setModule(TestModule.class);
+		assertTrue(this.frame.moduleFrame.hasImage());
+	}
+
+	@Test
+	public void testChangeModulesPreModule() throws Exception {
+		this.frame.setModule(SimpleMatrixModule.class);
+		assertFalse(this.frame.moduleFrame.hasImage());
+
+		this.frame.setModule(TestModule.class);
+		assertFalse(this.frame.moduleFrame.hasImage());
+
+		this.frame.startProcessing(source.getSingleSource());
+		assertTrue(this.frame.moduleFrame.hasImage());
+
+	}
+
+	@Test
+	public void testChangeModulesPreModule2() throws Exception {
+
+		this.frame.setModule(TestModule.class);
+		assertFalse(this.frame.moduleFrame.hasImage());
+
+		this.frame.setModule(SimpleMatrixModule.class);
+		assertFalse(this.frame.moduleFrame.hasImage());
+
+		this.frame.startProcessing(source.getSingleSource());
+		assertFalse(this.frame.moduleFrame.hasImage());
+
+	}
 }

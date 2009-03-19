@@ -58,6 +58,7 @@ public class ImagePanel extends JPanel {
 
 		if (myImage == null) {
 			// do nothing
+			this.repaint();
 			return;
 		}
 
@@ -143,4 +144,8 @@ public class ImagePanel extends JPanel {
 
 		}
 	};
+	
+	public boolean hasImage() {
+		return this.myImage != null;
+	}
 }

@@ -33,13 +33,17 @@ public class AppHelper {
 		}
 		return instance;
 	}
+	
+	protected static synchronized void reset() {
+		instance = null;
+	}
 
 	private volatile Map<Class<? extends Window>, Window> windowsCollection = new HashMap<Class<? extends Window>, Window>();
 
-	private synchronized Window getWindow(Class<? extends Window> windowType, Frame owner) {
+	private synchronized Window getWindow(Class<? extends Window> windowType, Frame owner, boolean force) {
 		Window window = windowsCollection.get(windowType);
 
-		if (window == null) {
+		if (window == null || force) {
 			try {
 				if (owner == null) {
 					window = windowType.newInstance();
@@ -52,7 +56,12 @@ public class AppHelper {
 						+ "'. Please, consult with developers (" + e + ")", "Error when creating frame",
 						JOptionPane.WARNING_MESSAGE);
 			}
-			windowsCollection.put(windowType, window);
+			if (force) {
+				logger.debug("Return force new instance of " + windowType + " :: " + window);
+				this.registerAdditionalComponent(window);
+			} else {
+				windowsCollection.put(windowType, window);
+			}
 		}
 		return window;
 	}
@@ -62,15 +71,15 @@ public class AppHelper {
 	}
 
 	public Window createWindow(Class<? extends Window> windowType) {
-		return createWindow(windowType, null);
+		return createWindow(windowType, null, true);
 	}
 
-	public Window createWindow(Class<? extends Window> windowType, Frame owner) {
+	private Window createWindow(Class<? extends Window> windowType, Frame owner, boolean force) {
 		if (windowType == null) {
 			throw new IllegalArgumentException("Internal error. 'windowType' must be not not null.");
 		}
 
-		Window frame = this.getWindow(windowType, owner);
+		Window frame = this.getWindow(windowType, owner, force);
 		if (owner != null && (frame instanceof Dialog)) {
 			frame.setLocationRelativeTo(owner);
 		}
@@ -82,7 +91,7 @@ public class AppHelper {
 	}
 
 	public Window openWindow(Class<? extends Window> windowType, Frame owner) {
-		Window frame = this.createWindow(windowType, owner);
+		Window frame = this.createWindow(windowType, owner, false);
 		frame.setVisible(true);
 		return frame;
 	}

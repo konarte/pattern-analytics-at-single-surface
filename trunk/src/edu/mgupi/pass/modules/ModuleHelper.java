@@ -9,6 +9,7 @@ import java.util.Collection;
 import javax.imageio.ImageIO;
 
 import edu.mgupi.pass.db.locuses.LocusModuleParams;
+import edu.mgupi.pass.db.locuses.LocusModuleParamsFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
 
 public class ModuleHelper {
@@ -18,6 +19,41 @@ public class ModuleHelper {
 			return null;
 		}
 		return searchParameter(name, locus.getParams(), true);
+	}
+
+	private final static String TMP_IMAGE_PARAM_NAME = "TEMPORARY_MODULE_IMAGE";
+
+	public static void putTemporaryModuleImage(Locuses store, BufferedImage image) throws ModuleParamException,
+			IOException {
+
+		if (store == null) {
+			throw new IllegalArgumentException("Internal error. Store is null.");
+		}
+		if (image == null) {
+			throw new IllegalArgumentException("Internal error. Image is null.");
+		}
+
+		LocusModuleParams param = searchParameter(TMP_IMAGE_PARAM_NAME, store.getParams(), false);
+		if (param == null) {
+			param = LocusModuleParamsFactory.createLocusModuleParams();
+			param.setParamName(TMP_IMAGE_PARAM_NAME);
+			store.getParams().add(param);
+		}
+
+		param.setParamData(convertImageToPNGRaw(image));
+	}
+
+	public static BufferedImage getTemporaryModuleImage(Locuses store) throws ModuleParamException, IOException {
+
+		if (store == null) {
+			throw new IllegalArgumentException("Internal error. Store is null.");
+		}
+
+		LocusModuleParams param = searchParameter(TMP_IMAGE_PARAM_NAME, store.getParams(), false);
+		if (param != null) {
+			return covertPNGRawToImage(param.getParamData());
+		}
+		return null;
 	}
 
 	//

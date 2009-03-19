@@ -52,6 +52,8 @@ public class ColorSpaceFilterTest {
 		filter.getCOLOR_MODE().setValue(space);
 		BufferedImage newImage = filter.convert(image);
 		logger.info("Image converted to " + name + " SUCCESSFULLY (image type is " + newImage.getType() + ")");
+		
+		new File("tmp").mkdir();
 
 		ImageIO.write(newImage, "JPG", new File("tmp/colorspace " + name + ".jpg"));
 	}
@@ -65,6 +67,8 @@ public class ColorSpaceFilterTest {
 			BufferedImage image = source.getSingleSource().getSourceImage();
 
 			Exception savedE = null;
+			
+			new File("tmp").mkdir();
 
 			ImageIO.write(image, "JPG", new File("tmp/ORIGINAL.jpg"));
 

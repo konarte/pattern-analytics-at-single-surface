@@ -54,6 +54,8 @@ public class ResizeFilterTest {
 			param.setValue(param.getAllowed_values()[i]);
 
 			BufferedImage newImage = filter.convert(image);
+			
+			new File("tmp").mkdir();
 
 			ImageIO.write(newImage, "JPG", new File("tmp/resize-" + width + "-" + height + "-"
 					+ param.getVisual_values()[i] + ".jpg"));

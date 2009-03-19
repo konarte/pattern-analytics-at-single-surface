@@ -31,9 +31,7 @@ public interface IModule {
 	 * @param filteredImage
 	 * @param store
 	 *            it is instance of {@link Locuses} class, filled with all
-	 *            neccessary data (histogram, using filters, thumb image etc.).
-	 *            You must use {@link Locuses#getParams()} for set (and store
-	 *            into database) specified parameters.
+	 *            neccessary data (histogram, using filters, thumb image etc.)
 	 * 
 	 * @throws IOException
 	 * @throws ModuleException

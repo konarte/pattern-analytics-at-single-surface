@@ -23,7 +23,6 @@ public class SimpleMatrixModule implements IModule {
 
 	public void analyze(BufferedImage filteredImage, Locuses store) throws IOException {
 		// TODO Auto-generated method stub
-
 	}
 
 	public float compare(Locuses graph1, Locuses graph2) {
