@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.db.surfaces.PassPersistentManager;
 import edu.mgupi.pass.util.Config;
+import edu.mgupi.pass.util.Const;
+import edu.mgupi.pass.util.SecundomerList;
 
 /**
  * Entry class for application. We set up file-lock (to prevent multiple
@@ -108,6 +110,7 @@ public class Application {
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 
 			public void run() {
+				SecundomerList.printToOutput(System.out);
 				logger.debug("Shutdown PASS.");
 				try {
 					lock.release();
@@ -159,7 +162,7 @@ public class Application {
 	}
 
 	public static void main(String[] args) throws Exception {
-		logger.debug("Starting PASS.");
+		logger.debug("Starting " + Const.FULL_PROGRAM_NAME);
 		new Application().run();
 	}
 }

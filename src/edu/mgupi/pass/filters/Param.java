@@ -14,11 +14,21 @@ public class Param {
 		this.title = title;
 		this.type = type;
 		this.default_ = default_;
-		this.value = this.default_;
+		try {
+			this.setValue(default_);
+		} catch (IllegalParameterValueException iv) {
+			throw new IllegalArgumentException(iv);
+		}
 	}
 
 	public Param(String name, String title, TYPES type, Object default_, int lowBorder, int hiBorder) {
 		this(name, title, type, default_);
+
+		if (hiBorder < lowBorder) {
+			throw new IllegalArgumentException("Incorrect using of hiBorder (" + hiBorder + ") and lowBorder ("
+					+ lowBorder + "). lowBorder must be smaller.");
+		}
+
 		this.low_border = lowBorder;
 		this.hi_border = hiBorder;
 	}
@@ -45,15 +55,15 @@ public class Param {
 	}
 
 	public static enum TYPES {
-		LIST, STRING, INT, COLOR
+		LIST, STRING, INT, DOUBLE, COLOR
 	};
 
 	private String name;
 	private String title;
 	private TYPES type;
 	private Object default_;
-	private int low_border;
-	private int hi_border;
+	private int low_border = Integer.MIN_VALUE;
+	private int hi_border = Integer.MAX_VALUE;
 	private Object[] allowed_values;
 	private String[] visual_values;
 
@@ -112,12 +122,47 @@ public class Param {
 			}
 
 			if (!found) {
-				throw new IllegalParameterValueException("Parameter " + this.title + " (" + this.name
-						+ ") attempt to use incorrect value " + value
-						+ ". This is value not acceptable by allowed_parameters.");
+				throw new IllegalParameterValueException("Parameter " + this + " attempt to use incorrect value "
+						+ value + ". This is value not acceptable by allowed_parameters.");
+			}
+		}
+
+		if (this.type == TYPES.DOUBLE) {
+			if (!(value instanceof Double)) {
+				throw new IllegalParameterValueException("Parameter " + this + " attempt to set up incorrect value "
+						+ value + ". This value must be a float.");
+			}
+		}
+
+		if (this.type == TYPES.INT) {
+
+			if (!(value instanceof Integer)) {
+				throw new IllegalParameterValueException("Parameter " + this + " attempt to set up incorrect value "
+						+ value + ". This value must be an integer.");
+			}
+
+			int newValue = (Integer) value;
+			if (newValue < this.low_border) {
+				throw new IllegalParameterValueException("Parameter " + this + " attempt to set up incorrect value "
+						+ value + ". This value must be greater that lowBorder " + this.low_border + ".");
+			}
+
+			if (newValue > this.hi_border) {
+				throw new IllegalParameterValueException("Parameter " + this + " attempt to set up incorrect value "
+						+ value + ". This value must be smaller that hiBorder " + this.hi_border + ".");
 			}
 		}
 
 		this.value = value;
+	}
+
+	public void resetValue() throws IllegalParameterValueException {
+		if (this.default_ != null) {
+			this.setValue(this.default_);
+		}
+	}
+
+	public String toString() {
+		return this.title + " (" + this.name + ")";
 	}
 }

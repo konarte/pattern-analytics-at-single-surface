@@ -43,13 +43,14 @@ public class ImageFrameTemplate extends JDialog {
 	 * 
 	 */
 	private void initialize() {
-		this.setSize(309, 331);
 		this.setName("nameFrameTemplate");
-		this.setMinimumSize(new Dimension(150, 80));
 		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		this.setResizable(true);
 		this.setContentPane(getJContentPane());
-		this.setTitle("JDialog");
+		this.setTitle("JFrame");
+		
+		this.setMinimumSize(new Dimension(150, 80));
+		this.setBounds(10, 10, 300, 330);
 	}
 
 	private boolean registeredAlready = false;
@@ -144,7 +145,6 @@ public class ImageFrameTemplate extends JDialog {
 		}
 
 		public void windowClosing(WindowEvent e) {
-			System.out.println(ImageFrameTemplate.this + " CLOSING...");
 			controlCheckBox.setSelected(false);
 		}
 	}
@@ -182,6 +182,7 @@ public class ImageFrameTemplate extends JDialog {
 						"Invalid layout programming", JOptionPane.ERROR_MESSAGE);
 			}
 			jCheckBoxScaleBox.setText("Масштаб под размеры окна");
+			jCheckBoxScaleBox.setName("scaleButton");
 		}
 		return jCheckBoxScaleBox;
 	}

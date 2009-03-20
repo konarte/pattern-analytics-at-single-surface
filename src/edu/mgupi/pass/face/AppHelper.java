@@ -17,6 +17,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.util.Config;
+
 public class AppHelper {
 
 	private final static Logger logger = LoggerFactory.getLogger(AppHelper.class);
@@ -33,12 +35,16 @@ public class AppHelper {
 		}
 		return instance;
 	}
-	
+
 	protected static synchronized void reset() {
+		instance.windowsCollection.clear();
+		instance.additionalWindows.clear();
+		instance.components.clear();
 		instance = null;
 	}
 
 	private volatile Map<Class<? extends Window>, Window> windowsCollection = new HashMap<Class<? extends Window>, Window>();
+	private volatile Collection<Window> additionalWindows = new ArrayList<Window>();
 
 	private synchronized Window getWindow(Class<? extends Window> windowType, Frame owner, boolean force) {
 		Window window = windowsCollection.get(windowType);
@@ -50,6 +56,7 @@ public class AppHelper {
 				} else {
 					window = windowType.getConstructor(Frame.class).newInstance(owner);
 				}
+
 			} catch (Exception e) {
 				logger.error("Error when creating window instance", e);
 				JOptionPane.showMessageDialog(null, "Unexpected error when creating instance of '" + windowType
@@ -58,12 +65,24 @@ public class AppHelper {
 			}
 			if (force) {
 				logger.debug("Return force new instance of " + windowType + " :: " + window);
-				this.registerAdditionalComponent(window);
+				additionalWindows.add(window);
 			} else {
 				windowsCollection.put(windowType, window);
 			}
 		}
+
+		if (owner != null && (window instanceof Dialog)) {
+			window.setLocationRelativeTo(owner);
+		}
 		return window;
+	}
+
+	private Window createWindow(Class<? extends Window> windowType, Frame owner, boolean force) {
+		if (windowType == null) {
+			throw new IllegalArgumentException("Internal error. 'windowType' must be not not null.");
+		}
+
+		return this.getWindow(windowType, owner, force);
 	}
 
 	public Window searchWindow(Class<? extends Window> windowType) {
@@ -72,18 +91,6 @@ public class AppHelper {
 
 	public Window createWindow(Class<? extends Window> windowType) {
 		return createWindow(windowType, null, true);
-	}
-
-	private Window createWindow(Class<? extends Window> windowType, Frame owner, boolean force) {
-		if (windowType == null) {
-			throw new IllegalArgumentException("Internal error. 'windowType' must be not not null.");
-		}
-
-		Window frame = this.getWindow(windowType, owner, force);
-		if (owner != null && (frame instanceof Dialog)) {
-			frame.setLocationRelativeTo(owner);
-		}
-		return frame;
 	}
 
 	public Window openWindow(Class<? extends Window> windowType) {
@@ -104,13 +111,16 @@ public class AppHelper {
 		for (Window window : windowsCollection.values()) {
 			SwingUtilities.updateComponentTreeUI(window);
 		}
+		for (Window window : additionalWindows) {
+			SwingUtilities.updateComponentTreeUI(window);
+		}
 		for (Component c : components) {
 			SwingUtilities.updateComponentTreeUI(c);
 		}
 
 	}
 
-	private Collection<Component> components = new ArrayList<Component>();
+	private volatile Collection<Component> components = new ArrayList<Component>();
 
 	public void registerAdditionalComponent(Component c) {
 		components.add(c);
@@ -120,23 +130,12 @@ public class AppHelper {
 		components.remove(c);
 	}
 
-	//
-	// public Window closeWindow(Class<? extends Window> windowType) {
-	// if (windowType == null) {
-	// throw new
-	// IllegalArgumentException("Internal error. 'windowType' must be not not null.");
-	// }
-	// return this.closeWindow(this.getWindow(windowType));
-	// }
-	//
-	// public Window closeWindow(Window frame) {
-	//
-	// if (frame == null) {
-	// throw new
-	// IllegalArgumentException("Internal error. 'frame' must be not not null.");
-	// }
-	//
-	// frame.setVisible(false);
-	// return frame;
-	// }
+	public void saveWindowPositions() {
+		for (Window window : windowsCollection.values()) {
+			Config.getInstance().setWindowPosition(window);
+		}
+		for (Window window : additionalWindows) {
+			Config.getInstance().setWindowPosition(window);
+		}
+	}
 }

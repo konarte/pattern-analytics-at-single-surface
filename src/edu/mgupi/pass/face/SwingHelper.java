@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
  * @author raidan
  * 
  */
-public class SwingTestHelper {
+public class SwingHelper {
 
-	private final static Logger logger = LoggerFactory.getLogger(SwingTestHelper.class);
+	private final static Logger logger = LoggerFactory.getLogger(SwingHelper.class);
 
 	/**
 	 * Method (c) Ichiro Suzuki
@@ -79,17 +79,7 @@ public class SwingTestHelper {
 	private static volatile int expectedWorkCount = 0;
 	private static volatile int workCount = 0;
 
-	/**
-	 * Append work by {@link SwingUtilities#invokeLater(Runnable)}.
-	 * 
-	 * You can call this method and do anything else. Next calling
-	 * {@link #addWork(WorkSet)} method will wait for this work too!
-	 * 
-	 * 
-	 * @param actualWork
-	 * @throws Exception
-	 */
-	public static void addWorkNoWait(final WorkSet actualWork) throws Exception {
+	private static void addWorkNoWait(final WorkSet actualWork) throws Exception {
 		expectedWorkCount++;
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -104,46 +94,68 @@ public class SwingTestHelper {
 		});
 	}
 
-	private static boolean lastWorkDone = false;
-
 	/**
-	 * Append work as separate thread. No SwingUtilities using!
+	 * Append work by {@link SwingUtilities#invokeLater(Runnable)}.
 	 * 
-	 * <b>Do not use for work with delayed GUI update!</b>
+	 * Wait until given condition is true.
+	 * 
+	 * <b>Use if work interrupts execution and you want to wait work
+	 * finished</b>
 	 * 
 	 * @param actualWork
+	 * @param waitCondition
+	 * 
 	 * @throws Exception
 	 */
-	public static void addWorkSingleWait(final WorkSet actualWork) throws Exception {
-		lastWorkDone = false;
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					actualWork.workImpl();
-				} catch (Exception e) {
-					e.printStackTrace();
-				} finally {
-					lastWorkDone = true;
-				}
-			}
-		}).start();
 
-		waitUntil(new ConditionSet() {
-			public boolean keepWorking() {
-				return !lastWorkDone;
-			}
-		});
+	public static void addWorkAndWaitThis(WorkSet actualWork, ConditionSet waitCondition) throws Exception {
+		addWorkNoWait(actualWork);
+		waitUntil(waitCondition);
 	}
+
+	//	private static boolean lastWorkDone = false;
+
+	//
+	//	/**
+	//	 * Append work as separate thread. No SwingUtilities using!
+	//	 * 
+	//	 * <b>Do not use for work with delayed GUI update!</b>
+	//	 * 
+	//	 * @param actualWork
+	//	 * @throws Exception
+	//	 */
+	//	public static void addWorkSingleWait(final WorkSet actualWork) throws Exception {
+	//		lastWorkDone = false;
+	//		new Thread(new Runnable() {
+	//			public void run() {
+	//				try {
+	//					actualWork.workImpl();
+	//				} catch (Exception e) {
+	//					e.printStackTrace();
+	//				} finally {
+	//					lastWorkDone = true;
+	//				}
+	//			}
+	//		}).start();
+	//
+	//		waitUntil(new ConditionSet() {
+	//			public boolean keepWorking() {
+	//				return !lastWorkDone;
+	//			}
+	//		});
+	//	}
 
 	/**
 	 * Use this method for any work that required delayed GUI update.
+	 * 
+	 * <b>Use if work does not interrupts execution!</b>
 	 * 
 	 * @param actualWork
 	 * @throws Exception
 	 * 
 	 * @see #addWorkNoWait(WorkSet)
 	 */
-	public static void addWork(WorkSet actualWork) throws Exception {
+	public static void addWorkAndWaitForTheEnd(WorkSet actualWork) throws Exception {
 		addWorkNoWait(actualWork);
 		waitUntil(new ConditionSet() {
 			public boolean keepWorking() {
@@ -163,9 +175,13 @@ public class SwingTestHelper {
 	 */
 	public static void waitUntil(ConditionSet condition) throws InterruptedException {
 		long time = System.currentTimeMillis();
-		while ((System.currentTimeMillis() - time) < MAX_WAIT_TIME && condition.keepWorking()) {
+		boolean timeOK = false;
+		while ((timeOK = ((System.currentTimeMillis() - time) < MAX_WAIT_TIME)) && condition.keepWorking()) {
 			Thread.sleep(100);
 		}
+		if (!timeOK) {
+			throw new RuntimeException("Error. Wait interrupted after " + (System.currentTimeMillis() - time)
+					+ " msec.");
+		}
 	}
-
 }

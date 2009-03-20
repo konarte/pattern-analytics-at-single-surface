@@ -67,6 +67,7 @@ public class SettingsDialog extends JDialog {
 		this.setModal(true);
 		this.setTitle("Настройки");
 		this.setContentPane(getJContentPane());
+		Config.getInstance().getWindowPosition(this);
 
 		// -------------------
 

@@ -15,44 +15,44 @@ public class CacheInitiable<E> {
 	public E getInstance(Class<? extends E> moduleClass) throws InstantiationException, IllegalAccessException {
 		E instance = cachedValues.get(moduleClass);
 		if (instance == null) {
-			logger.debug("Creating new instance");
+			logger.debug("Creating new instance of " + moduleClass);
 			instance = moduleClass.newInstance();
 			if (instance instanceof IInitiable) {
 				((IInitiable) instance).init();
 			}
 			cachedValues.put(moduleClass, instance);
 		} else {
-			logger.debug("Using cached instance");
+			logger.debug("Using cached instance of " + moduleClass);
 		}
 		return instance;
 	}
-	
-// Обязательно реализовать кэширование!
-// Пригодится для FilterChainsaw
-// Основная идея -- запоминание "удаленного" фильтра и его повторное использование
-//  для этого мы имеем списки экземпляров свободных фильтров :)
-//
-//	private Map<Class<? extends E>, List<E>> instances = new HashMap<Class<? extends E>, List<E>>();
-//
-//	public E getFirstFree(Class<? extends E> moduleClass) throws InstantiationException, IllegalAccessException {
-//		List<E> values = instances.get(moduleClass);
-//		if (values != null && values.size() > 0) {
-//			E value = values.get(values.size() - 1);
-//			values.remove(values.size() - 1);
-//			return value;
-//		}
-//		return null;
-//	}
-//
-//	@SuppressWarnings("unchecked")
-//	public void putInstance(E instance) {
-//		List<E> values = instances.get(instance.getClass());
-//		if (values == null) {
-//			values = new ArrayList<E>();
-//			instances.put((Class<? extends E>) instance.getClass(), values);
-//		}
-//		values.add(instance);
-//	}
+
+	// Обязательно реализовать кэширование!
+	// Пригодится для FilterChainsaw
+	// Основная идея -- запоминание "удаленного" фильтра и его повторное использование
+	//  для этого мы имеем списки экземпляров свободных фильтров :)
+	//
+	//	private Map<Class<? extends E>, List<E>> instances = new HashMap<Class<? extends E>, List<E>>();
+	//
+	//	public E getFirstFree(Class<? extends E> moduleClass) throws InstantiationException, IllegalAccessException {
+	//		List<E> values = instances.get(moduleClass);
+	//		if (values != null && values.size() > 0) {
+	//			E value = values.get(values.size() - 1);
+	//			values.remove(values.size() - 1);
+	//			return value;
+	//		}
+	//		return null;
+	//	}
+	//
+	//	@SuppressWarnings("unchecked")
+	//	public void putInstance(E instance) {
+	//		List<E> values = instances.get(instance.getClass());
+	//		if (values == null) {
+	//			values = new ArrayList<E>();
+	//			instances.put((Class<? extends E>) instance.getClass(), values);
+	//		}
+	//		values.add(instance);
+	//	}
 
 	public void close() {
 		for (E instance : cachedValues.values()) {
@@ -61,16 +61,16 @@ public class CacheInitiable<E> {
 			}
 		}
 		cachedValues.clear();
-		
-//		for (Collection<E> values : instances.values()) {
-//			for (E instance : values) {
-//				if (instance instanceof IInitiable) {
-//					((IInitiable) instance).close();
-//				}
-//			}
-//		}
 
-//		 instances.clear();
+		//		for (Collection<E> values : instances.values()) {
+		//			for (E instance : values) {
+		//				if (instance instanceof IInitiable) {
+		//					((IInitiable) instance).close();
+		//				}
+		//			}
+		//		}
+
+		//		 instances.clear();
 	}
 
 }

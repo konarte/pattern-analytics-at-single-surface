@@ -22,6 +22,7 @@ public class Const {
 	public final static String VERSION = ResourceBundle.getBundle("app").getString("version");
 	public final static String BUILD = ResourceBundle.getBundle("mybuild").getString("build.number");
 
-	public final static String FULL_PROGRAM_NAME = "Pattern Analytics at Single Surface v." + Const.VERSION + " dev.b."
-			+ Const.BUILD;
+	public final static String LAST_PROGRAM_NAME = " v." + Const.VERSION + " dev.b." + Const.BUILD;
+	public final static String FULL_PROGRAM_NAME = PROGRAM_NAME + LAST_PROGRAM_NAME;
+
 }

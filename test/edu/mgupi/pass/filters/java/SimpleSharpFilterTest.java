@@ -37,7 +37,6 @@ public class SimpleSharpFilterTest {
 		Collection<Param> params = filter.getParams();
 		assertNull(params);
 		assertTrue(params == filter.getParams());
-		System.out.println(params);
 	}
 
 	@Test

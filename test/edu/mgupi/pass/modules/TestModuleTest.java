@@ -119,7 +119,9 @@ public class TestModuleTest {
 			locusSource2.setSourceImage(sourceStore.getFileData());
 
 			locus2.setLocusSource(locusSource2);
-
+			
+			module.getTEST_PARAM1().setValue(5);
+			module.getTEST_PARAM2().setValue("Super");
 			module.analyze(sourceStore.getSourceImage(), locus2);
 			moduleImage = ModuleHelper.getTemporaryModuleImage(locus2);
 			locus2.setProcessed(true);

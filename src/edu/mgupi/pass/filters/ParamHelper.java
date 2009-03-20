@@ -43,7 +43,8 @@ public class ParamHelper {
 		return null;
 	}
 
-	protected static Object getParameterM(String key, Map<String, Object> params) throws NoSuchParamException {
+	
+		protected static Object getParameterM(String key, Map<String, Object> params) throws NoSuchParamException {
 		if (key == null) {
 			throw new IllegalArgumentException("Internal error. Key is null.");
 		}

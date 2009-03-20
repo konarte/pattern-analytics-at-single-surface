@@ -25,7 +25,6 @@ import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.IllegalParameterValueException;
 import edu.mgupi.pass.filters.NoSuchParamException;
 import edu.mgupi.pass.filters.ParamHelper;
-import edu.mgupi.pass.filters.java.GrayScaleFilter;
 import edu.mgupi.pass.filters.service.HistogramFilter;
 import edu.mgupi.pass.filters.service.ResizeFilter;
 import edu.mgupi.pass.sources.SourceStore;
@@ -68,7 +67,7 @@ public class ModuleProcessor {
 		resize.getHEIGHT().setValue(Const.THUMB_HEIGHT);
 
 		histoFilters = new FilterChainsaw();
-		histoFilters.appendFilter(GrayScaleFilter.class);
+		//histoFilters.appendFilter(GrayScaleFilter.class);
 		histogramFilter = (HistogramFilter) histoFilters.appendFilter(HistogramFilter.class);
 	}
 

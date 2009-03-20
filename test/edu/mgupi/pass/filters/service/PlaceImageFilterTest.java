@@ -1,7 +1,6 @@
 package edu.mgupi.pass.filters.service;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -37,8 +36,6 @@ public class PlaceImageFilterTest {
 	public void testGetParams() {
 		Collection<Param> params = filter.getParams();
 		assertNotNull(params);
-		assertTrue(params == filter.getParams());
-		System.out.println(params);
 	}
 
 	private void convertImage(BufferedImage image, int width, int height, Color background) throws IOException,

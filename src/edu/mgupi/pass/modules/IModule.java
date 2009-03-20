@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.Collection;
 
 import edu.mgupi.pass.db.locuses.Locuses;
-import edu.mgupi.pass.filters.IFilter;
+import edu.mgupi.pass.filters.Param;
 
 /**
  * Module of image analyzing and processing.
@@ -23,11 +23,11 @@ public interface IModule {
 	String getName();
 
 	/**
-	 * Return list of required pre-processing filters for this module
+	 * Return collection of parameters, using this module
 	 * 
-	 * @return collection of required filters
+	 * @return collection of parameters of null
 	 */
-	Collection<Class<? extends IFilter>> getRequiredFilters();
+	Collection<Param> getParams();
 
 	/**
 	 * Call when we need to analyze image. This method must convert image to
