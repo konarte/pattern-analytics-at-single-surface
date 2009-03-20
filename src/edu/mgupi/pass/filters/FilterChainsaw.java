@@ -20,6 +20,7 @@ import edu.mgupi.pass.util.IInitiable;
  * 
  */
 public class FilterChainsaw {
+
 	private final static Logger logger = LoggerFactory.getLogger(FilterChainsaw.class);
 
 	private List<IFilter> filterList = new ArrayList<IFilter>();
@@ -70,6 +71,8 @@ public class FilterChainsaw {
 		if (filterClass == null) {
 			throw new IllegalArgumentException("Internal error. filterClass must be not null.");
 		}
+		
+		
 
 		logger.debug("Appending filter as class {}", filterClass);
 		this.appendFilter(filterClass.newInstance());

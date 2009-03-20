@@ -70,20 +70,21 @@ public class SingleFilePick implements ISource {
 			setPreferredSize(new Dimension(256, 256));
 			setBorder(BorderFactory.createEtchedBorder());
 			chooser.addPropertyChangeListener(new PropertyChangeListener() {
-				public void propertyChange(PropertyChangeEvent event) {
-					if (event.getPropertyName() == JFileChooser.SELECTED_FILE_CHANGED_PROPERTY) {
-						File newFile = (File) event.getNewValue();
-
-						if (newFile != null) {
-							ImageIcon icon = new ImageIcon(newFile.getPath());
-							if (icon.getIconWidth() > getWidth())
-								icon = new ImageIcon(icon.getImage().getScaledInstance(getWidth(), -1,
-										Image.SCALE_DEFAULT));
-							setIcon(icon);
-							repaint();
-						}
+				public void propertyChange(PropertyChangeEvent event) { // #1
+					if (event.getPropertyName() != JFileChooser.SELECTED_FILE_CHANGED_PROPERTY) {
+						return;
 					}
-				}
+					File newFile = (File) event.getNewValue();
+
+					if (newFile != null) {
+						ImageIcon icon = new ImageIcon(newFile.getPath());
+						if (icon.getIconWidth() > getWidth())
+							icon = new ImageIcon(icon.getImage().getScaledInstance(getWidth(), -1, Image.SCALE_DEFAULT));
+						setIcon(icon);
+						repaint();
+					}
+
+				} // #1 addPropertyChangeListener
 			});
 		}
 	}

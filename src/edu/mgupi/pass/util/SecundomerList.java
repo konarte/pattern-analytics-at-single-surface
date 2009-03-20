@@ -20,4 +20,8 @@ public class SecundomerList {
 			stream.println(sec.toString());
 		}
 	}
+
+	public static void reset() {
+		registredList.clear();
+	}
 }

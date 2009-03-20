@@ -47,6 +47,7 @@ public class AboutDialog extends JDialog {
 	 */
 	private void initialize() {
 		this.setSize(353, 299);
+		this.setName("aboutDialog");
 		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		this.setTitle("О программе...");
 		this.setContentPane(getJContentPane());

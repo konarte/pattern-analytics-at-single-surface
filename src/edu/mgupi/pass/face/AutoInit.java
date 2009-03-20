@@ -84,6 +84,7 @@ public class AutoInit {
 				System.out.println("Registering filters (" + filterClasses.size() + " expected)...");
 				for (Class<?> clazz : filterClasses) {
 					IFilter filter = (IFilter) clazz.newInstance();
+					String name = filter.getName();
 					String codename = filter.getClass().getCanonicalName();
 
 					System.out.print("Checking filter class " + codename + " (" + filter.getName() + ")...");
@@ -96,7 +97,13 @@ public class AutoInit {
 						dbFilter.setCodename(codename);
 						dbFilter.save();
 					} else {
-						System.out.println(" SKIP");
+						if (!dbFilter.getName().equals(name)) {
+							dbFilter.setName(name);
+							dbFilter.save();
+							System.out.println(" SKIP (but update changed name)");
+						} else {
+							System.out.println(" SKIP (already exists)");
+						}
 					}
 					if (items.length() > 0) {
 						items.append(", ");
@@ -128,6 +135,7 @@ public class AutoInit {
 				System.out.println("Registering modules (" + moduleClasses.size() + " expected)...");
 				for (Class<?> clazz : moduleClasses) {
 					IModule module = (IModule) clazz.newInstance();
+					String name = module.getName();
 					String codename = module.getClass().getCanonicalName();
 
 					System.out.print("Checking module class " + codename + " (" + module.getName() + ")...");
@@ -140,7 +148,14 @@ public class AutoInit {
 						dbModule.setCodename(codename);
 						dbModule.save();
 					} else {
-						System.out.println(" SKIP (already exists)");
+						if (!dbModule.getName().equals(name)) {
+							dbModule.setName(name);
+							dbModule.save();
+							System.out.println(" SKIP (but update changed name)");
+						} else {
+							System.out.println(" SKIP (already exists)");
+						}
+
 					}
 					if (items.length() > 0) {
 						items.append(", ");

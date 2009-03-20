@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Collection;
 
 import javax.imageio.ImageIO;
@@ -102,6 +104,26 @@ public class ModuleHelper {
 
 	public static BufferedImage covertPNGRawToImage(byte[] data) throws IOException {
 		return ImageIO.read(new ByteArrayInputStream(data));
+	}
+
+	public static byte[] convertArrayToRaw(double[][] data) throws IOException {
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+		ObjectOutputStream objStream = new ObjectOutputStream(bytes);
+		try {
+			objStream.writeObject(data);
+			return bytes.toByteArray();
+		} finally {
+			objStream.close();
+		}
+	}
+
+	public static double[][] convertRawToArray(byte[] data) throws IOException, ClassNotFoundException {
+		ObjectInputStream objStream = new ObjectInputStream(new ByteArrayInputStream(data));
+		try {
+			return (double[][]) objStream.readObject();
+		} finally {
+			objStream.close();
+		}
 	}
 
 }

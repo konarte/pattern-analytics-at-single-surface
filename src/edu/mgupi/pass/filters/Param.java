@@ -45,7 +45,7 @@ public class Param {
 	}
 
 	public static enum TYPES {
-		LIST, STRING, INT
+		LIST, STRING, INT, COLOR
 	};
 
 	private String name;

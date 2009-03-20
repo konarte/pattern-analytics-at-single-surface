@@ -18,7 +18,7 @@ public class TestFilter implements IFilter, IInitiable, IFilterAttachable {
 	private final static Logger logger = LoggerFactory.getLogger(TestFilter.class);
 
 	public String getName() {
-		return "TestFilter";
+		return "TestFilter (no production)";
 	}
 
 	private Collection<Param> params = null;

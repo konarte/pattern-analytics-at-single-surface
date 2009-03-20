@@ -33,8 +33,8 @@ import edu.mgupi.pass.filters.java.GrayScaleFilter;
 import edu.mgupi.pass.filters.service.HistogramFilter;
 import edu.mgupi.pass.filters.service.ResizeFilter;
 import edu.mgupi.pass.sources.SourceStore;
+import edu.mgupi.pass.util.CacheInitiable;
 import edu.mgupi.pass.util.Const;
-import edu.mgupi.pass.util.IInitiable;
 import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
 
@@ -79,7 +79,8 @@ public class ModuleProcessor {
 	}
 
 	private IModule module;
-	private FilterChainsaw filters;
+	private FilterChainsaw processingFilters;
+	private FilterChainsaw preProcessingFilters;
 
 	// private FilterChainsaw
 
@@ -88,17 +89,16 @@ public class ModuleProcessor {
 		// ;)
 		this.finishProcessing();
 
-		for (IModule module : cachedModules.values()) {
-			if (module instanceof IInitiable) {
-				((IInitiable) module).close();
-			}
-		}
+		cachedModules.close();
 		this.module = null;
-		this.cachedModules.clear();
 
-		if (this.filters != null) {
-			this.filters.close();
-			this.filters = null;
+		if (this.processingFilters != null) {
+			this.processingFilters.close();
+			this.processingFilters = null;
+		}
+		if (this.preProcessingFilters != null) {
+			this.preProcessingFilters.close();
+			this.preProcessingFilters = null;
 		}
 
 		if (thumbFilters != null) {
@@ -113,14 +113,7 @@ public class ModuleProcessor {
 		logger.debug("ModuleProcessor closed");
 	}
 
-	//
-	// public void reset() {
-	// logger.debug("Reset");
-	//
-	//		
-	// }
-
-	private Map<Class<? extends IModule>, IModule> cachedModules = new HashMap<Class<? extends IModule>, IModule>();
+	private CacheInitiable<IModule> cachedModules = new CacheInitiable<IModule>();
 
 	public void setModule(Class<? extends IModule> moduleClass) throws InstantiationException, IllegalAccessException,
 			IOException, ModuleException {
@@ -135,17 +128,7 @@ public class ModuleProcessor {
 		}
 		logger.debug("Registering module as class {}", moduleClass);
 
-		IModule instance = cachedModules.get(moduleClass);
-		if (instance == null) {
-			logger.debug("Creating new instance");
-			instance = moduleClass.newInstance();
-			if (instance instanceof IInitiable) {
-				((IInitiable) instance).init();
-			}
-			cachedModules.put(moduleClass, instance);
-		} else {
-			logger.debug("Using cached instance");
-		}
+		IModule instance = cachedModules.getInstance(moduleClass);
 
 		this.module = instance;
 		if (lastLocus != null) {
@@ -177,9 +160,14 @@ public class ModuleProcessor {
 		}
 	}
 
-	public void setChainsaw(FilterChainsaw filters) {
-		logger.debug("Set main filter chain {}", filters);
-		this.filters = filters;
+	public void setChainsaw(FilterChainsaw processingFilters) {
+		logger.debug("Set main filter chain {}", processingFilters);
+		this.processingFilters = processingFilters;
+	}
+
+	public void setPreprocessingChainsaw(FilterChainsaw preProcessingFilters) {
+		logger.debug("Set pre-processing filter chain {}", preProcessingFilters);
+		this.preProcessingFilters = preProcessingFilters;
 	}
 
 	private BufferedImage lastProcessedImage;
@@ -199,6 +187,7 @@ public class ModuleProcessor {
 	}
 
 	private Secundomer STORE_ORIGINAL_IMAGE = SecundomerList.registerSecundomer("Saving original image AS IS");
+	private Secundomer PREPROCESSING = SecundomerList.registerSecundomer("Pre-process image by special filter chain");
 	private Secundomer FILTERING = SecundomerList.registerSecundomer("Filter image by common filter chain");
 	private Secundomer STORE_FILTERED_IMAGE = SecundomerList.registerSecundomer("Saving filtered image as PNG");
 	private Secundomer FILTERING_THUMB = SecundomerList.registerSecundomer("Filter image by internal thumb chain");
@@ -236,12 +225,24 @@ public class ModuleProcessor {
 		}
 
 		BufferedImage image = store.getSourceImage();
-		if (this.filters != null) {
+
+		if (this.preProcessingFilters != null) {
+			PREPROCESSING.start();
+			try {
+				this.preProcessingFilters.attachImage(image);
+				logger.debug("Pre-processing image, cause main filter chain is setup");
+				image = this.preProcessingFilters.filterSaw();
+			} finally {
+				PREPROCESSING.stop();
+			}
+		}
+
+		if (this.processingFilters != null) {
 			FILTERING.start();
 			try {
-				this.filters.attachImage(image);
+				this.processingFilters.attachImage(image);
 				logger.debug("Filtering image, cause main filter chain is setup");
-				image = this.filters.filterSaw();
+				image = this.processingFilters.filterSaw();
 			} finally {
 				FILTERING.stop();
 			}
@@ -307,8 +308,11 @@ public class ModuleProcessor {
 
 		cachedInstanceParams.clear();
 
-		if (filters != null) {
-			filters.detachImage();
+		if (processingFilters != null) {
+			processingFilters.detachImage();
+		}
+		if (preProcessingFilters != null) {
+			preProcessingFilters.detachImage();
 		}
 		thumbFilters.detachImage();
 		histoFilters.detachImage();
@@ -336,13 +340,13 @@ public class ModuleProcessor {
 
 		FILTERS_DATA.start();
 		try {
-			if (this.filters == null) {
+			if (this.processingFilters == null) {
 				return; //
 			}
 
 			List<LocusFilterOptions> lFilters = locus.getFilters();
 
-			for (IFilter filter : this.filters.getFilters()) {
+			for (IFilter filter : this.processingFilters.getFilters()) {
 				LocusFilterOptions locusFilter = LocusFilterOptionsFactory.createLocusFilterOptions();
 				locusFilter.setOptions(ParamHelper.convertParamsToJSON(filter));
 
@@ -367,7 +371,11 @@ public class ModuleProcessor {
 	}
 
 	public FilterChainsaw getFilters() {
-		return this.filters;
+		return this.processingFilters;
+	}
+
+	public FilterChainsaw getPreProcessingFilters() {
+		return this.preProcessingFilters;
 	}
 
 	public FilterChainsaw getThumbFilters() {

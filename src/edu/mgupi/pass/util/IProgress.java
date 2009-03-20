@@ -1,6 +1,6 @@
-package edu.mgupi.pass.face;
+package edu.mgupi.pass.util;
 
-public interface ProgressInterface {
+public interface IProgress {
 	void startProgress(int max);
 
 	void setProgress(int value);

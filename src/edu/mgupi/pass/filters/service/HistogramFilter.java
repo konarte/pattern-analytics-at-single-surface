@@ -52,32 +52,34 @@ public class HistogramFilter implements IFilter {
 		int height = source.getHeight();
 		int width = source.getWidth();
 
-		boolean gray = source.getType() == BufferedImage.TYPE_BYTE_GRAY;
-		histogram = new int[3][256];
+		final int bytesPerPixes = source.getColorModel().getPixelSize() / 8;
+		// boolean gray = source.getType() == BufferedImage.TYPE_BYTE_GRAY;
+		histogram = new int[bytesPerPixes][256];
 
 		// Loading distribution of dots
 		Raster raster = source.getRaster();
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
-				histogram[0][raster.getSample(i, j, 0)]++;
-				if (!gray) {
-					histogram[1][raster.getSample(i, j, 1)]++;
-					histogram[2][raster.getSample(i, j, 2)]++;
+				for (int z = 0; z < bytesPerPixes; z++) {
+					histogram[z][raster.getSample(i, j, z)]++;
+					histogram[z][raster.getSample(i, j, z)]++;
+					histogram[z][raster.getSample(i, j, z)]++;
 				}
 			}
 		}
 		// Normalization
 		for (int i = 0; i < histogram[0].length; i++) {
-			histogram[0][i / (width * height)]++;
-			if (!gray) {
-				histogram[1][i / (width * height)]++;
-				histogram[2][i / (width * height)]++;
+			for (int z = 0; z < bytesPerPixes; z++) {
+				histogram[z][i / (width * height)]++;
+				histogram[z][i / (width * height)]++;
+				histogram[z][i / (width * height)]++;
 			}
+
 		}
 
 		// Searching max
 		int max = 0;
-		for (int k = 0; k < (gray ? 1 : 3); k++) {
+		for (int k = 0; k < bytesPerPixes; k++) {
 			for (int value : histogram[k]) {
 				if (value > max) {
 					max = value;
@@ -99,11 +101,11 @@ public class HistogramFilter implements IFilter {
 		gc.setColor(Color.WHITE);
 		gc.fillRect(0, 0, 256, HEIGHT);
 
-		gc.setColor(gray ? Color.BLACK : Color.RED);
+		gc.setColor(bytesPerPixes == 1 ? Color.BLACK : Color.RED);
 		for (int i = 0; i < histogram[0].length; i++) {
 			gc.drawLine(i, HEIGHT, i, (int) (HEIGHT - (useDiv ? histogram[0][i] / div : histogram[0][i])));
 		}
-		if (!gray) {
+		if (bytesPerPixes > 1) {
 			gc.setColor(Color.GREEN);
 			for (int i = 0; i < histogram[1].length; i++) {
 				gc.drawLine(i, HEIGHT, i, (int) (HEIGHT - (useDiv ? histogram[1][i] / div : histogram[1][i])));
