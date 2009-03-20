@@ -56,10 +56,11 @@ public interface IModule {
 	 * @return range from 0 to 1, where 0 -- locuses are not the same at any
 	 *         kind of criteria, 1 -- there are the same (other numbers is a
 	 *         measure of alike)
+	 * @throws IOException
 	 * 
 	 * @throws ModuleException
 	 *             if anything goes wrong.
 	 */
-	float compare(Locuses graph1, Locuses graph2) throws ModuleException;
+	double compare(Locuses graph1, Locuses graph2) throws IOException, ModuleException;
 
 }

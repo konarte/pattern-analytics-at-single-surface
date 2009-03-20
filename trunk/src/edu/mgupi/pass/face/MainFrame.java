@@ -9,16 +9,18 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -32,26 +34,38 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
+import org.apache.commons.configuration.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.db.locuses.LFilters;
+import edu.mgupi.pass.db.locuses.LFiltersFactory;
 import edu.mgupi.pass.db.locuses.LModules;
 import edu.mgupi.pass.db.locuses.LModulesFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
+import edu.mgupi.pass.filters.FilterChainsaw;
+import edu.mgupi.pass.filters.IFilter;
+import edu.mgupi.pass.filters.java.GrayScaleFilter;
+import edu.mgupi.pass.filters.service.PlaceImageFilter;
+import edu.mgupi.pass.filters.service.ResizeFilter;
 import edu.mgupi.pass.modules.IModule;
 import edu.mgupi.pass.modules.ModuleHelper;
 import edu.mgupi.pass.modules.ModuleProcessor;
 import edu.mgupi.pass.sources.SourceStore;
 import edu.mgupi.pass.sources.visual.SingleFilePick;
+import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Const;
+import edu.mgupi.pass.util.IProgress;
 
-public class MainFrame extends JFrame implements ProgressInterface {
+public class MainFrame extends JFrame implements IProgress {
 
 	private final static Logger logger = LoggerFactory.getLogger(MainFrame.class); // @jve:decl-index=0:
 
@@ -67,11 +81,10 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JMenuItem jMenuItemMaterials = null;
 
 	// ------------
-	protected SingleFilePick singleFilePicker = null;  //  @jve:decl-index=0:
+	protected SingleFilePick singleFilePicker = null; // @jve:decl-index=0:
 	protected ImageFrameTemplate histogramFrame = null;
 	protected ImageFrameTemplate moduleFrame = null;
 	protected ModuleProcessor mainModuleProcessor = null; // @jve:decl-index=0:
-	protected LModules[] moduleList = null;
 
 	/**
 	 * This is the default constructor
@@ -96,6 +109,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 		this.setJMenuBar(getJmainMenuBar());
 		this.setContentPane(getJContentPane());
 		this.setTitle(Const.FULL_PROGRAM_NAME);
+		this.setName("mainFrame");
 		this.setMinimumSize(new Dimension(600, 720));
 		this.setBounds(new Rectangle(150, 150, 800, 720));
 
@@ -104,11 +118,19 @@ public class MainFrame extends JFrame implements ProgressInterface {
 		this.initImpl();
 	}
 
+	protected LModules[] moduleList = null;
+	protected LFilters[] filterList = null;
+
 	private void loadModelImpl() throws Exception {
 		moduleList = LModulesFactory.listLModulesByQuery(null, null);
 
 		if (moduleList == null || moduleList.length == 0) {
-			throw new Exception("No analyze modules found. Unable to work. Please, fill table 'LModules'.");
+			throw new Exception("No registered analyze modules found. Unable to work. Please, fill table 'LModules'.");
+		}
+
+		filterList = LFiltersFactory.listLFiltersByQuery(null, null);
+		if (filterList == null || filterList.length == 0) {
+			throw new Exception("No registered filters found. Unable to work. Please, fill table 'LFilters'.");
 		}
 	}
 
@@ -120,15 +142,19 @@ public class MainFrame extends JFrame implements ProgressInterface {
 			}
 		});
 
+		Config.getInstance().setIProgressInstance(this);
+
 		mainModuleProcessor = new ModuleProcessor();
 
 		histogramFrame = (ImageFrameTemplate) AppHelper.getInstance().createWindow(ImageFrameTemplate.class);
 		histogramFrame.registerControlCheckbox(this.jCheckBoxHistogram);
 		histogramFrame.setTitle(mainModuleProcessor.getHistoFilters().toString());
+		histogramFrame.setName("histogramWindow");
 
 		moduleFrame = (ImageFrameTemplate) AppHelper.getInstance().createWindow(ImageFrameTemplate.class);
 		moduleFrame.registerControlCheckbox(this.jCheckBoxModuleGraphic);
 		moduleFrame.setTitle("Модуль не выбран");
+		moduleFrame.setName("moduleFrameWindow");
 
 		singleFilePicker = new SingleFilePick();
 		singleFilePicker.init();
@@ -136,17 +162,61 @@ public class MainFrame extends JFrame implements ProgressInterface {
 		LModules item = (LModules) jComboBoxModules.getSelectedItem();
 		MainFrame.this.setModule((Class<IModule>) Class.forName(item.getCodename()));
 
+		mainModuleProcessor.setPreprocessingChainsaw(new FilterChainsaw());
+		this.applySourcePreProcessor();
+
+		FilterChainsaw saw = new FilterChainsaw();
+		saw.appendFilter(GrayScaleFilter.class);
+		mainModuleProcessor.setChainsaw(saw);
+
 		logger.debug("Main frame init done.");
+		this.clearMessage();
 	}
 
 	private void closeImpl() {
+		this.printMessage("Закрытие приложения");
+
 		logger.debug("Application terminating...");
+
 		if (singleFilePicker != null) {
 			singleFilePicker.close();
 		}
+		this.currentSource = null;
+		this.currentLocus = null;
+
+		if (mainModuleProcessor != null) {
+			try {
+				this.mainModuleProcessor.close();
+			} catch (Exception e) {
+				logger.error("Error when closing main module", e);
+				JOptionPane.showMessageDialog(null, "Error when closing main module: " + e, "Closing error",
+						JOptionPane.ERROR_MESSAGE);
+			}
+			mainModuleProcessor = null;
+		}
+
+		// preprocessingCache.close();
+
+		try {
+			logger.debug("Saving current config...");
+			Config.getInstance().saveCurrentConfig();
+		} catch (ConfigurationException e) {
+			logger.error("Error when saving current config", e);
+			JOptionPane.showMessageDialog(null, "Error when saving current config: " + e, "Config saving error",
+					JOptionPane.ERROR_MESSAGE);
+		}
+
+		this.clearMessage();
 	}
 
-	private Locuses myLocus = null; // @jve:decl-index=0:
+	private SourceStore currentSource = null;
+	private Locuses currentLocus = null; // @jve:decl-index=0:
+
+	private String originalImageInfo = "";
+	private String filteredImageInfo = "";
+
+	// private CacheInitiable<IFilter> preprocessingCache = new
+	// CacheInitiable<IFilter>(); // @jve:decl-index=0:
 
 	protected void startProcessing(SourceStore source) throws Exception {
 
@@ -158,6 +228,8 @@ public class MainFrame extends JFrame implements ProgressInterface {
 			return;
 		}
 
+		this.printMessage("Загрузка годографа...");
+
 		logger.debug("Start loading source " + source.getName());
 
 		this.setTitle(Const.FULL_PROGRAM_NAME + " -- " + source.getName());
@@ -165,18 +237,81 @@ public class MainFrame extends JFrame implements ProgressInterface {
 		// This is must be safe!!!!
 		// I can stop wherever I want!
 		mainModuleProcessor.finishProcessing();
-		myLocus = null;
+		currentLocus = null;
+		currentSource = source;
 
 		// Main cycle
-		myLocus = mainModuleProcessor.startProcessing(source);
-		this.jLabelImageInfo.setText("" + mainModuleProcessor.getLastProcessedImage().getWidth() + "x"
-				+ mainModuleProcessor.getLastProcessedImage().getHeight() + " "
-				+ mainModuleProcessor.getLastProcessedImage().getColorModel().getPixelSize() + " bpp");
-		// Locuses locus = mainModuleProcessor.startProcessing(source);
-		this.jPanelImage.setImage(mainModuleProcessor.getLastProcessedImage());
-		this.histogramFrame.setImage(mainModuleProcessor.getLastHistogramImage());
-		this.moduleFrame.setImage(ModuleHelper.getTemporaryModuleImage(this.myLocus));
+		currentLocus = mainModuleProcessor.startProcessing(source);
 
+		BufferedImage sourceImage = source.getSourceImage();
+		BufferedImage filteredImage = mainModuleProcessor.getLastProcessedImage();
+		originalImageInfo = "" + sourceImage.getWidth() + "x" + sourceImage.getHeight() + " "
+				+ sourceImage.getColorModel().getPixelSize() + " bpp";
+
+		filteredImageInfo = "" + filteredImage.getWidth() + "x" + filteredImage.getHeight() + " "
+				+ filteredImage.getColorModel().getPixelSize() + " bpp";
+
+		jLabelImageInfo.setText(jTabbedPaneImages.getSelectedIndex() == 0 ? this.originalImageInfo
+				: this.filteredImageInfo);
+
+		// Locuses locus = mainModuleProcessor.startProcessing(source);
+		this.jPanelImageFiltered.setImage(filteredImage);
+		this.jPanelImageSource.setImage(sourceImage);
+		this.histogramFrame.setImage(mainModuleProcessor.getLastHistogramImage());
+		this.moduleFrame.setImage(ModuleHelper.getTemporaryModuleImage(this.currentLocus));
+
+	}
+
+	private void applySourcePreProcessor() throws Exception {
+
+		FilterChainsaw preProcessing = mainModuleProcessor.getPreProcessingFilters();
+		IFilter currentFilter = preProcessing.getFilter(0);
+
+		String sourceScaleMode = Config.getInstance().getCurrentSourceMode(SettingsDialog.DEFAULT_SOURCE_MODE);
+		int background = Config.getInstance().getCurrentBackground(SettingsDialog.DEFAULT_BACKGROUND);
+
+		if (sourceScaleMode.equals(SettingsDialog.SOURCE_MODE_CENTER)
+				|| sourceScaleMode.equals(SettingsDialog.SOURCE_MODE_LEFT_TOP)) {
+			PlaceImageFilter place = null;
+			if (currentFilter == null || currentFilter.getClass() != PlaceImageFilter.class) {
+				if (currentFilter != null) {
+					preProcessing.removeFilter(0);
+				}
+
+				logger.debug("Applying PlaceImageFilter");
+				place = new PlaceImageFilter();
+				place.getWIDTH().setValue(Const.MAIN_IMAGE_WIDTH);
+				place.getHEIGHT().setValue(Const.MAIN_IMAGE_HEIGHT);
+
+				preProcessing.appendFilter(place);
+			} else {
+				place = (PlaceImageFilter) currentFilter;
+			}
+
+			place.getBACKGROUND().setValue(new Color(background));
+			place.getPLACE().setValue(sourceScaleMode.equals(SettingsDialog.SOURCE_MODE_CENTER) ? "center" : "topleft");
+
+		} else {
+			if (currentFilter == null || currentFilter.getClass() != ResizeFilter.class) {
+				if (currentFilter != null) {
+					preProcessing.removeFilter(0);
+				}
+
+				logger.debug("Applying ResizeFilter");
+
+				ResizeFilter resizer = new ResizeFilter();
+				resizer.getWIDTH().setValue(Const.MAIN_IMAGE_WIDTH);
+				resizer.getHEIGHT().setValue(Const.MAIN_IMAGE_HEIGHT);
+				resizer.getINTERPOLATION_METHOD().setValue(RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+
+				preProcessing.appendFilter(resizer);
+			}
+		}
+	}
+
+	protected void restartProcessingBySource() throws Exception {
+		this.applySourcePreProcessor();
+		this.startProcessing(this.currentSource);
 	}
 
 	protected void setModule(Class<? extends IModule> newModule) throws Exception {
@@ -190,8 +325,8 @@ public class MainFrame extends JFrame implements ProgressInterface {
 		this.mainModuleProcessor.setModule(newModule);
 		this.moduleFrame.setTitle(this.mainModuleProcessor.getModule().getName());
 
-		if (myLocus != null) {
-			this.moduleFrame.setImage(ModuleHelper.getTemporaryModuleImage(this.myLocus));
+		if (currentLocus != null) {
+			this.moduleFrame.setImage(ModuleHelper.getTemporaryModuleImage(this.currentLocus));
 		}
 	}
 
@@ -261,11 +396,14 @@ public class MainFrame extends JFrame implements ProgressInterface {
 
 				public void actionPerformed(ActionEvent e) {
 					try {
+						MainFrame.this.printMessage("Открытие нового годографа");
 						MainFrame.this.startProcessing(MainFrame.this.singleFilePicker.getSingleSource());
 					} catch (Exception e1) {
 						logger.error("Error when picking new image for processing", e1);
 						JOptionPane.showMessageDialog(null, "Error when opening image: " + e1, "Error",
 								JOptionPane.ERROR_MESSAGE);
+					} finally {
+						MainFrame.this.clearMessage();
 					}
 				}
 			});
@@ -386,7 +524,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JLabel jLabelTmp = null;
 	private JPanel jPanelCommon = null;
 	private JPanel jPanelLeft = null;
-	private JScrollPane jScrollPaneImage = null;
+	private JScrollPane jScrollPaneImageSource = null;
 	private JPanel jPanelFilters = null;
 	private JList jListFilters = null;
 	private JButton jButtonFiltersChange = null;
@@ -394,22 +532,19 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JPanel jPanelSensors = null;
 	private JComboBox jComboBoxSensor = null;
 	private JButton jButtonSensorSearch = null;
-	private JTextArea jTextAreaSensors = null;
 	private JCheckBox jCheckBoxSensor = null;
 	private JPanel jPanelSurface = null;
 	private JPanel jPanelDefect = null;
 	private JComboBox jComboBoxSurface = null;
 	private JButton jButtonSurface = null;
-	private JTextArea jTextAreaSurface = null;
 	private JCheckBox jCheckBoxSurface = null;
 	private JComboBox jComboBoxDefect = null;
 	private JButton jButtonDefect = null;
-	private JTextArea jTextAreaDefect = null;
 	private JCheckBox jCheckBoxDefect = null;
 	private JCheckBox jCheckBoxHistogram = null;
 	private JPanel jPanelLeftOthers = null;
 	private JButton jButtonProcess = null;
-	private ImagePanel jPanelImage = null;
+	private ImagePanel jPanelImageSource = null;
 
 	/**
 	 * This method initializes jMenuHelp
@@ -549,6 +684,20 @@ public class MainFrame extends JFrame implements ProgressInterface {
 
 	private JLabel jLabelImageInfo = null;
 
+	private JTabbedPane jTabbedPaneImages = null;
+
+	private JScrollPane jScrollPaneImageFiltered = null;
+
+	private ImagePanel jPanelImageFiltered = null;
+
+	private JPanel jPanelPreprocessing = null;
+
+	private JScrollPane jScrollPanePreProcessing = null;
+
+	private JList jListPreProcessing = null;
+
+	private JButton jButtonChangePreProcessing = null;
+
 	/**
 	 * This method initializes jCheckBoxScale
 	 * 
@@ -557,8 +706,9 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JCheckBox getJCheckBoxScale() {
 		if (jCheckBoxScale == null) {
 			jCheckBoxScale = new JCheckBox();
-			if (jPanelImage != null) {
-				jPanelImage.registerFitButton(jCheckBoxScale);
+			if (jPanelImageSource != null && jPanelImageFiltered != null) {
+				jPanelImageSource.registerFitButton(jCheckBoxScale);
+				jPanelImageFiltered.registerFitButton(jCheckBoxScale, jPanelImageSource);
 			} else {
 				JOptionPane.showMessageDialog(null, "Internal error. Expected panelImage layout not initialized yet.",
 						"Invalid layout programming", JOptionPane.ERROR_MESSAGE);
@@ -615,10 +765,10 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	 */
 	private JPanel getJPanelCommon() {
 		if (jPanelCommon == null) {
-			GridBagConstraints gridBagConstraints5 = new GridBagConstraints();
-			gridBagConstraints5.fill = GridBagConstraints.BOTH;
-			gridBagConstraints5.weighty = 1.0;
-			gridBagConstraints5.weightx = 1.0;
+			GridBagConstraints gridBagConstraints9 = new GridBagConstraints();
+			gridBagConstraints9.fill = GridBagConstraints.BOTH;
+			gridBagConstraints9.weighty = 1.0;
+			gridBagConstraints9.weightx = 1.0;
 			GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
 			gridBagConstraints4.gridx = 0;
 			gridBagConstraints4.anchor = GridBagConstraints.NORTH;
@@ -627,7 +777,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 			jPanelCommon = new JPanel();
 			jPanelCommon.setLayout(new GridBagLayout());
 			jPanelCommon.add(getJPanelLeft(), gridBagConstraints4);
-			jPanelCommon.add(getJScrollPaneImage(), gridBagConstraints5);
+			jPanelCommon.add(getJTabbedPaneImages(), gridBagConstraints9);
 		}
 		return jPanelCommon;
 	}
@@ -639,36 +789,81 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	 */
 	private JPanel getJPanelLeft() {
 		if (jPanelLeft == null) {
+			GridBagConstraints gridBagConstraints28 = new GridBagConstraints();
+			gridBagConstraints28.gridx = 0;
+			gridBagConstraints28.anchor = GridBagConstraints.NORTHWEST;
+			gridBagConstraints28.weighty = 0.0D;
+			gridBagConstraints28.gridy = 0;
+			gridBagConstraints28.fill = GridBagConstraints.BOTH;
+			gridBagConstraints28.weightx = 1.0D;
+			GridBagConstraints gridBagConstraints27 = new GridBagConstraints();
+			gridBagConstraints27.gridy = 6;
+			gridBagConstraints27.weighty = 0.0D;
+			gridBagConstraints27.weightx = 1.0D;
+			gridBagConstraints27.anchor = GridBagConstraints.NORTHWEST;
+			gridBagConstraints27.fill = GridBagConstraints.HORIZONTAL;
+			gridBagConstraints27.gridx = 0;
+			GridBagConstraints gridBagConstraints23 = new GridBagConstraints();
+			gridBagConstraints23.gridx = 0;
+			gridBagConstraints23.anchor = GridBagConstraints.NORTHWEST;
+			gridBagConstraints23.fill = GridBagConstraints.HORIZONTAL;
+			gridBagConstraints23.weightx = 1.0D;
+			gridBagConstraints23.gridy = 5;
+			GridBagConstraints gridBagConstraints20 = new GridBagConstraints();
+			gridBagConstraints20.gridx = 0;
+			gridBagConstraints20.anchor = GridBagConstraints.NORTHWEST;
+			gridBagConstraints20.fill = GridBagConstraints.HORIZONTAL;
+			gridBagConstraints20.weightx = 1.0D;
+			gridBagConstraints20.gridy = 4;
+			GridBagConstraints gridBagConstraints16 = new GridBagConstraints();
+			gridBagConstraints16.gridx = 0;
+			gridBagConstraints16.fill = GridBagConstraints.HORIZONTAL;
+			gridBagConstraints16.anchor = GridBagConstraints.NORTHWEST;
+			gridBagConstraints16.gridy = 3;
+			GridBagConstraints gridBagConstraints11 = new GridBagConstraints();
+			gridBagConstraints11.gridx = 0;
+			gridBagConstraints11.anchor = GridBagConstraints.NORTHWEST;
+			gridBagConstraints11.fill = GridBagConstraints.BOTH;
+			gridBagConstraints11.weightx = 1.0D;
+			gridBagConstraints11.weighty = 1.0D;
+			gridBagConstraints11.gridy = 1;
+			GridBagConstraints gridBagConstraints5 = new GridBagConstraints();
+			gridBagConstraints5.gridy = 2;
+			gridBagConstraints5.anchor = GridBagConstraints.NORTHWEST;
+			gridBagConstraints5.weightx = 1.0D;
+			gridBagConstraints5.fill = GridBagConstraints.HORIZONTAL;
+			gridBagConstraints5.gridx = 0;
 			GridBagConstraints gridBagConstraints6 = new GridBagConstraints();
 			gridBagConstraints6.gridx = -1;
 			gridBagConstraints6.gridy = -1;
 			jPanelLeft = new JPanel();
-			jPanelLeft.setLayout(new BoxLayout(getJPanelLeft(), BoxLayout.Y_AXIS));
+			jPanelLeft.setLayout(new GridBagLayout());
 			jPanelLeft.setPreferredSize(new Dimension(200, 200));
 			jPanelLeft.setMinimumSize(new Dimension(200, 200));
-			jPanelLeft.add(getJPanelModule(), null);
-			jPanelLeft.add(getJPanelFilters(), null);
-			jPanelLeft.add(getJPanelSensors(), null);
-			jPanelLeft.add(getJPanelSurface(), null);
-			jPanelLeft.add(getJPanelDefect(), null);
-			jPanelLeft.add(getJPanelLeftOthers(), null);
+			jPanelLeft.add(getJPanelPreprocessing(), gridBagConstraints28);
+			jPanelLeft.add(getJPanelFilters(), gridBagConstraints11);
+			jPanelLeft.add(getJPanelModule(), gridBagConstraints5);
+			jPanelLeft.add(getJPanelSensors(), gridBagConstraints16);
+			jPanelLeft.add(getJPanelSurface(), gridBagConstraints20);
+			jPanelLeft.add(getJPanelDefect(), gridBagConstraints23);
+			jPanelLeft.add(getJPanelLeftOthers(), gridBagConstraints27);
 		}
 		return jPanelLeft;
 	}
 
 	/**
-	 * This method initializes jScrollPaneImage
+	 * This method initializes jScrollPaneImageSource
 	 * 
 	 * @return javax.swing.JScrollPane
 	 */
-	private JScrollPane getJScrollPaneImage() {
-		if (jScrollPaneImage == null) {
-			jScrollPaneImage = new JScrollPane();
-			jScrollPaneImage.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-			jScrollPaneImage.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-			jScrollPaneImage.setViewportView(getJPanelImage());
+	private JScrollPane getJScrollPaneImageSource() {
+		if (jScrollPaneImageSource == null) {
+			jScrollPaneImageSource = new JScrollPane();
+			jScrollPaneImageSource.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+			jScrollPaneImageSource.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			jScrollPaneImageSource.setViewportView(getJPanelImageSource());
 		}
-		return jScrollPaneImage;
+		return jScrollPaneImageSource;
 	}
 
 	/**
@@ -709,8 +904,22 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	 */
 	private JList getJListFilters() {
 		if (jListFilters == null) {
-			jListFilters = new JList(new String[] { "GrayScale Filter", "AutoSharp Filter", "Invert Filter" });
-			jListFilters.setPreferredSize(new Dimension(93, 50));
+			jListFilters = new JList(filterList);
+			jListFilters.setCellRenderer(new DefaultListCellRenderer() {
+
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
+						boolean cellHasFocus) {
+					return super.getListCellRendererComponent(list, ((LFilters) value).getName(), index, isSelected,
+							cellHasFocus);
+				}
+			});
+
 		}
 		return jListFilters;
 	}
@@ -723,6 +932,7 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JButton getJButtonFiltersChange() {
 		if (jButtonFiltersChange == null) {
 			jButtonFiltersChange = new JButton();
+			jButtonFiltersChange.setAction(new NoAction());
 			jButtonFiltersChange.setText("Изменить");
 		}
 		return jButtonFiltersChange;
@@ -736,7 +946,6 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JScrollPane getJScrollPaneFilters() {
 		if (jScrollPaneFilters == null) {
 			jScrollPaneFilters = new JScrollPane();
-			jScrollPaneFilters.setPreferredSize(new Dimension(85, 120));
 			jScrollPaneFilters.setViewportView(getJListFilters());
 		}
 		return jScrollPaneFilters;
@@ -757,13 +966,6 @@ public class MainFrame extends JFrame implements ProgressInterface {
 			GridBagConstraints gridBagConstraints12 = new GridBagConstraints();
 			gridBagConstraints12.gridx = 1;
 			gridBagConstraints12.gridy = 0;
-			GridBagConstraints gridBagConstraints11 = new GridBagConstraints();
-			gridBagConstraints11.fill = GridBagConstraints.BOTH;
-			gridBagConstraints11.weighty = 1.0D;
-			gridBagConstraints11.gridwidth = 2;
-			gridBagConstraints11.gridy = 1;
-			gridBagConstraints11.gridheight = 1;
-			gridBagConstraints11.weightx = 1.0;
 			GridBagConstraints gridBagConstraints7 = new GridBagConstraints();
 			gridBagConstraints7.fill = GridBagConstraints.HORIZONTAL;
 			gridBagConstraints7.gridx = 0;
@@ -776,7 +978,6 @@ public class MainFrame extends JFrame implements ProgressInterface {
 					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
 			jPanelSensors.add(getJComboBoxSensor(), gridBagConstraints7);
 			jPanelSensors.add(getJButtonSensorSearch(), gridBagConstraints12);
-			jPanelSensors.add(getJTextAreaSensors(), gridBagConstraints11);
 			jPanelSensors.add(getJCheckBoxSensor(), gridBagConstraints13);
 		}
 		return jPanelSensors;
@@ -802,23 +1003,10 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JButton getJButtonSensorSearch() {
 		if (jButtonSensorSearch == null) {
 			jButtonSensorSearch = new JButton();
+			jButtonSensorSearch.setAction(new NoAction());
 			jButtonSensorSearch.setText("Найти");
 		}
 		return jButtonSensorSearch;
-	}
-
-	/**
-	 * This method initializes jTextAreaSensors
-	 * 
-	 * @return javax.swing.JTextArea
-	 */
-	private JTextArea getJTextAreaSensors() {
-		if (jTextAreaSensors == null) {
-			jTextAreaSensors = new JTextArea();
-			jTextAreaSensors.setText("Название: вихревой датчик\nЧуть-чуть о датчике");
-			jTextAreaSensors.setEditable(false);
-		}
-		return jTextAreaSensors;
 	}
 
 	/**
@@ -846,13 +1034,6 @@ public class MainFrame extends JFrame implements ProgressInterface {
 			gridBagConstraints17.gridwidth = 2;
 			gridBagConstraints17.anchor = GridBagConstraints.WEST;
 			gridBagConstraints17.gridy = 2;
-			GridBagConstraints gridBagConstraints16 = new GridBagConstraints();
-			gridBagConstraints16.fill = GridBagConstraints.BOTH;
-			gridBagConstraints16.gridy = 1;
-			gridBagConstraints16.weightx = 1.0;
-			gridBagConstraints16.weighty = 1.0;
-			gridBagConstraints16.gridwidth = 2;
-			gridBagConstraints16.gridx = 0;
 			GridBagConstraints gridBagConstraints15 = new GridBagConstraints();
 			gridBagConstraints15.gridx = 1;
 			gridBagConstraints15.gridy = 0;
@@ -868,7 +1049,6 @@ public class MainFrame extends JFrame implements ProgressInterface {
 					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
 			jPanelSurface.add(getJComboBoxSurface(), gridBagConstraints14);
 			jPanelSurface.add(getJButtonSurface(), gridBagConstraints15);
-			jPanelSurface.add(getJTextAreaSurface(), gridBagConstraints16);
 			jPanelSurface.add(getJCheckBoxSurface(), gridBagConstraints17);
 		}
 		return jPanelSurface;
@@ -886,13 +1066,6 @@ public class MainFrame extends JFrame implements ProgressInterface {
 			gridBagConstraints21.anchor = GridBagConstraints.WEST;
 			gridBagConstraints21.gridwidth = 2;
 			gridBagConstraints21.gridy = 2;
-			GridBagConstraints gridBagConstraints20 = new GridBagConstraints();
-			gridBagConstraints20.fill = GridBagConstraints.BOTH;
-			gridBagConstraints20.gridy = 1;
-			gridBagConstraints20.weightx = 1.0;
-			gridBagConstraints20.weighty = 1.0;
-			gridBagConstraints20.gridwidth = 2;
-			gridBagConstraints20.gridx = 0;
 			GridBagConstraints gridBagConstraints19 = new GridBagConstraints();
 			gridBagConstraints19.gridx = 1;
 			gridBagConstraints19.gridy = 0;
@@ -907,7 +1080,6 @@ public class MainFrame extends JFrame implements ProgressInterface {
 					TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
 			jPanelDefect.add(getJComboBoxDefect(), gridBagConstraints18);
 			jPanelDefect.add(getJButtonDefect(), gridBagConstraints19);
-			jPanelDefect.add(getJTextAreaDefect(), gridBagConstraints20);
 			jPanelDefect.add(getJCheckBoxDefect(), gridBagConstraints21);
 		}
 		return jPanelDefect;
@@ -933,23 +1105,10 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JButton getJButtonSurface() {
 		if (jButtonSurface == null) {
 			jButtonSurface = new JButton();
+			jButtonSurface.setAction(new NoAction());
 			jButtonSurface.setText("Найти");
 		}
 		return jButtonSurface;
-	}
-
-	/**
-	 * This method initializes jTextAreaSurface
-	 * 
-	 * @return javax.swing.JTextArea
-	 */
-	private JTextArea getJTextAreaSurface() {
-		if (jTextAreaSurface == null) {
-			jTextAreaSurface = new JTextArea();
-			jTextAreaSurface.setText("Название: плоскость\nЧуть-чуть о поверхности");
-			jTextAreaSurface.setEditable(false);
-		}
-		return jTextAreaSurface;
 	}
 
 	/**
@@ -985,23 +1144,10 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JButton getJButtonDefect() {
 		if (jButtonDefect == null) {
 			jButtonDefect = new JButton();
+			jButtonDefect.setAction(new NoAction());
 			jButtonDefect.setText("Найти");
 		}
 		return jButtonDefect;
-	}
-
-	/**
-	 * This method initializes jTextAreaDefect
-	 * 
-	 * @return javax.swing.JTextArea
-	 */
-	private JTextArea getJTextAreaDefect() {
-		if (jTextAreaDefect == null) {
-			jTextAreaDefect = new JTextArea();
-			jTextAreaDefect.setText("Название: поверхностный\nЧуть-чуть о дефекте");
-			jTextAreaDefect.setEditable(false);
-		}
-		return jTextAreaDefect;
 	}
 
 	/**
@@ -1059,23 +1205,23 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	private JButton getJButtonProcess() {
 		if (jButtonProcess == null) {
 			jButtonProcess = new JButton();
-			jButtonProcess.setText("Распознать...");
+			jButtonProcess.setText("Сравниить...");
 			jButtonProcess.setEnabled(false);
 		}
 		return jButtonProcess;
 	}
 
 	/**
-	 * This method initializes jPanelImage
+	 * This method initializes jPanelImageSource
 	 * 
 	 * @return javax.swing.JPanel
 	 */
-	private ImagePanel getJPanelImage() {
-		if (jPanelImage == null) {
-			jPanelImage = new ImagePanel();
-			jPanelImage.setLayout(new GridBagLayout());
+	private ImagePanel getJPanelImageSource() {
+		if (jPanelImageSource == null) {
+			jPanelImageSource = new ImagePanel();
+			jPanelImageSource.setLayout(new GridBagLayout());
 		}
-		return jPanelImage;
+		return jPanelImageSource;
 	};
 
 	/**
@@ -1224,12 +1370,130 @@ public class MainFrame extends JFrame implements ProgressInterface {
 	}
 
 	public void clearMessage() {
-		// TODO Auto-generated method stub
-
+		jStatus.setText("");
 	}
 
 	public void printMessage(String message) {
-		// TODO Auto-generated method stub
+		jStatus.setText(message);
+	}
 
+	/**
+	 * This method initializes jTabbedPaneImages
+	 * 
+	 * @return javax.swing.JTabbedPane
+	 */
+	private JTabbedPane getJTabbedPaneImages() {
+		if (jTabbedPaneImages == null) {
+			jTabbedPaneImages = new JTabbedPane();
+			jTabbedPaneImages.addTab("Исходное", null, getJScrollPaneImageSource(), null);
+			jTabbedPaneImages.addTab("Отфильтрованное", null, getJScrollPaneImageFiltered(), null);
+			jTabbedPaneImages.setSelectedIndex(1);
+			jTabbedPaneImages.addChangeListener(new ChangeListener() {
+
+				@Override
+				public void stateChanged(ChangeEvent e) {
+					jLabelImageInfo
+							.setText(jTabbedPaneImages.getSelectedIndex() == 0 ? MainFrame.this.originalImageInfo
+									: MainFrame.this.filteredImageInfo);
+
+				}
+			});
+		}
+		return jTabbedPaneImages;
+	}
+
+	/**
+	 * This method initializes jScrollPaneImageFiltered
+	 * 
+	 * @return javax.swing.JScrollPane
+	 */
+	private JScrollPane getJScrollPaneImageFiltered() {
+		if (jScrollPaneImageFiltered == null) {
+			jScrollPaneImageFiltered = new JScrollPane();
+			jScrollPaneImageFiltered.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+			jScrollPaneImageFiltered.setViewportView(getJPanelImageFiltered());
+			jScrollPaneImageFiltered.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		}
+		return jScrollPaneImageFiltered;
+	}
+
+	/**
+	 * This method initializes jPanelImageFiltered
+	 * 
+	 * @return javax.swing.JPanel
+	 */
+	private ImagePanel getJPanelImageFiltered() {
+		if (jPanelImageFiltered == null) {
+			jPanelImageFiltered = new ImagePanel();
+			jPanelImageFiltered.setLayout(new GridBagLayout());
+		}
+		return jPanelImageFiltered;
+	}
+
+	/**
+	 * This method initializes jPanelPreprocessing
+	 * 
+	 * @return javax.swing.JPanel
+	 */
+	private JPanel getJPanelPreprocessing() {
+		if (jPanelPreprocessing == null) {
+			GridBagConstraints gridBagConstraints30 = new GridBagConstraints();
+			gridBagConstraints30.gridx = 0;
+			gridBagConstraints30.anchor = GridBagConstraints.NORTHWEST;
+			gridBagConstraints30.gridy = 1;
+			GridBagConstraints gridBagConstraints29 = new GridBagConstraints();
+			gridBagConstraints29.fill = GridBagConstraints.BOTH;
+			gridBagConstraints29.weighty = 1.0;
+			gridBagConstraints29.gridx = 0;
+			gridBagConstraints29.gridy = 0;
+			gridBagConstraints29.anchor = GridBagConstraints.NORTHWEST;
+			gridBagConstraints29.weightx = 1.0;
+			jPanelPreprocessing = new JPanel();
+			jPanelPreprocessing.setLayout(new GridBagLayout());
+			jPanelPreprocessing.setBorder(BorderFactory.createTitledBorder(null, "Препроцессинг",
+					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
+					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			jPanelPreprocessing.add(getJScrollPanePreProcessing(), gridBagConstraints29);
+			jPanelPreprocessing.add(getJButtonChangePreProcessing(), gridBagConstraints30);
+		}
+		return jPanelPreprocessing;
+	}
+
+	/**
+	 * This method initializes jScrollPanePreProcessing
+	 * 
+	 * @return javax.swing.JScrollPane
+	 */
+	private JScrollPane getJScrollPanePreProcessing() {
+		if (jScrollPanePreProcessing == null) {
+			jScrollPanePreProcessing = new JScrollPane();
+			jScrollPanePreProcessing.setViewportView(getJListPreProcessing());
+		}
+		return jScrollPanePreProcessing;
+	}
+
+	/**
+	 * This method initializes jListPreProcessing
+	 * 
+	 * @return javax.swing.JList
+	 */
+	private JList getJListPreProcessing() {
+		if (jListPreProcessing == null) {
+			jListPreProcessing = new JList(new String[] { filterList[0].getName() });
+		}
+		return jListPreProcessing;
+	}
+
+	/**
+	 * This method initializes jButtonChangePreProcessing
+	 * 
+	 * @return javax.swing.JButton
+	 */
+	private JButton getJButtonChangePreProcessing() {
+		if (jButtonChangePreProcessing == null) {
+			jButtonChangePreProcessing = new JButton();
+			jButtonChangePreProcessing.setText("Изменить");
+		}
+		return jButtonChangePreProcessing;
 	}
 }

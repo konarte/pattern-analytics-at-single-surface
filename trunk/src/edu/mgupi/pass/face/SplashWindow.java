@@ -46,6 +46,7 @@ public class SplashWindow extends JFrame {
 	 */
 	private void initialize() throws IOException {
 		this.setResizable(false);
+		this.setName("splashFrame");
 		this.setBounds(new Rectangle(0, 0, 450, 200));
 		Point point = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
 

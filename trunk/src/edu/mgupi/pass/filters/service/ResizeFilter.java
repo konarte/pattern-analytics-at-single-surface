@@ -11,11 +11,10 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
-import edu.mgupi.pass.filters.IFilterAttachable;
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.Param.TYPES;
 
-public class ResizeFilter implements IFilter, IFilterAttachable {
+public class ResizeFilter implements IFilter {
 
 	private final static Logger logger = LoggerFactory.getLogger(ResizeFilter.class);
 
@@ -86,17 +85,19 @@ public class ResizeFilter implements IFilter, IFilterAttachable {
 		return dest;
 	}
 
-	public void onAttachToImage(BufferedImage source) {
-		logger.trace("Sets new default values {}x{}", source.getWidth(), source.getHeight());
-		WIDTH.setDefault_(source.getWidth());
-		HEIGHT.setDefault_(source.getHeight());
-		// do nothing
-	}
-
-	public void onDetachFromImage(BufferedImage source) {
-		logger.trace("No action on detach");
-		// do nothing
-	}
+	//
+	// public void onAttachToImage(BufferedImage source) {
+	// logger.trace("Sets new default values {}x{}", source.getWidth(),
+	// source.getHeight());
+	// WIDTH.setDefault_(source.getWidth());
+	// HEIGHT.setDefault_(source.getHeight());
+	// // do nothing
+	// }
+	//
+	// public void onDetachFromImage(BufferedImage source) {
+	// logger.trace("No action on detach");
+	// // do nothing
+	// }
 
 	public Param getWIDTH() {
 		return WIDTH;

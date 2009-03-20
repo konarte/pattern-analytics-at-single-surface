@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.db.surfaces.PassPersistentManager;
+import edu.mgupi.pass.util.Config;
 
 /**
  * Entry class for application. We set up file-lock (to prevent multiple
@@ -58,23 +59,27 @@ public class Application {
 	}
 
 	// Changing Look And Feel, depends on current OS
-	private void changeLookAndFeel() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
-			UnsupportedLookAndFeelException {
+	private void changeLookAndFeel(String newLookAndFeel) throws ClassNotFoundException, InstantiationException,
+			IllegalAccessException, UnsupportedLookAndFeelException {
+
+		logger.debug("Found look and feel: " + newLookAndFeel);
 
 		// If unexpected OS -- keep LaF by default
-		if (PREFFERED_LOOK_AND_FEEL == null) {
+		if (newLookAndFeel == null) {
 			return;
 		}
 
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-				if (PREFFERED_LOOK_AND_FEEL.equals(info.getName())) {
+				if (newLookAndFeel.equals(info.getName()) || newLookAndFeel.equals(info.getClassName())) {
 					logger.debug("Applying look and feel {}({})", info.getName(), info.getClassName());
 
 					UIManager.setLookAndFeel(info.getClassName());
 					break;
 				}
 			}
+
+			logger.debug("Not found any supported LaF for class '" + newLookAndFeel + "'");
 		} catch (Exception e) {
 			// If not found -- we don't care ^_^
 			// OK, choose cross-platform LaF
@@ -118,32 +123,35 @@ public class Application {
 		splash.setSplashText("Загрузка...");
 		splash.setVisible(true);
 
-		try {
-			this.changeLookAndFeel();
-		} catch (Exception e) {
-			JOptionPane
-					.showMessageDialog(null, "Unexpected error when applying LookAndFeel. Try to run "
-							+ "application with '-nolaf' key (" + e + ")", "Invalid look and feel",
-							JOptionPane.WARNING_MESSAGE);
-		}
-
-		splash.setSplashText("Подключение и инициализация БД...");
-
-		logger.debug("Initializing Hibernate...");
-		PassPersistentManager.instance();
-
 		MainFrame frame = null;
-		splash.setSplashText("Загрузка приложения...");
 		try {
-			frame = (MainFrame) AppHelper.getInstance().openWindow(MainFrame.class);
-			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		} catch (Exception e) {
-			throw e;
+
+			String newLookAndFeel = Config.getInstance().getLookAndFeel(PREFFERED_LOOK_AND_FEEL);
+
+			try {
+				this.changeLookAndFeel(newLookAndFeel);
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(null, "Unexpected error when applying LookAndFeel. Try to run "
+						+ "application with '-nolaf' key (" + e + ")", "Invalid look and feel",
+						JOptionPane.WARNING_MESSAGE);
+			}
+
+			splash.setSplashText("Подключение и инициализация БД...");
+
+			logger.debug("Initializing Hibernate...");
+			PassPersistentManager.instance();
+
+			splash.setSplashText("Загрузка приложения...");
+			try {
+				frame = (MainFrame) AppHelper.getInstance().openWindow(MainFrame.class);
+				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			} catch (Exception e) {
+				throw e;
+			}
 		} finally {
 			splash.setVisible(false);
 			splash.dispose();
 		}
-
 		frame.setVisible(true);
 
 		logger.debug("Application PASS ready...");

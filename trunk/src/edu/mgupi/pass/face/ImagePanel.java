@@ -35,6 +35,19 @@ public class ImagePanel extends JPanel {
 	private boolean fitImageToWindowSize;
 
 	public void registerFitButton(final JCheckBox fitBox) {
+		this.registerFitButton(fitBox, null);
+	}
+
+	private ImagePanel previousImagePanel;
+
+	public void registerFitButton(final JCheckBox fitBox, final ImagePanel previousImagePanel) {
+
+		if (previousImagePanel == this) {
+			throw new IllegalArgumentException(
+					"Internal error. Attempt to create link to the same imagePanel as previous panel.");
+		}
+
+		this.previousImagePanel = previousImagePanel;
 		fitBox.setAction(new AbstractAction() {
 
 			/**
@@ -43,10 +56,25 @@ public class ImagePanel extends JPanel {
 			private static final long serialVersionUID = 1L;
 
 			public void actionPerformed(ActionEvent e) {
-				ImagePanel.this.setFitMode(fitBox.isSelected());
+				ImagePanel.this.doCheckBoxAction(fitBox);
 			}
 		});
 		this.setFitMode(fitBox.isSelected());
+
+	}
+
+	private boolean cycleActionProtection = false;
+
+	private void doCheckBoxAction(JCheckBox fitBox) {
+		if (cycleActionProtection) {
+			return;
+		}
+		cycleActionProtection = true;
+		ImagePanel.this.setFitMode(fitBox.isSelected());
+		if (ImagePanel.this.previousImagePanel != null) {
+			ImagePanel.this.previousImagePanel.doCheckBoxAction(fitBox);
+		}
+		cycleActionProtection = false;
 	}
 
 	private void setFitMode(boolean fitImageToWindowSize) {
@@ -144,7 +172,7 @@ public class ImagePanel extends JPanel {
 
 		}
 	};
-	
+
 	public boolean hasImage() {
 		return this.myImage != null;
 	}

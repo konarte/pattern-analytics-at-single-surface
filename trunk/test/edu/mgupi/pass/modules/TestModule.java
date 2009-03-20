@@ -139,7 +139,7 @@ public class TestModule implements IModule, IInitiable {
 		ModuleHelper.putTemporaryModuleImage(store, dest);
 	}
 
-	public float compare(Locuses graph1, Locuses graph2) throws ModuleException {
+	public double compare(Locuses graph1, Locuses graph2) throws ModuleException {
 		if (!init) {
 			throw new IllegalStateException("Internal error. Please, call init first.");
 		}
