@@ -117,11 +117,13 @@ public class SettingsDialog extends JDialog {
 		// setup new source mode anyway
 		Config.getInstance().setCurrentSourceMode(newSourceMode);
 		if (!newSourceMode.equals(currentSource)) {
+			currentSource = newSourceMode;
 			needRestartProcessing = true;
 		}
 
 		Config.getInstance().setCurrentBackground(newBackground.getRGB());
 		if (!newBackground.equals(currentBackground)) {
+			currentBackground = newBackground; 
 			needRestartProcessing = true;
 		}
 

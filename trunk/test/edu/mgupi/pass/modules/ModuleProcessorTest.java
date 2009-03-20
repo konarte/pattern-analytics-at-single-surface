@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 
 import javax.imageio.ImageIO;
@@ -54,10 +55,9 @@ public class ModuleProcessorTest {
 			processor.setModule(TestModule.class);
 
 			FilterChainsaw mainSaw = new FilterChainsaw();
-			ResizeFilter resize = new ResizeFilter();
+			ResizeFilter resize = (ResizeFilter) mainSaw.appendFilter(ResizeFilter.class);
 			resize.getWIDTH().setValue(1024);
 			resize.getHEIGHT().setValue(1024);
-			mainSaw.appendFilter(resize);
 
 			processor.setChainsaw(mainSaw);
 
@@ -68,25 +68,28 @@ public class ModuleProcessorTest {
 				Locuses myLocus = processor.startProcessing(source.getSingleSource());
 				assertNotNull(myLocus);
 				assertTrue(myLocus.getProcessed());
-				assertNotNull(ModuleHelper.getTemporaryModuleImage(myLocus));
-				
+				BufferedImage image = ModuleHelper.getTemporaryModuleImage(myLocus);
+				assertNotNull(image);
+
 				IModule firstModule = processor.getModule();
 
 				new File("tmp").mkdir();
 				ImageIO.write(processor.getLastProcessedImage(), "PNG", new File("tmp/module-test-processed.png"));
 
 				processor.setModule(SimpleMatrixModule.class);
-				assertNull(ModuleHelper.getTemporaryModuleImage(myLocus));
+				assertNotNull(ModuleHelper.getTemporaryModuleImage(myLocus));
 				assertTrue(myLocus.getProcessed());
-				
+
 				assertFalse(processor.getModule() == firstModule);
 
 				processor.setModule(TestModule.class);
-				assertNotNull(myLocus);
 				assertTrue(myLocus.getProcessed());
 				assertNotNull(ModuleHelper.getTemporaryModuleImage(myLocus));
-				
+
 				assertTrue(processor.getModule() == firstModule);
+
+				processor.setModule(TestModule2.class);
+				assertNull(ModuleHelper.getTemporaryModuleImage(myLocus));
 
 			} finally {
 				processor.finishProcessing();
@@ -111,10 +114,10 @@ public class ModuleProcessorTest {
 			processor.setModule(TestModule.class);
 
 			FilterChainsaw preprocessingSaw = new FilterChainsaw();
-			ResizeFilter resize = new ResizeFilter();
+
+			ResizeFilter resize = (ResizeFilter) preprocessingSaw.appendFilter(ResizeFilter.class);
 			resize.getWIDTH().setValue(1024);
 			resize.getHEIGHT().setValue(1024);
-			preprocessingSaw.appendFilter(resize);
 
 			processor.setPreprocessingChainsaw(preprocessingSaw);
 
@@ -131,16 +134,16 @@ public class ModuleProcessorTest {
 				assertNotNull(myLocus);
 				assertTrue(myLocus.getProcessed());
 				assertNotNull(ModuleHelper.getTemporaryModuleImage(myLocus));
-				
+
 				IModule firstModule = processor.getModule();
 
 				new File("tmp").mkdir();
 				ImageIO.write(processor.getLastProcessedImage(), "PNG", new File("tmp/module-test-processed-pre.png"));
 
 				processor.setModule(SimpleMatrixModule.class);
-				assertNull(ModuleHelper.getTemporaryModuleImage(myLocus));
+				assertNotNull(ModuleHelper.getTemporaryModuleImage(myLocus));
 				assertTrue(myLocus.getProcessed());
-				
+
 				IModule secondModule = processor.getModule();
 				assertFalse(processor.getModule() == firstModule);
 
@@ -148,12 +151,11 @@ public class ModuleProcessorTest {
 				assertNotNull(myLocus);
 				assertTrue(myLocus.getProcessed());
 				assertNotNull(ModuleHelper.getTemporaryModuleImage(myLocus));
-				
+
 				assertTrue(processor.getModule() == firstModule);
-				
-				
+
 				processor.setModule(SimpleMatrixModule.class);
-				assertNull(ModuleHelper.getTemporaryModuleImage(myLocus));
+				assertNotNull(ModuleHelper.getTemporaryModuleImage(myLocus));
 				assertTrue(myLocus.getProcessed());
 				assertTrue(processor.getModule() == secondModule);
 				assertFalse(processor.getModule() == firstModule);

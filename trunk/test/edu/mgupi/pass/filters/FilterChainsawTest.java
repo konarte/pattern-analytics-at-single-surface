@@ -57,7 +57,7 @@ public class FilterChainsawTest {
 		chainsaw.reset();
 		assertNull(chainsaw.getFilter(0));
 
-		chainsaw.appendFilter(new TestFilter());
+		chainsaw.appendFilter(TestFilter.class);
 		assertNotNull(chainsaw.getFilter(0));
 
 		chainsaw.reset();
@@ -66,20 +66,16 @@ public class FilterChainsawTest {
 
 	@Test
 	public void testAppendFilter() throws InstantiationException, IllegalAccessException {
-		TestFilter filter = new TestFilter();
-		TestFilter filter2 = new TestFilter();
-
-		chainsaw.appendFilter(filter);
+		TestFilter filter = (TestFilter) chainsaw.appendFilter(TestFilter.class);
 
 		assertTrue(filter == chainsaw.getFilter(0));
 
-		chainsaw.appendFilter(filter2);
-
+		TestFilter filter2 = (TestFilter) chainsaw.appendFilter(TestFilter.class);
 		assertTrue(filter == chainsaw.getFilter(0));
 		assertTrue(filter2 == chainsaw.getFilter(1));
 
 		try {
-			chainsaw.appendFilter((IFilter) null);
+			chainsaw.appendFilter(null);
 			fail("No IllegalArgumentException!");
 		} catch (IllegalArgumentException iae) {
 			System.out.println("Received expected exception: " + iae);
@@ -102,12 +98,9 @@ public class FilterChainsawTest {
 	}
 
 	@Test
-	public void testRemoveFilter() {
-		TestFilter filter = new TestFilter();
-		TestFilter filter2 = new TestFilter();
-
-		chainsaw.appendFilter(filter);
-		chainsaw.appendFilter(filter2);
+	public void testRemoveFilter() throws InstantiationException, IllegalAccessException {
+		TestFilter filter = (TestFilter) chainsaw.appendFilter(TestFilter.class);
+		TestFilter filter2 = (TestFilter) chainsaw.appendFilter(TestFilter.class);
 
 		assertTrue(filter == chainsaw.getFilter(0));
 		assertTrue(filter2 == chainsaw.getFilter(1));
@@ -116,8 +109,7 @@ public class FilterChainsawTest {
 
 		assertTrue(filter2 == chainsaw.getFilter(0));
 
-		filter = new TestFilter();
-		chainsaw.appendFilter(filter);
+		filter = (TestFilter) chainsaw.appendFilter(TestFilter.class);
 		assertTrue(filter2 == chainsaw.getFilter(0));
 		assertTrue(filter == chainsaw.getFilter(1));
 
@@ -129,12 +121,9 @@ public class FilterChainsawTest {
 	}
 
 	@Test
-	public void testGetFilter() {
-		TestFilter filter = new TestFilter();
-		TestFilter filter2 = new TestFilter();
-
-		chainsaw.appendFilter(filter);
-		chainsaw.appendFilter(filter2);
+	public void testGetFilter() throws InstantiationException, IllegalAccessException {
+		TestFilter filter = (TestFilter) chainsaw.appendFilter(TestFilter.class);
+		TestFilter filter2 = (TestFilter) chainsaw.appendFilter(TestFilter.class);
 
 		assertTrue(filter == chainsaw.getFilter(0));
 		assertTrue(filter2 == chainsaw.getFilter(1));
@@ -145,19 +134,16 @@ public class FilterChainsawTest {
 	}
 
 	@Test
-	public void testMoveUpAndDown() {
+	public void testMoveUpAndDown() throws InstantiationException, IllegalAccessException {
 		chainsaw.moveUp(0);
 		assertNull(chainsaw.getFilter(0));
 
 		chainsaw.moveDown(0);
 		assertNull(chainsaw.getFilter(0));
 
-		TestFilter filter = new TestFilter();
-		TestFilter filter2 = new TestFilter();
-		TestFilter filter3 = new TestFilter();
-		chainsaw.appendFilter(filter);
-		chainsaw.appendFilter(filter2);
-		chainsaw.appendFilter(filter3);
+		TestFilter filter = (TestFilter) chainsaw.appendFilter(TestFilter.class);
+		TestFilter filter2 = (TestFilter) chainsaw.appendFilter(TestFilter.class);
+		TestFilter filter3 = (TestFilter) chainsaw.appendFilter(TestFilter.class);
 
 		assertTrue(filter == chainsaw.getFilter(0));
 		chainsaw.moveUp(0);
@@ -236,12 +222,11 @@ public class FilterChainsawTest {
 			System.out.println("Received expected exception: " + ise);
 		}
 
-		TestFilter filter = new TestFilter();
-		TestFilter filter2 = new TestFilter();
-		chainsaw.appendFilter(filter);
+		TestFilter filter = (TestFilter) chainsaw.appendFilter(TestFilter.class);
+
 		assertTrue(((TestFilter) chainsaw.getFilter(0)).isAttached());
 
-		chainsaw.appendFilter(filter2);
+		TestFilter filter2 = (TestFilter) chainsaw.appendFilter(TestFilter.class);
 		assertTrue(((TestFilter) chainsaw.getFilter(1)).isAttached());
 
 		try {
@@ -285,7 +270,7 @@ public class FilterChainsawTest {
 	}
 
 	@Test
-	public void testCommonFilterSaw() throws FilterException, IOException {
+	public void testCommonFilterSaw() throws Exception {
 		TestSourceImpl source = new TestSourceImpl();
 		source.init();
 		try {
@@ -295,13 +280,11 @@ public class FilterChainsawTest {
 
 			this.convertImage(image, "");
 
-			ColorSpaceFilter color = new ColorSpaceFilter();
+			ColorSpaceFilter color = (ColorSpaceFilter) chainsaw.appendFilter(ColorSpaceFilter.class);
 			color.getCOLOR_MODE().setValue(ColorSpace.CS_GRAY);
-			chainsaw.appendFilter(color);
 
-			RescaleFilter rescale = new RescaleFilter();
+			RescaleFilter rescale = (RescaleFilter) chainsaw.appendFilter(RescaleFilter.class);
 			rescale.getBRIGHTNESS().setValue(40);
-			chainsaw.appendFilter(rescale);
 
 			this.convertImage(image, "1");
 
@@ -316,6 +299,27 @@ public class FilterChainsawTest {
 		} finally {
 			source.close();
 		}
+	}
+
+	@Test
+	public void testFilterSourceCaching() throws InstantiationException, IllegalAccessException {
+		chainsaw.close();
+		chainsaw = new FilterChainsaw(true);
+
+		TestFilter filter = (TestFilter) chainsaw.appendFilter(TestFilter.class);
+		TestFilter filter2 = (TestFilter) chainsaw.appendFilter(TestFilter.class);
+
+		assertTrue(filter == filter2);
+		assertTrue(chainsaw.getFilter(0) == filter);
+		assertNull(chainsaw.getFilter(1));
+
+		chainsaw.removeFilter(TestFilter.class);
+
+		assertNull(chainsaw.getFilter(0));
+
+		filter2 = (TestFilter) chainsaw.appendFilter(TestFilter.class);
+		assertTrue(filter == filter2);
+
 	}
 
 }

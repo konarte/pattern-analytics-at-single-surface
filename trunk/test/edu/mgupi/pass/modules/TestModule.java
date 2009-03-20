@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 
 import javax.imageio.ImageIO;
 
@@ -15,8 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.db.locuses.LocusModuleParams;
-import edu.mgupi.pass.db.locuses.LocusModuleParamsFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
+import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.util.IInitiable;
 
 /**
@@ -78,42 +79,8 @@ public class TestModule implements IModule, IInitiable {
 		String imageParams = "" + filteredImage.getWidth() + "x" + filteredImage.getHeight() + " : "
 				+ filteredImage.getType();
 
-		LocusModuleParams param = LocusModuleParamsFactory.createLocusModuleParams();
-		param.setParamName("myParam1");
-		param.setParamData(imageParams.getBytes());
-		store.getParams().add(param);
-
-		param = LocusModuleParamsFactory.createLocusModuleParams();
-		param.setParamName("myParam2");
-		param.setParamData(ModuleHelper.convertImageToPNGRaw(filteredImage));
-		store.getParams().add(param);
-
-		// ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-
-		// ImageIO.write(filteredImage, "PNG", byteStream);
-		// param.setParamData(byteStream.toByteArray());
-
-		// byteStream.close();
-
-		// ImageWriter writer =
-		// ImageIO.getImageWritersByFormatName("JPG").next();
-		// writer.setOutput(ImageIO.createImageOutputStream(byteStream));
-		//
-		// ImageWriteParam iwp = writer.getDefaultWriteParam();
-		// iwp.setProgressiveMode(ImageWriteParam.MODE_DEFAULT );
-		// iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-		// iwp.setCompressionQuality(0.95f);
-		//
-		// writer.write(null, new IIOImage(filteredImage, null, null), iwp);
-		// writer.dispose();
-
-		// byte[] imageData = (byte[])
-		// filteredImage.getData().getDataElements(0, 0,
-		// filteredImage.getWidth(),
-		// filteredImage.getHeight(), null);
-		// GZIPOutputStream zipOut = new GZIPOutputStream(byteStream);
-		// zipOut.write(imageData);
-		// zipOut.close();
+		ModuleHelper.putParameterValue(store, "myParam1", imageParams);
+		ModuleHelper.putParameterValue(store, "myParam2", filteredImage);
 
 		BufferedImage dest = new BufferedImage(256, 256, filteredImage.getType());
 		Graphics2D graphics2D = dest.createGraphics();
@@ -156,14 +123,14 @@ public class TestModule implements IModule, IInitiable {
 			throw new IllegalArgumentException("Internal error. graph2 was not marked as processed!");
 		}
 
-		LocusModuleParams param_g1 = ModuleHelper.getParameter("myParam2", graph1);
-		LocusModuleParams param_g2 = ModuleHelper.getParameter("myParam2", graph2);
+		LocusModuleParams param_g1 = ModuleHelper.getParameter(graph1, "myParam2");
+		LocusModuleParams param_g2 = ModuleHelper.getParameter(graph2, "myParam2");
 
 		try {
 			new File("tmp").mkdir();
-			ImageIO.write(ModuleHelper.covertPNGRawToImage(param_g1.getParamData()), "PNG", new File(
+			ImageIO.write((BufferedImage) ModuleHelper.getParameterValue(graph1, "myParam2", true), "PNG", new File(
 					"tmp/G1-myParam1-imageRestored.png"));
-			ImageIO.write(ModuleHelper.covertPNGRawToImage(param_g2.getParamData()), "PNG", new File(
+			ImageIO.write((BufferedImage) ModuleHelper.getParameterValue(graph2, "myParam2", true), "PNG", new File(
 					"tmp/G2-myParam1-imageRestored.png"));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -175,38 +142,17 @@ public class TestModule implements IModule, IInitiable {
 			return 0;
 		}
 
-		// java.util.Set<LocusModuleParams> params = graph1.getParams();
-		// for (LocusModuleParams param : params) {
-		// if (param.getParamName().equals("myParam1")) {
-		// System.out.println("G1: " + param.getParamName() + " = " + new
-		// String(param.getParamData()));
-		// } else if (param.getParamName().equals("myParam2")) {
-		// try {
-		// ImageIO.write(ImageIO.read(new
-		// ByteArrayInputStream(param.getParamData())), "PNG", new File(
-		// "tmp/G1-myParam1-imageRestored.png"));
-		//		
-		// } catch (IOException e) {
-		// throw new RuntimeException(e);
-		// }
-		// }
-		// }
-		//
-		// params = graph2.getParams();
-		// for (LocusModuleParams param : params) {
-		// if (param.getParamName().equals("myParam1")) {
-		// System.out.println("G2: " + param.getParamName() + " = " +
-		// param.getParamData());
-		// } else {
-		//
-		// }
-		// }
-
 		// return false;
 	}
 
 	public String getName() {
 		return "Тестовый модуль анализа";
+	}
+
+	@Override
+	public Collection<Class<? extends IFilter>> getRequiredFilters() {
+		// no params required
+		return null;
 	}
 
 }

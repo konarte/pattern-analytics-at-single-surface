@@ -24,11 +24,17 @@ public class ImagePanel extends JPanel {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	private boolean square = false;
 	private BufferedImage myImage;
 
-	public void setImage(BufferedImage image) {
+	public void setImage(BufferedImage image, boolean square) {
 		this.myImage = image;
+		this.square = square;
 		this.refreshFit();
+	}
+
+	public void setImage(BufferedImage image) {
+		this.setImage(image, false);
 	}
 
 	private JScrollPane parent = null;
@@ -113,9 +119,23 @@ public class ImagePanel extends JPanel {
 		if (this.fitImageToWindowSize) {
 			this.setPreferredSize(new Dimension((int) parent.getVisibleRect().getWidth(), (int) parent.getVisibleRect()
 					.getHeight()));
-			this.setBounds(parent.getBounds());
+			int width = parent.getWidth();
+			int height = parent.getHeight();
+
+			if (this.square) {
+				if (width > height) {
+					height = width;
+				} else if (width < height) {
+					width = height;
+				}
+			}
+
+			this.setSize(width, height);
+			this.setLocation(0, 0);
+
 			parent.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 			parent.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+
 		} else {
 			int width = myImage.getWidth();
 			int height = myImage.getHeight();
@@ -123,12 +143,29 @@ public class ImagePanel extends JPanel {
 			width = Const.MAIN_IMAGE_WIDTH > width ? width : Const.MAIN_IMAGE_WIDTH;
 			height = Const.MAIN_IMAGE_HEIGHT > height ? height : Const.MAIN_IMAGE_HEIGHT;
 
+			if (this.square) {
+				if (width > height) {
+					height = width;
+				} else if (width < height) {
+					width = height;
+				}
+			}
+
 			this.setPreferredSize(new Dimension(width, height));
 			this.setBounds(0, 0, width, height);
 			parent.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 			parent.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+			parent.getHorizontalScrollBar().setValue(0);
+			parent.getVerticalScrollBar().setValue(0);
+
 		}
-		this.repaint();
+		// parent.scrollRectToVisible(new Rectangle(0, 0, (int)
+		// parent.getVisibleRect().getWidth(), (int) parent
+		// .getVisibleRect().getHeight()));
+
+		// this.repaint();
+		this.parent.repaint();
 	}
 
 	protected void paintComponent(Graphics g) {

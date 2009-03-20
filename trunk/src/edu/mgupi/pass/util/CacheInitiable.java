@@ -1,9 +1,6 @@
 package edu.mgupi.pass.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -13,7 +10,7 @@ public class CacheInitiable<E> {
 
 	private final static Logger logger = LoggerFactory.getLogger(CacheInitiable.class);
 
-	private Map<Class<? extends E>, E> cachedValues = new HashMap<Class<? extends E>, E>();
+	protected Map<Class<? extends E>, E> cachedValues = new HashMap<Class<? extends E>, E>();
 
 	public E getInstance(Class<? extends E> moduleClass) throws InstantiationException, IllegalAccessException {
 		E instance = cachedValues.get(moduleClass);
@@ -29,6 +26,7 @@ public class CacheInitiable<E> {
 		}
 		return instance;
 	}
+	
 // Обязательно реализовать кэширование!
 // Пригодится для FilterChainsaw
 // Основная идея -- запоминание "удаленного" фильтра и его повторное использование

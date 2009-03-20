@@ -17,6 +17,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -52,7 +54,6 @@ import edu.mgupi.pass.db.locuses.LModules;
 import edu.mgupi.pass.db.locuses.LModulesFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
 import edu.mgupi.pass.filters.FilterChainsaw;
-import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.java.GrayScaleFilter;
 import edu.mgupi.pass.filters.service.PlaceImageFilter;
 import edu.mgupi.pass.filters.service.ResizeFilter;
@@ -123,7 +124,6 @@ public class MainFrame extends JFrame implements IProgress {
 
 	private void loadModelImpl() throws Exception {
 		moduleList = LModulesFactory.listLModulesByQuery(null, null);
-
 		if (moduleList == null || moduleList.length == 0) {
 			throw new Exception("No registered analyze modules found. Unable to work. Please, fill table 'LModules'.");
 		}
@@ -132,6 +132,26 @@ public class MainFrame extends JFrame implements IProgress {
 		if (filterList == null || filterList.length == 0) {
 			throw new Exception("No registered filters found. Unable to work. Please, fill table 'LFilters'.");
 		}
+
+		Arrays.sort(moduleList, new Comparator<LModules>() {
+			@Override
+			public int compare(LModules o1, LModules o2) {
+				if (o1 != null && o2 != null) {
+					return o1.getName().compareTo(o2.getName());
+				}
+				return 0;
+			}
+		});
+
+		Arrays.sort(filterList, new Comparator<LFilters>() {
+			@Override
+			public int compare(LFilters o1, LFilters o2) {
+				if (o1 != null && o2 != null) {
+					return o1.getName().compareTo(o2.getName());
+				}
+				return 0;
+			}
+		});
 	}
 
 	@SuppressWarnings("unchecked")
@@ -162,7 +182,7 @@ public class MainFrame extends JFrame implements IProgress {
 		LModules item = (LModules) jComboBoxModules.getSelectedItem();
 		MainFrame.this.setModule((Class<IModule>) Class.forName(item.getCodename()));
 
-		mainModuleProcessor.setPreprocessingChainsaw(new FilterChainsaw());
+		mainModuleProcessor.setPreprocessingChainsaw(new FilterChainsaw(true));
 		this.applySourcePreProcessor();
 
 		FilterChainsaw saw = new FilterChainsaw();
@@ -255,58 +275,48 @@ public class MainFrame extends JFrame implements IProgress {
 				: this.filteredImageInfo);
 
 		// Locuses locus = mainModuleProcessor.startProcessing(source);
-		this.jPanelImageFiltered.setImage(filteredImage);
+		// REQUIRED SQUARE BASE!
+		this.jPanelImageFiltered.setImage(filteredImage, true);
 		this.jPanelImageSource.setImage(sourceImage);
 		this.histogramFrame.setImage(mainModuleProcessor.getLastHistogramImage());
 		this.moduleFrame.setImage(ModuleHelper.getTemporaryModuleImage(this.currentLocus));
+
+		this.clearMessage();
 
 	}
 
 	private void applySourcePreProcessor() throws Exception {
 
+		this.printMessage("Применение фильтров-препроцессинга...");
+
 		FilterChainsaw preProcessing = mainModuleProcessor.getPreProcessingFilters();
-		IFilter currentFilter = preProcessing.getFilter(0);
 
 		String sourceScaleMode = Config.getInstance().getCurrentSourceMode(SettingsDialog.DEFAULT_SOURCE_MODE);
 		int background = Config.getInstance().getCurrentBackground(SettingsDialog.DEFAULT_BACKGROUND);
 
 		if (sourceScaleMode.equals(SettingsDialog.SOURCE_MODE_CENTER)
 				|| sourceScaleMode.equals(SettingsDialog.SOURCE_MODE_LEFT_TOP)) {
-			PlaceImageFilter place = null;
-			if (currentFilter == null || currentFilter.getClass() != PlaceImageFilter.class) {
-				if (currentFilter != null) {
-					preProcessing.removeFilter(0);
-				}
 
-				logger.debug("Applying PlaceImageFilter");
-				place = new PlaceImageFilter();
-				place.getWIDTH().setValue(Const.MAIN_IMAGE_WIDTH);
-				place.getHEIGHT().setValue(Const.MAIN_IMAGE_HEIGHT);
+			preProcessing.removeFilter(ResizeFilter.class);
 
-				preProcessing.appendFilter(place);
-			} else {
-				place = (PlaceImageFilter) currentFilter;
-			}
+			PlaceImageFilter place = (PlaceImageFilter) preProcessing.appendFilter(PlaceImageFilter.class);
+			place.getWIDTH().setValue(Const.MAIN_IMAGE_WIDTH);
+			place.getHEIGHT().setValue(Const.MAIN_IMAGE_HEIGHT);
 
 			place.getBACKGROUND().setValue(new Color(background));
 			place.getPLACE().setValue(sourceScaleMode.equals(SettingsDialog.SOURCE_MODE_CENTER) ? "center" : "topleft");
 
 		} else {
-			if (currentFilter == null || currentFilter.getClass() != ResizeFilter.class) {
-				if (currentFilter != null) {
-					preProcessing.removeFilter(0);
-				}
+			preProcessing.removeFilter(PlaceImageFilter.class);
 
-				logger.debug("Applying ResizeFilter");
+			ResizeFilter resizer = (ResizeFilter) preProcessing.appendFilter(ResizeFilter.class);
+			resizer.getWIDTH().setValue(Const.MAIN_IMAGE_WIDTH);
+			resizer.getHEIGHT().setValue(Const.MAIN_IMAGE_HEIGHT);
+			resizer.getINTERPOLATION_METHOD().setValue(RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
-				ResizeFilter resizer = new ResizeFilter();
-				resizer.getWIDTH().setValue(Const.MAIN_IMAGE_WIDTH);
-				resizer.getHEIGHT().setValue(Const.MAIN_IMAGE_HEIGHT);
-				resizer.getINTERPOLATION_METHOD().setValue(RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-
-				preProcessing.appendFilter(resizer);
-			}
 		}
+
+		this.clearMessage();
 	}
 
 	protected void restartProcessingBySource() throws Exception {
@@ -320,6 +330,8 @@ public class MainFrame extends JFrame implements IProgress {
 			throw new IllegalArgumentException("Internal error. Parameter 'newModule' must be not null.");
 		}
 
+		this.printMessage("Подключение нового модуля анализа");
+
 		logger.debug("Applying module {}", newModule);
 
 		this.mainModuleProcessor.setModule(newModule);
@@ -327,7 +339,11 @@ public class MainFrame extends JFrame implements IProgress {
 
 		if (currentLocus != null) {
 			this.moduleFrame.setImage(ModuleHelper.getTemporaryModuleImage(this.currentLocus));
+		} else {
+			this.moduleFrame.setImage(null);
 		}
+
+		this.clearMessage();
 	}
 
 	/**
@@ -1492,6 +1508,7 @@ public class MainFrame extends JFrame implements IProgress {
 	private JButton getJButtonChangePreProcessing() {
 		if (jButtonChangePreProcessing == null) {
 			jButtonChangePreProcessing = new JButton();
+			jButtonChangePreProcessing.setAction(new NoAction());
 			jButtonChangePreProcessing.setText("Изменить");
 		}
 		return jButtonChangePreProcessing;
