@@ -45,15 +45,21 @@ public class HistogramFilter implements IFilter {
 			throw new IllegalArgumentException("Internal error: image is null.");
 		}
 
-		logger.debug("Building histogram 256x{}", HEIGHT);
-
 		BufferedImage dest = new BufferedImage(256, HEIGHT, BufferedImage.TYPE_INT_RGB);
 
-		int height = source.getHeight();
 		int width = source.getWidth();
+		int height = source.getHeight();
+		int bytesPerPixes = source.getColorModel().getPixelSize() / 8;
 
-		final int bytesPerPixes = source.getColorModel().getPixelSize() / 8;
-		// boolean gray = source.getType() == BufferedImage.TYPE_BYTE_GRAY;
+		// some gray-scale images (GIF, for example) can 4 bpp (bits per pixel), 
+		//  this is 0.5 Bpp (bytes per pixel :))
+		if (bytesPerPixes == 0) {
+			bytesPerPixes = 1;
+		}
+
+		logger.debug("Building histogram 256x" + HEIGHT + " for image " + width + "x" + height + ", " + bytesPerPixes
+				+ "Bpp (" + source.getColorModel().getPixelSize() + " pxs)");
+
 		histogram = new int[bytesPerPixes][256];
 
 		// Loading distribution of dots
