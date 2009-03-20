@@ -113,6 +113,7 @@ public class MainFrame extends JFrame implements IProgress {
 		this.setName("mainFrame");
 		this.setMinimumSize(new Dimension(600, 720));
 		this.setBounds(new Rectangle(150, 150, 800, 720));
+		Config.getInstance().getWindowPosition(this);
 
 		// ----------------
 
@@ -170,11 +171,15 @@ public class MainFrame extends JFrame implements IProgress {
 		histogramFrame.registerControlCheckbox(this.jCheckBoxHistogram);
 		histogramFrame.setTitle(mainModuleProcessor.getHistoFilters().toString());
 		histogramFrame.setName("histogramWindow");
+		Config.getInstance().getWindowPosition(histogramFrame);
 
 		moduleFrame = (ImageFrameTemplate) AppHelper.getInstance().createWindow(ImageFrameTemplate.class);
 		moduleFrame.registerControlCheckbox(this.jCheckBoxModuleGraphic);
 		moduleFrame.setTitle("Модуль не выбран");
 		moduleFrame.setName("moduleFrameWindow");
+		Config.getInstance().getWindowPosition(moduleFrame);
+
+		Config.getInstance().getWindowCheckBoxes(this);
 
 		singleFilePicker = new SingleFilePick();
 		singleFilePicker.init();
@@ -219,6 +224,8 @@ public class MainFrame extends JFrame implements IProgress {
 
 		try {
 			logger.debug("Saving current config...");
+			AppHelper.getInstance().saveWindowPositions();
+			Config.getInstance().setWindowCheckBoxes(MainFrame.this, jCheckBoxHistogram, jCheckBoxModuleGraphic);
 			Config.getInstance().saveCurrentConfig();
 		} catch (ConfigurationException e) {
 			logger.error("Error when saving current config", e);
@@ -226,6 +233,7 @@ public class MainFrame extends JFrame implements IProgress {
 					JOptionPane.ERROR_MESSAGE);
 		}
 
+		AppHelper.reset();
 		this.clearMessage();
 	}
 
@@ -286,6 +294,10 @@ public class MainFrame extends JFrame implements IProgress {
 	}
 
 	private void applySourcePreProcessor() throws Exception {
+
+		// Скорее всего, наилучшим выходом будет использование автоматического масштабирования,
+		// когда мы приводим изображение к размеру 1024x1024, а потом закрашиваем 
+		//   участки фоновым цветом :)
 
 		this.printMessage("Применение фильтров-препроцессинга...");
 
@@ -613,13 +625,12 @@ public class MainFrame extends JFrame implements IProgress {
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent e) {
-					JOptionPane.showMessageDialog(null, "<html><h2>" + Const.FULL_PROGRAM_NAME + "</h2>"
-							+ "<b>Science content:</b> Konart<br><b>Code, design:</b> raidan"
-							+ "<br><hr>(c) raidan, Konart 2009" + "</html>", "О программе...",
-							JOptionPane.INFORMATION_MESSAGE);
+					//					JOptionPane.showMessageDialog(null, "<html><h2>" + Const.FULL_PROGRAM_NAME + "</h2>"
+					//							+ "<b>Science content:</b> Konart<br><b>Code, design:</b> raidan"
+					//							+ "<br><hr>(c) raidan, Konart 2009" + "</html>", "О программе...",
+					//							JOptionPane.INFORMATION_MESSAGE);
 
-					// AppHelper.getInstance().openWindow(AboutDialog.class,
-					// MainFrame.this);
+					AppHelper.getInstance().openWindow(AboutDialog.class, MainFrame.this);
 				}
 			});
 			jMenuItemAbout.setText("О программе...");
@@ -706,13 +717,7 @@ public class MainFrame extends JFrame implements IProgress {
 
 	private ImagePanel jPanelImageFiltered = null;
 
-	private JPanel jPanelPreprocessing = null;
-
-	private JScrollPane jScrollPanePreProcessing = null;
-
-	private JList jListPreProcessing = null;
-
-	private JButton jButtonChangePreProcessing = null;
+	private JButton jButtonModuleParams = null;
 
 	/**
 	 * This method initializes jCheckBoxScale
@@ -732,7 +737,7 @@ public class MainFrame extends JFrame implements IProgress {
 			jCheckBoxScale.setText("Масштаб под размеры окна");
 			jCheckBoxScale.setHorizontalAlignment(SwingConstants.LEADING);
 			jCheckBoxScale.setMnemonic(KeyEvent.VK_UNDEFINED);
-			jCheckBoxScale.setName("fitButton");
+			jCheckBoxScale.setName("scaleButton");
 			jCheckBoxScale.setHorizontalTextPosition(SwingConstants.TRAILING);
 		}
 		return jCheckBoxScale;
@@ -805,13 +810,6 @@ public class MainFrame extends JFrame implements IProgress {
 	 */
 	private JPanel getJPanelLeft() {
 		if (jPanelLeft == null) {
-			GridBagConstraints gridBagConstraints28 = new GridBagConstraints();
-			gridBagConstraints28.gridx = 0;
-			gridBagConstraints28.anchor = GridBagConstraints.NORTHWEST;
-			gridBagConstraints28.weighty = 0.0D;
-			gridBagConstraints28.gridy = 0;
-			gridBagConstraints28.fill = GridBagConstraints.BOTH;
-			gridBagConstraints28.weightx = 1.0D;
 			GridBagConstraints gridBagConstraints27 = new GridBagConstraints();
 			gridBagConstraints27.gridy = 6;
 			gridBagConstraints27.weighty = 0.0D;
@@ -842,9 +840,9 @@ public class MainFrame extends JFrame implements IProgress {
 			gridBagConstraints11.fill = GridBagConstraints.BOTH;
 			gridBagConstraints11.weightx = 1.0D;
 			gridBagConstraints11.weighty = 1.0D;
-			gridBagConstraints11.gridy = 1;
+			gridBagConstraints11.gridy = 2;
 			GridBagConstraints gridBagConstraints5 = new GridBagConstraints();
-			gridBagConstraints5.gridy = 2;
+			gridBagConstraints5.gridy = 1;
 			gridBagConstraints5.anchor = GridBagConstraints.NORTHWEST;
 			gridBagConstraints5.weightx = 1.0D;
 			gridBagConstraints5.fill = GridBagConstraints.HORIZONTAL;
@@ -856,9 +854,8 @@ public class MainFrame extends JFrame implements IProgress {
 			jPanelLeft.setLayout(new GridBagLayout());
 			jPanelLeft.setPreferredSize(new Dimension(200, 200));
 			jPanelLeft.setMinimumSize(new Dimension(200, 200));
-			jPanelLeft.add(getJPanelPreprocessing(), gridBagConstraints28);
-			jPanelLeft.add(getJPanelFilters(), gridBagConstraints11);
 			jPanelLeft.add(getJPanelModule(), gridBagConstraints5);
+			jPanelLeft.add(getJPanelFilters(), gridBagConstraints11);
 			jPanelLeft.add(getJPanelSensors(), gridBagConstraints16);
 			jPanelLeft.add(getJPanelSurface(), gridBagConstraints20);
 			jPanelLeft.add(getJPanelDefect(), gridBagConstraints23);
@@ -1247,21 +1244,27 @@ public class MainFrame extends JFrame implements IProgress {
 	 */
 	private JPanel getJPanelModule() {
 		if (jPanelModule == null) {
+			GridBagConstraints gridBagConstraints28 = new GridBagConstraints();
+			gridBagConstraints28.gridx = 0;
+			gridBagConstraints28.anchor = GridBagConstraints.NORTHWEST;
+			gridBagConstraints28.gridy = 1;
 			GridBagConstraints gridBagConstraints26 = new GridBagConstraints();
-			gridBagConstraints26.gridx = 1;
+			gridBagConstraints26.gridx = 0;
 			gridBagConstraints26.anchor = GridBagConstraints.WEST;
-			gridBagConstraints26.gridy = 1;
+			gridBagConstraints26.gridy = 3;
 			GridBagConstraints gridBagConstraints22 = new GridBagConstraints();
 			gridBagConstraints22.anchor = GridBagConstraints.WEST;
 			gridBagConstraints22.insets = new Insets(0, 0, 0, 0);
 			gridBagConstraints22.gridx = 0;
-			gridBagConstraints22.gridy = 1;
+			gridBagConstraints22.gridy = 2;
 			gridBagConstraints22.weightx = 1.0D;
 			gridBagConstraints22.fill = GridBagConstraints.NONE;
 			GridBagConstraints gridBagConstraints25 = new GridBagConstraints();
 			gridBagConstraints25.fill = GridBagConstraints.HORIZONTAL;
 			gridBagConstraints25.anchor = GridBagConstraints.WEST;
-			gridBagConstraints25.gridwidth = 3;
+			gridBagConstraints25.gridwidth = 1;
+			gridBagConstraints25.gridx = 0;
+			gridBagConstraints25.gridy = 0;
 			gridBagConstraints25.weightx = 1.0;
 			jPanelModule = new JPanel();
 			jPanelModule.setLayout(new GridBagLayout());
@@ -1270,6 +1273,7 @@ public class MainFrame extends JFrame implements IProgress {
 					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
 			jPanelModule.setMaximumSize(new Dimension(200, 50));
 			jPanelModule.add(getJComboBoxModules(), gridBagConstraints25);
+			jPanelModule.add(getJButtonModuleParams(), gridBagConstraints28);
 			jPanelModule.add(getJCheckBoxHistogram(), gridBagConstraints22);
 			jPanelModule.add(getJCheckBoxModuleGraphic(), gridBagConstraints26);
 		}
@@ -1328,7 +1332,7 @@ public class MainFrame extends JFrame implements IProgress {
 	private JCheckBox getJCheckBoxModuleGraphic() {
 		if (jCheckBoxModuleGraphic == null) {
 			jCheckBoxModuleGraphic = new JCheckBox();
-			jCheckBoxModuleGraphic.setText("Модуль");
+			jCheckBoxModuleGraphic.setText("График модуля");
 			jCheckBoxModuleGraphic.setName("moduleImage");
 		}
 		return jCheckBoxModuleGraphic;
@@ -1447,70 +1451,16 @@ public class MainFrame extends JFrame implements IProgress {
 	}
 
 	/**
-	 * This method initializes jPanelPreprocessing
-	 * 
-	 * @return javax.swing.JPanel
-	 */
-	private JPanel getJPanelPreprocessing() {
-		if (jPanelPreprocessing == null) {
-			GridBagConstraints gridBagConstraints30 = new GridBagConstraints();
-			gridBagConstraints30.gridx = 0;
-			gridBagConstraints30.anchor = GridBagConstraints.NORTHWEST;
-			gridBagConstraints30.gridy = 1;
-			GridBagConstraints gridBagConstraints29 = new GridBagConstraints();
-			gridBagConstraints29.fill = GridBagConstraints.BOTH;
-			gridBagConstraints29.weighty = 1.0;
-			gridBagConstraints29.gridx = 0;
-			gridBagConstraints29.gridy = 0;
-			gridBagConstraints29.anchor = GridBagConstraints.NORTHWEST;
-			gridBagConstraints29.weightx = 1.0;
-			jPanelPreprocessing = new JPanel();
-			jPanelPreprocessing.setLayout(new GridBagLayout());
-			jPanelPreprocessing.setBorder(BorderFactory.createTitledBorder(null, "Препроцессинг",
-					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
-					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
-			jPanelPreprocessing.add(getJScrollPanePreProcessing(), gridBagConstraints29);
-			jPanelPreprocessing.add(getJButtonChangePreProcessing(), gridBagConstraints30);
-		}
-		return jPanelPreprocessing;
-	}
-
-	/**
-	 * This method initializes jScrollPanePreProcessing
-	 * 
-	 * @return javax.swing.JScrollPane
-	 */
-	private JScrollPane getJScrollPanePreProcessing() {
-		if (jScrollPanePreProcessing == null) {
-			jScrollPanePreProcessing = new JScrollPane();
-			jScrollPanePreProcessing.setViewportView(getJListPreProcessing());
-		}
-		return jScrollPanePreProcessing;
-	}
-
-	/**
-	 * This method initializes jListPreProcessing
-	 * 
-	 * @return javax.swing.JList
-	 */
-	private JList getJListPreProcessing() {
-		if (jListPreProcessing == null) {
-			jListPreProcessing = new JList(new String[] { filterList[0].getName() });
-		}
-		return jListPreProcessing;
-	}
-
-	/**
-	 * This method initializes jButtonChangePreProcessing
+	 * This method initializes jButtonModuleParams
 	 * 
 	 * @return javax.swing.JButton
 	 */
-	private JButton getJButtonChangePreProcessing() {
-		if (jButtonChangePreProcessing == null) {
-			jButtonChangePreProcessing = new JButton();
-			jButtonChangePreProcessing.setAction(new NoAction());
-			jButtonChangePreProcessing.setText("Изменить");
+	private JButton getJButtonModuleParams() {
+		if (jButtonModuleParams == null) {
+			jButtonModuleParams = new JButton();
+			jButtonModuleParams.setText("Параметры модуля");
+			jButtonModuleParams.setName("moduleParams");
 		}
-		return jButtonChangePreProcessing;
+		return jButtonModuleParams;
 	}
 }

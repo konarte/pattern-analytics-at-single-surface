@@ -1,6 +1,7 @@
 package edu.mgupi.pass.filters.service;
 
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
+import edu.mgupi.pass.filters.IllegalParameterValueException;
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.Param.TYPES;
 
@@ -57,32 +59,52 @@ public class ResizeFilter implements IFilter {
 		int thumbHeight = (Integer) HEIGHT.getValue();
 		Object interpolationMethod = INTERPOLATION_METHOD.getValue();
 
+		if (!RenderingHints.KEY_INTERPOLATION.isCompatibleValue(interpolationMethod)) {
+			throw new IllegalParameterValueException("Unable to set value " + interpolationMethod + " from parameter "
+					+ INTERPOLATION_METHOD.getName() + " to 'RenderingHints.KEY_INTERPOLATION'.");
+		}
+
 		logger.debug("Resizing image to {}x{}, method {}",
 				new Object[] { thumbWidth, thumbHeight, interpolationMethod });
 
-		/*
-		 * Based of thumb maker by Marco Schmidt
-		 */
+		Point newSize = calcThumbSize(source, thumbWidth, thumbHeight);
 
-		double thumbRatio = (double) thumbWidth / (double) thumbHeight;
+		// draw original image to thumbnail image object and
+		// scale it to the new size on-the-fly
+		BufferedImage dest = new BufferedImage(newSize.x, newSize.y, BufferedImage.TYPE_INT_RGB);
+		Graphics2D graphics2D = dest.createGraphics();
+		graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, interpolationMethod);
+		graphics2D.drawImage(source, 0, 0, newSize.x, newSize.y, null);
+
+		graphics2D.dispose();
+
+		return dest;
+	}
+
+	/**
+	 * 
+	 * 
+	 * Based of thumb maker by Marco Schmidt
+	 * 
+	 * 
+	 * @param source
+	 * @param thumbWidth
+	 * @param thumbHeight
+	 * @return resizedI
+	 */
+	public static Point calcThumbSize(BufferedImage source, int thumbWidth, int thumbHeight) {
 		int imageWidth = source.getWidth();
 		int imageHeight = source.getHeight();
+
+		double thumbRatio = (double) thumbWidth / (double) thumbHeight;
 		double imageRatio = (double) imageWidth / (double) imageHeight;
+
 		if (thumbRatio < imageRatio) {
 			thumbHeight = (int) (thumbWidth / imageRatio);
 		} else {
 			thumbWidth = (int) (thumbHeight * imageRatio);
 		}
-		// draw original image to thumbnail image object and
-		// scale it to the new size on-the-fly
-		BufferedImage dest = new BufferedImage(thumbWidth, thumbHeight, BufferedImage.TYPE_INT_RGB);
-		Graphics2D graphics2D = dest.createGraphics();
-		graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, interpolationMethod);
-		graphics2D.drawImage(source, 0, 0, thumbWidth, thumbHeight, null);
-
-		graphics2D.dispose();
-
-		return dest;
+		return new Point(thumbWidth, thumbHeight);
 	}
 
 	//

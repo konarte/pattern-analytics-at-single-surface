@@ -16,9 +16,17 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.mgupi.pass.util.Const;
+import edu.mgupi.pass.util.Secundomer;
+import edu.mgupi.pass.util.SecundomerList;
 
 public class ImagePanel extends JPanel {
+
+	private final static Logger logger = LoggerFactory.getLogger(ImagePanel.class);
+
 	/**
 	 * 
 	 */
@@ -62,7 +70,10 @@ public class ImagePanel extends JPanel {
 			private static final long serialVersionUID = 1L;
 
 			public void actionPerformed(ActionEvent e) {
-				ImagePanel.this.doCheckBoxAction(fitBox);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Set action " + fitBox.isSelected() + " for " + ImagePanel.this);
+				}
+				ImagePanel.this.setFitModeCascade(fitBox.isSelected());
 			}
 		});
 		this.setFitMode(fitBox.isSelected());
@@ -71,14 +82,14 @@ public class ImagePanel extends JPanel {
 
 	private boolean cycleActionProtection = false;
 
-	private void doCheckBoxAction(JCheckBox fitBox) {
+	private void setFitModeCascade(boolean fitImageToWindowSize) {
 		if (cycleActionProtection) {
 			return;
 		}
 		cycleActionProtection = true;
-		ImagePanel.this.setFitMode(fitBox.isSelected());
+		ImagePanel.this.setFitMode(fitImageToWindowSize);
 		if (ImagePanel.this.previousImagePanel != null) {
-			ImagePanel.this.previousImagePanel.doCheckBoxAction(fitBox);
+			ImagePanel.this.previousImagePanel.setFitModeCascade(fitImageToWindowSize);
 		}
 		cycleActionProtection = false;
 	}
@@ -90,8 +101,12 @@ public class ImagePanel extends JPanel {
 
 	private void refreshFit() {
 
+		if (logger.isTraceEnabled()) {
+			logger.trace("Refresh fit (" + this.fitImageToWindowSize + ") as " + this);
+		}
+
 		if (myImage == null) {
-			// do nothing
+			// do nothing, except repaint
 			this.repaint();
 			return;
 		}
@@ -101,13 +116,6 @@ public class ImagePanel extends JPanel {
 		if (parent == null) {
 			Container parentContainer = this.getParent();
 			if (parentContainer == null || !((parentContainer = parentContainer.getParent()) instanceof JScrollPane)) {
-				// if (!noScrollPane) {
-				// JOptionPane.showMessageDialog(null,
-				// "Internal error. Inappropriate layout mode -- "
-				// + "ImagePanel does not on JScrollPane.",
-				// "Invalid layout programming",
-				// JOptionPane.ERROR_MESSAGE);
-				// }
 				// otherwise, we don't care
 				return;
 			}
@@ -168,32 +176,70 @@ public class ImagePanel extends JPanel {
 		this.parent.repaint();
 	}
 
+	private Secundomer secundomerNormalDraw = null;
+	private Secundomer secundomerScaleDraw = null;
+
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
 		if (myImage != null) {
 
+			if (secundomerNormalDraw == null) {
+				Container topContainer = this.getTopLevelAncestor();
+				secundomerNormalDraw = SecundomerList.registerSecundomer("Draw simple image for "
+						+ (topContainer == null ? this.getName() : topContainer.getName()));
+				secundomerScaleDraw = SecundomerList.registerSecundomer("Draw scaled image for "
+						+ (topContainer == null ? this.getName() : topContainer.getName()));
+			}
+
 			if (this.fitImageToWindowSize) {
-				/*
-				 * Based of thumb maker by Marco Schmidt
-				 */
-				int thumbWidth = this.getWidth();
-				int thumbHeight = this.getHeight();
-				double thumbRatio = (double) thumbWidth / (double) thumbHeight;
-				int imageWidth = myImage.getWidth();
-				int imageHeight = myImage.getHeight();
-				double imageRatio = (double) imageWidth / (double) imageHeight;
-				if (thumbRatio < imageRatio) {
-					thumbHeight = (int) (thumbWidth / imageRatio);
-				} else {
-					thumbWidth = (int) (thumbHeight * imageRatio);
+				secundomerScaleDraw.start();
+
+				// Must set preferred size!
+				this.setPreferredSize(new Dimension((int) parent.getVisibleRect().getWidth(), (int) parent
+						.getVisibleRect().getHeight()));
+
+				try {
+					/*
+					 * Based of thumb maker by Marco Schmidt
+					 */
+					int thumbWidth = this.getWidth();
+					int thumbHeight = this.getHeight();
+					double thumbRatio = (double) thumbWidth / (double) thumbHeight;
+					int imageWidth = myImage.getWidth();
+					int imageHeight = myImage.getHeight();
+					double imageRatio = (double) imageWidth / (double) imageHeight;
+					if (thumbRatio < imageRatio) {
+						thumbHeight = (int) (thumbWidth / imageRatio);
+					} else {
+						thumbWidth = (int) (thumbHeight * imageRatio);
+					}
+
+					g.drawImage(this.myImage, 0, 0, thumbWidth, thumbHeight, null);
+				} finally {
+					secundomerScaleDraw.stop();
 				}
 
-				g.drawImage(this.myImage, 0, 0, thumbWidth, thumbHeight, null);
+				//
+				//				Point newSize = ResizeFilter.calcThumbSize(this.myImage, this.getWidth(), this.getHeight());
+				//				Graphics2D graphics2D = (Graphics2D) g;
+				//				graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+				//						RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+				//				try {
+				//					g.drawImage(this.myImage, 0, 0, newSize.x, newSize.y, null);
+				//				} finally {
+				//					secundomerScaleDraw.stop();
+				//				}
 
 			} else {
-				g.drawImage(this.myImage, 0, 0, null);
+				secundomerNormalDraw.start();
+				try {
+					g.drawImage(this.myImage, 0, 0, null);
+				} finally {
+					secundomerNormalDraw.stop();
+				}
 			}
+
 		} else {
 
 			// Simple visual cake :)

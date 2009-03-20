@@ -21,6 +21,7 @@ import edu.mgupi.pass.modules.TestModule;
 import edu.mgupi.pass.modules.TestModule2;
 import edu.mgupi.pass.modules.basic.SimpleMatrixModule;
 import edu.mgupi.pass.sources.TestSourceImpl;
+import edu.mgupi.pass.util.Config;
 
 public class MainFrameTest {
 
@@ -31,6 +32,8 @@ public class MainFrameTest {
 
 	@Before
 	public void setUp() throws Exception {
+		Config.getInstance().setReadOnly();
+		
 		frame = (MainFrame) AppHelper.getInstance().openWindow(MainFrame.class);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
@@ -47,7 +50,7 @@ public class MainFrameTest {
 			source = null;
 		}
 		if (frame != null) {
-			SwingTestHelper.addWork(new WorkSet() {
+			SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 				public void workImpl() throws Exception {
 					frame.setVisible(false);
 					frame.dispose();
@@ -62,7 +65,7 @@ public class MainFrameTest {
 	@Test
 	public void testLaFCycling() throws Exception {
 		for (final LookAndFeelInfo laf : UIManager.getInstalledLookAndFeels()) {
-			SwingTestHelper.addWork(new WorkSet() {
+			SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 				public void workImpl() throws Exception {
 					logger.debug("Applying class " + laf.getClassName());
 					AppHelper.getInstance().updateUI(laf.getClassName());
@@ -74,54 +77,54 @@ public class MainFrameTest {
 
 	@Test
 	public void testOpenImage() throws Exception {
-		SwingTestHelper.addWork(new WorkSet() {
+		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				AppHelper.getInstance().updateUI(UIManager.getCrossPlatformLookAndFeelClassName());
 			}
 		});
 
-		JMenuItem open = (JMenuItem) SwingTestHelper.getChildNamed(frame, "open");
+		JMenuItem open = (JMenuItem) SwingHelper.getChildNamed(frame, "open");
 		assertNotNull(open);
 
 		this.frame.startProcessing(source.getSingleSource());
 
-		final JCheckBox fitButton = (JCheckBox) SwingTestHelper.getChildNamed(frame, "fitButton");
-		assertNotNull(fitButton);
-		fitButton.setSelected(false);
+		final JCheckBox scaleButton = (JCheckBox) SwingHelper.getChildNamed(frame, "scaleButton");
+		assertNotNull(scaleButton);
+		assertFalse(scaleButton.isSelected());
 
 		// Fit image to window size
-		SwingTestHelper.addWork(new WorkSet() {
+		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
-				fitButton.doClick();
+				scaleButton.doClick();
 			}
 		});
 
-		SwingTestHelper.addWork(new WorkSet() {
+		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				frame.setBounds(100, 200, 1024, 768);
 			}
 		});
 
-		SwingTestHelper.addWork(new WorkSet() {
+		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				frame.setBounds(100, 200, 600, 600);
 			}
 		});
 
 		// Return default style
-		SwingTestHelper.addWork(new WorkSet() {
+		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
-				fitButton.doClick();
+				scaleButton.doClick();
 			}
 		});
 
-		SwingTestHelper.addWork(new WorkSet() {
+		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				frame.setBounds(100, 200, 1024, 768);
 			}
 		});
 
-		SwingTestHelper.addWork(new WorkSet() {
+		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				frame.setBounds(100, 200, 600, 600);
 			}
@@ -160,30 +163,32 @@ public class MainFrameTest {
 	@Test
 	public void testSettings() throws Exception {
 
-		final JMenuItem settings = (JMenuItem) SwingTestHelper.getChildNamed(frame, "settings");
+		final JMenuItem settings = (JMenuItem) SwingHelper.getChildNamed(frame, "settings");
 		assertNotNull(settings);
 
-		SwingTestHelper.addWorkNoWait(new WorkSet() {
+		SwingHelper.addWorkAndWaitThis(new WorkSet() {
 			public void workImpl() throws Exception {
 				settings.doClick();
 			}
-		});
-
-		SwingTestHelper.waitUntil(new ConditionSet() {
+		}, new ConditionSet() {
 			public boolean keepWorking() {
 				return AppHelper.getInstance().searchWindow(SettingsDialog.class) == null;
 			}
 		});
 		assertNotNull(AppHelper.getInstance().searchWindow(SettingsDialog.class));
-		final JButton cancel = (JButton) SwingTestHelper.getChildNamed(AppHelper.getInstance().searchWindow(
+		final JButton cancel = (JButton) SwingHelper.getChildNamed(AppHelper.getInstance().searchWindow(
 				SettingsDialog.class), "cancel");
 		assertNotNull(cancel);
 
-		SwingTestHelper.addWork(new WorkSet() {
+		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				cancel.doClick();
 			}
 		});
+
+		SettingsDialog settingsDialog = (SettingsDialog) AppHelper.getInstance().searchWindow(SettingsDialog.class);
+		assertNotNull(settingsDialog);
+		assertFalse(settingsDialog.isVisible());
 	}
 
 	@Test
@@ -193,11 +198,11 @@ public class MainFrameTest {
 		this.frame.startProcessing(source.getSingleSource());
 		assertTrue(this.frame.histogramFrame.hasImage());
 
-		final JCheckBox histogram = (JCheckBox) SwingTestHelper.getChildNamed(frame, "histogram");
+		final JCheckBox histogram = (JCheckBox) SwingHelper.getChildNamed(frame, "histogram");
 		assertNotNull(histogram);
-		histogram.setSelected(false);
+		assertFalse(histogram.isSelected());
 
-		SwingTestHelper.addWork(new WorkSet() {
+		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				histogram.doClick();
 			}
@@ -206,17 +211,17 @@ public class MainFrameTest {
 		assertNotNull(frame.histogramFrame);
 		assertTrue(frame.histogramFrame.isVisible());
 
-		SwingTestHelper.addWork(new WorkSet() {
+		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				frame.histogramFrame.setLocation(300, 400);
 			}
 		});
 
-		final JCheckBox moduleImage = (JCheckBox) SwingTestHelper.getChildNamed(frame, "moduleImage");
+		final JCheckBox moduleImage = (JCheckBox) SwingHelper.getChildNamed(frame, "moduleImage");
 		assertNotNull(moduleImage);
-		moduleImage.setSelected(false);
+		assertFalse(moduleImage.isSelected());
 
-		SwingTestHelper.addWork(new WorkSet() {
+		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				moduleImage.doClick();
 			}
@@ -225,11 +230,21 @@ public class MainFrameTest {
 		assertNotNull(frame.moduleFrame);
 		assertTrue(frame.moduleFrame.isVisible());
 
-		SwingTestHelper.addWork(new WorkSet() {
+		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				frame.moduleFrame.setLocation(300, 600);
 			}
 		});
+
+		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+			public void workImpl() throws Exception {
+				histogram.doClick();
+				moduleImage.doClick();
+			}
+		});
+
+		assertFalse(frame.histogramFrame.isVisible());
+		assertFalse(frame.moduleFrame.isVisible());
 
 	}
 

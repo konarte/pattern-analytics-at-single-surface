@@ -7,6 +7,7 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -17,7 +18,8 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.db.locuses.LocusModuleParams;
 import edu.mgupi.pass.db.locuses.Locuses;
-import edu.mgupi.pass.filters.IFilter;
+import edu.mgupi.pass.filters.Param;
+import edu.mgupi.pass.filters.Param.TYPES;
 import edu.mgupi.pass.util.IInitiable;
 
 /**
@@ -34,6 +36,25 @@ public class TestModule implements IModule, IInitiable {
 			throw new RuntimeException("Method close not called!");
 		}
 
+	}
+
+	private Collection<Param> params = null;
+	private Param TEST_PARAM1 = new Param("test", "Тестовый", TYPES.INT, 0);
+	private Param TEST_PARAM2 = new Param("test2", "Тестовый2", TYPES.STRING, "Hello");
+
+	public TestModule() {
+		params = new ArrayList<Param>();
+		params.add(TEST_PARAM1);
+		params.add(TEST_PARAM2);
+	}
+
+	public String getName() {
+		return "Тестовый модуль анализа";
+	}
+
+	@Override
+	public Collection<Param> getParams() {
+		return params;
 	}
 
 	private final static Logger logger = LoggerFactory.getLogger(TestModule.class);
@@ -92,7 +113,8 @@ public class TestModule implements IModule, IInitiable {
 
 		// graphics2D.setStroke(new BasicStroke(3.0f));
 
-		String text = "HELLO!";
+		String text = TEST_PARAM1.getName() + "(" + TEST_PARAM1.getValue() + ") \n " + TEST_PARAM2.getName() + "("
+				+ TEST_PARAM2.getValue() + ")";
 		graphics2D.setColor(Color.WHITE);
 		graphics2D.fillRect(20, 35 - graphics2D.getFontMetrics().getHeight() + 5, graphics2D.getFontMetrics()
 				.charsWidth(text.toCharArray(), 0, text.length()), graphics2D.getFontMetrics().getHeight());
@@ -145,14 +167,12 @@ public class TestModule implements IModule, IInitiable {
 		// return false;
 	}
 
-	public String getName() {
-		return "Тестовый модуль анализа";
+	public Param getTEST_PARAM1() {
+		return TEST_PARAM1;
 	}
 
-	@Override
-	public Collection<Class<? extends IFilter>> getRequiredFilters() {
-		// no params required
-		return null;
+	public Param getTEST_PARAM2() {
+		return TEST_PARAM2;
 	}
 
 }

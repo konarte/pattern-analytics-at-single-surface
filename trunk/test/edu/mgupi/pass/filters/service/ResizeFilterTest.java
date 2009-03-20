@@ -37,7 +37,6 @@ public class ResizeFilterTest {
 		Collection<Param> params = filter.getParams();
 		assertNotNull(params);
 		assertTrue(params == filter.getParams());
-		System.out.println(params);
 	}
 
 	@Test

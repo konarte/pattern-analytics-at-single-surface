@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.Collection;
 
 import edu.mgupi.pass.db.locuses.Locuses;
-import edu.mgupi.pass.filters.IFilter;
+import edu.mgupi.pass.filters.Param;
 
 public class TestModule2 implements IModule {
 
@@ -24,7 +24,7 @@ public class TestModule2 implements IModule {
 	}
 
 	@Override
-	public Collection<Class<? extends IFilter>> getRequiredFilters() {
+	public Collection<Param> getParams() {
 		return null;
 	}
 

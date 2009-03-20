@@ -12,8 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.db.locuses.Locuses;
-import edu.mgupi.pass.filters.IFilter;
-import edu.mgupi.pass.filters.java.GrayScaleFilter;
+import edu.mgupi.pass.filters.Param;
+import edu.mgupi.pass.filters.Param.TYPES;
 import edu.mgupi.pass.modules.IModule;
 import edu.mgupi.pass.modules.ModuleCantProcessException;
 import edu.mgupi.pass.modules.ModuleException;
@@ -24,24 +24,33 @@ public class SimpleMatrixModule implements IModule {
 
 	private final static Logger logger = LoggerFactory.getLogger(SimpleMatrixModule.class);
 
-	private Collection<Class<? extends IFilter>> requiredFilters = null;
+	private final static String METHOD_FAST = "fast";
+	private final static String METHOD_SLOW = "slow";
+
+	private Param RENREDING_METHOD = new Param("RenderMethod", "Способ рендеринга", "fast", new Object[] { METHOD_FAST,
+			METHOD_SLOW }, new String[] { "Быстрый", "Медленный, многослойный" });
+	private Param CELL_SIZE = new Param("CellSize", "Размер ячейки", TYPES.INT, 10, 5, 15);
+
+	private Collection<Param> paramList = null;
 
 	public SimpleMatrixModule() {
-		requiredFilters = new ArrayList<Class<? extends IFilter>>();
-		requiredFilters.add(GrayScaleFilter.class);
+		paramList = new ArrayList<Param>();
+		paramList.add(RENREDING_METHOD);
+		paramList.add(CELL_SIZE);
+	}
+
+	@Override
+	public Collection<Param> getParams() {
+		return paramList;
 	}
 
 	public String getName() {
 		return "Матричный анализ (Ч/Б)";
 	}
 
-	public Collection<Class<? extends IFilter>> getRequiredFilters() {
-		return requiredFilters;
-	}
-
 	private final static float MAX_LEVEL = 255.0f;
-	private final static int CELL_SIZE = 10;
 	private final static int MATRIX_SIZE = 80;
+	private final static int MULTIPLIER = 4;
 
 	private int getBitMapLineSum(int x1, int y1, int x2, int y2, Raster source) {
 		int result = 0;
@@ -63,9 +72,12 @@ public class SimpleMatrixModule implements IModule {
 
 	public void analyze(BufferedImage filteredImage, Locuses store) throws IOException, ModuleException {
 
+		int cellSize = (Integer) CELL_SIZE.getValue();
+		String renredMethod = (String) RENREDING_METHOD.getValue();
+
 		logger.debug("Analyzing image by matrixes");
 
-		final int bytesPerPixel = filteredImage.getColorModel().getPixelSize() / 8;
+		//final int bytesPerPixel = filteredImage.getColorModel().getPixelSize() / 8;
 		Raster raster = filteredImage.getRaster();
 		double[][] matrix = new double[MATRIX_SIZE][MATRIX_SIZE];
 
@@ -100,8 +112,12 @@ public class SimpleMatrixModule implements IModule {
 					+ " and bottom-top = " + (bottom - top));
 		}
 
+		// Warning!
+		// Potentially dangerous situation!
+		// Delta can change left and right -- 
+		//  so left can be less then 0 and right is more than image width
 		int delta = ((bottom - top) - (right - left)) / 2;
-		if (Math.abs(delta) > sourceWidth / 4) {
+		if (Math.abs(delta) > sourceWidth / MULTIPLIER) {
 			if (delta > 0) {
 				right = right + delta;
 				left = left - delta;
@@ -124,38 +140,50 @@ public class SimpleMatrixModule implements IModule {
 			logger.trace("bottom = {}", bottom);
 		}
 
-		int destSize = MATRIX_SIZE * CELL_SIZE;
-		BufferedImage dest = new BufferedImage(destSize, destSize, BufferedImage.TYPE_BYTE_GRAY);
+		int fullSize = MATRIX_SIZE * cellSize;
+		BufferedImage dest = new BufferedImage(fullSize, fullSize, BufferedImage.TYPE_INT_RGB);
 		Graphics2D graph = dest.createGraphics();
 		graph.setColor(Color.WHITE);
 		graph.fillRect(0, 0, dest.getWidth(), dest.getHeight());
 
-		graph.setColor(Color.BLACK);
-		graph.drawLine(0, destSize, destSize, destSize);
-		graph.drawLine(destSize, destSize, destSize, 0);
+		// Old method -- Konart, new method -- raidan
+		boolean isOldMethod = METHOD_SLOW.equals(renredMethod);
+		if (isOldMethod) {
+			graph.setColor(Color.BLACK);
+			graph.drawLine(0, fullSize, fullSize, fullSize);
+			graph.drawLine(fullSize, fullSize, fullSize, 0);
+		}
 
 		for (int f = 0; f < MATRIX_SIZE; f++) {
 
-			graph.drawLine(0, f * CELL_SIZE, destSize, f * CELL_SIZE);
-			graph.drawLine(f * CELL_SIZE, 0, f * CELL_SIZE, destSize);
+			// Draw lines by old method
+			if (isOldMethod) {
+				graph.drawLine(0, f * cellSize, fullSize - 1, f * cellSize);
+				graph.drawLine(f * cellSize, 0, f * cellSize, fullSize - 1);
+			}
 
-			for (int g = 0; g < MATRIX_SIZE; g++) {
-				for (int i = 0; i < bytesPerPixel; i++) {
-					for (int j = 0; j < bytesPerPixel; j++) {
+			for (int g = 0; g < MATRIX_SIZE; g++) { // #1
+				for (int i = 0; i < MULTIPLIER; i++) {
+					for (int j = 0; j < MULTIPLIER; j++) {
 
-						int x = (int) ((f * 4 + i) * dx + left);
-						int y = (int) ((g * 4 + j) * dy + top);
+						int x = (int) ((f * MULTIPLIER + i) * dx + left);
+						int y = (int) ((g * MULTIPLIER + j) * dy + top);
 
 						matrix[f][g] = matrix[f][g] + (1.0 - raster.getSampleFloat(x, y, 0) / MAX_LEVEL) / 16;
 						int color = (int) Math.round((1 - matrix[f][g]) * 255);
 
 						graph.setColor(new Color(color, color, color));
-						graph.fillRect(f * CELL_SIZE + 2, g * CELL_SIZE + 2, (f + 1) * CELL_SIZE - 1, (g + 1)
-								* CELL_SIZE - 1);
+						if (isOldMethod) {
+							graph.fillRect(f * cellSize + 2, g * cellSize + 2, (f + 1) * cellSize - 1, (g + 1)
+									* cellSize - 1);
+						} else {
+							graph.fillRect(f * cellSize, g * cellSize, cellSize - 1, cellSize - 1);
+						}
 
 					}
 				}
-			}
+			} // #1 for
+
 		}
 
 		graph.dispose();
@@ -190,6 +218,14 @@ public class SimpleMatrixModule implements IModule {
 
 		return result;
 
+	}
+
+	public Param getRENREDING_METHOD() {
+		return RENREDING_METHOD;
+	}
+
+	public Param getCELL_SIZE() {
+		return CELL_SIZE;
 	}
 
 }

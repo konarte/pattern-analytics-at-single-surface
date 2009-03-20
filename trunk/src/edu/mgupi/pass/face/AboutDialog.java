@@ -3,13 +3,14 @@ package edu.mgupi.pass.face;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.util.Arrays;
+import java.util.Properties;
 
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
@@ -17,21 +18,26 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
+import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Const;
 
 public class AboutDialog extends JDialog {
 
+	/**
+	 * 
+	 */
 	private static final long serialVersionUID = 1L;
+
 	private JPanel jContentPane = null;
 	private JPanel jPanel = null;
 	private JButton jButtonOK = null;
 	private JPanel jPanel1 = null;
 	private JLabel jLabelProgramTitle = null;
-	private JLabel jLabelVersion = null;
 
 	/**
 	 * @param owner
@@ -46,11 +52,12 @@ public class AboutDialog extends JDialog {
 	 * 
 	 */
 	private void initialize() {
-		this.setSize(353, 299);
+		this.setSize(462, 380);
 		this.setName("aboutDialog");
 		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		this.setTitle("О программе...");
 		this.setContentPane(getJContentPane());
+		Config.getInstance().getWindowPosition(this);
 	}
 
 	/**
@@ -103,6 +110,7 @@ public class AboutDialog extends JDialog {
 			});
 			jButtonOK.setHorizontalAlignment(SwingConstants.CENTER);
 			jButtonOK.setText("OK");
+			jButtonOK.setName("ok");
 			jButtonOK.setMnemonic(KeyEvent.VK_UNDEFINED);
 		}
 		return jButtonOK;
@@ -110,7 +118,8 @@ public class AboutDialog extends JDialog {
 
 	private JLabel jLabelAuthor = null;
 	private JScrollPane jScrollPane = null;
-	private JTextArea jTextArea = null;
+
+	private JTable jTableSystemProperties = null;
 
 	/**
 	 * This method initializes jPanel1
@@ -135,30 +144,25 @@ public class AboutDialog extends JDialog {
 			gridBagConstraints11.gridwidth = 1;
 			gridBagConstraints11.gridy = 3;
 			jLabelAuthor = new JLabel();
-			jLabelAuthor.setText("<html><hr><center>Design, code: raidan<br>Science contest: Konart</center></html>");
+			jLabelAuthor.setText("<html><br><hr>(c) raidan, Konart 2009</html>");
 			jLabelAuthor.setHorizontalAlignment(SwingConstants.CENTER);
 			jLabelAuthor.setHorizontalTextPosition(SwingConstants.TRAILING);
 			jLabelAuthor.setPreferredSize(new Dimension(200, 40));
-			GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
-			gridBagConstraints1.insets = new Insets(0, 0, 0, 0);
-			gridBagConstraints1.gridy = 1;
-			gridBagConstraints1.weightx = 0.0D;
-			gridBagConstraints1.gridx = 0;
 			GridBagConstraints gridBagConstraints = new GridBagConstraints();
-			gridBagConstraints.insets = new Insets(0, 0, 0, 0);
+			gridBagConstraints.insets = new Insets(0, 15, 5, 15);
 			gridBagConstraints.gridy = 0;
-			gridBagConstraints.weightx = 0.0D;
+			gridBagConstraints.weightx = 1.0D;
+			gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+			gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
 			gridBagConstraints.gridx = 0;
-			jLabelVersion = new JLabel();
-			jLabelVersion.setText("Version " + Const.VERSION + ", development build " + Const.BUILD);
 			jLabelProgramTitle = new JLabel();
-			jLabelProgramTitle.setText(Const.PROGRAM_NAME);
-			jLabelProgramTitle.setFont(new Font("Dialog", Font.BOLD, 12));
+			jLabelProgramTitle.setText("<html><h3>" + Const.PROGRAM_NAME + "<br>" + Const.LAST_PROGRAM_NAME + "</h3>"
+					+ "<b>Science content:</b> Konart<br><b>Code, design:</b> raidan</html>");
+
 			jPanel1 = new JPanel();
 			jPanel1.setLayout(new GridBagLayout());
 			jPanel1.setEnabled(true);
 			jPanel1.add(jLabelProgramTitle, gridBagConstraints);
-			jPanel1.add(jLabelVersion, gridBagConstraints1);
 			jPanel1.add(jLabelAuthor, gridBagConstraints11);
 			jPanel1.add(getJScrollPane(), gridBagConstraints4);
 		}
@@ -173,25 +177,45 @@ public class AboutDialog extends JDialog {
 	private JScrollPane getJScrollPane() {
 		if (jScrollPane == null) {
 			jScrollPane = new JScrollPane();
-			jScrollPane.setViewportView(getJTextArea());
+			jScrollPane.setViewportView(getJTableSystemProperties());
 		}
 		return jScrollPane;
 	}
 
 	/**
-	 * This method initializes jTextArea
+	 * This method initializes jTableSystemProperties
 	 * 
-	 * @return javax.swing.JTextArea
+	 * @return javax.swing.JTable
 	 */
-	private JTextArea getJTextArea() {
-		if (jTextArea == null) {
-			jTextArea = new JTextArea();
-			jTextArea.setEditable(false);
-			jTextArea.setFont(new Font("Dialog", Font.PLAIN, 12));
-			jTextArea.setText("Database connection: MySQL JDBC Type 4\n" + "User: normal\n" + "Free memory: 51 MB\n"
-					+ "---------------------\n" + "Modules: 1\n" + "Filters: 18");
-		}
-		return jTextArea;
-	}
+	private JTable getJTableSystemProperties() {
+		if (jTableSystemProperties == null) {
 
-} // @jve:decl-index=0:visual-constraint="10,10"
+			Properties props = System.getProperties();
+			String list[] = props.keySet().toArray(new String[0]);
+			Arrays.sort(list);
+
+			String cells[][] = new String[props.size()][2];
+
+			for (int i = 0; i < list.length; i++) {
+				cells[i][0] = list[i];
+				cells[i][1] = props.getProperty(cells[i][0]);
+			}
+
+			jTableSystemProperties = new JTable(cells, new String[] { "Property", "Value" }) {
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				public boolean isCellEditable(int row, int column) {
+					return false;
+				}
+			};
+			jTableSystemProperties.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			jTableSystemProperties.setName("properties");
+			jTableSystemProperties.setCellSelectionEnabled(true);
+
+		}
+		return jTableSystemProperties;
+	}
+} //  @jve:decl-index=0:visual-constraint="7,1"
