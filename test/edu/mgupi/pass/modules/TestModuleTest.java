@@ -93,6 +93,8 @@ public class TestModuleTest {
 			ObjectOutputStream out;
 
 			new File("tmp").mkdir();
+			
+			ModuleHelper.finalyzeParams(locus);
 
 			fileStream = new FileOutputStream("tmp/locus-serialized.data");
 			out = new ObjectOutputStream(fileStream);
@@ -123,7 +125,7 @@ public class TestModuleTest {
 			locus2.setProcessed(true);
 
 			ImageIO.write(moduleImage, "PNG", new File("tmp/locus-module-return2.png"));
-
+			ModuleHelper.finalyzeParams(locus2);
 			assertTrue(module.compare(locus, locus2) == 1);
 			assertNotNull(moduleImage);
 
@@ -138,6 +140,7 @@ public class TestModuleTest {
 			moduleImage = ModuleHelper.getTemporaryModuleImage(locus3);
 			locus3.setProcessed(true);
 
+			ModuleHelper.finalyzeParams(locus3);
 			assertFalse(module.compare(locus, locus3) == 1);
 			assertNotNull(moduleImage);
 

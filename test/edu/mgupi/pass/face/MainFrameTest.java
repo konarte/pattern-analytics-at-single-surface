@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.modules.TestModule;
+import edu.mgupi.pass.modules.TestModule2;
 import edu.mgupi.pass.modules.basic.SimpleMatrixModule;
 import edu.mgupi.pass.sources.TestSourceImpl;
 
@@ -238,10 +239,20 @@ public class MainFrameTest {
 		this.frame.startProcessing(source.getSingleSource());
 
 		frame.setModule(SimpleMatrixModule.class);
+		assertTrue(this.frame.moduleFrame.hasImage());
+
+		this.frame.setModule(TestModule.class);
+		assertTrue(this.frame.moduleFrame.hasImage());
+
+		this.frame.setModule(TestModule2.class);
 		assertFalse(this.frame.moduleFrame.hasImage());
 
 		this.frame.setModule(TestModule.class);
 		assertTrue(this.frame.moduleFrame.hasImage());
+
+		this.frame.setModule(TestModule2.class);
+		assertFalse(this.frame.moduleFrame.hasImage());
+
 	}
 
 	@Test
@@ -264,6 +275,9 @@ public class MainFrameTest {
 		assertFalse(this.frame.moduleFrame.hasImage());
 
 		this.frame.setModule(SimpleMatrixModule.class);
+		assertFalse(this.frame.moduleFrame.hasImage());
+
+		this.frame.setModule(TestModule2.class);
 		assertFalse(this.frame.moduleFrame.hasImage());
 
 		this.frame.startProcessing(source.getSingleSource());

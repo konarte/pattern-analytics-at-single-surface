@@ -81,8 +81,8 @@ public class NameMapping implements Serializable {
 	
 	@Column(name="ID", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D31201F30439004828")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31201F30439004828", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312023AEC6B105EFF")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312023AEC6B105EFF", strategy="native")	
 	private int ID;
 	
 	@Column(name="NameType", nullable=false, length=11)	

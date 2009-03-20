@@ -2,8 +2,10 @@ package edu.mgupi.pass.modules;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Collection;
 
 import edu.mgupi.pass.db.locuses.Locuses;
+import edu.mgupi.pass.filters.IFilter;
 
 /**
  * Module of image analyzing and processing.
@@ -19,6 +21,13 @@ public interface IModule {
 	 * @return human readable name.
 	 */
 	String getName();
+
+	/**
+	 * Return list of required pre-processing filters for this module
+	 * 
+	 * @return collection of required filters
+	 */
+	Collection<Class<? extends IFilter>> getRequiredFilters();
 
 	/**
 	 * Call when we need to analyze image. This method must convert image to

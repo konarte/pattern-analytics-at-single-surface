@@ -74,8 +74,8 @@ public class LocusSources implements Serializable {
 	
 	@Column(name="IdLocusSource", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D31201F30444C04833")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31201F30444C04833", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312023AEC76D05F0A")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312023AEC76D05F0A", strategy="native")	
 	private int idLocusSource;
 	
 	@Column(name="Filename", nullable=false, length=255)	

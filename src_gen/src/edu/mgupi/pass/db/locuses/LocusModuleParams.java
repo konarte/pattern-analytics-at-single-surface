@@ -74,8 +74,8 @@ public class LocusModuleParams implements Serializable {
 	
 	@Column(name="IdModuleParam", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D31201F30447B04835")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31201F30447B04835", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312023AEC79B05F0C")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312023AEC79B05F0C", strategy="native")	
 	private int idModuleParam;
 	
 	@Column(name="ParamName", nullable=false, length=255)	
@@ -83,6 +83,9 @@ public class LocusModuleParams implements Serializable {
 	
 	@Column(name="ParamData", nullable=false)	
 	private byte[] paramData;
+	
+	@Column(name="ParamType", nullable=true, length=11)	
+	private int paramType;
 	
 	private void setIdModuleParam(int value) {
 		this.idModuleParam = value;
@@ -110,6 +113,35 @@ public class LocusModuleParams implements Serializable {
 	
 	public byte[] getParamData() {
 		return paramData;
+	}
+	
+	/**
+	 * Тип параметра:
+	 * 1 - обычный сериализуемый
+	 * 2 - изображение
+	 */
+	public void setParamType(int value) {
+		this.paramType = value;
+	}
+	
+	/**
+	 * Тип параметра:
+	 * 1 - обычный сериализуемый
+	 * 2 - изображение
+	 */
+	public int getParamType() {
+		return paramType;
+	}
+	
+	@Transient	
+	private Object objectData;
+	
+	public Object getObjectData() {
+		return objectData;
+	}
+	
+	public void setObjectData(Object aObjectData) {
+		objectData = aObjectData;
 	}
 	
 	public String toString() {

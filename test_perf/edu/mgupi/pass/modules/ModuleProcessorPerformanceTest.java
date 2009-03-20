@@ -80,10 +80,10 @@ public class ModuleProcessorPerformanceTest {
 			processor.setModule(TestModule.class);
 
 			FilterChainsaw mainSaw = new FilterChainsaw();
-			ResizeFilter resize = new ResizeFilter();
+			ResizeFilter resize = (ResizeFilter) mainSaw.appendFilter(ResizeFilter.class);
 			resize.getWIDTH().setValue(1024);
 			resize.getHEIGHT().setValue(1024);
-			mainSaw.appendFilter(resize);
+			
 
 			processor.setChainsaw(mainSaw);
 

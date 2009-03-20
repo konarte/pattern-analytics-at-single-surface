@@ -168,13 +168,11 @@ public class FilterPerformanceTest {
 		this.testImpl(filter);
 	}
 
-	public void testGrayScaleFilterChainsaw(boolean readEveryImage) throws IOException, FilterException {
+	public void testGrayScaleFilterChainsaw(boolean readEveryImage) throws Exception {
 		FilterChainsaw saw = new FilterChainsaw();
 
-		GrayScaleFilter filter = new GrayScaleFilter();
+		GrayScaleFilter filter = (GrayScaleFilter) saw.appendFilter(GrayScaleFilter.class);
 		BufferedImage image = source.getSingleSource().getSourceImage();
-
-		saw.appendFilter(filter);
 
 		if (!readEveryImage) {
 			saw.attachImage(image);
@@ -201,7 +199,7 @@ public class FilterPerformanceTest {
 	}
 
 	@Test
-	public void testAll() throws IOException, FilterException {
+	public void testAll() throws Exception {
 		this.testColorSpaceFilter();
 		this.testGrayScaleFilter();
 		this.testInvertFilter();

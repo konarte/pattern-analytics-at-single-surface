@@ -8,6 +8,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.util.CacheInitiable;
 import edu.mgupi.pass.util.IInitiable;
 
 /**
@@ -25,6 +26,18 @@ public class FilterChainsaw {
 
 	private List<IFilter> filterList = new ArrayList<IFilter>();
 
+	private CacheInitiable<IFilter> cacheInstance = null;
+	private boolean singleInstanceCaching = false;
+
+	public FilterChainsaw() {
+		//
+	}
+
+	public FilterChainsaw(boolean singleInstanceCaching) {
+		this.singleInstanceCaching = singleInstanceCaching;
+		this.cacheInstance = new CacheInitiable<IFilter>();
+	}
+
 	/**
 	 * Normally, we do not need actually closing our chain. Cause these chains
 	 * do not removing during all program execution (this is how I planned).
@@ -33,6 +46,10 @@ public class FilterChainsaw {
 	 */
 	public void close() {
 		this.reset();
+		if (singleInstanceCaching) {
+			this.clearFilters();
+			cacheInstance.close();
+		}
 	}
 
 	/**
@@ -45,12 +62,19 @@ public class FilterChainsaw {
 		logger.debug("Reset all registered filters");
 
 		this.detachImage();
+
+		if (!singleInstanceCaching) {
+			this.clearFilters();
+		}
+		filterList.clear();
+	}
+
+	private void clearFilters() {
 		for (IFilter filter : filterList) {
 			if (filter instanceof IInitiable) {
 				((IInitiable) filter).close();
 			}
 		}
-		filterList.clear();
 	}
 
 	/**
@@ -59,52 +83,74 @@ public class FilterChainsaw {
 	 * 
 	 * @param filterClass
 	 *            {@link IFilter} class for instantiate. Must be not null.
+	 * @return created instance
 	 * @throws InstantiationException
 	 *             standard exception for {@link Class#newInstance()} method.
 	 * @throws IllegalAccessException
 	 *             standard exception for {@link Class#newInstance()} method.
 	 * 
-	 * @see #appendFilter(IFilter)
 	 */
-	public void appendFilter(Class<? extends IFilter> filterClass) throws InstantiationException,
+	public IFilter appendFilter(Class<? extends IFilter> filterClass) throws InstantiationException,
 			IllegalAccessException {
 		if (filterClass == null) {
 			throw new IllegalArgumentException("Internal error. filterClass must be not null.");
 		}
-		
-		
 
 		logger.debug("Appending filter as class {}", filterClass);
-		this.appendFilter(filterClass.newInstance());
-	}
+		//		this.appendFilter(filterClass.newInstance());
 
-	/**
-	 * Append new filter to chain (in the end). If filter instance implements
-	 * {@link IInitiable} interface we call its method {@link IInitiable#init()}
-	 * .
-	 * 
-	 * @param filter
-	 *            instance of {@link IFilter} class. Must be not null.
-	 * 
-	 */
-	public void appendFilter(IFilter filter) {
+		//logger.debug("Appending filter as instance {}", filter);
 
-		if (filter == null) {
-			throw new IllegalArgumentException("Internal error. filter must be not null.");
-		}
+		IFilter filter = null;
 
-		logger.debug("Appending filter as instance {}", filter);
-
-		filterList.add(filter);
-
-		if (filter instanceof IInitiable) {
-			((IInitiable) filter).init();
+		if (singleInstanceCaching) {
+			filter = this.cacheInstance.getInstance(filterClass);
+			if (this.searchFilterClass(filterClass) == -1) {
+				filterList.add(filter);
+			}
+		} else {
+			filter = filterClass.newInstance();
+			filterList.add(filter);
+			if (filter instanceof IInitiable) {
+				((IInitiable) filter).init();
+			}
 		}
 
 		if (this.sourceImage != null && filter instanceof IFilterAttachable) {
 			((IFilterAttachable) filter).onAttachToImage(sourceImage);
 		}
+
+		return filter;
+
 	}
+
+	//	/**
+	//	 * Append new filter to chain (in the end). If filter instance implements
+	//	 * {@link IInitiable} interface we call its method {@link IInitiable#init()}
+	//	 * .
+	//	 * 
+	//	 * @param filter
+	//	 *            instance of {@link IFilter} class. Must be not null.
+	//	 * 
+	//	 */
+	//	public void appendFilter(IFilter filter) {
+	//
+	//		if (filter == null) {
+	//			throw new IllegalArgumentException("Internal error. filter must be not null.");
+	//		}
+	//
+	//		logger.debug("Appending filter as instance {}", filter);
+	//
+	//		filterList.add(filter);
+	//
+	//		if (filter instanceof IInitiable) {
+	//			((IInitiable) filter).init();
+	//		}
+	//
+	//		if (this.sourceImage != null && filter instanceof IFilterAttachable) {
+	//			((IFilterAttachable) filter).onAttachToImage(sourceImage);
+	//		}
+	//	}
 
 	/**
 	 * Remove filter from specified position. If filter implements
@@ -124,13 +170,38 @@ public class FilterChainsaw {
 			if (this.sourceImage != null && filter instanceof IFilterAttachable) {
 				((IFilterAttachable) filter).onDetachFromImage(sourceImage);
 			}
-			if (filter instanceof IInitiable) {
-				((IInitiable) filter).close();
+
+			if (!singleInstanceCaching) {
+				if (filter instanceof IInitiable) {
+					((IInitiable) filter).close();
+				}
 			}
 			filterList.remove(pos);
 		} else {
 			logger.debug("FilterChainsaw.appendFilter, but pos {} is not in range", pos);
 		}
+	}
+
+	public void removeFilter(Class<? extends IFilter> filterClass) {
+		if (!this.singleInstanceCaching) {
+			throw new IllegalStateException(
+					"Removing filters by class allow only if constructor parameter 'singleInstanceCaching' is true.");
+		}
+		this.removeFilter(this.searchFilterClass(filterClass));
+	}
+
+	private int searchFilterClass(Class<? extends IFilter> filterClass) {
+		if (!this.singleInstanceCaching) {
+			throw new IllegalStateException(
+					"Removing filters by class allow only if constructor parameter 'singleInstanceCaching' is true.");
+		}
+		for (int pos = 0; pos < filterList.size(); pos++) {
+			IFilter filter = filterList.get(pos);
+			if (filter.getClass().equals(filterClass)) {
+				return pos;
+			}
+		}
+		return -1;
 	}
 
 	/**

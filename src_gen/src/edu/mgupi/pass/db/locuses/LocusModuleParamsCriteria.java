@@ -22,12 +22,14 @@ public class LocusModuleParamsCriteria extends AbstractORMCriteria {
 	public final IntegerExpression idModuleParam;
 	public final StringExpression paramName;
 	public final ByteArrayExpression paramData;
+	public final IntegerExpression paramType;
 	
 	public LocusModuleParamsCriteria(Criteria criteria) {
 		super(criteria);
 		idModuleParam = new IntegerExpression("idModuleParam", this);
 		paramName = new StringExpression("paramName", this);
 		paramData = new ByteArrayExpression("paramData", this);
+		paramType = new IntegerExpression("paramType", this);
 	}
 	
 	public LocusModuleParamsCriteria(PersistentSession session) {

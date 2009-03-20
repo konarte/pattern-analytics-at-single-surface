@@ -23,12 +23,14 @@ public class LocusModuleParamsDetachedCriteria extends AbstractORMDetachedCriter
 	public final IntegerExpression idModuleParam;
 	public final StringExpression paramName;
 	public final ByteArrayExpression paramData;
+	public final IntegerExpression paramType;
 	
 	public LocusModuleParamsDetachedCriteria() {
 		super(edu.mgupi.pass.db.locuses.LocusModuleParams.class, edu.mgupi.pass.db.locuses.LocusModuleParamsCriteria.class);
 		idModuleParam = new IntegerExpression("idModuleParam", this.getDetachedCriteria());
 		paramName = new StringExpression("paramName", this.getDetachedCriteria());
 		paramData = new ByteArrayExpression("paramData", this.getDetachedCriteria());
+		paramType = new IntegerExpression("paramType", this.getDetachedCriteria());
 	}
 	
 	public LocusModuleParamsDetachedCriteria(DetachedCriteria aDetachedCriteria) {
@@ -36,6 +38,7 @@ public class LocusModuleParamsDetachedCriteria extends AbstractORMDetachedCriter
 		idModuleParam = new IntegerExpression("idModuleParam", this.getDetachedCriteria());
 		paramName = new StringExpression("paramName", this.getDetachedCriteria());
 		paramData = new ByteArrayExpression("paramData", this.getDetachedCriteria());
+		paramType = new IntegerExpression("paramType", this.getDetachedCriteria());
 	}
 	
 	public LocusModuleParams uniqueLocusModuleParams(PersistentSession session) {

@@ -2,11 +2,7 @@ package edu.mgupi.pass.modules;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.orm.PersistentException;
 import org.slf4j.Logger;
@@ -64,18 +60,16 @@ public class ModuleProcessor {
 	public ModuleProcessor() throws InstantiationException, IllegalAccessException, IllegalParameterValueException,
 			NoSuchParamException {
 
-		ResizeFilter resize = new ResizeFilter();
-		resize.getWIDTH().setValue(Const.THUMB_WIDTH);
-		resize.getHEIGHT().setValue(Const.THUMB_HEIGHT);
-
 		histogramFilter = new HistogramFilter();
 
 		thumbFilters = new FilterChainsaw();
-		thumbFilters.appendFilter(resize);
+		ResizeFilter resize = (ResizeFilter) thumbFilters.appendFilter(ResizeFilter.class);
+		resize.getWIDTH().setValue(Const.THUMB_WIDTH);
+		resize.getHEIGHT().setValue(Const.THUMB_HEIGHT);
 
 		histoFilters = new FilterChainsaw();
 		histoFilters.appendFilter(GrayScaleFilter.class);
-		histoFilters.appendFilter(histogramFilter);
+		histogramFilter = (HistogramFilter) histoFilters.appendFilter(HistogramFilter.class);
 	}
 
 	private IModule module;
@@ -116,7 +110,7 @@ public class ModuleProcessor {
 	private CacheInitiable<IModule> cachedModules = new CacheInitiable<IModule>();
 
 	public void setModule(Class<? extends IModule> moduleClass) throws InstantiationException, IllegalAccessException,
-			IOException, ModuleException {
+			IOException, ModuleException, PersistentException {
 		if (moduleClass == null) {
 			throw new IllegalArgumentException("Internal error. moduleClass must be not null.");
 		}
@@ -133,29 +127,25 @@ public class ModuleProcessor {
 		this.module = instance;
 		if (lastLocus != null) {
 
-			Set<LocusModuleParams> params = this.cachedInstanceParams.get(instance);
-			if (params != null) {
+			logger.debug("Do analyze after set new module");
 
-				logger
-						.debug("Skip analyzing. Using cached values " + params + " for instance "
-								+ this.module.getName());
-				lastLocus.setParams(params);
+			// Reset temporary image!
+			// Because some modules does not provide it :)
 
-			} else {
-				logger.debug("Do analyze after set new module");
-
-				// Reset temporary image!
-				// Because some modules does not provide it :)
-
-				lastLocus.setProcessed(false);
-				lastLocus.setParams(new HashSet<LocusModuleParams>());
-				this.module.analyze(lastProcessedImage, lastLocus);
-				lastLocus.setProcessed(true);
-
-				logger.debug("Caching parameters for instance {} : {}", this.module.getName(), lastLocus.getParams());
-				this.cachedInstanceParams.put(this.module, lastLocus.getParams());
-
+			lastLocus.setProcessed(false);
+			for (LocusModuleParams param : lastLocus.getParams()) {
+				param.delete();
 			}
+			lastLocus.getParams().clear();
+			ANAZYLE.start();
+			try {
+				this.module.analyze(lastProcessedImage, lastLocus);
+			} finally {
+				ANAZYLE.stop();
+			}
+			lastLocus.setProcessed(true);
+
+			logger.debug("Caching parameters for instance {} : {}", this.module.getName(), lastLocus.getParams());
 
 		}
 	}
@@ -195,7 +185,6 @@ public class ModuleProcessor {
 	private Secundomer ANAZYLE = SecundomerList.registerSecundomer("Analyze image by registered module");
 
 	private Locuses lastLocus = null;
-	private Map<IModule, Set<LocusModuleParams>> cachedInstanceParams = new HashMap<IModule, Set<LocusModuleParams>>();
 
 	public Locuses startProcessing(SourceStore store) throws FilterException, IOException, ModuleException,
 			PersistentException {
@@ -252,7 +241,7 @@ public class ModuleProcessor {
 		STORE_FILTERED_IMAGE.start();
 		try {
 			this.lastProcessedImage = image;
-			locus.setFilteredImage(ModuleHelper.convertImageToPNGRaw(image));
+
 		} finally {
 			STORE_FILTERED_IMAGE.stop();
 		}
@@ -261,7 +250,7 @@ public class ModuleProcessor {
 		try {
 			thumbFilters.attachImage(image);
 			this.lastThumbImage = thumbFilters.filterSaw();
-			locus.setThumbImage(ModuleHelper.convertImageToPNGRaw(this.lastThumbImage));
+
 		} finally {
 			FILTERING_THUMB.stop();
 		}
@@ -270,7 +259,6 @@ public class ModuleProcessor {
 		try {
 			histoFilters.attachImage(image);
 			this.lastHistogramImage = histoFilters.filterSaw();
-			store.setHistogram(histogramFilter.getLastHistogramChannel());
 			locus.setHistogram(histogramFilter.getLastHistogramChannel());
 		} finally {
 			FILTERING_HISTO.stop();
@@ -289,9 +277,20 @@ public class ModuleProcessor {
 
 		// Cache params (for switched modules)
 		logger.debug("Caching parameters for instance {} : {}", this.module.getName(), locus.getParams());
-		cachedInstanceParams.put(this.module, locus.getParams());
 
 		return locus;
+	}
+
+	public void applyProcessed() throws IOException {
+
+		if (lastLocus == null) {
+			throw new IllegalStateException("Internal error when applying processed module. Locus does not saved.");
+		}
+
+		lastLocus.setFilteredImage(ModuleHelper.convertImageToRaw(this.lastProcessedImage));
+		lastLocus.setThumbImage(ModuleHelper.convertImageToRaw(this.lastThumbImage));
+
+		ModuleHelper.finalyzeParams(lastLocus);
 	}
 
 	public void finishProcessing() throws PersistentException {
@@ -299,14 +298,6 @@ public class ModuleProcessor {
 		lastProcessedImage = null;
 		lastThumbImage = null;
 		lastHistogramImage = null;
-
-		for (Set<LocusModuleParams> params : cachedInstanceParams.values()) {
-			for (LocusModuleParams param : params) {
-				param.delete();
-			}
-		}
-
-		cachedInstanceParams.clear();
 
 		if (processingFilters != null) {
 			processingFilters.detachImage();
