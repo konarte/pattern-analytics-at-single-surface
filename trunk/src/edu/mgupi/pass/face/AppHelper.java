@@ -4,6 +4,9 @@ import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.Window;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -136,6 +139,20 @@ public class AppHelper {
 		}
 		for (Window window : additionalWindows) {
 			Config.getInstance().setWindowPosition(window);
+		}
+	}
+
+	public static void showExceptionDialog(String message, Throwable e) {
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		e.printStackTrace(new PrintStream(out));
+
+		JOptionPane.showMessageDialog(null, "<html><h2>" + message + "</h2>" + out.toString() + "</html>",
+				"Error", JOptionPane.ERROR_MESSAGE);
+		try {
+			out.close();
+		} catch (IOException io) {
+			logger.error("Error when closing stream", io);
 		}
 	}
 }

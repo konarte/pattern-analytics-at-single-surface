@@ -235,6 +235,7 @@ public class MainFrame extends JFrame implements IProgress {
 
 		AppHelper.reset();
 		this.clearMessage();
+		System.exit(0);
 	}
 
 	private SourceStore currentSource = null;
@@ -428,8 +429,9 @@ public class MainFrame extends JFrame implements IProgress {
 						MainFrame.this.startProcessing(MainFrame.this.singleFilePicker.getSingleSource());
 					} catch (Exception e1) {
 						logger.error("Error when picking new image for processing", e1);
-						JOptionPane.showMessageDialog(null, "Error when opening image: " + e1, "Error",
+						JOptionPane.showMessageDialog(null, "Error when processing image: " + e1, "Error",
 								JOptionPane.ERROR_MESSAGE);
+						//AppHelper.showExceptionDialog("Error when processing image", e1);
 					} finally {
 						MainFrame.this.clearMessage();
 					}
@@ -504,7 +506,6 @@ public class MainFrame extends JFrame implements IProgress {
 					// When this frame closed -- we totally exit the application
 
 					MainFrame.this.closeImpl();
-					System.exit(0);
 				}
 			});
 			jMenuItemExit.setText("Выход");

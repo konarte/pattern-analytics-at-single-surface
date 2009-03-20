@@ -178,7 +178,7 @@ public class ModuleProcessor {
 	private Secundomer STORE_ORIGINAL_IMAGE = SecundomerList.registerSecundomer("Saving original image AS IS");
 	private Secundomer PREPROCESSING = SecundomerList.registerSecundomer("Pre-process image by special filter chain");
 	private Secundomer FILTERING = SecundomerList.registerSecundomer("Filter image by common filter chain");
-	private Secundomer STORE_FILTERED_IMAGE = SecundomerList.registerSecundomer("Saving filtered image as PNG");
+	private Secundomer STORE_FILTERED_IMAGE = SecundomerList.registerSecundomer("Saving filtered image as raw");
 	private Secundomer FILTERING_THUMB = SecundomerList.registerSecundomer("Filter image by internal thumb chain");
 	private Secundomer FILTERING_HISTO = SecundomerList.registerSecundomer("Filter image by internal histogram chain");
 	private Secundomer ANAZYLE = SecundomerList.registerSecundomer("Analyze image by registered module");
@@ -214,6 +214,15 @@ public class ModuleProcessor {
 
 		BufferedImage image = store.getSourceImage();
 
+		FILTERING_HISTO.start();
+		try {
+			histoFilters.attachImage(image);
+			this.lastHistogramImage = histoFilters.filterSaw();
+			locus.setHistogram(histogramFilter.getLastHistogramChannel());
+		} finally {
+			FILTERING_HISTO.stop();
+		}
+
 		if (this.preProcessingFilters != null) {
 			PREPROCESSING.start();
 			try {
@@ -237,13 +246,14 @@ public class ModuleProcessor {
 		}
 
 		logger.debug("Now we building histograms and thumb-image");
-		STORE_FILTERED_IMAGE.start();
-		try {
-			this.lastProcessedImage = image;
+		this.lastProcessedImage = image;
 
-		} finally {
-			STORE_FILTERED_IMAGE.stop();
-		}
+		//		STORE_FILTERED_IMAGE.start();
+		//		try {
+		//			this.lastProcessedImage = image;
+		//		} finally {
+		//			STORE_FILTERED_IMAGE.stop();
+		//		}
 
 		FILTERING_THUMB.start();
 		try {
@@ -254,14 +264,7 @@ public class ModuleProcessor {
 			FILTERING_THUMB.stop();
 		}
 
-		FILTERING_HISTO.start();
-		try {
-			histoFilters.attachImage(image);
-			this.lastHistogramImage = histoFilters.filterSaw();
-			locus.setHistogram(histogramFilter.getLastHistogramChannel());
-		} finally {
-			FILTERING_HISTO.stop();
-		}
+		// There is histo, before
 
 		logger.debug("Time to analyze image by registered module {}", this.module);
 		ANAZYLE.start();
@@ -286,10 +289,17 @@ public class ModuleProcessor {
 			throw new IllegalStateException("Internal error when applying processed module. Locus does not saved.");
 		}
 
-		lastLocus.setFilteredImage(ModuleHelper.convertImageToRaw(this.lastProcessedImage));
-		lastLocus.setThumbImage(ModuleHelper.convertImageToRaw(this.lastThumbImage));
+		STORE_FILTERED_IMAGE.start();
 
-		ModuleHelper.finalyzeParams(lastLocus);
+		try {
+
+			lastLocus.setFilteredImage(ModuleHelper.convertImageToRaw(this.lastProcessedImage));
+			lastLocus.setThumbImage(ModuleHelper.convertImageToRaw(this.lastThumbImage));
+
+			ModuleHelper.finalyzeParams(lastLocus);
+		} finally {
+			STORE_FILTERED_IMAGE.stop();
+		}
 	}
 
 	public void finishProcessing() throws PersistentException {
