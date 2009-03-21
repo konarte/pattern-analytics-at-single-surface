@@ -22,12 +22,13 @@ public class SplashWindowTest {
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.setVisible(true);
 		Thread.sleep(200);
-		
+
 		window.setSplashText("Изменение теста");
-		Thread.sleep(2000);
-		
+		Thread.sleep(500);
+
 		window.setVisible(false);
-		
+		window.dispose();
+
 	}
 
 }

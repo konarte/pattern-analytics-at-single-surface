@@ -10,7 +10,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.UIManager.LookAndFeelInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,30 +34,31 @@ public class Application {
 		// Not allowed for any other instances
 	}
 
-	// Choose Windows Look and Feel by default
-	private final static String PREFFERED_LOOK_AND_FEEL;
-	static {
-		String OS = System.getProperty("os.name");
-		String VERSION = System.getProperty("os.version");
-		// Well, I don't know how to do this automatically :)
-		if (OS != null && VERSION != null) {
-			if (OS.startsWith("Windows") && (VERSION.startsWith("3.") || VERSION.startsWith("4."))) {
-				// Classic skin for Windows 95, 98, Me
-				PREFFERED_LOOK_AND_FEEL = "Windows Classic";
-			} else if (OS.startsWith("Windows")) {
-				// Windows 200, XP, 2003, Vista, other
-				PREFFERED_LOOK_AND_FEEL = "Windows";
-			} else if (OS.startsWith("Mac OS")) {
-				// Mac OS
-				PREFFERED_LOOK_AND_FEEL = "Nimbus";
-			} else {
-				PREFFERED_LOOK_AND_FEEL = null;
-			}
-		} else {
-			PREFFERED_LOOK_AND_FEEL = null;
-		}
-
-	}
+	//
+	//	// Choose Windows Look and Feel by default
+	//	private final static String PREFFERED_LOOK_AND_FEEL;
+	//	static {
+	//		String OS = System.getProperty("os.name");
+	//		String VERSION = System.getProperty("os.version");
+	//		// Well, I don't know how to do this automatically :)
+	//		if (OS != null && VERSION != null) {
+	//			if (OS.startsWith("Windows") && (VERSION.startsWith("3.") || VERSION.startsWith("4."))) {
+	//				// Classic skin for Windows 95, 98, Me
+	//				PREFFERED_LOOK_AND_FEEL = "Windows Classic";
+	//			} else if (OS.startsWith("Windows")) {
+	//				// Windows 200, XP, 2003, Vista, other
+	//				PREFFERED_LOOK_AND_FEEL = "Windows";
+	//			} else if (OS.startsWith("Mac OS")) {
+	//				// Mac OS
+	//				PREFFERED_LOOK_AND_FEEL = "Nimbus";
+	//			} else {
+	//				PREFFERED_LOOK_AND_FEEL = null;
+	//			}
+	//		} else {
+	//			PREFFERED_LOOK_AND_FEEL = null;
+	//		}
+	//
+	//	}
 
 	// Changing Look And Feel, depends on current OS
 	private void changeLookAndFeel(String newLookAndFeel) throws ClassNotFoundException, InstantiationException,
@@ -72,16 +72,17 @@ public class Application {
 		}
 
 		try {
-			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-				if (newLookAndFeel.equals(info.getName()) || newLookAndFeel.equals(info.getClassName())) {
-					logger.debug("Applying look and feel {}({})", info.getName(), info.getClassName());
 
-					UIManager.setLookAndFeel(info.getClassName());
-					break;
-				}
-			}
-
-			logger.debug("Not found any supported LaF for class '" + newLookAndFeel + "'");
+			UIManager.setLookAndFeel(newLookAndFeel);
+			//			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+			//				if (newLookAndFeel.equals(info.getName()) || newLookAndFeel.equals(info.getClassName())) {
+			//					logger.debug("Applying look and feel {}({})", info.getName(), info.getClassName());
+			//
+			//					UIManager.setLookAndFeel(info.getClassName());
+			//					break;
+			//				}
+			//			}
+			//			logger.debug("Not found any supported LaF for class '" + newLookAndFeel + "'");
 		} catch (Exception e) {
 			// If not found -- we don't care ^_^
 			// OK, choose cross-platform LaF
@@ -129,14 +130,16 @@ public class Application {
 		MainFrame frame = null;
 		try {
 
-			String newLookAndFeel = Config.getInstance().getLookAndFeel(PREFFERED_LOOK_AND_FEEL);
+			String newLookAndFeel = Config.getInstance().getLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
 			try {
 				this.changeLookAndFeel(newLookAndFeel);
 			} catch (Exception e) {
-				JOptionPane.showMessageDialog(null, "Unexpected error when applying LookAndFeel. Try to run "
-						+ "application with '-nolaf' key (" + e + ")", "Invalid look and feel",
-						JOptionPane.WARNING_MESSAGE);
+				AppHelper.showExceptionDialog("Unexpected error when applying LookAndFeel. Try to run "
+						+ "application with '-nolaf' key.", e);
+				//				JOptionPane.showMessageDialog(null, "Unexpected error when applying LookAndFeel. Try to run "
+				//						+ "application with '-nolaf' key (" + e + ")", "Invalid look and feel",
+				//						JOptionPane.WARNING_MESSAGE);
 			}
 
 			splash.setSplashText("Подключение и инициализация БД...");

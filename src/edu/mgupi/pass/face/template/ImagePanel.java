@@ -1,4 +1,4 @@
-package edu.mgupi.pass.face;
+package edu.mgupi.pass.face.template;
 
 import java.awt.Color;
 import java.awt.Container;

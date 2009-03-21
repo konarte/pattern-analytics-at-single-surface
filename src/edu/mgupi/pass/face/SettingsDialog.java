@@ -19,7 +19,6 @@ import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
@@ -124,7 +123,7 @@ public class SettingsDialog extends JDialog {
 
 		Config.getInstance().setCurrentBackground(newBackground.getRGB());
 		if (!newBackground.equals(currentBackground)) {
-			currentBackground = newBackground; 
+			currentBackground = newBackground;
 			needRestartProcessing = true;
 		}
 
@@ -140,8 +139,9 @@ public class SettingsDialog extends JDialog {
 			this.applySettings();
 		} catch (Exception e) {
 			logger.error("Error when applying settings", e);
-			JOptionPane.showMessageDialog(null, "Unexpected error when applying settings (" + e + ")",
-					"Error when applying settings.", JOptionPane.ERROR_MESSAGE);
+			AppHelper.showExceptionDialog(this, "Unexpected error when applying settings.", e);
+			//			JOptionPane.showMessageDialog(null, "Unexpected error when applying settings (" + e + ")",
+			//					"Error when applying settings.", JOptionPane.ERROR_MESSAGE);
 		}
 
 		try {
@@ -151,8 +151,9 @@ public class SettingsDialog extends JDialog {
 			}
 		} catch (ConfigurationException e) {
 			logger.error("Error when saving settings", e);
-			JOptionPane.showMessageDialog(null, "Unexpected error when saving settings (" + e + ")",
-					"Error when saving settings.", JOptionPane.ERROR_MESSAGE);
+			AppHelper.showExceptionDialog(this, "Unexpected error when saving settings.", e);
+			//			JOptionPane.showMessageDialog(null, "Unexpected error when saving settings (" + e + ")",
+			//					"Error when saving settings.", JOptionPane.ERROR_MESSAGE);
 		}
 
 		SettingsDialog.this.setVisible(false);

@@ -54,6 +54,26 @@ public class SwingHelper {
 		return null;
 	}
 
+	public static void printChildHierarchy(Component parent) {
+		printChildHierarchy(parent, 0);
+	}
+
+	private static void printChildHierarchy(Component parent, int level) {
+		StringBuilder prefix = new StringBuilder("");
+		for (int i = 0; i <= level; i++) {
+			prefix.append(" ");
+		}
+		if (parent instanceof Container) {
+			Component[] children = (parent instanceof JMenu) ? ((JMenu) parent).getMenuComponents()
+					: ((Container) parent).getComponents();
+
+			for (int i = 0; i < children.length; ++i) {
+				System.out.println(prefix + " " + children[i].getName() + " = " + children[i]);
+				printChildHierarchy(children[i], level + 1);
+			}
+		}
+	}
+
 	//
 	// public static Object getReflectedFieldAccess(Object object, String name)
 	// throws SecurityException,
@@ -79,19 +99,23 @@ public class SwingHelper {
 	private static volatile int expectedWorkCount = 0;
 	private static volatile int workCount = 0;
 
-	private static void addWorkNoWait(final WorkSet actualWork) throws Exception {
+	private static Throwable addWorkNoWait(final WorkSet actualWork) throws Exception {
 		expectedWorkCount++;
+
+		final Throwable outputException = new Throwable();
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				try {
 					actualWork.workImpl();
-				} catch (Exception e) {
-					e.printStackTrace();
+				} catch (Throwable e) {
+					outputException.initCause(e);
 				} finally {
 					workCount++;
 				}
 			}
 		});
+
+		return outputException;
 	}
 
 	/**
@@ -107,10 +131,8 @@ public class SwingHelper {
 	 * 
 	 * @throws Exception
 	 */
-
 	public static void addWorkAndWaitThis(WorkSet actualWork, ConditionSet waitCondition) throws Exception {
-		addWorkNoWait(actualWork);
-		waitUntil(waitCondition);
+		waitUntil(waitCondition, addWorkNoWait(actualWork));
 	}
 
 	//	private static boolean lastWorkDone = false;
@@ -156,14 +178,16 @@ public class SwingHelper {
 	 * @see #addWorkNoWait(WorkSet)
 	 */
 	public static void addWorkAndWaitForTheEnd(WorkSet actualWork) throws Exception {
-		addWorkNoWait(actualWork);
+
 		waitUntil(new ConditionSet() {
 			public boolean keepWorking() {
 				return workCount < expectedWorkCount;
 			}
-		});
+		}, addWorkNoWait(actualWork));
 	}
 
+	// Please, do not change this line.
+	// I can't imagine that any normal operation in interface can be longer than 5 sec
 	private final static long MAX_WAIT_TIME = 5000;
 
 	/**
@@ -174,6 +198,10 @@ public class SwingHelper {
 	 * @throws InterruptedException
 	 */
 	public static void waitUntil(ConditionSet condition) throws InterruptedException {
+		waitUntil(condition, null);
+	}
+
+	private static void waitUntil(ConditionSet condition, Throwable watchedException) throws InterruptedException {
 		long time = System.currentTimeMillis();
 		boolean timeOK = false;
 		while ((timeOK = ((System.currentTimeMillis() - time) < MAX_WAIT_TIME)) && condition.keepWorking()) {
@@ -182,6 +210,9 @@ public class SwingHelper {
 		if (!timeOK) {
 			throw new RuntimeException("Error. Wait interrupted after " + (System.currentTimeMillis() - time)
 					+ " msec.");
+		}
+		if (watchedException.getCause() != null) {
+			throw new RuntimeException(watchedException.getCause());
 		}
 	}
 }

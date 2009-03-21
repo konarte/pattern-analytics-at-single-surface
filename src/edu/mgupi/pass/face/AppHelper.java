@@ -22,6 +22,13 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.util.Config;
 
+/**
+ * Class for application support -- make easy change LookAndFeel, set window
+ * states, keep cached (opened) windows, some dialogues.
+ * 
+ * @author raidan
+ * 
+ */
 public class AppHelper {
 
 	private final static Logger logger = LoggerFactory.getLogger(AppHelper.class);
@@ -40,32 +47,29 @@ public class AppHelper {
 	}
 
 	protected static synchronized void reset() {
-		instance.windowsCollection.clear();
-		instance.additionalWindows.clear();
-		instance.components.clear();
-		instance = null;
+		if (instance != null) {
+			instance.windowsCollection.clear();
+			instance.additionalWindows.clear();
+			instance.components.clear();
+			instance = null;
+		}
 	}
 
 	private volatile Map<Class<? extends Window>, Window> windowsCollection = new HashMap<Class<? extends Window>, Window>();
 	private volatile Collection<Window> additionalWindows = new ArrayList<Window>();
 
-	private synchronized Window getWindow(Class<? extends Window> windowType, Frame owner, boolean force) {
+	private synchronized Window getWindow(Class<? extends Window> windowType, Frame owner, boolean force)
+			throws Exception {
 		Window window = windowsCollection.get(windowType);
 
 		if (window == null || force) {
-			try {
-				if (owner == null) {
-					window = windowType.newInstance();
-				} else {
-					window = windowType.getConstructor(Frame.class).newInstance(owner);
-				}
 
-			} catch (Exception e) {
-				logger.error("Error when creating window instance", e);
-				JOptionPane.showMessageDialog(null, "Unexpected error when creating instance of '" + windowType
-						+ "'. Please, consult with developers (" + e + ")", "Error when creating frame",
-						JOptionPane.WARNING_MESSAGE);
+			if (owner == null) {
+				window = windowType.newInstance();
+			} else {
+				window = windowType.getConstructor(Frame.class).newInstance(owner);
 			}
+
 			if (force) {
 				logger.debug("Return force new instance of " + windowType + " :: " + window);
 				additionalWindows.add(window);
@@ -80,7 +84,7 @@ public class AppHelper {
 		return window;
 	}
 
-	private Window createWindow(Class<? extends Window> windowType, Frame owner, boolean force) {
+	private Window createWindow(Class<? extends Window> windowType, Frame owner, boolean force) throws Exception {
 		if (windowType == null) {
 			throw new IllegalArgumentException("Internal error. 'windowType' must be not not null.");
 		}
@@ -92,7 +96,7 @@ public class AppHelper {
 		return windowsCollection.get(windowType);
 	}
 
-	public Window createWindow(Class<? extends Window> windowType) {
+	public Window registerAdditionalWindow(Class<? extends Window> windowType) throws Exception {
 		return createWindow(windowType, null, true);
 	}
 
@@ -101,6 +105,20 @@ public class AppHelper {
 	}
 
 	public Window openWindow(Class<? extends Window> windowType, Frame owner) {
+		try {
+			return this.openWindowImpl(windowType, owner);
+		} catch (Exception e) {
+			logger.error("Error when creating window instance", e);
+			AppHelper.showExceptionDialog("Unexpected error when creating instance of '" + windowType
+					+ "'. Please, consult with developers.", e);
+			//			JOptionPane.showMessageDialog(null, "Unexpected error when creating instance of '" + windowType
+			//					+ "'. Please, consult with developers (" + e + ")", "Error when creating frame",
+			//					JOptionPane.WARNING_MESSAGE);
+			return null;
+		}
+	}
+
+	protected Window openWindowImpl(Class<? extends Window> windowType, Frame owner) throws Exception {
 		Window frame = this.createWindow(windowType, owner, false);
 		frame.setVisible(true);
 		return frame;
@@ -125,8 +143,9 @@ public class AppHelper {
 
 	private volatile Collection<Component> components = new ArrayList<Component>();
 
-	public void registerAdditionalComponent(Component c) {
+	public Component registerAdditionalComponent(Component c) {
 		components.add(c);
+		return c;
 	}
 
 	public void unregisterAdditionalComponent(Component c) {
@@ -143,12 +162,35 @@ public class AppHelper {
 	}
 
 	public static void showExceptionDialog(String message, Throwable e) {
+		showExceptionDialog(null, message, e);
+	}
+
+	public static void showExceptionDialog(Component parent, String message, Throwable e) {
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		e.printStackTrace(new PrintStream(out));
 
-		JOptionPane.showMessageDialog(null, "<html><h2>" + message + "</h2>" + out.toString() + "</html>",
-				"Error", JOptionPane.ERROR_MESSAGE);
+		String stackTrace = out.toString().replaceAll("\n", "");
+
+		//StringBuilder str = Utils.replaceAll(new StringBuilder(out.toString()), "\n", "");
+		//String str = Utils.replaceAll(out.toString(), "\n", "");
+
+		//		JOptionPane option = new JOptionPane(message, JOptionPane.ERROR_MESSAGE);
+		//		JDialog dialog = option.createDialog("Error");
+		//		JTextArea jtext = new JTextArea(out.toString());
+		//		jtext.setPreferredSize(new Dimension(400, 300));
+		//		jtext.setEditable(false);
+		//		dialog.getContentPane().add(jtext, BorderLayout.SOUTH);
+		//		dialog.pack();
+		//		dialog.setVisible(true);
+		//
+		//		SwingHelper.printChildHierarchy(dialog);
+		//
+		//		dialog.dispose();
+
+		JOptionPane.showMessageDialog(parent, "<html><h2>" + message + "</h2><b>" + e + "</b><hr><pre>" + stackTrace
+				+ "</pre></html>", "Error", JOptionPane.ERROR_MESSAGE);
+
 		try {
 			out.close();
 		} catch (IOException io) {
