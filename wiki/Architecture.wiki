@@ -71,6 +71,6 @@ http://pattern-analytics-at-single-surface.googlecode.com/svn/wiki/doc/common-ar
 == 3.4 Архитектура данных ==
 
 
-http://pattern-analytics-at-single-surface.googlecode.com/svn/wiki/model-report/images/edumgupipassdb.png
+http://pattern-analytics-at-single-surface.googlecode.com/svn/wiki/model-report/images/Pattern_Analytics_at_Single_Surface_CD.png
 
 См. http://code.google.com/p/pattern-analytics-at-single-surface/source/browse/#svn/wiki/model-report
