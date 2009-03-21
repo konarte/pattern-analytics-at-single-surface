@@ -95,10 +95,6 @@ License Type: Purchased
 		<instrument verbose="true">
 			<fileset dir="${classes.dir}">
 				<include name="edu\mgupi\pass\db\NameMapping.class"/>
-				<include name="edu\mgupi\pass\db\surfaces\SurfaceClasses.class"/>
-				<include name="edu\mgupi\pass\db\surfaces\Surfaces.class"/>
-				<include name="edu\mgupi\pass\db\surfaces\SurfaceTypes.class"/>
-				<include name="edu\mgupi\pass\db\surfaces\Materials.class"/>
 				<include name="edu\mgupi\pass\db\defects\DefectClasses.class"/>
 				<include name="edu\mgupi\pass\db\defects\DefectTypes.class"/>
 				<include name="edu\mgupi\pass\db\defects\Defects.class"/>
@@ -111,6 +107,10 @@ License Type: Purchased
 				<include name="edu\mgupi\pass\db\sensors\Sensors.class"/>
 				<include name="edu\mgupi\pass\db\sensors\SensorClasses.class"/>
 				<include name="edu\mgupi\pass\db\sensors\SensorTypes.class"/>
+				<include name="edu\mgupi\pass\db\surfaces\SurfaceClasses.class"/>
+				<include name="edu\mgupi\pass\db\surfaces\Surfaces.class"/>
+				<include name="edu\mgupi\pass\db\surfaces\SurfaceTypes.class"/>
+				<include name="edu\mgupi\pass\db\surfaces\Materials.class"/>
 			</fileset>
 		</instrument>
 	</target>

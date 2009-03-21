@@ -24,6 +24,7 @@ public class LocusesDetachedCriteria extends AbstractORMDetachedCriteria {
 	public final StringExpression name;
 	public final ByteArrayExpression thumbImage;
 	public final ByteArrayExpression filteredImage;
+	public final StringExpression moduleOptions;
 	
 	public LocusesDetachedCriteria() {
 		super(edu.mgupi.pass.db.locuses.Locuses.class, edu.mgupi.pass.db.locuses.LocusesCriteria.class);
@@ -31,6 +32,7 @@ public class LocusesDetachedCriteria extends AbstractORMDetachedCriteria {
 		name = new StringExpression("name", this.getDetachedCriteria());
 		thumbImage = new ByteArrayExpression("thumbImage", this.getDetachedCriteria());
 		filteredImage = new ByteArrayExpression("filteredImage", this.getDetachedCriteria());
+		moduleOptions = new StringExpression("moduleOptions", this.getDetachedCriteria());
 	}
 	
 	public LocusesDetachedCriteria(DetachedCriteria aDetachedCriteria) {
@@ -39,6 +41,7 @@ public class LocusesDetachedCriteria extends AbstractORMDetachedCriteria {
 		name = new StringExpression("name", this.getDetachedCriteria());
 		thumbImage = new ByteArrayExpression("thumbImage", this.getDetachedCriteria());
 		filteredImage = new ByteArrayExpression("filteredImage", this.getDetachedCriteria());
+		moduleOptions = new StringExpression("moduleOptions", this.getDetachedCriteria());
 	}
 	
 	public LModulesDetachedCriteria createModuleCriteria() {

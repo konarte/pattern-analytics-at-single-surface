@@ -80,14 +80,14 @@ public class SensorTypes implements Serializable {
 	
 	@Column(name="IdSensorType", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312023AEC7DA05F0F")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312023AEC7DA05F0F", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31202AD730F803D1D")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31202AD730F803D1D", strategy="native")	
 	private int idSensorType;
 	
 	@Column(name="Name", nullable=false, length=255)	
 	private String name;
 	
-	@Column(name="SensorImage", nullable=true)	
+	@Column(name="SensorImage", nullable=false)	
 	@Basic(fetch=FetchType.LAZY)	
 	private byte[] sensorImage;
 	

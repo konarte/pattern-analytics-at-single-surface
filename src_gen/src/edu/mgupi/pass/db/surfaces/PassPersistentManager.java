@@ -36,10 +36,6 @@ public class PassPersistentManager extends PersistentManager {
 	public Configuration createConfiguration() {
 		AnnotationConfiguration configuration = new AnnotationConfiguration();
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.NameMapping.class);
-		configuration.addAnnotatedClass(edu.mgupi.pass.db.surfaces.SurfaceClasses.class);
-		configuration.addAnnotatedClass(edu.mgupi.pass.db.surfaces.Surfaces.class);
-		configuration.addAnnotatedClass(edu.mgupi.pass.db.surfaces.SurfaceTypes.class);
-		configuration.addAnnotatedClass(edu.mgupi.pass.db.surfaces.Materials.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.defects.DefectClasses.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.defects.DefectTypes.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.defects.Defects.class);
@@ -52,6 +48,10 @@ public class PassPersistentManager extends PersistentManager {
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.sensors.Sensors.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.sensors.SensorClasses.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.sensors.SensorTypes.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.surfaces.SurfaceClasses.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.surfaces.Surfaces.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.surfaces.SurfaceTypes.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.surfaces.Materials.class);
 		configuration.buildMappings();
 		return configuration;
 	}

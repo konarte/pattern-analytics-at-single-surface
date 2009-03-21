@@ -72,29 +72,29 @@ public class SurfaceClasses implements Serializable {
 		}
 	}
 	
-	@Column(name="IdSurfaceType", nullable=false)	
+	@Column(name="IdSurfaceClass", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312023AEC6C105F00")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312023AEC6C105F00", strategy="native")	
-	private int idSurfaceType;
+	@GeneratedValue(generator="V0A1070D31202AD7311803D1E")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31202AD7311803D1E", strategy="native")	
+	private int idSurfaceClass;
 	
 	@Column(name="Name", nullable=false, length=255)	
 	private String name;
 	
-	@Column(name="SurfaceImage", nullable=true)	
+	@Column(name="SurfaceImage", nullable=false)	
 	@Basic(fetch=FetchType.LAZY)	
 	private byte[] surfaceImage;
 	
-	private void setIdSurfaceType(int value) {
-		this.idSurfaceType = value;
+	private void setIdSurfaceClass(int value) {
+		this.idSurfaceClass = value;
 	}
 	
-	public int getIdSurfaceType() {
-		return idSurfaceType;
+	public int getIdSurfaceClass() {
+		return idSurfaceClass;
 	}
 	
 	public int getORMID() {
-		return getIdSurfaceType();
+		return getIdSurfaceClass();
 	}
 	
 	public void setName(String value) {
@@ -126,7 +126,7 @@ public class SurfaceClasses implements Serializable {
 	}
 	
 	public String toString() {
-		return String.valueOf(getIdSurfaceType());
+		return String.valueOf(getIdSurfaceClass());
 	}
 	
 }

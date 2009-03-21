@@ -12,18 +12,6 @@ public class RetrieveAndUpdatePassData {
 			edu.mgupi.pass.db.NameMapping ledumgupipassdbNameMapping = edu.mgupi.pass.db.NameMappingFactory.loadNameMappingByQuery(null, null);
 			// Update the properties of the persistent object
 			ledumgupipassdbNameMapping.save();
-			edu.mgupi.pass.db.surfaces.SurfaceClasses ledumgupipassdbsurfacesSurfaceClasses = edu.mgupi.pass.db.surfaces.SurfaceClassesFactory.loadSurfaceClassesByQuery(null, null);
-			// Update the properties of the persistent object
-			ledumgupipassdbsurfacesSurfaceClasses.save();
-			edu.mgupi.pass.db.surfaces.Surfaces ledumgupipassdbsurfacesSurfaces = edu.mgupi.pass.db.surfaces.SurfacesFactory.loadSurfacesByQuery(null, null);
-			// Update the properties of the persistent object
-			ledumgupipassdbsurfacesSurfaces.save();
-			edu.mgupi.pass.db.surfaces.SurfaceTypes ledumgupipassdbsurfacesSurfaceTypes = edu.mgupi.pass.db.surfaces.SurfaceTypesFactory.loadSurfaceTypesByQuery(null, null);
-			// Update the properties of the persistent object
-			ledumgupipassdbsurfacesSurfaceTypes.save();
-			edu.mgupi.pass.db.surfaces.Materials ledumgupipassdbsurfacesMaterials = edu.mgupi.pass.db.surfaces.MaterialsFactory.loadMaterialsByQuery(null, null);
-			// Update the properties of the persistent object
-			ledumgupipassdbsurfacesMaterials.save();
 			edu.mgupi.pass.db.defects.DefectClasses ledumgupipassdbdefectsDefectClasses = edu.mgupi.pass.db.defects.DefectClassesFactory.loadDefectClassesByQuery(null, null);
 			// Update the properties of the persistent object
 			ledumgupipassdbdefectsDefectClasses.save();
@@ -60,6 +48,18 @@ public class RetrieveAndUpdatePassData {
 			edu.mgupi.pass.db.sensors.SensorTypes ledumgupipassdbsensorsSensorTypes = edu.mgupi.pass.db.sensors.SensorTypesFactory.loadSensorTypesByQuery(null, null);
 			// Update the properties of the persistent object
 			ledumgupipassdbsensorsSensorTypes.save();
+			edu.mgupi.pass.db.surfaces.SurfaceClasses ledumgupipassdbsurfacesSurfaceClasses = edu.mgupi.pass.db.surfaces.SurfaceClassesFactory.loadSurfaceClassesByQuery(null, null);
+			// Update the properties of the persistent object
+			ledumgupipassdbsurfacesSurfaceClasses.save();
+			edu.mgupi.pass.db.surfaces.Surfaces ledumgupipassdbsurfacesSurfaces = edu.mgupi.pass.db.surfaces.SurfacesFactory.loadSurfacesByQuery(null, null);
+			// Update the properties of the persistent object
+			ledumgupipassdbsurfacesSurfaces.save();
+			edu.mgupi.pass.db.surfaces.SurfaceTypes ledumgupipassdbsurfacesSurfaceTypes = edu.mgupi.pass.db.surfaces.SurfaceTypesFactory.loadSurfaceTypesByQuery(null, null);
+			// Update the properties of the persistent object
+			ledumgupipassdbsurfacesSurfaceTypes.save();
+			edu.mgupi.pass.db.surfaces.Materials ledumgupipassdbsurfacesMaterials = edu.mgupi.pass.db.surfaces.MaterialsFactory.loadMaterialsByQuery(null, null);
+			// Update the properties of the persistent object
+			ledumgupipassdbsurfacesMaterials.save();
 			t.commit();
 		}
 		catch (Exception e) {
@@ -74,30 +74,6 @@ public class RetrieveAndUpdatePassData {
 		// Please uncomment the follow line and fill in parameter(s)
 		//nameMappingCriteria.ID.eq();
 		System.out.println(nameMappingCriteria.uniqueNameMapping());
-		
-		System.out.println("Retrieving SurfaceClasses by SurfaceClassesCriteria");
-		edu.mgupi.pass.db.surfaces.SurfaceClassesCriteria surfaceClassesCriteria = new edu.mgupi.pass.db.surfaces.SurfaceClassesCriteria();
-		// Please uncomment the follow line and fill in parameter(s)
-		//surfaceClassesCriteria.idSurfaceType.eq();
-		System.out.println(surfaceClassesCriteria.uniqueSurfaceClasses());
-		
-		System.out.println("Retrieving Surfaces by SurfacesCriteria");
-		edu.mgupi.pass.db.surfaces.SurfacesCriteria surfacesCriteria = new edu.mgupi.pass.db.surfaces.SurfacesCriteria();
-		// Please uncomment the follow line and fill in parameter(s)
-		//surfacesCriteria.idSurface.eq();
-		System.out.println(surfacesCriteria.uniqueSurfaces());
-		
-		System.out.println("Retrieving SurfaceTypes by SurfaceTypesCriteria");
-		edu.mgupi.pass.db.surfaces.SurfaceTypesCriteria surfaceTypesCriteria = new edu.mgupi.pass.db.surfaces.SurfaceTypesCriteria();
-		// Please uncomment the follow line and fill in parameter(s)
-		//surfaceTypesCriteria.idSurfaceType.eq();
-		System.out.println(surfaceTypesCriteria.uniqueSurfaceTypes());
-		
-		System.out.println("Retrieving Materials by MaterialsCriteria");
-		edu.mgupi.pass.db.surfaces.MaterialsCriteria materialsCriteria = new edu.mgupi.pass.db.surfaces.MaterialsCriteria();
-		// Please uncomment the follow line and fill in parameter(s)
-		//materialsCriteria.idSurfaceMaterial.eq();
-		System.out.println(materialsCriteria.uniqueMaterials());
 		
 		System.out.println("Retrieving DefectClasses by DefectClassesCriteria");
 		edu.mgupi.pass.db.defects.DefectClassesCriteria defectClassesCriteria = new edu.mgupi.pass.db.defects.DefectClassesCriteria();
@@ -170,6 +146,30 @@ public class RetrieveAndUpdatePassData {
 		// Please uncomment the follow line and fill in parameter(s)
 		//sensorTypesCriteria.idSensorType.eq();
 		System.out.println(sensorTypesCriteria.uniqueSensorTypes());
+		
+		System.out.println("Retrieving SurfaceClasses by SurfaceClassesCriteria");
+		edu.mgupi.pass.db.surfaces.SurfaceClassesCriteria surfaceClassesCriteria = new edu.mgupi.pass.db.surfaces.SurfaceClassesCriteria();
+		// Please uncomment the follow line and fill in parameter(s)
+		//surfaceClassesCriteria.idSurfaceClass.eq();
+		System.out.println(surfaceClassesCriteria.uniqueSurfaceClasses());
+		
+		System.out.println("Retrieving Surfaces by SurfacesCriteria");
+		edu.mgupi.pass.db.surfaces.SurfacesCriteria surfacesCriteria = new edu.mgupi.pass.db.surfaces.SurfacesCriteria();
+		// Please uncomment the follow line and fill in parameter(s)
+		//surfacesCriteria.idSurface.eq();
+		System.out.println(surfacesCriteria.uniqueSurfaces());
+		
+		System.out.println("Retrieving SurfaceTypes by SurfaceTypesCriteria");
+		edu.mgupi.pass.db.surfaces.SurfaceTypesCriteria surfaceTypesCriteria = new edu.mgupi.pass.db.surfaces.SurfaceTypesCriteria();
+		// Please uncomment the follow line and fill in parameter(s)
+		//surfaceTypesCriteria.idSurfaceType.eq();
+		System.out.println(surfaceTypesCriteria.uniqueSurfaceTypes());
+		
+		System.out.println("Retrieving Materials by MaterialsCriteria");
+		edu.mgupi.pass.db.surfaces.MaterialsCriteria materialsCriteria = new edu.mgupi.pass.db.surfaces.MaterialsCriteria();
+		// Please uncomment the follow line and fill in parameter(s)
+		//materialsCriteria.idSurfaceMaterial.eq();
+		System.out.println(materialsCriteria.uniqueMaterials());
 		
 	}
 	

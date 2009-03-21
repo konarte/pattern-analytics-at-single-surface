@@ -75,14 +75,14 @@ public class DefectTypes implements Serializable {
 	
 	@Column(name="IdDefectType", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312023AEC70F05F05")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312023AEC70F05F05", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31202AD7302D03D13")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31202AD7302D03D13", strategy="native")	
 	private int idDefectType;
 	
 	@Column(name="Name", nullable=false, length=255)	
 	private String name;
 	
-	@Column(name="DefectImage", nullable=true)	
+	@Column(name="DefectImage", nullable=false)	
 	@Basic(fetch=FetchType.LAZY)	
 	private byte[] defectImage;
 	

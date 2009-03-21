@@ -23,6 +23,7 @@ public class LocusesCriteria extends AbstractORMCriteria {
 	public final StringExpression name;
 	public final ByteArrayExpression thumbImage;
 	public final ByteArrayExpression filteredImage;
+	public final StringExpression moduleOptions;
 	
 	public LocusesCriteria(Criteria criteria) {
 		super(criteria);
@@ -30,6 +31,7 @@ public class LocusesCriteria extends AbstractORMCriteria {
 		name = new StringExpression("name", this);
 		thumbImage = new ByteArrayExpression("thumbImage", this);
 		filteredImage = new ByteArrayExpression("filteredImage", this);
+		moduleOptions = new StringExpression("moduleOptions", this);
 	}
 	
 	public LocusesCriteria(PersistentSession session) {

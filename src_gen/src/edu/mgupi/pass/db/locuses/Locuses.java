@@ -74,20 +74,16 @@ public class Locuses implements Serializable {
 	
 	@Column(name="IdLocus", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312023AEC75D05F09")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312023AEC75D05F09", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31202AD7307B03D17")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31202AD7307B03D17", strategy="native")	
 	private int idLocus;
 	
-	@Column(name="Name", nullable=false, length=255)	
+	@Column(name="Name", nullable=true, length=255)	
 	private String name;
 	
 	@Column(name="ThumbImage", nullable=false)	
 	@Basic(fetch=FetchType.LAZY)	
 	private byte[] thumbImage;
-	
-	@Column(name="Histogram", nullable=false)	
-	@Basic(fetch=FetchType.LAZY)	
-	private int[] histogram;
 	
 	@Column(name="FilteredImage", nullable=false)	
 	@Basic(fetch=FetchType.LAZY)	
@@ -122,6 +118,9 @@ public class Locuses implements Serializable {
 	@JoinColumns({ @JoinColumn(name="SensorsIdSensor") })	
 	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.sensors.Sensors sensor;
+	
+	@Column(name="ModuleOptions", nullable=true, length=4096)	
+	private String moduleOptions;
 	
 	@OneToMany(targetEntity=edu.mgupi.pass.db.locuses.LocusModuleParams.class)	
 	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
@@ -189,26 +188,6 @@ public class Locuses implements Serializable {
 	}
 	
 	/**
-	 * Гистограмма изображения с примененными фильтрами.
-	 * 
-	 * Формат хранения -- матрица (т.е. двумерный массив).
-	 * Размер гистограммы зависит от размера изображения.
-	 */
-	public void setHistogram(int[] value) {
-		this.histogram = value;
-	}
-	
-	/**
-	 * Гистограмма изображения с примененными фильтрами.
-	 * 
-	 * Формат хранения -- матрица (т.е. двумерный массив).
-	 * Размер гистограммы зависит от размера изображения.
-	 */
-	public int[] getHistogram() {
-		return histogram;
-	}
-	
-	/**
 	 * Базовое изображение – уже отмасштабированное и с примененными фильтрами. 
 	 * Размер изображения 1024x1024 пикселей.
 	 * Формат хранения -- PNG.
@@ -230,6 +209,22 @@ public class Locuses implements Serializable {
 	 */
 	public byte[] getFilteredImage() {
 		return filteredImage;
+	}
+	
+	/**
+	 * Параметр модуля анализа в JSON-формате
+	 * 
+	 */
+	public void setModuleOptions(String value) {
+		this.moduleOptions = value;
+	}
+	
+	/**
+	 * Параметр модуля анализа в JSON-формате
+	 * 
+	 */
+	public String getModuleOptions() {
+		return moduleOptions;
 	}
 	
 	public void setModule(edu.mgupi.pass.db.locuses.LModules value) {
@@ -288,6 +283,25 @@ public class Locuses implements Serializable {
 	
 	public edu.mgupi.pass.db.sensors.Sensors getSensor() {
 		return sensor;
+	}
+	
+	/**
+	 * Пока отключено от сохранения!
+	 * 
+	 * Гистограмма изображения с примененными фильтрами.
+	 * 
+	 * Формат хранения -- матрица (т.е. двумерный массив).
+	 * Размер гистограммы зависит от размера изображения.
+	 */
+	@Transient	
+	private int[] histogram;
+	
+	public int[] getHistogram() {
+		return histogram;
+	}
+	
+	public void setHistogram(int[] aHistogram) {
+		histogram = aHistogram;
 	}
 	
 	@Transient	

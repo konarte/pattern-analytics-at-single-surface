@@ -17,14 +17,10 @@ import org.orm.*;
 import java.io.Serializable;
 import javax.persistence.*;
 /**
- * Маппинг наименований кодовых названий в JSON-параметрах 
- * реальным наименованиям.
+ * Маппинг дополнительных параметров для дефектов.
+ * Для каждого типа сущности (дефектов) задается название и видимое имя.
  * 
- * Т.е. для каждого nameType задается такой набор name/title, который позволяет 
- * однозначно идентифицировать все параметры, разрешенные к размещению 
- * в полях additionalOptions и заодно показывает их видимое наименование.
- * 
- * В будущем мы здесь разместим поле определяющее тип данных, допустимые значения и т.д.
+ * В дальнейшем мы добавим тип данных, значение по-умолчанию и т.д.
  */
 @Entity
 @org.hibernate.annotations.Proxy(lazy=false)
@@ -81,17 +77,17 @@ public class NameMapping implements Serializable {
 	
 	@Column(name="ID", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312023AEC6B105EFF")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312023AEC6B105EFF", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31202AD7300E03D11")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31202AD7300E03D11", strategy="native")	
 	private int ID;
 	
 	@Column(name="NameType", nullable=false, length=11)	
 	private int nameType;
 	
-	@Column(name="Name", nullable=true, length=255)	
+	@Column(name="Name", nullable=false, length=255)	
 	private String name;
 	
-	@Column(name="Title", nullable=true, length=255)	
+	@Column(name="Title", nullable=false, length=255)	
 	private String title;
 	
 	private void setID(int value) {
@@ -107,44 +103,44 @@ public class NameMapping implements Serializable {
 	}
 	
 	/**
-	 * Тип записи:
-	 * 1 - дефект
+	 * Тип параметра:
+	 * 1 - дефекты
 	 */
 	public void setNameType(int value) {
 		this.nameType = value;
 	}
 	
 	/**
-	 * Тип записи:
-	 * 1 - дефект
+	 * Тип параметра:
+	 * 1 - дефекты
 	 */
 	public int getNameType() {
 		return nameType;
 	}
 	
 	/**
-	 * Название параметра (латиницей)
+	 * Название параметра (код), латиницей
 	 */
 	public void setName(String value) {
 		this.name = value;
 	}
 	
 	/**
-	 * Название параметра (латиницей)
+	 * Название параметра (код), латиницей
 	 */
 	public String getName() {
 		return name;
 	}
 	
 	/**
-	 * Видимое название параметра
+	 * Видимое наименование
 	 */
 	public void setTitle(String value) {
 		this.title = value;
 	}
 	
 	/**
-	 * Видимое название параметра
+	 * Видимое наименование
 	 */
 	public String getTitle() {
 		return title;

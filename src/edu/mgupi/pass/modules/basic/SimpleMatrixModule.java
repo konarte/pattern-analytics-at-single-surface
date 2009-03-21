@@ -45,7 +45,7 @@ public class SimpleMatrixModule implements IModule {
 	}
 
 	public String getName() {
-		return "Матричный анализ (Ч/Б)";
+		return "Матричный анализ";
 	}
 
 	private final static float MAX_LEVEL = 255.0f;
