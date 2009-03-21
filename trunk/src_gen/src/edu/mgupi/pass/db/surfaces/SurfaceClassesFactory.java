@@ -19,65 +19,65 @@ import java.util.List;
 
 public class SurfaceClassesFactory {
 	private static final org.apache.log4j.Logger _logger = org.apache.log4j.Logger.getLogger(SurfaceClassesFactory.class);
-	public static SurfaceClasses loadSurfaceClassesByORMID(int idSurfaceType) throws PersistentException {
+	public static SurfaceClasses loadSurfaceClassesByORMID(int idSurfaceClass) throws PersistentException {
 		try {
 			PersistentSession session = edu.mgupi.pass.db.surfaces.PassPersistentManager.instance().getSession();
-			return loadSurfaceClassesByORMID(session, idSurfaceType);
+			return loadSurfaceClassesByORMID(session, idSurfaceClass);
 		}
 		catch (Exception e) {
-			_logger.error("loadSurfaceClassesByORMID(int idSurfaceType)", e);
+			_logger.error("loadSurfaceClassesByORMID(int idSurfaceClass)", e);
 			throw new PersistentException(e);
 		}
 	}
 	
-	public static SurfaceClasses getSurfaceClassesByORMID(int idSurfaceType) throws PersistentException {
+	public static SurfaceClasses getSurfaceClassesByORMID(int idSurfaceClass) throws PersistentException {
 		try {
 			PersistentSession session = edu.mgupi.pass.db.surfaces.PassPersistentManager.instance().getSession();
-			return getSurfaceClassesByORMID(session, idSurfaceType);
+			return getSurfaceClassesByORMID(session, idSurfaceClass);
 		}
 		catch (Exception e) {
-			_logger.error("getSurfaceClassesByORMID(int idSurfaceType)", e);
+			_logger.error("getSurfaceClassesByORMID(int idSurfaceClass)", e);
 			throw new PersistentException(e);
 		}
 	}
 	
-	public static SurfaceClasses loadSurfaceClassesByORMID(int idSurfaceType, org.hibernate.LockMode lockMode) throws PersistentException {
+	public static SurfaceClasses loadSurfaceClassesByORMID(int idSurfaceClass, org.hibernate.LockMode lockMode) throws PersistentException {
 		try {
 			PersistentSession session = edu.mgupi.pass.db.surfaces.PassPersistentManager.instance().getSession();
-			return loadSurfaceClassesByORMID(session, idSurfaceType, lockMode);
+			return loadSurfaceClassesByORMID(session, idSurfaceClass, lockMode);
 		}
 		catch (Exception e) {
-			_logger.error("loadSurfaceClassesByORMID(int idSurfaceType, org.hibernate.LockMode lockMode)", e);
+			_logger.error("loadSurfaceClassesByORMID(int idSurfaceClass, org.hibernate.LockMode lockMode)", e);
 			throw new PersistentException(e);
 		}
 	}
 	
-	public static SurfaceClasses loadSurfaceClassesByORMID(PersistentSession session, int idSurfaceType) throws PersistentException {
+	public static SurfaceClasses loadSurfaceClassesByORMID(PersistentSession session, int idSurfaceClass) throws PersistentException {
 		try {
-			return (SurfaceClasses) session.load(edu.mgupi.pass.db.surfaces.SurfaceClasses.class, new Integer(idSurfaceType));
+			return (SurfaceClasses) session.load(edu.mgupi.pass.db.surfaces.SurfaceClasses.class, new Integer(idSurfaceClass));
 		}
 		catch (Exception e) {
-			_logger.error("loadSurfaceClassesByORMID(PersistentSession session, int idSurfaceType)", e);
+			_logger.error("loadSurfaceClassesByORMID(PersistentSession session, int idSurfaceClass)", e);
 			throw new PersistentException(e);
 		}
 	}
 	
-	public static SurfaceClasses getSurfaceClassesByORMID(PersistentSession session, int idSurfaceType) throws PersistentException {
+	public static SurfaceClasses getSurfaceClassesByORMID(PersistentSession session, int idSurfaceClass) throws PersistentException {
 		try {
-			return (SurfaceClasses) session.get(edu.mgupi.pass.db.surfaces.SurfaceClasses.class, new Integer(idSurfaceType));
+			return (SurfaceClasses) session.get(edu.mgupi.pass.db.surfaces.SurfaceClasses.class, new Integer(idSurfaceClass));
 		}
 		catch (Exception e) {
-			_logger.error("getSurfaceClassesByORMID(PersistentSession session, int idSurfaceType)", e);
+			_logger.error("getSurfaceClassesByORMID(PersistentSession session, int idSurfaceClass)", e);
 			throw new PersistentException(e);
 		}
 	}
 	
-	public static SurfaceClasses loadSurfaceClassesByORMID(PersistentSession session, int idSurfaceType, org.hibernate.LockMode lockMode) throws PersistentException {
+	public static SurfaceClasses loadSurfaceClassesByORMID(PersistentSession session, int idSurfaceClass, org.hibernate.LockMode lockMode) throws PersistentException {
 		try {
-			return (SurfaceClasses) session.load(edu.mgupi.pass.db.surfaces.SurfaceClasses.class, new Integer(idSurfaceType), lockMode);
+			return (SurfaceClasses) session.load(edu.mgupi.pass.db.surfaces.SurfaceClasses.class, new Integer(idSurfaceClass), lockMode);
 		}
 		catch (Exception e) {
-			_logger.error("loadSurfaceClassesByORMID(PersistentSession session, int idSurfaceType, org.hibernate.LockMode lockMode)", e);
+			_logger.error("loadSurfaceClassesByORMID(PersistentSession session, int idSurfaceClass, org.hibernate.LockMode lockMode)", e);
 			throw new PersistentException(e);
 		}
 	}

@@ -74,11 +74,11 @@ public class LocusFilterOptions implements Serializable {
 	
 	@Column(name="IdLocusFilter", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312023AEC78C05F0B")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312023AEC78C05F0B", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31202AD730AA03D19")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31202AD730AA03D19", strategy="native")	
 	private int idLocusFilter;
 	
-	@Column(name="Options", nullable=true, length=4096)	
+	@Column(name="Options", nullable=false, length=4096)	
 	private String options;
 	
 	@OneToOne(targetEntity=edu.mgupi.pass.db.locuses.LFilters.class)	

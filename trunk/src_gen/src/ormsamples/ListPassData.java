@@ -17,38 +17,6 @@ public class ListPassData {
 		}
 		System.out.println(length + " record(s) retrieved.");
 		
-		System.out.println("Listing SurfaceClasses...");
-		edu.mgupi.pass.db.surfaces.SurfaceClasses[] edumgupipassdbsurfacesSurfaceClasseses = edu.mgupi.pass.db.surfaces.SurfaceClassesFactory.listSurfaceClassesByQuery(null, null);
-		length = Math.min(edumgupipassdbsurfacesSurfaceClasseses.length, ROW_COUNT);
-		for (int i = 0; i < length; i++) {
-			System.out.println(edumgupipassdbsurfacesSurfaceClasseses[i]);
-		}
-		System.out.println(length + " record(s) retrieved.");
-		
-		System.out.println("Listing Surfaces...");
-		edu.mgupi.pass.db.surfaces.Surfaces[] edumgupipassdbsurfacesSurfaceses = edu.mgupi.pass.db.surfaces.SurfacesFactory.listSurfacesByQuery(null, null);
-		length = Math.min(edumgupipassdbsurfacesSurfaceses.length, ROW_COUNT);
-		for (int i = 0; i < length; i++) {
-			System.out.println(edumgupipassdbsurfacesSurfaceses[i]);
-		}
-		System.out.println(length + " record(s) retrieved.");
-		
-		System.out.println("Listing SurfaceTypes...");
-		edu.mgupi.pass.db.surfaces.SurfaceTypes[] edumgupipassdbsurfacesSurfaceTypeses = edu.mgupi.pass.db.surfaces.SurfaceTypesFactory.listSurfaceTypesByQuery(null, null);
-		length = Math.min(edumgupipassdbsurfacesSurfaceTypeses.length, ROW_COUNT);
-		for (int i = 0; i < length; i++) {
-			System.out.println(edumgupipassdbsurfacesSurfaceTypeses[i]);
-		}
-		System.out.println(length + " record(s) retrieved.");
-		
-		System.out.println("Listing Materials...");
-		edu.mgupi.pass.db.surfaces.Materials[] edumgupipassdbsurfacesMaterialses = edu.mgupi.pass.db.surfaces.MaterialsFactory.listMaterialsByQuery(null, null);
-		length = Math.min(edumgupipassdbsurfacesMaterialses.length, ROW_COUNT);
-		for (int i = 0; i < length; i++) {
-			System.out.println(edumgupipassdbsurfacesMaterialses[i]);
-		}
-		System.out.println(length + " record(s) retrieved.");
-		
 		System.out.println("Listing DefectClasses...");
 		edu.mgupi.pass.db.defects.DefectClasses[] edumgupipassdbdefectsDefectClasseses = edu.mgupi.pass.db.defects.DefectClassesFactory.listDefectClassesByQuery(null, null);
 		length = Math.min(edumgupipassdbdefectsDefectClasseses.length, ROW_COUNT);
@@ -145,6 +113,38 @@ public class ListPassData {
 		}
 		System.out.println(length + " record(s) retrieved.");
 		
+		System.out.println("Listing SurfaceClasses...");
+		edu.mgupi.pass.db.surfaces.SurfaceClasses[] edumgupipassdbsurfacesSurfaceClasseses = edu.mgupi.pass.db.surfaces.SurfaceClassesFactory.listSurfaceClassesByQuery(null, null);
+		length = Math.min(edumgupipassdbsurfacesSurfaceClasseses.length, ROW_COUNT);
+		for (int i = 0; i < length; i++) {
+			System.out.println(edumgupipassdbsurfacesSurfaceClasseses[i]);
+		}
+		System.out.println(length + " record(s) retrieved.");
+		
+		System.out.println("Listing Surfaces...");
+		edu.mgupi.pass.db.surfaces.Surfaces[] edumgupipassdbsurfacesSurfaceses = edu.mgupi.pass.db.surfaces.SurfacesFactory.listSurfacesByQuery(null, null);
+		length = Math.min(edumgupipassdbsurfacesSurfaceses.length, ROW_COUNT);
+		for (int i = 0; i < length; i++) {
+			System.out.println(edumgupipassdbsurfacesSurfaceses[i]);
+		}
+		System.out.println(length + " record(s) retrieved.");
+		
+		System.out.println("Listing SurfaceTypes...");
+		edu.mgupi.pass.db.surfaces.SurfaceTypes[] edumgupipassdbsurfacesSurfaceTypeses = edu.mgupi.pass.db.surfaces.SurfaceTypesFactory.listSurfaceTypesByQuery(null, null);
+		length = Math.min(edumgupipassdbsurfacesSurfaceTypeses.length, ROW_COUNT);
+		for (int i = 0; i < length; i++) {
+			System.out.println(edumgupipassdbsurfacesSurfaceTypeses[i]);
+		}
+		System.out.println(length + " record(s) retrieved.");
+		
+		System.out.println("Listing Materials...");
+		edu.mgupi.pass.db.surfaces.Materials[] edumgupipassdbsurfacesMaterialses = edu.mgupi.pass.db.surfaces.MaterialsFactory.listMaterialsByQuery(null, null);
+		length = Math.min(edumgupipassdbsurfacesMaterialses.length, ROW_COUNT);
+		for (int i = 0; i < length; i++) {
+			System.out.println(edumgupipassdbsurfacesMaterialses[i]);
+		}
+		System.out.println(length + " record(s) retrieved.");
+		
 	}
 	
 	public void listByCriteria() throws PersistentException  {
@@ -159,54 +159,6 @@ public class ListPassData {
 			 System.out.println(edumgupipassdbNameMappings[i]);
 		}
 		System.out.println(length + " NameMapping record(s) retrieved."); 
-		
-		System.out.println("Listing SurfaceClasses by Criteria...");
-		edu.mgupi.pass.db.surfaces.SurfaceClassesCriteria surfaceClassesCriteria = new edu.mgupi.pass.db.surfaces.SurfaceClassesCriteria();
-		// Please uncomment the follow line and fill in parameter(s) 
-		//surfaceClassesCriteria.idSurfaceType.eq();
-		surfaceClassesCriteria.setMaxResults(ROW_COUNT);
-		edu.mgupi.pass.db.surfaces.SurfaceClasses[] edumgupipassdbsurfacesSurfaceClasseses = surfaceClassesCriteria.listSurfaceClasses();
-		length =edumgupipassdbsurfacesSurfaceClasseses== null ? 0 : Math.min(edumgupipassdbsurfacesSurfaceClasseses.length, ROW_COUNT); 
-		for (int i = 0; i < length; i++) {
-			 System.out.println(edumgupipassdbsurfacesSurfaceClasseses[i]);
-		}
-		System.out.println(length + " SurfaceClasses record(s) retrieved."); 
-		
-		System.out.println("Listing Surfaces by Criteria...");
-		edu.mgupi.pass.db.surfaces.SurfacesCriteria surfacesCriteria = new edu.mgupi.pass.db.surfaces.SurfacesCriteria();
-		// Please uncomment the follow line and fill in parameter(s) 
-		//surfacesCriteria.idSurface.eq();
-		surfacesCriteria.setMaxResults(ROW_COUNT);
-		edu.mgupi.pass.db.surfaces.Surfaces[] edumgupipassdbsurfacesSurfaceses = surfacesCriteria.listSurfaces();
-		length =edumgupipassdbsurfacesSurfaceses== null ? 0 : Math.min(edumgupipassdbsurfacesSurfaceses.length, ROW_COUNT); 
-		for (int i = 0; i < length; i++) {
-			 System.out.println(edumgupipassdbsurfacesSurfaceses[i]);
-		}
-		System.out.println(length + " Surfaces record(s) retrieved."); 
-		
-		System.out.println("Listing SurfaceTypes by Criteria...");
-		edu.mgupi.pass.db.surfaces.SurfaceTypesCriteria surfaceTypesCriteria = new edu.mgupi.pass.db.surfaces.SurfaceTypesCriteria();
-		// Please uncomment the follow line and fill in parameter(s) 
-		//surfaceTypesCriteria.idSurfaceType.eq();
-		surfaceTypesCriteria.setMaxResults(ROW_COUNT);
-		edu.mgupi.pass.db.surfaces.SurfaceTypes[] edumgupipassdbsurfacesSurfaceTypeses = surfaceTypesCriteria.listSurfaceTypes();
-		length =edumgupipassdbsurfacesSurfaceTypeses== null ? 0 : Math.min(edumgupipassdbsurfacesSurfaceTypeses.length, ROW_COUNT); 
-		for (int i = 0; i < length; i++) {
-			 System.out.println(edumgupipassdbsurfacesSurfaceTypeses[i]);
-		}
-		System.out.println(length + " SurfaceTypes record(s) retrieved."); 
-		
-		System.out.println("Listing Materials by Criteria...");
-		edu.mgupi.pass.db.surfaces.MaterialsCriteria materialsCriteria = new edu.mgupi.pass.db.surfaces.MaterialsCriteria();
-		// Please uncomment the follow line and fill in parameter(s) 
-		//materialsCriteria.idSurfaceMaterial.eq();
-		materialsCriteria.setMaxResults(ROW_COUNT);
-		edu.mgupi.pass.db.surfaces.Materials[] edumgupipassdbsurfacesMaterialses = materialsCriteria.listMaterials();
-		length =edumgupipassdbsurfacesMaterialses== null ? 0 : Math.min(edumgupipassdbsurfacesMaterialses.length, ROW_COUNT); 
-		for (int i = 0; i < length; i++) {
-			 System.out.println(edumgupipassdbsurfacesMaterialses[i]);
-		}
-		System.out.println(length + " Materials record(s) retrieved."); 
 		
 		System.out.println("Listing DefectClasses by Criteria...");
 		edu.mgupi.pass.db.defects.DefectClassesCriteria defectClassesCriteria = new edu.mgupi.pass.db.defects.DefectClassesCriteria();
@@ -351,6 +303,54 @@ public class ListPassData {
 			 System.out.println(edumgupipassdbsensorsSensorTypeses[i]);
 		}
 		System.out.println(length + " SensorTypes record(s) retrieved."); 
+		
+		System.out.println("Listing SurfaceClasses by Criteria...");
+		edu.mgupi.pass.db.surfaces.SurfaceClassesCriteria surfaceClassesCriteria = new edu.mgupi.pass.db.surfaces.SurfaceClassesCriteria();
+		// Please uncomment the follow line and fill in parameter(s) 
+		//surfaceClassesCriteria.idSurfaceClass.eq();
+		surfaceClassesCriteria.setMaxResults(ROW_COUNT);
+		edu.mgupi.pass.db.surfaces.SurfaceClasses[] edumgupipassdbsurfacesSurfaceClasseses = surfaceClassesCriteria.listSurfaceClasses();
+		length =edumgupipassdbsurfacesSurfaceClasseses== null ? 0 : Math.min(edumgupipassdbsurfacesSurfaceClasseses.length, ROW_COUNT); 
+		for (int i = 0; i < length; i++) {
+			 System.out.println(edumgupipassdbsurfacesSurfaceClasseses[i]);
+		}
+		System.out.println(length + " SurfaceClasses record(s) retrieved."); 
+		
+		System.out.println("Listing Surfaces by Criteria...");
+		edu.mgupi.pass.db.surfaces.SurfacesCriteria surfacesCriteria = new edu.mgupi.pass.db.surfaces.SurfacesCriteria();
+		// Please uncomment the follow line and fill in parameter(s) 
+		//surfacesCriteria.idSurface.eq();
+		surfacesCriteria.setMaxResults(ROW_COUNT);
+		edu.mgupi.pass.db.surfaces.Surfaces[] edumgupipassdbsurfacesSurfaceses = surfacesCriteria.listSurfaces();
+		length =edumgupipassdbsurfacesSurfaceses== null ? 0 : Math.min(edumgupipassdbsurfacesSurfaceses.length, ROW_COUNT); 
+		for (int i = 0; i < length; i++) {
+			 System.out.println(edumgupipassdbsurfacesSurfaceses[i]);
+		}
+		System.out.println(length + " Surfaces record(s) retrieved."); 
+		
+		System.out.println("Listing SurfaceTypes by Criteria...");
+		edu.mgupi.pass.db.surfaces.SurfaceTypesCriteria surfaceTypesCriteria = new edu.mgupi.pass.db.surfaces.SurfaceTypesCriteria();
+		// Please uncomment the follow line and fill in parameter(s) 
+		//surfaceTypesCriteria.idSurfaceType.eq();
+		surfaceTypesCriteria.setMaxResults(ROW_COUNT);
+		edu.mgupi.pass.db.surfaces.SurfaceTypes[] edumgupipassdbsurfacesSurfaceTypeses = surfaceTypesCriteria.listSurfaceTypes();
+		length =edumgupipassdbsurfacesSurfaceTypeses== null ? 0 : Math.min(edumgupipassdbsurfacesSurfaceTypeses.length, ROW_COUNT); 
+		for (int i = 0; i < length; i++) {
+			 System.out.println(edumgupipassdbsurfacesSurfaceTypeses[i]);
+		}
+		System.out.println(length + " SurfaceTypes record(s) retrieved."); 
+		
+		System.out.println("Listing Materials by Criteria...");
+		edu.mgupi.pass.db.surfaces.MaterialsCriteria materialsCriteria = new edu.mgupi.pass.db.surfaces.MaterialsCriteria();
+		// Please uncomment the follow line and fill in parameter(s) 
+		//materialsCriteria.idSurfaceMaterial.eq();
+		materialsCriteria.setMaxResults(ROW_COUNT);
+		edu.mgupi.pass.db.surfaces.Materials[] edumgupipassdbsurfacesMaterialses = materialsCriteria.listMaterials();
+		length =edumgupipassdbsurfacesMaterialses== null ? 0 : Math.min(edumgupipassdbsurfacesMaterialses.length, ROW_COUNT); 
+		for (int i = 0; i < length; i++) {
+			 System.out.println(edumgupipassdbsurfacesMaterialses[i]);
+		}
+		System.out.println(length + " Materials record(s) retrieved."); 
 		
 	}
 	

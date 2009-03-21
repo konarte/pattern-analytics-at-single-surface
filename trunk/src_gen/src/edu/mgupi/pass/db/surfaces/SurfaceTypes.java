@@ -75,8 +75,8 @@ public class SurfaceTypes implements Serializable {
 	
 	@Column(name="IdSurfaceType", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312023AEC6E005F02")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312023AEC6E005F02", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31202AD7313703D20")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31202AD7313703D20", strategy="native")	
 	private int idSurfaceType;
 	
 	@Column(name="Name", nullable=false, length=255)	
@@ -84,7 +84,7 @@ public class SurfaceTypes implements Serializable {
 	
 	@OneToOne(targetEntity=edu.mgupi.pass.db.surfaces.SurfaceClasses.class)	
 	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
-	@JoinColumns({ @JoinColumn(name="SurfaceClassesIdSurfaceType") })	
+	@JoinColumns({ @JoinColumn(name="SurfaceClassesIdSurfaceClass") })	
 	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.surfaces.SurfaceClasses surfaceClass;
 	

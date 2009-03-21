@@ -19,13 +19,13 @@ import org.orm.PersistentSession;
 import org.orm.criteria.*;
 
 public class SurfaceClassesCriteria extends AbstractORMCriteria {
-	public final IntegerExpression idSurfaceType;
+	public final IntegerExpression idSurfaceClass;
 	public final StringExpression name;
 	public final ByteArrayExpression surfaceImage;
 	
 	public SurfaceClassesCriteria(Criteria criteria) {
 		super(criteria);
-		idSurfaceType = new IntegerExpression("idSurfaceType", this);
+		idSurfaceClass = new IntegerExpression("idSurfaceClass", this);
 		name = new StringExpression("name", this);
 		surfaceImage = new ByteArrayExpression("surfaceImage", this);
 	}

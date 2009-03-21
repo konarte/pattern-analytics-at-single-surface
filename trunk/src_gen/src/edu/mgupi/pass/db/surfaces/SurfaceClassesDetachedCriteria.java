@@ -20,20 +20,20 @@ import org.orm.PersistentSession;
 import org.orm.criteria.*;
 
 public class SurfaceClassesDetachedCriteria extends AbstractORMDetachedCriteria {
-	public final IntegerExpression idSurfaceType;
+	public final IntegerExpression idSurfaceClass;
 	public final StringExpression name;
 	public final ByteArrayExpression surfaceImage;
 	
 	public SurfaceClassesDetachedCriteria() {
 		super(edu.mgupi.pass.db.surfaces.SurfaceClasses.class, edu.mgupi.pass.db.surfaces.SurfaceClassesCriteria.class);
-		idSurfaceType = new IntegerExpression("idSurfaceType", this.getDetachedCriteria());
+		idSurfaceClass = new IntegerExpression("idSurfaceClass", this.getDetachedCriteria());
 		name = new StringExpression("name", this.getDetachedCriteria());
 		surfaceImage = new ByteArrayExpression("surfaceImage", this.getDetachedCriteria());
 	}
 	
 	public SurfaceClassesDetachedCriteria(DetachedCriteria aDetachedCriteria) {
 		super(aDetachedCriteria, edu.mgupi.pass.db.surfaces.SurfaceClassesCriteria.class);
-		idSurfaceType = new IntegerExpression("idSurfaceType", this.getDetachedCriteria());
+		idSurfaceClass = new IntegerExpression("idSurfaceClass", this.getDetachedCriteria());
 		name = new StringExpression("name", this.getDetachedCriteria());
 		surfaceImage = new ByteArrayExpression("surfaceImage", this.getDetachedCriteria());
 	}

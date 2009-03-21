@@ -74,8 +74,8 @@ public class Surfaces implements Serializable {
 	
 	@Column(name="IdSurface", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312023AEC6D005F01")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312023AEC6D005F01", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31202AD7312703D1F")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31202AD7312703D1F", strategy="native")	
 	private int idSurface;
 	
 	@Column(name="Height", nullable=false)	
