@@ -33,7 +33,6 @@ public class AboutDialogTest {
 	public void testUI() throws Exception {
 
 		SwingHelper.addWorkAndWaitThis(new WorkSet() {
-
 			@Override
 			public void workImpl() throws Exception {
 				dialog.setVisible(true);

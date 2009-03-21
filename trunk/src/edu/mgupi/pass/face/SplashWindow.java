@@ -19,6 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
+import edu.mgupi.pass.face.template.ImagePanel;
 import edu.mgupi.pass.util.Const;
 
 public class SplashWindow extends JFrame {

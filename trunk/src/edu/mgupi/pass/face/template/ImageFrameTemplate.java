@@ -1,4 +1,4 @@
-package edu.mgupi.pass.face;
+package edu.mgupi.pass.face.template;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -19,6 +19,7 @@ import javax.swing.WindowConstants;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 public class ImageFrameTemplate extends JDialog {
 

@@ -53,6 +53,8 @@ import edu.mgupi.pass.db.locuses.LFiltersFactory;
 import edu.mgupi.pass.db.locuses.LModules;
 import edu.mgupi.pass.db.locuses.LModulesFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
+import edu.mgupi.pass.face.template.ImageFrameTemplate;
+import edu.mgupi.pass.face.template.ImagePanel;
 import edu.mgupi.pass.filters.FilterChainsaw;
 import edu.mgupi.pass.filters.java.GrayScaleFilter;
 import edu.mgupi.pass.filters.service.PlaceImageFilter;
@@ -167,13 +169,14 @@ public class MainFrame extends JFrame implements IProgress {
 
 		mainModuleProcessor = new ModuleProcessor();
 
-		histogramFrame = (ImageFrameTemplate) AppHelper.getInstance().createWindow(ImageFrameTemplate.class);
+		histogramFrame = (ImageFrameTemplate) AppHelper.getInstance()
+				.registerAdditionalWindow(ImageFrameTemplate.class);
 		histogramFrame.registerControlCheckbox(this.jCheckBoxHistogram);
 		histogramFrame.setTitle(mainModuleProcessor.getHistoFilters().toString());
 		histogramFrame.setName("histogramWindow");
 		Config.getInstance().getWindowPosition(histogramFrame);
 
-		moduleFrame = (ImageFrameTemplate) AppHelper.getInstance().createWindow(ImageFrameTemplate.class);
+		moduleFrame = (ImageFrameTemplate) AppHelper.getInstance().registerAdditionalWindow(ImageFrameTemplate.class);
 		moduleFrame.registerControlCheckbox(this.jCheckBoxModuleGraphic);
 		moduleFrame.setTitle("Модуль не выбран");
 		moduleFrame.setName("moduleFrameWindow");
@@ -214,8 +217,8 @@ public class MainFrame extends JFrame implements IProgress {
 				this.mainModuleProcessor.close();
 			} catch (Exception e) {
 				logger.error("Error when closing main module", e);
-				JOptionPane.showMessageDialog(null, "Error when closing main module: " + e, "Closing error",
-						JOptionPane.ERROR_MESSAGE);
+				//				JOptionPane.showMessageDialog(null, "Error when closing main module: " + e, "Closing error",
+				//						JOptionPane.ERROR_MESSAGE);
 			}
 			mainModuleProcessor = null;
 		}
@@ -229,8 +232,8 @@ public class MainFrame extends JFrame implements IProgress {
 			Config.getInstance().saveCurrentConfig();
 		} catch (ConfigurationException e) {
 			logger.error("Error when saving current config", e);
-			JOptionPane.showMessageDialog(null, "Error when saving current config: " + e, "Config saving error",
-					JOptionPane.ERROR_MESSAGE);
+			//			JOptionPane.showMessageDialog(null, "Error when saving current config: " + e, "Config saving error",
+			//					JOptionPane.ERROR_MESSAGE);
 		}
 
 		AppHelper.reset();
@@ -429,9 +432,9 @@ public class MainFrame extends JFrame implements IProgress {
 						MainFrame.this.startProcessing(MainFrame.this.singleFilePicker.getSingleSource());
 					} catch (Exception e1) {
 						logger.error("Error when picking new image for processing", e1);
-						JOptionPane.showMessageDialog(null, "Error when processing image: " + e1, "Error",
-								JOptionPane.ERROR_MESSAGE);
-						//AppHelper.showExceptionDialog("Error when processing image", e1);
+						AppHelper.showExceptionDialog(MainFrame.this, "Error when processing image.", e1);
+						//						JOptionPane.showMessageDialog(null, "Error when processing image: " + e1, "Error",
+						//								JOptionPane.ERROR_MESSAGE);
 					} finally {
 						MainFrame.this.clearMessage();
 					}
@@ -841,9 +844,9 @@ public class MainFrame extends JFrame implements IProgress {
 			gridBagConstraints11.fill = GridBagConstraints.BOTH;
 			gridBagConstraints11.weightx = 1.0D;
 			gridBagConstraints11.weighty = 1.0D;
-			gridBagConstraints11.gridy = 2;
+			gridBagConstraints11.gridy = 1;
 			GridBagConstraints gridBagConstraints5 = new GridBagConstraints();
-			gridBagConstraints5.gridy = 1;
+			gridBagConstraints5.gridy = 2;
 			gridBagConstraints5.anchor = GridBagConstraints.NORTHWEST;
 			gridBagConstraints5.weightx = 1.0D;
 			gridBagConstraints5.fill = GridBagConstraints.HORIZONTAL;
@@ -855,8 +858,8 @@ public class MainFrame extends JFrame implements IProgress {
 			jPanelLeft.setLayout(new GridBagLayout());
 			jPanelLeft.setPreferredSize(new Dimension(200, 200));
 			jPanelLeft.setMinimumSize(new Dimension(200, 200));
-			jPanelLeft.add(getJPanelModule(), gridBagConstraints5);
 			jPanelLeft.add(getJPanelFilters(), gridBagConstraints11);
+			jPanelLeft.add(getJPanelModule(), gridBagConstraints5);
 			jPanelLeft.add(getJPanelSensors(), gridBagConstraints16);
 			jPanelLeft.add(getJPanelSurface(), gridBagConstraints20);
 			jPanelLeft.add(getJPanelDefect(), gridBagConstraints23);
@@ -1186,7 +1189,7 @@ public class MainFrame extends JFrame implements IProgress {
 		if (jCheckBoxHistogram == null) {
 			jCheckBoxHistogram = new JCheckBox();
 			jCheckBoxHistogram.setName("histogram");
-			jCheckBoxHistogram.setText("Гистограмма");
+			jCheckBoxHistogram.setText("Гистограмма исходника");
 		}
 		return jCheckBoxHistogram;
 	}
@@ -1459,6 +1462,7 @@ public class MainFrame extends JFrame implements IProgress {
 	private JButton getJButtonModuleParams() {
 		if (jButtonModuleParams == null) {
 			jButtonModuleParams = new JButton();
+			jButtonModuleParams.setAction(new NoAction());
 			jButtonModuleParams.setText("Параметры модуля");
 			jButtonModuleParams.setName("moduleParams");
 		}
