@@ -12,9 +12,11 @@ import edu.mgupi.pass.db.locuses.LFilters;
 import edu.mgupi.pass.db.locuses.LFiltersFactory;
 import edu.mgupi.pass.db.locuses.LModules;
 import edu.mgupi.pass.db.locuses.LModulesFactory;
-import edu.mgupi.pass.db.locuses.LocusFilterOptions;
-import edu.mgupi.pass.db.locuses.LocusFilterOptionsFactory;
-import edu.mgupi.pass.db.locuses.LocusModuleParams;
+import edu.mgupi.pass.db.locuses.LocusAppliedFilters;
+import edu.mgupi.pass.db.locuses.LocusAppliedFiltersFactory;
+import edu.mgupi.pass.db.locuses.LocusAppliedModule;
+import edu.mgupi.pass.db.locuses.LocusAppliedModuleFactory;
+import edu.mgupi.pass.db.locuses.LocusModuleData;
 import edu.mgupi.pass.db.locuses.LocusSources;
 import edu.mgupi.pass.db.locuses.LocusSourcesFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
@@ -24,7 +26,6 @@ import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.IllegalParameterValueException;
 import edu.mgupi.pass.filters.NoSuchParamException;
-import edu.mgupi.pass.filters.ParamHelper;
 import edu.mgupi.pass.filters.service.HistogramFilter;
 import edu.mgupi.pass.filters.service.ResizeFilter;
 import edu.mgupi.pass.sources.SourceStore;
@@ -132,10 +133,10 @@ public class ModuleProcessor {
 			// Because some modules does not provide it :)
 
 			lastLocus.setProcessed(false);
-			for (LocusModuleParams param : lastLocus.getParams()) {
+			for (LocusModuleData param : lastLocus.getModule().getData()) {
 				param.delete();
 			}
-			lastLocus.getParams().clear();
+			lastLocus.getModule().getData().clear();
 			ANAZYLE.start();
 			try {
 				this.module.analyze(lastProcessedImage, lastLocus);
@@ -144,7 +145,8 @@ public class ModuleProcessor {
 			}
 			lastLocus.setProcessed(true);
 
-			logger.debug("Caching parameters for instance {} : {}", this.module.getName(), lastLocus.getParams());
+			logger.debug("Caching parameters for instance {} : {}", this.module.getName(), lastLocus.getModule()
+					.getData());
 
 		}
 	}
@@ -278,7 +280,7 @@ public class ModuleProcessor {
 		lastLocus = locus;
 
 		// Cache params (for switched modules)
-		logger.debug("Caching parameters for instance {} : {}", this.module.getName(), locus.getParams());
+		logger.debug("Caching parameters for instance {} : {}", this.module.getName(), locus.getModule().getData());
 
 		return locus;
 	}
@@ -333,7 +335,10 @@ public class ModuleProcessor {
 			if (lModule == null) {
 				throw new FilterException("Unexpected error. Unable to find properly registed module " + codename);
 			}
-			locus.setModule(lModule);
+			LocusAppliedModule module = LocusAppliedModuleFactory.createLocusAppliedModule();
+			module.setModule(lModule);
+			locus.setModule(module);
+
 		} finally {
 			LOCUS_DATA.stop();
 		}
@@ -344,11 +349,11 @@ public class ModuleProcessor {
 				return; //
 			}
 
-			List<LocusFilterOptions> lFilters = locus.getFilters();
+			List<LocusAppliedFilters> lFilters = locus.getFilters();
 
 			for (IFilter filter : this.processingFilters.getFilters()) {
-				LocusFilterOptions locusFilter = LocusFilterOptionsFactory.createLocusFilterOptions();
-				locusFilter.setOptions(ParamHelper.convertParamsToJSON(filter));
+				LocusAppliedFilters locusFilter = LocusAppliedFiltersFactory.createLocusAppliedFilters();
+				//locusFilter.setOptions(ParamHelper.convertParamsToJSON(filter));
 
 				String codename = filter.getClass().getCanonicalName();
 				LFilters dbFilter = LFiltersFactory.loadLFiltersByQuery("codename = '" + codename + "'", null);

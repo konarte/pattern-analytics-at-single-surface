@@ -47,7 +47,7 @@ public class ResizeFilterTest {
 	private void convertImage(BufferedImage image, int width, int height) throws IOException, FilterException {
 		filter.getWIDTH().setValue(width);
 		filter.getHEIGHT().setValue(height);
-		
+
 		new File("tmp").mkdir();
 
 		Param param = filter.getINTERPOLATION_METHOD();

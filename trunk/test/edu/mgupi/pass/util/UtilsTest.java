@@ -23,7 +23,7 @@ public class UtilsTest {
 	public void testListFiles() {
 		Collection<File> files = Utils.listFiles("bin", ".class");
 		assertNotNull(files);
-		
+
 		for (File file : files) {
 			System.out.println(file.getName());
 		}

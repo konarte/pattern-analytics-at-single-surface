@@ -11,17 +11,21 @@ import java.util.Collection;
 
 import javax.imageio.ImageIO;
 
-import edu.mgupi.pass.db.locuses.LocusModuleParams;
-import edu.mgupi.pass.db.locuses.LocusModuleParamsFactory;
+import edu.mgupi.pass.db.locuses.LocusAppliedModule;
+import edu.mgupi.pass.db.locuses.LocusModuleData;
+import edu.mgupi.pass.db.locuses.LocusModuleDataFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
 
 public class ModuleHelper {
 
-	public static LocusModuleParams getParameter(Locuses locus, String name) throws ModuleParamException {
+	public static LocusModuleData getParameter(Locuses locus, String name) throws ModuleParamException {
 		if (locus == null) {
 			return null;
 		}
-		return searchParameter(name, locus.getParams(), true);
+		if (locus.getModule() == null) {
+			return null;
+		}
+		return searchParameter(name, locus.getModule().getData(), true);
 	}
 
 	public final static int PARAM_TYPE_SERIALIZABLE = 1;
@@ -49,17 +53,22 @@ public class ModuleHelper {
 			throw new IllegalArgumentException("Internal error. Value is null.");
 		}
 
-		LocusModuleParams param = searchParameter(name, store.getParams(), false);
+		LocusAppliedModule module = store.getModule();
+		if (module == null) {
+			throw new IllegalArgumentException("Internal error. Store.module is null.");
+		}
+
+		LocusModuleData param = searchParameter(name, module.getData(), false);
 		if (param == null) {
-			param = LocusModuleParamsFactory.createLocusModuleParams();
+			param = LocusModuleDataFactory.createLocusModuleData();
 			param.setParamName(name);
-			store.getParams().add(param);
+			module.getData().add(param);
 		}
 
 		if (value instanceof BufferedImage) {
-			param.setParamType(PARAM_TYPE_IMAGE);
+			param.setDataType(PARAM_TYPE_IMAGE);
 		} else if (value instanceof Serializable) {
-			param.setParamType(PARAM_TYPE_SERIALIZABLE);
+			param.setDataType(PARAM_TYPE_SERIALIZABLE);
 		} else {
 			throw new IllegalArgumentException("Internal error. Attempt to set non-serializable parameter '" + name
 					+ "' " + " of class '" + value.getClass() + "'");
@@ -76,11 +85,15 @@ public class ModuleHelper {
 		if (name == null) {
 			throw new IllegalArgumentException("Internal error. Name is null.");
 		}
-		LocusModuleParams param = searchParameter(name, store.getParams(), required);
+		if (store.getModule() == null) {
+			throw new IllegalArgumentException("Internal error. Store.module is null.");
+		}
+
+		LocusModuleData param = searchParameter(name, store.getModule().getData(), required);
 		if (param != null) {
 
 			if (param.getObjectData() == null && param.getParamData() != null) {
-				param.setObjectData(convertRawToObject(param.getParamData(), param.getParamType()));
+				param.setObjectData(convertRawToObject(param.getParamData(), param.getDataType()));
 			}
 
 			return param.getObjectData();
@@ -89,9 +102,15 @@ public class ModuleHelper {
 	}
 
 	protected static void finalyzeParams(Locuses store) throws IOException {
-		for (LocusModuleParams param : store.getParams()) {
+		if (store == null) {
+			throw new IllegalArgumentException("Internal error. Store is null.");
+		}
+		if (store.getModule() == null) {
+			throw new IllegalArgumentException("Internal error. Store.module is null.");
+		}
+		for (LocusModuleData param : store.getModule().getData()) {
 			if (param.getObjectData() != null) {
-				param.setParamData(convertObjectToRaw(param.getObjectData(), param.getParamType()));
+				param.setParamData(convertObjectToRaw(param.getObjectData(), param.getDataType()));
 				param.setObjectData(null);
 			}
 		}
@@ -110,8 +129,8 @@ public class ModuleHelper {
 	// return searchParameter(name, paramList, false);
 	// }
 
-	private static LocusModuleParams searchParameter(String name, Collection<LocusModuleParams> paramList,
-			boolean mandatory) throws ModuleParamException {
+	private static LocusModuleData searchParameter(String name, Collection<LocusModuleData> paramList, boolean mandatory)
+			throws ModuleParamException {
 		if (paramList == null) {
 			return null;
 		}
@@ -119,7 +138,7 @@ public class ModuleHelper {
 		if (name == null) {
 			throw new IllegalArgumentException("Internal error. Name is null.");
 		}
-		for (LocusModuleParams param : paramList) {
+		for (LocusModuleData param : paramList) {
 			if (name.equals(param.getParamName())) {
 				return param;
 			}

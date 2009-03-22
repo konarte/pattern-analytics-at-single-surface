@@ -105,7 +105,7 @@ public class PlaceImageFilter implements IFilter {
 	public Param getPLACE() {
 		return PLACE;
 	}
-	
+
 	public Param getBACKGROUND() {
 		return BACKGROUND;
 	}

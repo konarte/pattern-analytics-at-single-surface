@@ -94,16 +94,19 @@ License Type: Purchased
 		</taskdef>
 		<instrument verbose="true">
 			<fileset dir="${classes.dir}">
-				<include name="edu\mgupi\pass\db\NameMapping.class"/>
 				<include name="edu\mgupi\pass\db\defects\DefectClasses.class"/>
 				<include name="edu\mgupi\pass\db\defects\DefectTypes.class"/>
 				<include name="edu\mgupi\pass\db\defects\Defects.class"/>
+				<include name="edu\mgupi\pass\db\defects\DefectTypeOptions.class"/>
 				<include name="edu\mgupi\pass\db\locuses\LModules.class"/>
 				<include name="edu\mgupi\pass\db\locuses\LFilters.class"/>
 				<include name="edu\mgupi\pass\db\locuses\Locuses.class"/>
 				<include name="edu\mgupi\pass\db\locuses\LocusSources.class"/>
-				<include name="edu\mgupi\pass\db\locuses\LocusFilterOptions.class"/>
-				<include name="edu\mgupi\pass\db\locuses\LocusModuleParams.class"/>
+				<include name="edu\mgupi\pass\db\locuses\LocusAppliedFilters.class"/>
+				<include name="edu\mgupi\pass\db\locuses\LocusModuleData.class"/>
+				<include name="edu\mgupi\pass\db\locuses\LocusAppliedModule.class"/>
+				<include name="edu\mgupi\pass\db\locuses\LocusAppliedModuleParams.class"/>
+				<include name="edu\mgupi\pass\db\locuses\LocusAppliedFilterParams.class"/>
 				<include name="edu\mgupi\pass\db\sensors\Sensors.class"/>
 				<include name="edu\mgupi\pass\db\sensors\SensorClasses.class"/>
 				<include name="edu\mgupi\pass\db\sensors\SensorTypes.class"/>

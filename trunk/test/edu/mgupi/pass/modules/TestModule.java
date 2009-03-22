@@ -16,7 +16,7 @@ import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.mgupi.pass.db.locuses.LocusModuleParams;
+import edu.mgupi.pass.db.locuses.LocusModuleData;
 import edu.mgupi.pass.db.locuses.Locuses;
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.Param.TYPES;
@@ -145,8 +145,8 @@ public class TestModule implements IModule, IInitiable {
 			throw new IllegalArgumentException("Internal error. graph2 was not marked as processed!");
 		}
 
-		LocusModuleParams param_g1 = ModuleHelper.getParameter(graph1, "myParam2");
-		LocusModuleParams param_g2 = ModuleHelper.getParameter(graph2, "myParam2");
+		LocusModuleData param_g1 = ModuleHelper.getParameter(graph1, "myParam2");
+		LocusModuleData param_g2 = ModuleHelper.getParameter(graph2, "myParam2");
 
 		try {
 			new File("tmp").mkdir();

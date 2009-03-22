@@ -74,8 +74,8 @@ public class Locuses implements Serializable {
 	
 	@Column(name="IdLocus", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D31202AD7307B03D17")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31202AD7307B03D17", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31202B70654F03335")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31202B70654F03335", strategy="native")	
 	private int idLocus;
 	
 	@Column(name="Name", nullable=true, length=255)	
@@ -88,12 +88,6 @@ public class Locuses implements Serializable {
 	@Column(name="FilteredImage", nullable=false)	
 	@Basic(fetch=FetchType.LAZY)	
 	private byte[] filteredImage;
-	
-	@OneToOne(targetEntity=edu.mgupi.pass.db.locuses.LModules.class)	
-	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
-	@JoinColumns({ @JoinColumn(name="LModulesIdLModule") })	
-	@Basic(fetch=FetchType.LAZY)	
-	private edu.mgupi.pass.db.locuses.LModules module;
 	
 	@OneToOne(targetEntity=edu.mgupi.pass.db.surfaces.Surfaces.class)	
 	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
@@ -119,21 +113,18 @@ public class Locuses implements Serializable {
 	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.sensors.Sensors sensor;
 	
-	@Column(name="ModuleOptions", nullable=true, length=4096)	
-	private String moduleOptions;
-	
-	@OneToMany(targetEntity=edu.mgupi.pass.db.locuses.LocusModuleParams.class)	
+	@OneToOne(targetEntity=edu.mgupi.pass.db.locuses.LocusAppliedModule.class)	
 	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
-	@JoinColumn(name="LocusesIdLocus", nullable=true)	
-	@org.hibernate.annotations.LazyCollection(org.hibernate.annotations.LazyCollectionOption.TRUE)	
-	private java.util.Set<edu.mgupi.pass.db.locuses.LocusModuleParams> params = new java.util.HashSet<edu.mgupi.pass.db.locuses.LocusModuleParams>();
+	@JoinColumns({ @JoinColumn(name="LocusAppliedModuleIdLocusModule") })	
+	@Basic(fetch=FetchType.LAZY)	
+	private edu.mgupi.pass.db.locuses.LocusAppliedModule module;
 	
-	@OneToMany(targetEntity=edu.mgupi.pass.db.locuses.LocusFilterOptions.class)	
+	@OneToMany(targetEntity=edu.mgupi.pass.db.locuses.LocusAppliedFilters.class)	
 	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
 	@JoinColumn(name="LocusesIdLocus", nullable=true)	
 	@org.hibernate.annotations.IndexColumn(name="LocusesIndex")	
 	@org.hibernate.annotations.LazyCollection(org.hibernate.annotations.LazyCollectionOption.TRUE)	
-	private java.util.List<edu.mgupi.pass.db.locuses.LocusFilterOptions> filters = new java.util.ArrayList<edu.mgupi.pass.db.locuses.LocusFilterOptions>();
+	private java.util.List<edu.mgupi.pass.db.locuses.LocusAppliedFilters> filters = new java.util.ArrayList<edu.mgupi.pass.db.locuses.LocusAppliedFilters>();
 	
 	private void setIdLocus(int value) {
 		this.idLocus = value;
@@ -211,30 +202,6 @@ public class Locuses implements Serializable {
 		return filteredImage;
 	}
 	
-	/**
-	 * Параметр модуля анализа в JSON-формате
-	 * 
-	 */
-	public void setModuleOptions(String value) {
-		this.moduleOptions = value;
-	}
-	
-	/**
-	 * Параметр модуля анализа в JSON-формате
-	 * 
-	 */
-	public String getModuleOptions() {
-		return moduleOptions;
-	}
-	
-	public void setModule(edu.mgupi.pass.db.locuses.LModules value) {
-		this.module = value;
-	}
-	
-	public edu.mgupi.pass.db.locuses.LModules getModule() {
-		return module;
-	}
-	
 	public void setSurface(edu.mgupi.pass.db.surfaces.Surfaces value) {
 		this.surface = value;
 	}
@@ -259,20 +226,11 @@ public class Locuses implements Serializable {
 		return locusSource;
 	}
 	
-	public void setParams(java.util.Set<edu.mgupi.pass.db.locuses.LocusModuleParams> value) {
-		this.params = value;
-	}
-	
-	public java.util.Set<edu.mgupi.pass.db.locuses.LocusModuleParams> getParams() {
-		return params;
-	}
-	
-	
-	public void setFilters(java.util.List<edu.mgupi.pass.db.locuses.LocusFilterOptions> value) {
+	public void setFilters(java.util.List<edu.mgupi.pass.db.locuses.LocusAppliedFilters> value) {
 		this.filters = value;
 	}
 	
-	public java.util.List<edu.mgupi.pass.db.locuses.LocusFilterOptions> getFilters() {
+	public java.util.List<edu.mgupi.pass.db.locuses.LocusAppliedFilters> getFilters() {
 		return filters;
 	}
 	
@@ -283,6 +241,14 @@ public class Locuses implements Serializable {
 	
 	public edu.mgupi.pass.db.sensors.Sensors getSensor() {
 		return sensor;
+	}
+	
+	public void setModule(edu.mgupi.pass.db.locuses.LocusAppliedModule value) {
+		this.module = value;
+	}
+	
+	public edu.mgupi.pass.db.locuses.LocusAppliedModule getModule() {
+		return module;
 	}
 	
 	/**

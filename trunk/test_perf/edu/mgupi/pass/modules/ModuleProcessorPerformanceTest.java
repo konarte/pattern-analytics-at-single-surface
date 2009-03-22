@@ -83,7 +83,6 @@ public class ModuleProcessorPerformanceTest {
 			ResizeFilter resize = (ResizeFilter) mainSaw.appendFilter(ResizeFilter.class);
 			resize.getWIDTH().setValue(1024);
 			resize.getHEIGHT().setValue(1024);
-			
 
 			processor.setChainsaw(mainSaw);
 

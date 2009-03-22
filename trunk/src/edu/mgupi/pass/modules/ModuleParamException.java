@@ -2,7 +2,6 @@ package edu.mgupi.pass.modules;
 
 public class ModuleParamException extends ModuleException {
 
-
 	/**
 	 * 
 	 */

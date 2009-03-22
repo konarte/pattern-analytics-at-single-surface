@@ -75,8 +75,8 @@ public class DefectTypes implements Serializable {
 	
 	@Column(name="IdDefectType", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D31202AD7302D03D13")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31202AD7302D03D13", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31202B70650003330")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31202B70650003330", strategy="native")	
 	private int idDefectType;
 	
 	@Column(name="Name", nullable=false, length=255)	
@@ -86,14 +86,18 @@ public class DefectTypes implements Serializable {
 	@Basic(fetch=FetchType.LAZY)	
 	private byte[] defectImage;
 	
-	@Column(name="AdditionalOptions", nullable=true, length=4096)	
-	private String additionalOptions;
-	
 	@OneToOne(targetEntity=edu.mgupi.pass.db.defects.DefectClasses.class)	
 	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
 	@JoinColumns({ @JoinColumn(name="DefectClassesIdDefectClass") })	
 	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.defects.DefectClasses defectClass;
+	
+	@OneToMany(targetEntity=edu.mgupi.pass.db.defects.DefectTypeOptions.class)	
+	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
+	@JoinColumn(name="DefectTypesIdDefectType", nullable=true)	
+	@org.hibernate.annotations.IndexColumn(name="DefectTypesIndex")	
+	@org.hibernate.annotations.LazyCollection(org.hibernate.annotations.LazyCollectionOption.TRUE)	
+	private java.util.List<edu.mgupi.pass.db.defects.DefectTypeOptions> options = new java.util.ArrayList<edu.mgupi.pass.db.defects.DefectTypeOptions>();
 	
 	private void setIdDefectType(int value) {
 		this.idDefectType = value;
@@ -135,26 +139,6 @@ public class DefectTypes implements Serializable {
 		return defectImage;
 	}
 	
-	/**
-	 * ƒополнительные параметры типа дефекта в JSON-формате.
-	 * 
-	 * —оответствие кодовых названий (латиницей) наименовани€м на человеческом
-	 * €зыке задаетс€ в таблице NameMapping
-	 */
-	public void setAdditionalOptions(String value) {
-		this.additionalOptions = value;
-	}
-	
-	/**
-	 * ƒополнительные параметры типа дефекта в JSON-формате.
-	 * 
-	 * —оответствие кодовых названий (латиницей) наименовани€м на человеческом
-	 * €зыке задаетс€ в таблице NameMapping
-	 */
-	public String getAdditionalOptions() {
-		return additionalOptions;
-	}
-	
 	public void setDefectClass(edu.mgupi.pass.db.defects.DefectClasses value) {
 		this.defectClass = value;
 	}
@@ -162,6 +146,15 @@ public class DefectTypes implements Serializable {
 	public edu.mgupi.pass.db.defects.DefectClasses getDefectClass() {
 		return defectClass;
 	}
+	
+	public void setOptions(java.util.List<edu.mgupi.pass.db.defects.DefectTypeOptions> value) {
+		this.options = value;
+	}
+	
+	public java.util.List<edu.mgupi.pass.db.defects.DefectTypeOptions> getOptions() {
+		return options;
+	}
+	
 	
 	public String toString() {
 		return String.valueOf(getIdDefectType());

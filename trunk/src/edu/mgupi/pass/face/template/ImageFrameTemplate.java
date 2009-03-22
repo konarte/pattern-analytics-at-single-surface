@@ -20,7 +20,6 @@ import javax.swing.WindowConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class ImageFrameTemplate extends JDialog {
 
 	private final static Logger logger = LoggerFactory.getLogger(ImageFrameTemplate.class);
@@ -49,7 +48,7 @@ public class ImageFrameTemplate extends JDialog {
 		this.setResizable(true);
 		this.setContentPane(getJContentPane());
 		this.setTitle("JFrame");
-		
+
 		this.setMinimumSize(new Dimension(150, 80));
 		this.setBounds(10, 10, 300, 330);
 	}
@@ -68,9 +67,9 @@ public class ImageFrameTemplate extends JDialog {
 		}
 
 		this.addWindowListener(new OnHideWindowAdapter(controlCheckBox));
-		
+
 		String text = controlCheckBox.getText();
-		String name = controlCheckBox.getName(); 
+		String name = controlCheckBox.getName();
 		controlCheckBox.setAction(new AbstractAction() {
 
 			/**
@@ -187,7 +186,7 @@ public class ImageFrameTemplate extends JDialog {
 		}
 		return jCheckBoxScaleBox;
 	}
-	
+
 	public boolean hasImage() {
 		return this.jPanelImage != null && this.jPanelImage.hasImage();
 	}

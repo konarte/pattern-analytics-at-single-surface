@@ -24,7 +24,6 @@ public class LocusesDetachedCriteria extends AbstractORMDetachedCriteria {
 	public final StringExpression name;
 	public final ByteArrayExpression thumbImage;
 	public final ByteArrayExpression filteredImage;
-	public final StringExpression moduleOptions;
 	
 	public LocusesDetachedCriteria() {
 		super(edu.mgupi.pass.db.locuses.Locuses.class, edu.mgupi.pass.db.locuses.LocusesCriteria.class);
@@ -32,7 +31,6 @@ public class LocusesDetachedCriteria extends AbstractORMDetachedCriteria {
 		name = new StringExpression("name", this.getDetachedCriteria());
 		thumbImage = new ByteArrayExpression("thumbImage", this.getDetachedCriteria());
 		filteredImage = new ByteArrayExpression("filteredImage", this.getDetachedCriteria());
-		moduleOptions = new StringExpression("moduleOptions", this.getDetachedCriteria());
 	}
 	
 	public LocusesDetachedCriteria(DetachedCriteria aDetachedCriteria) {
@@ -41,11 +39,6 @@ public class LocusesDetachedCriteria extends AbstractORMDetachedCriteria {
 		name = new StringExpression("name", this.getDetachedCriteria());
 		thumbImage = new ByteArrayExpression("thumbImage", this.getDetachedCriteria());
 		filteredImage = new ByteArrayExpression("filteredImage", this.getDetachedCriteria());
-		moduleOptions = new StringExpression("moduleOptions", this.getDetachedCriteria());
-	}
-	
-	public LModulesDetachedCriteria createModuleCriteria() {
-		return new LModulesDetachedCriteria(createCriteria("module"));
 	}
 	
 	public edu.mgupi.pass.db.surfaces.SurfacesDetachedCriteria createSurfaceCriteria() {
@@ -64,12 +57,12 @@ public class LocusesDetachedCriteria extends AbstractORMDetachedCriteria {
 		return new edu.mgupi.pass.db.sensors.SensorsDetachedCriteria(createCriteria("sensor"));
 	}
 	
-	public LocusModuleParamsDetachedCriteria createParamsCriteria() {
-		return new LocusModuleParamsDetachedCriteria(createCriteria("params"));
+	public LocusAppliedModuleDetachedCriteria createModuleCriteria() {
+		return new LocusAppliedModuleDetachedCriteria(createCriteria("module"));
 	}
 	
-	public LocusFilterOptionsDetachedCriteria createFiltersCriteria() {
-		return new LocusFilterOptionsDetachedCriteria(createCriteria("filters"));
+	public LocusAppliedFiltersDetachedCriteria createFiltersCriteria() {
+		return new LocusAppliedFiltersDetachedCriteria(createCriteria("filters"));
 	}
 	
 	public Locuses uniqueLocuses(PersistentSession session) {

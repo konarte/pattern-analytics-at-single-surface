@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Collection;
 
+import edu.mgupi.pass.db.locuses.LocusAppliedModule;
 import edu.mgupi.pass.db.locuses.Locuses;
 import edu.mgupi.pass.filters.Param;
 
@@ -54,8 +55,9 @@ public interface IModule {
 	 * 
 	 * This method can be called remotely, but you don't need to care about.
 	 * 
-	 * You must use {@link Locuses#getParams()} for get stored parameters (you
-	 * know their names, you saved these parameters in
+	 * You must use {@link Locuses#getModule()} and
+	 * {@link LocusAppliedModule#getData()} for get stored parameters (you know
+	 * their names, you saved these parameters in
 	 * {@link #analyze(BufferedImage, Locuses)} method).
 	 * 
 	 * @param graph1
