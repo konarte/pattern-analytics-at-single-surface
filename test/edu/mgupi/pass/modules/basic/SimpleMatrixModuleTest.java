@@ -15,6 +15,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.mgupi.pass.db.locuses.LocusAppliedModule;
+import edu.mgupi.pass.db.locuses.LocusAppliedModuleFactory;
 import edu.mgupi.pass.db.locuses.LocusSources;
 import edu.mgupi.pass.db.locuses.LocusSourcesFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
@@ -54,6 +56,8 @@ public class SimpleMatrixModuleTest {
 		locusSource.setSourceImage(sourceStore.getFileData());
 
 		locus.setLocusSource(locusSource);
+		LocusAppliedModule appModule = LocusAppliedModuleFactory.createLocusAppliedModule();
+		locus.setModule(appModule);
 
 		BufferedImage sourceImage = alternativeImage == null ? sourceStore.getSourceImage() : alternativeImage;
 		module.analyze(sourceImage, locus);
@@ -92,7 +96,6 @@ public class SimpleMatrixModuleTest {
 
 		System.out.println("HINT = " + RenderingHints.VALUE_INTERPOLATION_BILINEAR + " ("
 				+ RenderingHints.VALUE_INTERPOLATION_BILINEAR.getClass() + ")");
-		
 
 		TestSourceImpl source = new TestSourceImpl();
 		FilterChainsaw mySaw = new FilterChainsaw(true);

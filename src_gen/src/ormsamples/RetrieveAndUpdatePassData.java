@@ -9,9 +9,6 @@ public class RetrieveAndUpdatePassData {
 	public void retrieveAndUpdateTestData() throws PersistentException {
 		PersistentTransaction t = edu.mgupi.pass.db.surfaces.PassPersistentManager.instance().getSession().beginTransaction();
 		try {
-			edu.mgupi.pass.db.NameMapping ledumgupipassdbNameMapping = edu.mgupi.pass.db.NameMappingFactory.loadNameMappingByQuery(null, null);
-			// Update the properties of the persistent object
-			ledumgupipassdbNameMapping.save();
 			edu.mgupi.pass.db.defects.DefectClasses ledumgupipassdbdefectsDefectClasses = edu.mgupi.pass.db.defects.DefectClassesFactory.loadDefectClassesByQuery(null, null);
 			// Update the properties of the persistent object
 			ledumgupipassdbdefectsDefectClasses.save();
@@ -21,6 +18,9 @@ public class RetrieveAndUpdatePassData {
 			edu.mgupi.pass.db.defects.Defects ledumgupipassdbdefectsDefects = edu.mgupi.pass.db.defects.DefectsFactory.loadDefectsByQuery(null, null);
 			// Update the properties of the persistent object
 			ledumgupipassdbdefectsDefects.save();
+			edu.mgupi.pass.db.defects.DefectTypeOptions ledumgupipassdbdefectsDefectTypeOptions = edu.mgupi.pass.db.defects.DefectTypeOptionsFactory.loadDefectTypeOptionsByQuery(null, null);
+			// Update the properties of the persistent object
+			ledumgupipassdbdefectsDefectTypeOptions.save();
 			edu.mgupi.pass.db.locuses.LModules ledumgupipassdblocusesLModules = edu.mgupi.pass.db.locuses.LModulesFactory.loadLModulesByQuery(null, null);
 			// Update the properties of the persistent object
 			ledumgupipassdblocusesLModules.save();
@@ -33,12 +33,21 @@ public class RetrieveAndUpdatePassData {
 			edu.mgupi.pass.db.locuses.LocusSources ledumgupipassdblocusesLocusSources = edu.mgupi.pass.db.locuses.LocusSourcesFactory.loadLocusSourcesByQuery(null, null);
 			// Update the properties of the persistent object
 			ledumgupipassdblocusesLocusSources.save();
-			edu.mgupi.pass.db.locuses.LocusFilterOptions ledumgupipassdblocusesLocusFilterOptions = edu.mgupi.pass.db.locuses.LocusFilterOptionsFactory.loadLocusFilterOptionsByQuery(null, null);
+			edu.mgupi.pass.db.locuses.LocusAppliedFilters ledumgupipassdblocusesLocusAppliedFilters = edu.mgupi.pass.db.locuses.LocusAppliedFiltersFactory.loadLocusAppliedFiltersByQuery(null, null);
 			// Update the properties of the persistent object
-			ledumgupipassdblocusesLocusFilterOptions.save();
-			edu.mgupi.pass.db.locuses.LocusModuleParams ledumgupipassdblocusesLocusModuleParams = edu.mgupi.pass.db.locuses.LocusModuleParamsFactory.loadLocusModuleParamsByQuery(null, null);
+			ledumgupipassdblocusesLocusAppliedFilters.save();
+			edu.mgupi.pass.db.locuses.LocusModuleData ledumgupipassdblocusesLocusModuleData = edu.mgupi.pass.db.locuses.LocusModuleDataFactory.loadLocusModuleDataByQuery(null, null);
 			// Update the properties of the persistent object
-			ledumgupipassdblocusesLocusModuleParams.save();
+			ledumgupipassdblocusesLocusModuleData.save();
+			edu.mgupi.pass.db.locuses.LocusAppliedModule ledumgupipassdblocusesLocusAppliedModule = edu.mgupi.pass.db.locuses.LocusAppliedModuleFactory.loadLocusAppliedModuleByQuery(null, null);
+			// Update the properties of the persistent object
+			ledumgupipassdblocusesLocusAppliedModule.save();
+			edu.mgupi.pass.db.locuses.LocusAppliedModuleParams ledumgupipassdblocusesLocusAppliedModuleParams = edu.mgupi.pass.db.locuses.LocusAppliedModuleParamsFactory.loadLocusAppliedModuleParamsByQuery(null, null);
+			// Update the properties of the persistent object
+			ledumgupipassdblocusesLocusAppliedModuleParams.save();
+			edu.mgupi.pass.db.locuses.LocusAppliedFilterParams ledumgupipassdblocusesLocusAppliedFilterParams = edu.mgupi.pass.db.locuses.LocusAppliedFilterParamsFactory.loadLocusAppliedFilterParamsByQuery(null, null);
+			// Update the properties of the persistent object
+			ledumgupipassdblocusesLocusAppliedFilterParams.save();
 			edu.mgupi.pass.db.sensors.Sensors ledumgupipassdbsensorsSensors = edu.mgupi.pass.db.sensors.SensorsFactory.loadSensorsByQuery(null, null);
 			// Update the properties of the persistent object
 			ledumgupipassdbsensorsSensors.save();
@@ -69,12 +78,6 @@ public class RetrieveAndUpdatePassData {
 	}
 	
 	public void retrieveByCriteria() throws PersistentException {
-		System.out.println("Retrieving NameMapping by NameMappingCriteria");
-		edu.mgupi.pass.db.NameMappingCriteria nameMappingCriteria = new edu.mgupi.pass.db.NameMappingCriteria();
-		// Please uncomment the follow line and fill in parameter(s)
-		//nameMappingCriteria.ID.eq();
-		System.out.println(nameMappingCriteria.uniqueNameMapping());
-		
 		System.out.println("Retrieving DefectClasses by DefectClassesCriteria");
 		edu.mgupi.pass.db.defects.DefectClassesCriteria defectClassesCriteria = new edu.mgupi.pass.db.defects.DefectClassesCriteria();
 		// Please uncomment the follow line and fill in parameter(s)
@@ -92,6 +95,12 @@ public class RetrieveAndUpdatePassData {
 		// Please uncomment the follow line and fill in parameter(s)
 		//defectsCriteria.idDefect.eq();
 		System.out.println(defectsCriteria.uniqueDefects());
+		
+		System.out.println("Retrieving DefectTypeOptions by DefectTypeOptionsCriteria");
+		edu.mgupi.pass.db.defects.DefectTypeOptionsCriteria defectTypeOptionsCriteria = new edu.mgupi.pass.db.defects.DefectTypeOptionsCriteria();
+		// Please uncomment the follow line and fill in parameter(s)
+		//defectTypeOptionsCriteria.ID.eq();
+		System.out.println(defectTypeOptionsCriteria.uniqueDefectTypeOptions());
 		
 		System.out.println("Retrieving LModules by LModulesCriteria");
 		edu.mgupi.pass.db.locuses.LModulesCriteria lModulesCriteria = new edu.mgupi.pass.db.locuses.LModulesCriteria();
@@ -117,17 +126,35 @@ public class RetrieveAndUpdatePassData {
 		//locusSourcesCriteria.idLocusSource.eq();
 		System.out.println(locusSourcesCriteria.uniqueLocusSources());
 		
-		System.out.println("Retrieving LocusFilterOptions by LocusFilterOptionsCriteria");
-		edu.mgupi.pass.db.locuses.LocusFilterOptionsCriteria locusFilterOptionsCriteria = new edu.mgupi.pass.db.locuses.LocusFilterOptionsCriteria();
+		System.out.println("Retrieving LocusAppliedFilters by LocusAppliedFiltersCriteria");
+		edu.mgupi.pass.db.locuses.LocusAppliedFiltersCriteria locusAppliedFiltersCriteria = new edu.mgupi.pass.db.locuses.LocusAppliedFiltersCriteria();
 		// Please uncomment the follow line and fill in parameter(s)
-		//locusFilterOptionsCriteria.idLocusFilter.eq();
-		System.out.println(locusFilterOptionsCriteria.uniqueLocusFilterOptions());
+		//locusAppliedFiltersCriteria.idLocusFilter.eq();
+		System.out.println(locusAppliedFiltersCriteria.uniqueLocusAppliedFilters());
 		
-		System.out.println("Retrieving LocusModuleParams by LocusModuleParamsCriteria");
-		edu.mgupi.pass.db.locuses.LocusModuleParamsCriteria locusModuleParamsCriteria = new edu.mgupi.pass.db.locuses.LocusModuleParamsCriteria();
+		System.out.println("Retrieving LocusModuleData by LocusModuleDataCriteria");
+		edu.mgupi.pass.db.locuses.LocusModuleDataCriteria locusModuleDataCriteria = new edu.mgupi.pass.db.locuses.LocusModuleDataCriteria();
 		// Please uncomment the follow line and fill in parameter(s)
-		//locusModuleParamsCriteria.idModuleParam.eq();
-		System.out.println(locusModuleParamsCriteria.uniqueLocusModuleParams());
+		//locusModuleDataCriteria.idModuleParam.eq();
+		System.out.println(locusModuleDataCriteria.uniqueLocusModuleData());
+		
+		System.out.println("Retrieving LocusAppliedModule by LocusAppliedModuleCriteria");
+		edu.mgupi.pass.db.locuses.LocusAppliedModuleCriteria locusAppliedModuleCriteria = new edu.mgupi.pass.db.locuses.LocusAppliedModuleCriteria();
+		// Please uncomment the follow line and fill in parameter(s)
+		//locusAppliedModuleCriteria.idLocusModule.eq();
+		System.out.println(locusAppliedModuleCriteria.uniqueLocusAppliedModule());
+		
+		System.out.println("Retrieving LocusAppliedModuleParams by LocusAppliedModuleParamsCriteria");
+		edu.mgupi.pass.db.locuses.LocusAppliedModuleParamsCriteria locusAppliedModuleParamsCriteria = new edu.mgupi.pass.db.locuses.LocusAppliedModuleParamsCriteria();
+		// Please uncomment the follow line and fill in parameter(s)
+		//locusAppliedModuleParamsCriteria.ID.eq();
+		System.out.println(locusAppliedModuleParamsCriteria.uniqueLocusAppliedModuleParams());
+		
+		System.out.println("Retrieving LocusAppliedFilterParams by LocusAppliedFilterParamsCriteria");
+		edu.mgupi.pass.db.locuses.LocusAppliedFilterParamsCriteria locusAppliedFilterParamsCriteria = new edu.mgupi.pass.db.locuses.LocusAppliedFilterParamsCriteria();
+		// Please uncomment the follow line and fill in parameter(s)
+		//locusAppliedFilterParamsCriteria.ID.eq();
+		System.out.println(locusAppliedFilterParamsCriteria.uniqueLocusAppliedFilterParams());
 		
 		System.out.println("Retrieving Sensors by SensorsCriteria");
 		edu.mgupi.pass.db.sensors.SensorsCriteria sensorsCriteria = new edu.mgupi.pass.db.sensors.SensorsCriteria();

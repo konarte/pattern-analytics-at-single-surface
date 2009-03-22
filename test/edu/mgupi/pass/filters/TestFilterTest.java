@@ -47,7 +47,7 @@ public class TestFilterTest {
 
 	private void convertImage(BufferedImage image) throws IOException, NoSuchParamException {
 		BufferedImage newImage = filter.convert(image);
-		
+
 		new File("tmp").mkdir();
 
 		ImageWriter writer = ImageIO.getImageWritersByFormatName("JPG").next();

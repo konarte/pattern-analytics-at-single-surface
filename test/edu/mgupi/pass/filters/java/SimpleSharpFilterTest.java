@@ -46,7 +46,7 @@ public class SimpleSharpFilterTest {
 
 	private void convertImage(BufferedImage image) throws IOException, FilterException {
 		BufferedImage newImage = filter.convert(image);
-		
+
 		new File("tmp").mkdir();
 
 		ImageIO.write(newImage, "JPG", new File("tmp/sharp.jpg"));

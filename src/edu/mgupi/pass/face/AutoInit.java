@@ -14,10 +14,10 @@ import edu.mgupi.pass.db.locuses.LFilters;
 import edu.mgupi.pass.db.locuses.LFiltersFactory;
 import edu.mgupi.pass.db.locuses.LModules;
 import edu.mgupi.pass.db.locuses.LModulesFactory;
-import edu.mgupi.pass.db.locuses.LocusFilterOptions;
-import edu.mgupi.pass.db.locuses.LocusFilterOptionsFactory;
-import edu.mgupi.pass.db.locuses.Locuses;
-import edu.mgupi.pass.db.locuses.LocusesFactory;
+import edu.mgupi.pass.db.locuses.LocusAppliedFilters;
+import edu.mgupi.pass.db.locuses.LocusAppliedFiltersFactory;
+import edu.mgupi.pass.db.locuses.LocusAppliedModule;
+import edu.mgupi.pass.db.locuses.LocusAppliedModuleFactory;
 import edu.mgupi.pass.db.surfaces.PassPersistentManager;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.modules.IModule;
@@ -118,7 +118,7 @@ public class AutoInit {
 				if (items.length() > 0) {
 					for (LFilters checkFilter : LFiltersFactory.listLFiltersByQuery("codename not in (" + items + ")",
 							null)) {
-						LocusFilterOptions found = LocusFilterOptionsFactory.loadLocusFilterOptionsByQuery(
+						LocusAppliedFilters found = LocusAppliedFiltersFactory.loadLocusAppliedFiltersByQuery(
 								"LFiltersIdLFilter = " + checkFilter.getIdLFilter(), null);
 						if (found == null) {
 							System.out.println("Filter " + checkFilter.getCodename() + " (" + checkFilter.getName()
@@ -167,8 +167,8 @@ public class AutoInit {
 				if (items.length() > 0) {
 					for (LModules checkModule : LModulesFactory.listLModulesByQuery("codename not in (" + items + ")",
 							null)) {
-						Locuses found = LocusesFactory.loadLocusesByQuery("LModulesIDLModule = "
-								+ checkModule.getIdLModule(), null);
+						LocusAppliedModule found = LocusAppliedModuleFactory.loadLocusAppliedModuleByQuery(
+								"LModulesIDLModule = " + checkModule.getIdLModule(), null);
 						if (found == null) {
 							System.out.println("Module " + checkModule.getCodename() + " (" + checkModule.getName()
 									+ ") stored in database does not have reference "

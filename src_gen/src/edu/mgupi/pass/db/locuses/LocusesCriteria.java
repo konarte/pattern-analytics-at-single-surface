@@ -23,7 +23,6 @@ public class LocusesCriteria extends AbstractORMCriteria {
 	public final StringExpression name;
 	public final ByteArrayExpression thumbImage;
 	public final ByteArrayExpression filteredImage;
-	public final StringExpression moduleOptions;
 	
 	public LocusesCriteria(Criteria criteria) {
 		super(criteria);
@@ -31,7 +30,6 @@ public class LocusesCriteria extends AbstractORMCriteria {
 		name = new StringExpression("name", this);
 		thumbImage = new ByteArrayExpression("thumbImage", this);
 		filteredImage = new ByteArrayExpression("filteredImage", this);
-		moduleOptions = new StringExpression("moduleOptions", this);
 	}
 	
 	public LocusesCriteria(PersistentSession session) {
@@ -40,10 +38,6 @@ public class LocusesCriteria extends AbstractORMCriteria {
 	
 	public LocusesCriteria() throws PersistentException {
 		this(edu.mgupi.pass.db.surfaces.PassPersistentManager.instance().getSession());
-	}
-	
-	public LModulesCriteria createModuleCriteria() {
-		return new LModulesCriteria(createCriteria("module"));
 	}
 	
 	public edu.mgupi.pass.db.surfaces.SurfacesCriteria createSurfaceCriteria() {
@@ -62,12 +56,12 @@ public class LocusesCriteria extends AbstractORMCriteria {
 		return new edu.mgupi.pass.db.sensors.SensorsCriteria(createCriteria("sensor"));
 	}
 	
-	public LocusModuleParamsCriteria createParamsCriteria() {
-		return new LocusModuleParamsCriteria(createCriteria("params"));
+	public LocusAppliedModuleCriteria createModuleCriteria() {
+		return new LocusAppliedModuleCriteria(createCriteria("module"));
 	}
 	
-	public LocusFilterOptionsCriteria createFiltersCriteria() {
-		return new LocusFilterOptionsCriteria(createCriteria("filters"));
+	public LocusAppliedFiltersCriteria createFiltersCriteria() {
+		return new LocusAppliedFiltersCriteria(createCriteria("filters"));
 	}
 	
 	public Locuses uniqueLocuses() {

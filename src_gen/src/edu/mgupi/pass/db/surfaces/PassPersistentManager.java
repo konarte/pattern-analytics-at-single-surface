@@ -35,16 +35,19 @@ public class PassPersistentManager extends PersistentManager {
 	@Override
 	public Configuration createConfiguration() {
 		AnnotationConfiguration configuration = new AnnotationConfiguration();
-		configuration.addAnnotatedClass(edu.mgupi.pass.db.NameMapping.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.defects.DefectClasses.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.defects.DefectTypes.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.defects.Defects.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.defects.DefectTypeOptions.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LModules.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LFilters.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.Locuses.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LocusSources.class);
-		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LocusFilterOptions.class);
-		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LocusModuleParams.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LocusAppliedFilters.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LocusModuleData.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LocusAppliedModule.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LocusAppliedModuleParams.class);
+		configuration.addAnnotatedClass(edu.mgupi.pass.db.locuses.LocusAppliedFilterParams.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.sensors.Sensors.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.sensors.SensorClasses.class);
 		configuration.addAnnotatedClass(edu.mgupi.pass.db.sensors.SensorTypes.class);

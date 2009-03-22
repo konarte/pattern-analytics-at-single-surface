@@ -53,7 +53,7 @@ public class HistogramFilterTest {
 
 	private void saveImage(BufferedImage image, String addInfo) throws IOException, FilterException {
 		BufferedImage newImage = filter.convert(image);
-		
+
 		new File("tmp").mkdir();
 
 		ImageIO.write(newImage, "JPG", new File("tmp/histogram-" + addInfo + ".jpg"));

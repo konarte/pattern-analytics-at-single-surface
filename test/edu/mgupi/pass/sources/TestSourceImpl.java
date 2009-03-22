@@ -44,6 +44,7 @@ public class TestSourceImpl implements ISource {
 	}
 
 	private String imagePath = "test/suslik_list.jpg";
+
 	//private String imagePath = "test/suslik.jpg";
 
 	public SourceStore getSingleSource() throws IOException {
@@ -51,7 +52,7 @@ public class TestSourceImpl implements ISource {
 			throw new IllegalStateException("Internal error. Please, call init first.");
 		}
 		logger.debug("Return new source from {}", imagePath);
-		
+
 		File file = new File(imagePath);
 
 		FileInputStream input = new FileInputStream(file);

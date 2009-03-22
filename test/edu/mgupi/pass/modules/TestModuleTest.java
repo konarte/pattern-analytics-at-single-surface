@@ -19,6 +19,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.mgupi.pass.db.locuses.LocusAppliedModule;
+import edu.mgupi.pass.db.locuses.LocusAppliedModuleFactory;
 import edu.mgupi.pass.db.locuses.LocusSources;
 import edu.mgupi.pass.db.locuses.LocusSourcesFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
@@ -81,6 +83,8 @@ public class TestModuleTest {
 			locusSource.setSourceImage(sourceStore.getFileData());
 
 			locus.setLocusSource(locusSource);
+			LocusAppliedModule appmodule = LocusAppliedModuleFactory.createLocusAppliedModule();
+			locus.setModule(appmodule);
 
 			module.analyze(sourceStore.getSourceImage(), locus);
 
@@ -93,7 +97,7 @@ public class TestModuleTest {
 			ObjectOutputStream out;
 
 			new File("tmp").mkdir();
-			
+
 			ModuleHelper.finalyzeParams(locus);
 
 			fileStream = new FileOutputStream("tmp/locus-serialized.data");
@@ -119,7 +123,9 @@ public class TestModuleTest {
 			locusSource2.setSourceImage(sourceStore.getFileData());
 
 			locus2.setLocusSource(locusSource2);
-			
+			LocusAppliedModule appmodule2 = LocusAppliedModuleFactory.createLocusAppliedModule();
+			locus2.setModule(appmodule2);
+
 			module.getTEST_PARAM1().setValue(5);
 			module.getTEST_PARAM2().setValue("Super");
 			module.analyze(sourceStore.getSourceImage(), locus2);
@@ -137,6 +143,8 @@ public class TestModuleTest {
 			locusSource3.setSourceImage(sourceStore.getFileData());
 
 			locus3.setLocusSource(locusSource3);
+			LocusAppliedModule appmodule3 = LocusAppliedModuleFactory.createLocusAppliedModule();
+			locus3.setModule(appmodule3);
 
 			module.analyze(new GrayScaleFilter().convert(sourceStore.getSourceImage()), locus3);
 			moduleImage = ModuleHelper.getTemporaryModuleImage(locus3);

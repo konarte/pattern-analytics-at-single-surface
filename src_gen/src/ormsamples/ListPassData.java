@@ -9,17 +9,9 @@ public class ListPassData {
 	private static final int ROW_COUNT = 100;
 	
 	public void listTestData() throws PersistentException {
-		System.out.println("Listing NameMapping...");
-		edu.mgupi.pass.db.NameMapping[] edumgupipassdbNameMappings = edu.mgupi.pass.db.NameMappingFactory.listNameMappingByQuery(null, null);
-		int length = Math.min(edumgupipassdbNameMappings.length, ROW_COUNT);
-		for (int i = 0; i < length; i++) {
-			System.out.println(edumgupipassdbNameMappings[i]);
-		}
-		System.out.println(length + " record(s) retrieved.");
-		
 		System.out.println("Listing DefectClasses...");
 		edu.mgupi.pass.db.defects.DefectClasses[] edumgupipassdbdefectsDefectClasseses = edu.mgupi.pass.db.defects.DefectClassesFactory.listDefectClassesByQuery(null, null);
-		length = Math.min(edumgupipassdbdefectsDefectClasseses.length, ROW_COUNT);
+		int length = Math.min(edumgupipassdbdefectsDefectClasseses.length, ROW_COUNT);
 		for (int i = 0; i < length; i++) {
 			System.out.println(edumgupipassdbdefectsDefectClasseses[i]);
 		}
@@ -38,6 +30,14 @@ public class ListPassData {
 		length = Math.min(edumgupipassdbdefectsDefectses.length, ROW_COUNT);
 		for (int i = 0; i < length; i++) {
 			System.out.println(edumgupipassdbdefectsDefectses[i]);
+		}
+		System.out.println(length + " record(s) retrieved.");
+		
+		System.out.println("Listing DefectTypeOptions...");
+		edu.mgupi.pass.db.defects.DefectTypeOptions[] edumgupipassdbdefectsDefectTypeOptionses = edu.mgupi.pass.db.defects.DefectTypeOptionsFactory.listDefectTypeOptionsByQuery(null, null);
+		length = Math.min(edumgupipassdbdefectsDefectTypeOptionses.length, ROW_COUNT);
+		for (int i = 0; i < length; i++) {
+			System.out.println(edumgupipassdbdefectsDefectTypeOptionses[i]);
 		}
 		System.out.println(length + " record(s) retrieved.");
 		
@@ -73,19 +73,43 @@ public class ListPassData {
 		}
 		System.out.println(length + " record(s) retrieved.");
 		
-		System.out.println("Listing LocusFilterOptions...");
-		edu.mgupi.pass.db.locuses.LocusFilterOptions[] edumgupipassdblocusesLocusFilterOptionses = edu.mgupi.pass.db.locuses.LocusFilterOptionsFactory.listLocusFilterOptionsByQuery(null, null);
-		length = Math.min(edumgupipassdblocusesLocusFilterOptionses.length, ROW_COUNT);
+		System.out.println("Listing LocusAppliedFilters...");
+		edu.mgupi.pass.db.locuses.LocusAppliedFilters[] edumgupipassdblocusesLocusAppliedFilterses = edu.mgupi.pass.db.locuses.LocusAppliedFiltersFactory.listLocusAppliedFiltersByQuery(null, null);
+		length = Math.min(edumgupipassdblocusesLocusAppliedFilterses.length, ROW_COUNT);
 		for (int i = 0; i < length; i++) {
-			System.out.println(edumgupipassdblocusesLocusFilterOptionses[i]);
+			System.out.println(edumgupipassdblocusesLocusAppliedFilterses[i]);
 		}
 		System.out.println(length + " record(s) retrieved.");
 		
-		System.out.println("Listing LocusModuleParams...");
-		edu.mgupi.pass.db.locuses.LocusModuleParams[] edumgupipassdblocusesLocusModuleParamses = edu.mgupi.pass.db.locuses.LocusModuleParamsFactory.listLocusModuleParamsByQuery(null, null);
-		length = Math.min(edumgupipassdblocusesLocusModuleParamses.length, ROW_COUNT);
+		System.out.println("Listing LocusModuleData...");
+		edu.mgupi.pass.db.locuses.LocusModuleData[] edumgupipassdblocusesLocusModuleDatas = edu.mgupi.pass.db.locuses.LocusModuleDataFactory.listLocusModuleDataByQuery(null, null);
+		length = Math.min(edumgupipassdblocusesLocusModuleDatas.length, ROW_COUNT);
 		for (int i = 0; i < length; i++) {
-			System.out.println(edumgupipassdblocusesLocusModuleParamses[i]);
+			System.out.println(edumgupipassdblocusesLocusModuleDatas[i]);
+		}
+		System.out.println(length + " record(s) retrieved.");
+		
+		System.out.println("Listing LocusAppliedModule...");
+		edu.mgupi.pass.db.locuses.LocusAppliedModule[] edumgupipassdblocusesLocusAppliedModules = edu.mgupi.pass.db.locuses.LocusAppliedModuleFactory.listLocusAppliedModuleByQuery(null, null);
+		length = Math.min(edumgupipassdblocusesLocusAppliedModules.length, ROW_COUNT);
+		for (int i = 0; i < length; i++) {
+			System.out.println(edumgupipassdblocusesLocusAppliedModules[i]);
+		}
+		System.out.println(length + " record(s) retrieved.");
+		
+		System.out.println("Listing LocusAppliedModuleParams...");
+		edu.mgupi.pass.db.locuses.LocusAppliedModuleParams[] edumgupipassdblocusesLocusAppliedModuleParamses = edu.mgupi.pass.db.locuses.LocusAppliedModuleParamsFactory.listLocusAppliedModuleParamsByQuery(null, null);
+		length = Math.min(edumgupipassdblocusesLocusAppliedModuleParamses.length, ROW_COUNT);
+		for (int i = 0; i < length; i++) {
+			System.out.println(edumgupipassdblocusesLocusAppliedModuleParamses[i]);
+		}
+		System.out.println(length + " record(s) retrieved.");
+		
+		System.out.println("Listing LocusAppliedFilterParams...");
+		edu.mgupi.pass.db.locuses.LocusAppliedFilterParams[] edumgupipassdblocusesLocusAppliedFilterParamses = edu.mgupi.pass.db.locuses.LocusAppliedFilterParamsFactory.listLocusAppliedFilterParamsByQuery(null, null);
+		length = Math.min(edumgupipassdblocusesLocusAppliedFilterParamses.length, ROW_COUNT);
+		for (int i = 0; i < length; i++) {
+			System.out.println(edumgupipassdblocusesLocusAppliedFilterParamses[i]);
 		}
 		System.out.println(length + " record(s) retrieved.");
 		
@@ -148,25 +172,13 @@ public class ListPassData {
 	}
 	
 	public void listByCriteria() throws PersistentException  {
-		System.out.println("Listing NameMapping by Criteria...");
-		edu.mgupi.pass.db.NameMappingCriteria nameMappingCriteria = new edu.mgupi.pass.db.NameMappingCriteria();
-		// Please uncomment the follow line and fill in parameter(s) 
-		//nameMappingCriteria.ID.eq();
-		nameMappingCriteria.setMaxResults(ROW_COUNT);
-		edu.mgupi.pass.db.NameMapping[] edumgupipassdbNameMappings = nameMappingCriteria.listNameMapping();
-		int length =edumgupipassdbNameMappings== null ? 0 : Math.min(edumgupipassdbNameMappings.length, ROW_COUNT); 
-		for (int i = 0; i < length; i++) {
-			 System.out.println(edumgupipassdbNameMappings[i]);
-		}
-		System.out.println(length + " NameMapping record(s) retrieved."); 
-		
 		System.out.println("Listing DefectClasses by Criteria...");
 		edu.mgupi.pass.db.defects.DefectClassesCriteria defectClassesCriteria = new edu.mgupi.pass.db.defects.DefectClassesCriteria();
 		// Please uncomment the follow line and fill in parameter(s) 
 		//defectClassesCriteria.idDefectClass.eq();
 		defectClassesCriteria.setMaxResults(ROW_COUNT);
 		edu.mgupi.pass.db.defects.DefectClasses[] edumgupipassdbdefectsDefectClasseses = defectClassesCriteria.listDefectClasses();
-		length =edumgupipassdbdefectsDefectClasseses== null ? 0 : Math.min(edumgupipassdbdefectsDefectClasseses.length, ROW_COUNT); 
+		int length =edumgupipassdbdefectsDefectClasseses== null ? 0 : Math.min(edumgupipassdbdefectsDefectClasseses.length, ROW_COUNT); 
 		for (int i = 0; i < length; i++) {
 			 System.out.println(edumgupipassdbdefectsDefectClasseses[i]);
 		}
@@ -195,6 +207,18 @@ public class ListPassData {
 			 System.out.println(edumgupipassdbdefectsDefectses[i]);
 		}
 		System.out.println(length + " Defects record(s) retrieved."); 
+		
+		System.out.println("Listing DefectTypeOptions by Criteria...");
+		edu.mgupi.pass.db.defects.DefectTypeOptionsCriteria defectTypeOptionsCriteria = new edu.mgupi.pass.db.defects.DefectTypeOptionsCriteria();
+		// Please uncomment the follow line and fill in parameter(s) 
+		//defectTypeOptionsCriteria.ID.eq();
+		defectTypeOptionsCriteria.setMaxResults(ROW_COUNT);
+		edu.mgupi.pass.db.defects.DefectTypeOptions[] edumgupipassdbdefectsDefectTypeOptionses = defectTypeOptionsCriteria.listDefectTypeOptions();
+		length =edumgupipassdbdefectsDefectTypeOptionses== null ? 0 : Math.min(edumgupipassdbdefectsDefectTypeOptionses.length, ROW_COUNT); 
+		for (int i = 0; i < length; i++) {
+			 System.out.println(edumgupipassdbdefectsDefectTypeOptionses[i]);
+		}
+		System.out.println(length + " DefectTypeOptions record(s) retrieved."); 
 		
 		System.out.println("Listing LModules by Criteria...");
 		edu.mgupi.pass.db.locuses.LModulesCriteria lModulesCriteria = new edu.mgupi.pass.db.locuses.LModulesCriteria();
@@ -244,29 +268,65 @@ public class ListPassData {
 		}
 		System.out.println(length + " LocusSources record(s) retrieved."); 
 		
-		System.out.println("Listing LocusFilterOptions by Criteria...");
-		edu.mgupi.pass.db.locuses.LocusFilterOptionsCriteria locusFilterOptionsCriteria = new edu.mgupi.pass.db.locuses.LocusFilterOptionsCriteria();
+		System.out.println("Listing LocusAppliedFilters by Criteria...");
+		edu.mgupi.pass.db.locuses.LocusAppliedFiltersCriteria locusAppliedFiltersCriteria = new edu.mgupi.pass.db.locuses.LocusAppliedFiltersCriteria();
 		// Please uncomment the follow line and fill in parameter(s) 
-		//locusFilterOptionsCriteria.idLocusFilter.eq();
-		locusFilterOptionsCriteria.setMaxResults(ROW_COUNT);
-		edu.mgupi.pass.db.locuses.LocusFilterOptions[] edumgupipassdblocusesLocusFilterOptionses = locusFilterOptionsCriteria.listLocusFilterOptions();
-		length =edumgupipassdblocusesLocusFilterOptionses== null ? 0 : Math.min(edumgupipassdblocusesLocusFilterOptionses.length, ROW_COUNT); 
+		//locusAppliedFiltersCriteria.idLocusFilter.eq();
+		locusAppliedFiltersCriteria.setMaxResults(ROW_COUNT);
+		edu.mgupi.pass.db.locuses.LocusAppliedFilters[] edumgupipassdblocusesLocusAppliedFilterses = locusAppliedFiltersCriteria.listLocusAppliedFilters();
+		length =edumgupipassdblocusesLocusAppliedFilterses== null ? 0 : Math.min(edumgupipassdblocusesLocusAppliedFilterses.length, ROW_COUNT); 
 		for (int i = 0; i < length; i++) {
-			 System.out.println(edumgupipassdblocusesLocusFilterOptionses[i]);
+			 System.out.println(edumgupipassdblocusesLocusAppliedFilterses[i]);
 		}
-		System.out.println(length + " LocusFilterOptions record(s) retrieved."); 
+		System.out.println(length + " LocusAppliedFilters record(s) retrieved."); 
 		
-		System.out.println("Listing LocusModuleParams by Criteria...");
-		edu.mgupi.pass.db.locuses.LocusModuleParamsCriteria locusModuleParamsCriteria = new edu.mgupi.pass.db.locuses.LocusModuleParamsCriteria();
+		System.out.println("Listing LocusModuleData by Criteria...");
+		edu.mgupi.pass.db.locuses.LocusModuleDataCriteria locusModuleDataCriteria = new edu.mgupi.pass.db.locuses.LocusModuleDataCriteria();
 		// Please uncomment the follow line and fill in parameter(s) 
-		//locusModuleParamsCriteria.idModuleParam.eq();
-		locusModuleParamsCriteria.setMaxResults(ROW_COUNT);
-		edu.mgupi.pass.db.locuses.LocusModuleParams[] edumgupipassdblocusesLocusModuleParamses = locusModuleParamsCriteria.listLocusModuleParams();
-		length =edumgupipassdblocusesLocusModuleParamses== null ? 0 : Math.min(edumgupipassdblocusesLocusModuleParamses.length, ROW_COUNT); 
+		//locusModuleDataCriteria.idModuleParam.eq();
+		locusModuleDataCriteria.setMaxResults(ROW_COUNT);
+		edu.mgupi.pass.db.locuses.LocusModuleData[] edumgupipassdblocusesLocusModuleDatas = locusModuleDataCriteria.listLocusModuleData();
+		length =edumgupipassdblocusesLocusModuleDatas== null ? 0 : Math.min(edumgupipassdblocusesLocusModuleDatas.length, ROW_COUNT); 
 		for (int i = 0; i < length; i++) {
-			 System.out.println(edumgupipassdblocusesLocusModuleParamses[i]);
+			 System.out.println(edumgupipassdblocusesLocusModuleDatas[i]);
 		}
-		System.out.println(length + " LocusModuleParams record(s) retrieved."); 
+		System.out.println(length + " LocusModuleData record(s) retrieved."); 
+		
+		System.out.println("Listing LocusAppliedModule by Criteria...");
+		edu.mgupi.pass.db.locuses.LocusAppliedModuleCriteria locusAppliedModuleCriteria = new edu.mgupi.pass.db.locuses.LocusAppliedModuleCriteria();
+		// Please uncomment the follow line and fill in parameter(s) 
+		//locusAppliedModuleCriteria.idLocusModule.eq();
+		locusAppliedModuleCriteria.setMaxResults(ROW_COUNT);
+		edu.mgupi.pass.db.locuses.LocusAppliedModule[] edumgupipassdblocusesLocusAppliedModules = locusAppliedModuleCriteria.listLocusAppliedModule();
+		length =edumgupipassdblocusesLocusAppliedModules== null ? 0 : Math.min(edumgupipassdblocusesLocusAppliedModules.length, ROW_COUNT); 
+		for (int i = 0; i < length; i++) {
+			 System.out.println(edumgupipassdblocusesLocusAppliedModules[i]);
+		}
+		System.out.println(length + " LocusAppliedModule record(s) retrieved."); 
+		
+		System.out.println("Listing LocusAppliedModuleParams by Criteria...");
+		edu.mgupi.pass.db.locuses.LocusAppliedModuleParamsCriteria locusAppliedModuleParamsCriteria = new edu.mgupi.pass.db.locuses.LocusAppliedModuleParamsCriteria();
+		// Please uncomment the follow line and fill in parameter(s) 
+		//locusAppliedModuleParamsCriteria.ID.eq();
+		locusAppliedModuleParamsCriteria.setMaxResults(ROW_COUNT);
+		edu.mgupi.pass.db.locuses.LocusAppliedModuleParams[] edumgupipassdblocusesLocusAppliedModuleParamses = locusAppliedModuleParamsCriteria.listLocusAppliedModuleParams();
+		length =edumgupipassdblocusesLocusAppliedModuleParamses== null ? 0 : Math.min(edumgupipassdblocusesLocusAppliedModuleParamses.length, ROW_COUNT); 
+		for (int i = 0; i < length; i++) {
+			 System.out.println(edumgupipassdblocusesLocusAppliedModuleParamses[i]);
+		}
+		System.out.println(length + " LocusAppliedModuleParams record(s) retrieved."); 
+		
+		System.out.println("Listing LocusAppliedFilterParams by Criteria...");
+		edu.mgupi.pass.db.locuses.LocusAppliedFilterParamsCriteria locusAppliedFilterParamsCriteria = new edu.mgupi.pass.db.locuses.LocusAppliedFilterParamsCriteria();
+		// Please uncomment the follow line and fill in parameter(s) 
+		//locusAppliedFilterParamsCriteria.ID.eq();
+		locusAppliedFilterParamsCriteria.setMaxResults(ROW_COUNT);
+		edu.mgupi.pass.db.locuses.LocusAppliedFilterParams[] edumgupipassdblocusesLocusAppliedFilterParamses = locusAppliedFilterParamsCriteria.listLocusAppliedFilterParams();
+		length =edumgupipassdblocusesLocusAppliedFilterParamses== null ? 0 : Math.min(edumgupipassdblocusesLocusAppliedFilterParamses.length, ROW_COUNT); 
+		for (int i = 0; i < length; i++) {
+			 System.out.println(edumgupipassdblocusesLocusAppliedFilterParamses[i]);
+		}
+		System.out.println(length + " LocusAppliedFilterParams record(s) retrieved."); 
 		
 		System.out.println("Listing Sensors by Criteria...");
 		edu.mgupi.pass.db.sensors.SensorsCriteria sensorsCriteria = new edu.mgupi.pass.db.sensors.SensorsCriteria();
