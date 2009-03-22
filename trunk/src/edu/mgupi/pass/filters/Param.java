@@ -111,6 +111,11 @@ public class Param {
 
 	public void setValue(Object value) throws IllegalParameterValueException {
 
+		if (value == null) {
+			this.value = value;
+			return;
+		}
+
 		if (this.allowed_values != null) {
 
 			boolean found = false;
@@ -128,17 +133,25 @@ public class Param {
 		}
 
 		if (this.type == TYPES.DOUBLE) {
-			if (!(value instanceof Double)) {
-				throw new IllegalParameterValueException("Parameter " + this + " attempt to set up incorrect value "
-						+ value + ". This value must be a double.");
+			if (value instanceof Long) {
+				value = ((Long) value).doubleValue();
+			} else {
+				if (!(value instanceof Double)) {
+					throw new IllegalParameterValueException("Parameter " + this
+							+ " attempt to set up incorrect value " + value + " (" + value.getClass()
+							+ "). This value must be a double.");
+				}
 			}
 		}
 
 		if (this.type == TYPES.INT) {
-
-			if (!(value instanceof Integer)) {
-				throw new IllegalParameterValueException("Parameter " + this + " attempt to set up incorrect value "
-						+ value + ". This value must be an integer.");
+			if (value instanceof Long) {
+				value = ((Long) value).intValue();
+			} else {
+				if (!(value instanceof Integer)) {
+					throw new IllegalParameterValueException("Parameter " + this
+							+ " attempt to set up incorrect value " + value + ". This value must be an integer.");
+				}
 			}
 
 			int newValue = (Integer) value;
@@ -150,6 +163,13 @@ public class Param {
 			if (newValue > this.hi_border) {
 				throw new IllegalParameterValueException("Parameter " + this + " attempt to set up incorrect value "
 						+ value + ". This value must be smaller that hiBorder " + this.hi_border + ".");
+			}
+		}
+
+		if (this.type == TYPES.STRING) {
+			if (!(value instanceof String)) {
+				throw new IllegalParameterValueException("Parameter " + this + " attempt to set up incorrect value "
+						+ value + ". This value must be a string.");
 			}
 		}
 

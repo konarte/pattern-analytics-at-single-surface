@@ -18,6 +18,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 
 import javax.swing.AbstractAction;
@@ -39,6 +40,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -56,6 +58,7 @@ import edu.mgupi.pass.db.locuses.Locuses;
 import edu.mgupi.pass.face.template.ImageFrameTemplate;
 import edu.mgupi.pass.face.template.ImagePanel;
 import edu.mgupi.pass.filters.FilterChainsaw;
+import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.java.GrayScaleFilter;
 import edu.mgupi.pass.filters.service.PlaceImageFilter;
 import edu.mgupi.pass.filters.service.ResizeFilter;
@@ -113,8 +116,8 @@ public class MainFrame extends JFrame implements IProgress {
 		this.setContentPane(getJContentPane());
 		this.setTitle(Const.FULL_PROGRAM_NAME);
 		this.setName("mainFrame");
-		this.setMinimumSize(new Dimension(600, 720));
-		this.setBounds(new Rectangle(150, 150, 800, 720));
+		this.setMinimumSize(new Dimension(600, 620));
+		this.setBounds(new Rectangle(150, 150, 800, 620));
 		Config.getInstance().getWindowPosition(this);
 
 		// ----------------
@@ -166,18 +169,19 @@ public class MainFrame extends JFrame implements IProgress {
 		});
 
 		Config.getInstance().setIProgressInstance(this);
+		this.clearMessage();
 
 		mainModuleProcessor = new ModuleProcessor();
 
 		histogramFrame = (ImageFrameTemplate) AppHelper.getInstance()
 				.registerAdditionalWindow(ImageFrameTemplate.class);
-		histogramFrame.registerControlCheckbox(this.jCheckBoxHistogram);
+		histogramFrame.registerControlCheckbox(this, this.jCheckBoxHistogram);
 		histogramFrame.setTitle(mainModuleProcessor.getHistoFilters().toString());
 		histogramFrame.setName("histogramWindow");
 		Config.getInstance().getWindowPosition(histogramFrame);
 
 		moduleFrame = (ImageFrameTemplate) AppHelper.getInstance().registerAdditionalWindow(ImageFrameTemplate.class);
-		moduleFrame.registerControlCheckbox(this.jCheckBoxModuleGraphic);
+		moduleFrame.registerControlCheckbox(this, this.jCheckBoxModuleGraphic);
 		moduleFrame.setTitle("Модуль не выбран");
 		moduleFrame.setName("moduleFrameWindow");
 		Config.getInstance().getWindowPosition(moduleFrame);
@@ -198,7 +202,6 @@ public class MainFrame extends JFrame implements IProgress {
 		mainModuleProcessor.setChainsaw(saw);
 
 		logger.debug("Main frame init done.");
-		this.clearMessage();
 	}
 
 	private void closeImpl() {
@@ -241,7 +244,7 @@ public class MainFrame extends JFrame implements IProgress {
 		System.exit(0);
 	}
 
-	private SourceStore currentSource = null;
+	private SourceStore currentSource = null; //  @jve:decl-index=0:
 	private Locuses currentLocus = null; // @jve:decl-index=0:
 
 	private String originalImageInfo = "";
@@ -259,8 +262,6 @@ public class MainFrame extends JFrame implements IProgress {
 			// JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-
-		this.printMessage("Загрузка годографа...");
 
 		logger.debug("Start loading source " + source.getName());
 
@@ -293,8 +294,29 @@ public class MainFrame extends JFrame implements IProgress {
 		this.histogramFrame.setImage(mainModuleProcessor.getLastHistogramImage());
 		this.moduleFrame.setImage(ModuleHelper.getTemporaryModuleImage(this.currentLocus));
 
-		this.clearMessage();
+	}
 
+	protected void restartProcessingBySource() {
+		MainFrame.this.printMessage("Обновление параметров загрузки изображения...");
+		SwingUtilities.invokeLater(new Runnable() {
+
+			public void run() {
+				try {
+					MainFrame.this.restartProcessingBySourceImpl();
+				} catch (Throwable t) {
+					logger.error("Error when applying module parameter", t);
+					AppHelper.showExceptionDialog(MainFrame.this, "Error when applying module parameters", t);
+				} finally {
+					MainFrame.this.clearMessage();
+				}
+
+			}
+		});
+	}
+
+	protected void restartProcessingBySourceImpl() throws Exception {
+		this.applySourcePreProcessor();
+		this.startProcessing(this.currentSource);
 	}
 
 	private void applySourcePreProcessor() throws Exception {
@@ -302,8 +324,6 @@ public class MainFrame extends JFrame implements IProgress {
 		// Скорее всего, наилучшим выходом будет использование автоматического масштабирования,
 		// когда мы приводим изображение к размеру 1024x1024, а потом закрашиваем 
 		//   участки фоновым цветом :)
-
-		this.printMessage("Применение фильтров-препроцессинга...");
 
 		FilterChainsaw preProcessing = mainModuleProcessor.getPreProcessingFilters();
 
@@ -332,12 +352,29 @@ public class MainFrame extends JFrame implements IProgress {
 
 		}
 
-		this.clearMessage();
 	}
 
-	protected void restartProcessingBySource() throws Exception {
-		this.applySourcePreProcessor();
-		this.startProcessing(this.currentSource);
+	protected void restartProcessingByModule() {
+		MainFrame.this.printMessage("Обновление параметров модуля...");
+		SwingUtilities.invokeLater(new Runnable() {
+
+			public void run() {
+				try {
+					MainFrame.this.restartProcessingByModuleImpl();
+				} catch (Throwable t) {
+					logger.error("Error when applying module parameter", t);
+					AppHelper.showExceptionDialog(MainFrame.this, "Error when applying module parameters", t);
+				} finally {
+					MainFrame.this.clearMessage();
+				}
+
+			}
+		});
+	}
+
+	protected void restartProcessingByModuleImpl() throws Exception {
+		MainFrame.this.mainModuleProcessor.updateModule();
+		MainFrame.this.applyModuleProcessing();
 	}
 
 	protected void setModule(Class<? extends IModule> newModule) throws Exception {
@@ -346,20 +383,32 @@ public class MainFrame extends JFrame implements IProgress {
 			throw new IllegalArgumentException("Internal error. Parameter 'newModule' must be not null.");
 		}
 
-		this.printMessage("Подключение нового модуля анализа");
-
 		logger.debug("Applying module {}", newModule);
 
 		this.mainModuleProcessor.setModule(newModule);
 		this.moduleFrame.setTitle(this.mainModuleProcessor.getModule().getName());
+		Collection<Param> params = mainModuleProcessor.getModule().getParams();
+		jButtonModuleParams.setEnabled(params != null && params.size() > 0);
+
+		this.applyModuleProcessing();
+
+	}
+
+	private void applyModuleProcessing() throws Exception {
 
 		if (currentLocus != null) {
 			this.moduleFrame.setImage(ModuleHelper.getTemporaryModuleImage(this.currentLocus));
 		} else {
 			this.moduleFrame.setImage(null);
 		}
+	}
 
-		this.clearMessage();
+	public void clearMessage() {
+		this.printMessage("");
+	}
+
+	public void printMessage(final String message) {
+		jStatus.setText(message);
 	}
 
 	/**
@@ -480,7 +529,10 @@ public class MainFrame extends JFrame implements IProgress {
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent e) {
-					AppHelper.getInstance().openWindow(SettingsDialog.class, MainFrame.this);
+					if (((SettingsDialog) AppHelper.getInstance()
+							.openWindowHidden(MainFrame.this, SettingsDialog.class)).open()) {
+						MainFrame.this.restartProcessingBySource();
+					}
 				}
 			});
 			jMenuItemSettings.setText("Настройки...");
@@ -566,16 +618,12 @@ public class MainFrame extends JFrame implements IProgress {
 	private JButton jButtonSensorSearch = null;
 	private JCheckBox jCheckBoxSensor = null;
 	private JPanel jPanelSurface = null;
-	private JPanel jPanelDefect = null;
 	private JComboBox jComboBoxSurface = null;
 	private JButton jButtonSurface = null;
 	private JCheckBox jCheckBoxSurface = null;
-	private JComboBox jComboBoxDefect = null;
-	private JButton jButtonDefect = null;
-	private JCheckBox jCheckBoxDefect = null;
 	private JCheckBox jCheckBoxHistogram = null;
 	private JPanel jPanelLeftOthers = null;
-	private JButton jButtonProcess = null;
+	private JButton jButtonTeach = null;
 	private ImagePanel jPanelImageSource = null;
 
 	/**
@@ -634,7 +682,7 @@ public class MainFrame extends JFrame implements IProgress {
 					//							+ "<br><hr>(c) raidan, Konart 2009" + "</html>", "О программе...",
 					//							JOptionPane.INFORMATION_MESSAGE);
 
-					AppHelper.getInstance().openWindow(AboutDialog.class, MainFrame.this);
+					AppHelper.getInstance().openWindow(MainFrame.this, AboutDialog.class);
 				}
 			});
 			jMenuItemAbout.setText("О программе...");
@@ -694,6 +742,7 @@ public class MainFrame extends JFrame implements IProgress {
 			jStatus = new JLabel();
 			jStatus.setText("Текст для примера!");
 
+			jStatus.setFont(new Font("Dialog", Font.BOLD, 12));
 			jPanelStatus = new JPanel();
 			jPanelStatus.setLayout(new GridBagLayout());
 			jPanelStatus.add(jStatus, gridBagConstraints);
@@ -722,6 +771,8 @@ public class MainFrame extends JFrame implements IProgress {
 	private ImagePanel jPanelImageFiltered = null;
 
 	private JButton jButtonModuleParams = null;
+
+	private JButton jButtonCompare = null;
 
 	/**
 	 * This method initializes jCheckBoxScale
@@ -821,12 +872,6 @@ public class MainFrame extends JFrame implements IProgress {
 			gridBagConstraints27.anchor = GridBagConstraints.NORTHWEST;
 			gridBagConstraints27.fill = GridBagConstraints.HORIZONTAL;
 			gridBagConstraints27.gridx = 0;
-			GridBagConstraints gridBagConstraints23 = new GridBagConstraints();
-			gridBagConstraints23.gridx = 0;
-			gridBagConstraints23.anchor = GridBagConstraints.NORTHWEST;
-			gridBagConstraints23.fill = GridBagConstraints.HORIZONTAL;
-			gridBagConstraints23.weightx = 1.0D;
-			gridBagConstraints23.gridy = 5;
 			GridBagConstraints gridBagConstraints20 = new GridBagConstraints();
 			gridBagConstraints20.gridx = 0;
 			gridBagConstraints20.anchor = GridBagConstraints.NORTHWEST;
@@ -862,7 +907,6 @@ public class MainFrame extends JFrame implements IProgress {
 			jPanelLeft.add(getJPanelModule(), gridBagConstraints5);
 			jPanelLeft.add(getJPanelSensors(), gridBagConstraints16);
 			jPanelLeft.add(getJPanelSurface(), gridBagConstraints20);
-			jPanelLeft.add(getJPanelDefect(), gridBagConstraints23);
 			jPanelLeft.add(getJPanelLeftOthers(), gridBagConstraints27);
 		}
 		return jPanelLeft;
@@ -1072,37 +1116,6 @@ public class MainFrame extends JFrame implements IProgress {
 	}
 
 	/**
-	 * This method initializes jPanelDefect
-	 * 
-	 * @return javax.swing.JPanel
-	 */
-	private JPanel getJPanelDefect() {
-		if (jPanelDefect == null) {
-			GridBagConstraints gridBagConstraints21 = new GridBagConstraints();
-			gridBagConstraints21.gridx = 0;
-			gridBagConstraints21.anchor = GridBagConstraints.WEST;
-			gridBagConstraints21.gridwidth = 2;
-			gridBagConstraints21.gridy = 2;
-			GridBagConstraints gridBagConstraints19 = new GridBagConstraints();
-			gridBagConstraints19.gridx = 1;
-			gridBagConstraints19.gridy = 0;
-			GridBagConstraints gridBagConstraints18 = new GridBagConstraints();
-			gridBagConstraints18.fill = GridBagConstraints.HORIZONTAL;
-			gridBagConstraints18.gridy = 0;
-			gridBagConstraints18.weightx = 1.0;
-			gridBagConstraints18.gridx = 0;
-			jPanelDefect = new JPanel();
-			jPanelDefect.setLayout(new GridBagLayout());
-			jPanelDefect.setBorder(BorderFactory.createTitledBorder(null, "Дефект", TitledBorder.DEFAULT_JUSTIFICATION,
-					TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
-			jPanelDefect.add(getJComboBoxDefect(), gridBagConstraints18);
-			jPanelDefect.add(getJButtonDefect(), gridBagConstraints19);
-			jPanelDefect.add(getJCheckBoxDefect(), gridBagConstraints21);
-		}
-		return jPanelDefect;
-	}
-
-	/**
 	 * This method initializes jComboBoxSurface
 	 * 
 	 * @return javax.swing.JComboBox
@@ -1142,45 +1155,6 @@ public class MainFrame extends JFrame implements IProgress {
 	}
 
 	/**
-	 * This method initializes jComboBoxDefect
-	 * 
-	 * @return javax.swing.JComboBox
-	 */
-	private JComboBox getJComboBoxDefect() {
-		if (jComboBoxDefect == null) {
-			jComboBoxDefect = new JComboBox(new String[] { "Недавно выбранные дефекты" });
-		}
-		return jComboBoxDefect;
-	}
-
-	/**
-	 * This method initializes jButtonDefect
-	 * 
-	 * @return javax.swing.JButton
-	 */
-	private JButton getJButtonDefect() {
-		if (jButtonDefect == null) {
-			jButtonDefect = new JButton();
-			jButtonDefect.setAction(new NoAction());
-			jButtonDefect.setText("Найти");
-		}
-		return jButtonDefect;
-	}
-
-	/**
-	 * This method initializes jCheckBoxDefect
-	 * 
-	 * @return javax.swing.JCheckBox
-	 */
-	private JCheckBox getJCheckBoxDefect() {
-		if (jCheckBoxDefect == null) {
-			jCheckBoxDefect = new JCheckBox();
-			jCheckBoxDefect.setText("Окно подробностей");
-		}
-		return jCheckBoxDefect;
-	}
-
-	/**
 	 * This method initializes jCheckBoxHistogram
 	 * 
 	 * @return javax.swing.JCheckBox
@@ -1201,31 +1175,37 @@ public class MainFrame extends JFrame implements IProgress {
 	 */
 	private JPanel getJPanelLeftOthers() {
 		if (jPanelLeftOthers == null) {
+			GridBagConstraints gridBagConstraints18 = new GridBagConstraints();
+			gridBagConstraints18.gridx = 0;
+			gridBagConstraints18.insets = new Insets(5, 0, 5, 0);
+			gridBagConstraints18.gridy = 2;
 			GridBagConstraints gridBagConstraints24 = new GridBagConstraints();
 			gridBagConstraints24.gridx = 0;
 			gridBagConstraints24.fill = GridBagConstraints.NONE;
-			gridBagConstraints24.insets = new Insets(15, 15, 15, 15);
+			gridBagConstraints24.insets = new Insets(5, 0, 0, 0);
 			gridBagConstraints24.anchor = GridBagConstraints.NORTH;
 			gridBagConstraints24.gridy = 1;
 			jPanelLeftOthers = new JPanel();
 			jPanelLeftOthers.setLayout(new GridBagLayout());
-			jPanelLeftOthers.add(getJButtonProcess(), gridBagConstraints24);
+			jPanelLeftOthers.add(getJButtonTeach(), gridBagConstraints24);
+			jPanelLeftOthers.add(getJButtonCompare(), gridBagConstraints18);
 		}
 		return jPanelLeftOthers;
 	}
 
 	/**
-	 * This method initializes jButtonProcess
+	 * This method initializes jButtonTeach
 	 * 
 	 * @return javax.swing.JButton
 	 */
-	private JButton getJButtonProcess() {
-		if (jButtonProcess == null) {
-			jButtonProcess = new JButton();
-			jButtonProcess.setText("Сравниить...");
-			jButtonProcess.setEnabled(false);
+	private JButton getJButtonTeach() {
+		if (jButtonTeach == null) {
+			jButtonTeach = new JButton();
+			jButtonTeach.setAction(new NoAction());
+			jButtonTeach.setText("Обучение...");
+			jButtonTeach.setEnabled(false);
 		}
-		return jButtonProcess;
+		return jButtonTeach;
 	}
 
 	/**
@@ -1393,14 +1373,6 @@ public class MainFrame extends JFrame implements IProgress {
 		return jMenuItemProgress;
 	}
 
-	public void clearMessage() {
-		jStatus.setText("");
-	}
-
-	public void printMessage(String message) {
-		jStatus.setText(message);
-	}
-
 	/**
 	 * This method initializes jTabbedPaneImages
 	 * 
@@ -1462,10 +1434,40 @@ public class MainFrame extends JFrame implements IProgress {
 	private JButton getJButtonModuleParams() {
 		if (jButtonModuleParams == null) {
 			jButtonModuleParams = new JButton();
-			jButtonModuleParams.setAction(new NoAction());
+			jButtonModuleParams.setAction(new AbstractAction() {
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent e) {
+					ModuleParametersEditor editor = (ModuleParametersEditor) AppHelper.getInstance().openWindowHidden(
+							MainFrame.this, ModuleParametersEditor.class);
+					editor.setModule(mainModuleProcessor.getModule());
+					if (editor.open()) {
+						MainFrame.this.restartProcessingByModule();
+
+					}
+				}
+			});
 			jButtonModuleParams.setText("Параметры модуля");
 			jButtonModuleParams.setName("moduleParams");
 		}
 		return jButtonModuleParams;
+	}
+
+	/**
+	 * This method initializes jButtonCompare	
+	 * 	
+	 * @return javax.swing.JButton	
+	 */
+	private JButton getJButtonCompare() {
+		if (jButtonCompare == null) {
+			jButtonCompare = new JButton();
+			jButtonCompare.setAction(new NoAction());
+			jButtonCompare.setText("Сравнение...");
+			jButtonCompare.setEnabled(false);
+		}
+		return jButtonCompare;
 	}
 }

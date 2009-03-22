@@ -120,7 +120,7 @@ public class AppHelperTest {
 		SwingHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
-				AppHelper.getInstance().openWindow(AboutDialog.class, splash);
+				AppHelper.getInstance().openWindow(splash, AboutDialog.class);
 
 			}
 		}, new ConditionSet() {
@@ -151,7 +151,7 @@ public class AppHelperTest {
 			SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 				@Override
 				public void workImpl() throws Exception {
-					splash = (SplashWindow) AppHelper.getInstance().openWindowImpl(SplashWindow.class, mySplash);
+					splash = (SplashWindow) AppHelper.getInstance().openWindowImpl(mySplash, SplashWindow.class, true);
 				}
 			});
 			fail("No exception thrown!");
@@ -167,7 +167,7 @@ public class AppHelperTest {
 			SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 				@Override
 				public void workImpl() throws Exception {
-					AppHelper.getInstance().openWindowImpl(SettingsDialog.class, null);
+					AppHelper.getInstance().openWindowImpl(null, SettingsDialog.class, true);
 				}
 			});
 			fail("No exception thrown!");
@@ -321,7 +321,7 @@ public class AppHelperTest {
 				@Override
 				public void workImpl() throws Exception {
 					AppHelper.showExceptionDialog(testFrame, "Fuck you fucking fuck. Wait 5 sec...", new Exception(
-							"I'm dead already :("));
+							"I'm dead already :(", new RuntimeException("Stars will show me the way...")));
 				}
 			});
 			fail("No exception thrown!");

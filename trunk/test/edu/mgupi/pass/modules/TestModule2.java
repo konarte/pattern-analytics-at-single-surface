@@ -20,7 +20,7 @@ public class TestModule2 implements IModule {
 
 	@Override
 	public String getName() {
-		return "Абсолютно тестовый без всего";
+		return "Warning. Тестовый пустой";
 	}
 
 	@Override

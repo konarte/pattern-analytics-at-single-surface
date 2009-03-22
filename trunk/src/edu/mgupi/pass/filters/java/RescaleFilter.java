@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,7 @@ public class RescaleFilter implements IFilter {
 		params = new ArrayList<Param>(2);
 		params.add(BRIGHTNESS);
 		params.add(CONTRAST);
-
+		params = Collections.unmodifiableCollection(params);
 	}
 
 	public String getName() {

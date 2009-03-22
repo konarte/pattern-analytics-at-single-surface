@@ -26,7 +26,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
-import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 
 import org.junit.After;
@@ -46,11 +45,33 @@ public class ParametersEditorPanelTest {
 	private JDialog parent;
 	private ParametersEditorPanel panel;
 
-	Collection<Param> fullParams = null;
+	private static Collection<Param> fullParams = fillParameters(new ArrayList<Param>());
+
+	public static Collection<Param> fillParameters(Collection<Param> fullParams) {
+		fullParams.add(new Param("p1", "Параметр1", TYPES.INT, 11));
+		fullParams.add(new Param("p2", "Параметр2", TYPES.INT, 1, 0, 10));
+
+		fullParams.add(new Param("p3", "Параметр3", TYPES.DOUBLE, 2.0));
+		fullParams.add(new Param("p4", "Параметр4", TYPES.DOUBLE, 5.0, 0, 10));
+
+		fullParams.add(new Param("p5", "Параметр5", TYPES.STRING, null));
+		fullParams.add(new Param("p5.1", "Параметр5.1", TYPES.STRING, ""));
+		fullParams.add(new Param("p6", "Параметр6", TYPES.STRING, "Тестовая строка"));
+
+		fullParams.add(new Param("p7", "Параметр7", TYPES.COLOR, null));
+		fullParams.add(new Param("p8", "Параметр8", TYPES.COLOR, Color.BLUE));
+
+		fullParams.add(new Param("p9", "Параметр9", null, new Object[] { "айн", "цвай", "драй" }, new String[] {
+				"Первый", "Второй", "Третий" }));
+		fullParams.add(new Param("p10", "Параметр10", "цвай", new Object[] { "айн", "цвай", "драй" }, new String[] {
+				"Первый", "Второй", "Третий" }));
+
+		return fullParams;
+	}
 
 	@Before
 	public void setUp() throws Exception {
-		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+
 		parent = new JDialog((Frame) null, true);
 
 		parent.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -80,25 +101,6 @@ public class ParametersEditorPanelTest {
 		panel = new ParametersEditorPanel();
 		jContentPane.add(panel, BorderLayout.CENTER);
 
-		fullParams = new ArrayList<Param>();
-		fullParams.add(new Param("p1", "Параметр1", TYPES.INT, 11));
-		fullParams.add(new Param("p2", "Параметр2", TYPES.INT, 1, 0, 10));
-
-		fullParams.add(new Param("p3", "Параметр3", TYPES.DOUBLE, 2.0));
-		fullParams.add(new Param("p4", "Параметр4", TYPES.DOUBLE, 5.0, 0, 10));
-
-		fullParams.add(new Param("p5", "Параметр5", TYPES.STRING, null));
-		fullParams.add(new Param("p5.1", "Параметр5.1", TYPES.STRING, ""));
-		fullParams.add(new Param("p6", "Параметр6", TYPES.STRING, "Тестовая строка"));
-
-		fullParams.add(new Param("p7", "Параметр7", TYPES.COLOR, null));
-		fullParams.add(new Param("p8", "Параметр8", TYPES.COLOR, Color.BLUE));
-
-		fullParams.add(new Param("p9", "Параметр9", null, new Object[] { "айн", "цвай", "драй" }, new String[] {
-				"Первый", "Второй", "Третий" }));
-		fullParams.add(new Param("p10", "Параметр10", "цвай", new Object[] { "айн", "цвай", "драй" }, new String[] {
-				"Первый", "Второй", "Третий" }));
-
 	}
 
 	@After
@@ -126,15 +128,15 @@ public class ParametersEditorPanelTest {
 		});
 	}
 
-//	private void waitMe() throws Exception {
-//		SwingHelper.waitUntil(new ConditionSet() {
-//
-//			@Override
-//			public boolean keepWorking() {
-//				return parent.isVisible() == true;
-//			}
-//		});
-//	}
+	private void waitMe() throws Exception {
+		SwingHelper.waitUntil(new ConditionSet() {
+
+			@Override
+			public boolean keepWorking() {
+				return parent.isVisible() == true;
+			}
+		});
+	}
 
 	@Test
 	public void testPrimarySetParameters() throws Exception {
@@ -520,5 +522,51 @@ public class ParametersEditorPanelTest {
 		params = panel.saveParameterValues();
 		assertEquals("цвай", ParamHelper.getParameter("p9", params).getValue());
 		assertEquals("драй", ParamHelper.getParameter("p10", params).getValue());
+	}
+
+	@Test
+	public void testMultipleInstancing() throws Exception {
+		Collection<Param> params1 = new ArrayList<Param>();
+		params1.add(new Param("param1", "Параметр1", TYPES.INT, 5));
+
+		Collection<Param> params2 = new ArrayList<Param>();
+		params2.add(new Param("param2", "Параметр2", TYPES.INT, 5));
+
+		panel.setParameters("Sample params1", params1);
+		this.showMeBackground();
+
+		JFormattedTextField fmt = (JFormattedTextField) SwingHelper.getChildNamed(panel, "param1_int_field");
+		assertNotNull(fmt);
+
+		parent.setVisible(false);
+		this.waitMe();
+
+		panel.setParameters("Sample params2", params2);
+		this.showMeBackground();
+
+		fmt = (JFormattedTextField) SwingHelper.getChildNamed(panel, "param1_int_field");
+		assertNull(fmt);
+
+		fmt = (JFormattedTextField) SwingHelper.getChildNamed(panel, "param2_int_field");
+		assertNotNull(fmt);
+
+		parent.setVisible(false);
+		this.waitMe();
+
+		panel.setParameters("Sample params2", params2);
+		this.showMeBackground();
+
+		// Check for skipping recreating objects if parameters are the same as previous!
+
+		JFormattedTextField newFmt = (JFormattedTextField) SwingHelper.getChildNamed(panel, "param2_int_field");
+		assertNotNull(newFmt);
+		assertTrue(fmt == newFmt);
+	}
+
+	public void testSample() throws Exception {
+		panel.setParameters("Sample params", fullParams);
+		this.showMeBackground();
+
+		this.waitMe();
 	}
 }

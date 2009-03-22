@@ -19,6 +19,7 @@ import javax.swing.ScrollPaneConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.filters.service.ResizeFilter;
 import edu.mgupi.pass.util.Const;
 import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
@@ -182,77 +183,59 @@ public class ImagePanel extends JPanel {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
-		if (myImage != null) {
+		synchronized (getTreeLock()) {
+			if (myImage != null) {
 
-			if (secundomerNormalDraw == null) {
-				Container topContainer = this.getTopLevelAncestor();
-				secundomerNormalDraw = SecundomerList.registerSecundomer("Draw simple image for "
-						+ (topContainer == null ? this.getName() : topContainer.getName()));
-				secundomerScaleDraw = SecundomerList.registerSecundomer("Draw scaled image for "
-						+ (topContainer == null ? this.getName() : topContainer.getName()));
-			}
-
-			if (this.fitImageToWindowSize) {
-				secundomerScaleDraw.start();
-
-				// Must set preferred size!
-				this.setPreferredSize(new Dimension((int) parent.getVisibleRect().getWidth(), (int) parent
-						.getVisibleRect().getHeight()));
-
-				try {
-					/*
-					 * Based of thumb maker by Marco Schmidt
-					 */
-					int thumbWidth = this.getWidth();
-					int thumbHeight = this.getHeight();
-					double thumbRatio = (double) thumbWidth / (double) thumbHeight;
-					int imageWidth = myImage.getWidth();
-					int imageHeight = myImage.getHeight();
-					double imageRatio = (double) imageWidth / (double) imageHeight;
-					if (thumbRatio < imageRatio) {
-						thumbHeight = (int) (thumbWidth / imageRatio);
-					} else {
-						thumbWidth = (int) (thumbHeight * imageRatio);
-					}
-
-					g.drawImage(this.myImage, 0, 0, thumbWidth, thumbHeight, null);
-				} finally {
-					secundomerScaleDraw.stop();
+				if (secundomerNormalDraw == null) {
+					Container topContainer = this.getTopLevelAncestor();
+					secundomerNormalDraw = SecundomerList.registerSecundomer("Draw simple image for "
+							+ (topContainer == null ? this.getName() : topContainer.getName()));
+					secundomerScaleDraw = SecundomerList.registerSecundomer("Draw scaled image for "
+							+ (topContainer == null ? this.getName() : topContainer.getName()));
 				}
 
-				//
-				//				Point newSize = ResizeFilter.calcThumbSize(this.myImage, this.getWidth(), this.getHeight());
-				//				Graphics2D graphics2D = (Graphics2D) g;
-				//				graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-				//						RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-				//				try {
-				//					g.drawImage(this.myImage, 0, 0, newSize.x, newSize.y, null);
-				//				} finally {
-				//					secundomerScaleDraw.stop();
-				//				}
+				if (this.fitImageToWindowSize) {
+					secundomerScaleDraw.start();
+
+					// Must set preferred size!
+					this.setPreferredSize(new Dimension((int) parent.getVisibleRect().getWidth(), (int) parent
+							.getVisibleRect().getHeight()));
+
+					try {
+						/*
+						 * Based of thumb maker by Marco Schmidt
+						 */
+						Dimension thumb = new Dimension(this.getWidth(), this.getHeight());
+
+						ResizeFilter.calcThumbSize(this.myImage, thumb);
+
+						g.drawImage(this.myImage, 0, 0, thumb.width, thumb.height, null);
+					} finally {
+						secundomerScaleDraw.stop();
+					}
+				} else {
+					secundomerNormalDraw.start();
+					try {
+						g.drawImage(this.myImage, 0, 0, null);
+					} finally {
+						secundomerNormalDraw.stop();
+					}
+				}
 
 			} else {
-				secundomerNormalDraw.start();
-				try {
-					g.drawImage(this.myImage, 0, 0, null);
-				} finally {
-					secundomerNormalDraw.stop();
-				}
+
+				// Simple visual cake :)
+				String text = "No image";
+
+				Graphics2D graphics2D = (Graphics2D) g;
+				graphics2D.setFont(new Font("Courier", Font.PLAIN, 22));
+				graphics2D.setColor(Color.BLACK);
+				Rectangle2D rect = graphics2D.getFontMetrics().getStringBounds(text, g);
+
+				graphics2D.drawString(text, this.getWidth() / 2 - (int) rect.getCenterX(), this.getHeight() / 2
+						- (int) rect.getCenterY());
+
 			}
-
-		} else {
-
-			// Simple visual cake :)
-			String text = "No image";
-
-			Graphics2D graphics2D = (Graphics2D) g;
-			graphics2D.setFont(new Font("Courier", Font.PLAIN, 22));
-			graphics2D.setColor(Color.BLACK);
-			Rectangle2D rect = graphics2D.getFontMetrics().getStringBounds(text, g);
-
-			graphics2D.drawString(text, this.getWidth() / 2 - (int) rect.getCenterX(), this.getHeight() / 2
-					- (int) rect.getCenterY());
-
 		}
 	};
 

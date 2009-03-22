@@ -7,6 +7,7 @@ import java.awt.image.Raster;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,9 +35,10 @@ public class SimpleMatrixModule implements IModule {
 	private Collection<Param> paramList = null;
 
 	public SimpleMatrixModule() {
-		paramList = new ArrayList<Param>();
+		paramList = new ArrayList<Param>(2);
 		paramList.add(RENREDING_METHOD);
 		paramList.add(CELL_SIZE);
+		paramList = Collections.unmodifiableCollection(paramList);
 	}
 
 	@Override

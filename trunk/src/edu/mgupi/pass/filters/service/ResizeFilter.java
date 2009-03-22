@@ -1,11 +1,12 @@
 package edu.mgupi.pass.filters.service;
 
+import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +31,11 @@ public class ResizeFilter implements IFilter {
 			new String[] { "Bicubic (best)", "Bilinear (medium)", "Nearest point (worst)" });
 
 	public ResizeFilter() {
-		params = new ArrayList<Param>(2);
+		params = new ArrayList<Param>(3);
 		params.add(WIDTH);
 		params.add(HEIGHT);
 		params.add(INTERPOLATION_METHOD);
+		params = Collections.unmodifiableCollection(params);
 	}
 
 	public String getName() {
@@ -55,8 +57,7 @@ public class ResizeFilter implements IFilter {
 			throw new IllegalArgumentException("Internal error: image is null.");
 		}
 
-		int thumbWidth = (Integer) WIDTH.getValue();
-		int thumbHeight = (Integer) HEIGHT.getValue();
+		Dimension thumb = new Dimension((Integer) WIDTH.getValue(), (Integer) HEIGHT.getValue());
 		Object interpolationMethod = INTERPOLATION_METHOD.getValue();
 
 		if (!RenderingHints.KEY_INTERPOLATION.isCompatibleValue(interpolationMethod)) {
@@ -64,17 +65,17 @@ public class ResizeFilter implements IFilter {
 					+ INTERPOLATION_METHOD.getName() + " to 'RenderingHints.KEY_INTERPOLATION'.");
 		}
 
-		logger.debug("Resizing image to {}x{}, method {}",
-				new Object[] { thumbWidth, thumbHeight, interpolationMethod });
+		logger.debug("Resizing image to {}x{}, method {}", new Object[] { thumb.width, thumb.height,
+				interpolationMethod });
 
-		Point newSize = calcThumbSize(source, thumbWidth, thumbHeight);
+		Dimension newSize = calcThumbSize(source, thumb);
 
 		// draw original image to thumbnail image object and
 		// scale it to the new size on-the-fly
-		BufferedImage dest = new BufferedImage(newSize.x, newSize.y, BufferedImage.TYPE_INT_RGB);
+		BufferedImage dest = new BufferedImage(newSize.width, newSize.height, BufferedImage.TYPE_INT_RGB);
 		Graphics2D graphics2D = dest.createGraphics();
 		graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, interpolationMethod);
-		graphics2D.drawImage(source, 0, 0, newSize.x, newSize.y, null);
+		graphics2D.drawImage(source, 0, 0, newSize.width, newSize.height, null);
 
 		graphics2D.dispose();
 
@@ -88,23 +89,22 @@ public class ResizeFilter implements IFilter {
 	 * 
 	 * 
 	 * @param source
-	 * @param thumbWidth
-	 * @param thumbHeight
+	 * @param thumb
 	 * @return resizedI
 	 */
-	public static Point calcThumbSize(BufferedImage source, int thumbWidth, int thumbHeight) {
+	public static Dimension calcThumbSize(BufferedImage source, Dimension thumb) {
 		int imageWidth = source.getWidth();
 		int imageHeight = source.getHeight();
 
-		double thumbRatio = (double) thumbWidth / (double) thumbHeight;
+		double thumbRatio = thumb.getWidth() / thumb.getHeight();
 		double imageRatio = (double) imageWidth / (double) imageHeight;
 
 		if (thumbRatio < imageRatio) {
-			thumbHeight = (int) (thumbWidth / imageRatio);
+			thumb.height = (int) (thumb.width / imageRatio);
 		} else {
-			thumbWidth = (int) (thumbHeight * imageRatio);
+			thumb.width = (int) (thumb.height * imageRatio);
 		}
-		return new Point(thumbWidth, thumbHeight);
+		return thumb;
 	}
 
 	//

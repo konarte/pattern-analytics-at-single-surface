@@ -3,8 +3,9 @@ package edu.mgupi.pass.filters.java;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.Collections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +34,9 @@ public class ColorSpaceFilter implements IFilter {
 			new String[] { "Gray scale", "linear RGB", "CIEXYZ" });
 
 	public ColorSpaceFilter() {
-		params = new LinkedHashSet<Param>(1);
+		params = new ArrayList<Param>(1);
 		params.add(COLOR_MODE);
+		params = Collections.unmodifiableCollection(params);
 	}
 
 	public Collection<Param> getParams() {

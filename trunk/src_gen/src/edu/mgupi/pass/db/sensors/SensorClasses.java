@@ -82,8 +82,8 @@ public class SensorClasses implements Serializable {
 	
 	@Column(name="IdSensorClass", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D31202B7065DB0333D")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31202B7065DB0333D", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31202DC6ABDD052D3")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31202DC6ABDD052D3", strategy="native")	
 	private int idSensorClass;
 	
 	@Column(name="Name", nullable=false, length=255)	

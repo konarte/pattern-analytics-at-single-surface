@@ -171,6 +171,17 @@ public class ListPassData {
 		
 	}
 	
+	public void listLFiltersBycodename() {
+		System.out.println("Listing LFilters by codename...");
+		// Please uncomment the follow lines and fill in parameters 
+		//edu.mgupi.pass.db.locuses.LFilters[] lFilterss = edu.mgupi.pass.db.locuses.LFiltersFactory.listBycodename();
+		//int length = lFilterss == null ? 0 : Math.min(lFilterss.length, ROW_COUNT);
+		//for (int i = 0; i < length; i++) {
+			//System.out.println(lFilterss[i]);
+		//}
+		//System.out.println(length + " record(s) retrieved.");
+	}
+	
 	public void listByCriteria() throws PersistentException  {
 		System.out.println("Listing DefectClasses by Criteria...");
 		edu.mgupi.pass.db.defects.DefectClassesCriteria defectClassesCriteria = new edu.mgupi.pass.db.defects.DefectClassesCriteria();
@@ -419,6 +430,7 @@ public class ListPassData {
 			ListPassData listPassData = new ListPassData();
 			try {
 				listPassData.listTestData();
+				//listPassData.listLFiltersBycodename();
 				//listPassData.listByCriteria();
 			}
 			finally {
