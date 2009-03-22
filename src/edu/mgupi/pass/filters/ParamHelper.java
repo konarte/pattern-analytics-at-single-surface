@@ -8,6 +8,10 @@ import org.json.simple.JSONValue;
 
 public class ParamHelper {
 
+	public static Param getParameter(String name, Collection<Param> params) throws NoSuchParamException {
+		return searchParameter(name, params, true);
+	}
+
 	public static Param getParameter(String name, IFilter filter) throws NoSuchParamException {
 		return searchParameter(name, filter, true);
 	}
@@ -24,7 +28,14 @@ public class ParamHelper {
 		if (filter == null) {
 			return null;
 		}
-		Collection<Param> paramList = filter.getParams();
+		return searchParameter(name, filter.getParams(), mandatory);
+	}
+
+	protected static Param searchParameter(String name, Collection<Param> paramList, boolean mandatory)
+			throws NoSuchParamException {
+		if (name == null) {
+			throw new IllegalArgumentException("Internal error. Name is null.");
+		}
 		if (paramList == null) {
 			return null;
 		}

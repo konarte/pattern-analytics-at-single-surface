@@ -13,12 +13,15 @@ import java.util.Arrays;
 import java.util.Properties;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
@@ -97,7 +100,7 @@ public class AboutDialog extends JDialog {
 	private JButton getJButtonOK() {
 		if (jButtonOK == null) {
 			jButtonOK = new JButton();
-			jButtonOK.setAction(new AbstractAction() {
+			Action okAction = new AbstractAction() {
 
 				/**
 				 * 
@@ -107,7 +110,13 @@ public class AboutDialog extends JDialog {
 				public void actionPerformed(ActionEvent e) {
 					AboutDialog.this.setVisible(false);
 				}
-			});
+			};
+
+			jButtonOK.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+					KeyStroke.getKeyStroke((char) KeyEvent.VK_ESCAPE), "cancel");
+			jButtonOK.getActionMap().put("cancel", okAction);
+			jButtonOK.setAction(okAction);
+
 			jButtonOK.setHorizontalAlignment(SwingConstants.CENTER);
 			jButtonOK.setText("OK");
 			jButtonOK.setName("ok");

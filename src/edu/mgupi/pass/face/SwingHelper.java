@@ -2,7 +2,9 @@ package edu.mgupi.pass.face;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.lang.reflect.Field;
 
+import javax.swing.JButton;
 import javax.swing.JMenu;
 import javax.swing.SwingUtilities;
 
@@ -30,6 +32,13 @@ public class SwingHelper {
 	 */
 	public static Component getChildNamed(Component parent, String name) {
 
+		if (parent == null) {
+			return null;
+		}
+		if (name == null) {
+			return null;
+		}
+
 		// Debug line
 		if (logger.isTraceEnabled()) {
 			logger.trace("Class: " + parent.getClass() + " Name: " + parent.getName());
@@ -45,6 +54,41 @@ public class SwingHelper {
 
 			for (int i = 0; i < children.length; ++i) {
 				Component child = getChildNamed(children[i], name);
+				if (child != null) {
+					return child;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	public static JButton getButtonByActionCommand(Component parent, String actionCommand) {
+
+		if (parent == null) {
+			return null;
+		}
+		if (actionCommand == null) {
+			return null;
+		}
+
+		// Debug line
+		if (logger.isTraceEnabled()) {
+			logger.trace("Class: " + parent.getClass() + " Name: " + parent.getName());
+		}
+
+		if (parent instanceof JButton) {
+			if (actionCommand.equals(((JButton) parent).getActionCommand())) {
+				return (JButton) parent;
+			}
+		}
+
+		if (parent instanceof Container) {
+			Component[] children = (parent instanceof JMenu) ? ((JMenu) parent).getMenuComponents()
+					: ((Container) parent).getComponents();
+
+			for (int i = 0; i < children.length; ++i) {
+				JButton child = getButtonByActionCommand(children[i], actionCommand);
 				if (child != null) {
 					return child;
 				}
@@ -74,27 +118,25 @@ public class SwingHelper {
 		}
 	}
 
-	//
-	// public static Object getReflectedFieldAccess(Object object, String name)
-	// throws SecurityException,
-	// NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
-	// Field field = object.getClass().getDeclaredField(name);
-	//
-	// boolean returnNoAccess = false;
-	// if (!field.isAccessible()) {
-	// returnNoAccess = true;
-	// field.setAccessible(true);
-	// }
-	//
-	// try {
-	// return field.get(object);
-	// } finally {
-	// if (returnNoAccess) {
-	// field.setAccessible(false);
-	// }
-	// }
-	//
-	// }
+	public static Object getReflectedFieldAccess(Object object, String name) throws SecurityException,
+			NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+		Field field = object.getClass().getDeclaredField(name);
+
+		boolean returnNoAccess = false;
+		if (!field.isAccessible()) {
+			returnNoAccess = true;
+			field.setAccessible(true);
+		}
+
+		try {
+			return field.get(object);
+		} finally {
+			if (returnNoAccess) {
+				field.setAccessible(false);
+			}
+		}
+
+	}
 
 	private static volatile int expectedWorkCount = 0;
 	private static volatile int workCount = 0;
@@ -204,7 +246,8 @@ public class SwingHelper {
 	private static void waitUntil(ConditionSet condition, Throwable watchedException) throws InterruptedException {
 		long time = System.currentTimeMillis();
 		boolean timeOK = false;
-		while ((timeOK = ((System.currentTimeMillis() - time) < MAX_WAIT_TIME)) && condition.keepWorking()) {
+		while ((timeOK = ((System.currentTimeMillis() - time) < MAX_WAIT_TIME)) && condition.keepWorking()
+				&& ((watchedException != null && watchedException.getCause() == null) || watchedException == null)) {
 			Thread.sleep(100);
 		}
 		if (!timeOK) {
