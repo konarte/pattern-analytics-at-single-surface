@@ -29,7 +29,6 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.TitledBorder;
 
-import org.apache.commons.configuration.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,14 +48,12 @@ public class SettingsDialog extends JDialog {
 	private JPanel jPanelLaF = null;
 	private JComboBox jComboBoxLaF = null;
 	private JLabel jLabelLaF = null;
-	private MainFrame parentFrame = null;
 
 	/**
 	 * @param owner
 	 */
 	public SettingsDialog(Frame owner) {
 		super(owner);
-		parentFrame = (MainFrame) owner;
 		initialize();
 	}
 
@@ -101,11 +98,13 @@ public class SettingsDialog extends JDialog {
 		jLabelBackgroundShow.setBackground(currentBackground);
 	}
 
+	private boolean needRestartProcessing = false;
 	private boolean needSaveCommon = false;
 
 	private void applySettings() throws Exception {
 
 		needSaveCommon = false;
+		needRestartProcessing = false;
 
 		// LaF apply
 		String className = lafs.get(jComboBoxLaF.getSelectedItem());
@@ -114,8 +113,6 @@ public class SettingsDialog extends JDialog {
 			AppHelper.getInstance().updateUI(className);
 			needSaveCommon = true;
 		}
-
-		boolean needRestartProcessing = false;
 
 		String newSourceMode = (String) jComboBoxSourceMode.getSelectedItem();
 		// setup new source mode anyway
@@ -131,39 +128,42 @@ public class SettingsDialog extends JDialog {
 			needRestartProcessing = true;
 		}
 
-		if (needRestartProcessing) {
-			this.parentFrame.restartProcessingBySource();
-		}
-
 	}
 
-	private void saveSettings() {
+	private boolean ok = false;
 
+	public boolean open() {
+		this.setVisible(true);
+		return ok;
+	}
+
+	private void save() {
 		try {
-			this.applySettings();
+			this.saveImpl();
 		} catch (Exception e) {
 			logger.error("Error when applying settings", e);
 			AppHelper.showExceptionDialog(this, "Unexpected error when applying settings.", e);
-			//			JOptionPane.showMessageDialog(null, "Unexpected error when applying settings (" + e + ")",
-			//					"Error when applying settings.", JOptionPane.ERROR_MESSAGE);
 		}
+	}
 
+	private void saveImpl() throws Exception {
+		ok = false;
 		try {
+			this.applySettings();
+
 			if (this.needSaveCommon) {
 				logger.debug("Saving settings...");
 				Config.getInstance().saveCommonConfig();
 			}
-		} catch (ConfigurationException e) {
-			logger.error("Error when saving settings", e);
-			AppHelper.showExceptionDialog(this, "Unexpected error when saving settings.", e);
-			//			JOptionPane.showMessageDialog(null, "Unexpected error when saving settings (" + e + ")",
-			//					"Error when saving settings.", JOptionPane.ERROR_MESSAGE);
-		}
 
-		SettingsDialog.this.setVisible(false);
+			ok = this.needRestartProcessing;
+		} finally {
+			SettingsDialog.this.setVisible(false);
+		}
 	}
 
-	private void cancelSettings() {
+	private void cancelImpl() {
+		ok = false;
 		this.resetSettings();
 		SettingsDialog.this.setVisible(false);
 	}
@@ -214,7 +214,7 @@ public class SettingsDialog extends JDialog {
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent e) {
-					SettingsDialog.this.saveSettings();
+					SettingsDialog.this.save();
 				}
 			});
 			jButtonOK.setName("ok");
@@ -240,7 +240,7 @@ public class SettingsDialog extends JDialog {
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent e) {
-					SettingsDialog.this.cancelSettings();
+					SettingsDialog.this.cancelImpl();
 				}
 			};
 

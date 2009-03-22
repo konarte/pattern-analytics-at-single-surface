@@ -2,6 +2,7 @@ package edu.mgupi.pass.face.template;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -63,23 +64,33 @@ public class ParametersEditorPanel extends JPanel {
 		this.add(getJPanelPlace(), gridBagConstraints);
 	}
 
-	private Collection<Param> parameters = null;
-	private Map<Param, Color> selectedColors = new HashMap<Param, Color>(); //  @jve:decl-index=0:
-	private Map<Param, Component> controlComponents = new HashMap<Param, Component>(); //  @jve:decl-index=0:
 	private JPanel jPanelPlace = null;
 
-	public void setParameters(String title, Collection<Param> editableParameters) throws Exception {
+	private Collection<Param> parameters = null; //  @jve:decl-index=0:
+	private Map<Param, Color> selectedColors = new HashMap<Param, Color>(); //  @jve:decl-index=0:
+	private Map<Param, Component> controlComponents = new HashMap<Param, Component>(); //  @jve:decl-index=0:
+
+	private Dimension lastDimension = null; //  @jve:decl-index=0:
+
+	public void setParameters(String title, Collection<Param> editableParameters) {
 
 		if (editableParameters == null) {
-			return; // ---------
+			throw new IllegalArgumentException("Internal error. 'editableParameters' must be not null.");
 		}
 		if (title == null) {
-			throw new IllegalAccessException("Internal error. 'Title' must be not null.");
+			throw new IllegalArgumentException("Internal error. 'title' must be not null.");
 		}
 
+		if (parameters == editableParameters) {
+			return;
+		}
+
+		lastDimension = null;
 		selectedColors.clear();
 		controlComponents.clear();
 		parameters = editableParameters;
+
+		jPanelPlace.removeAll();
 
 		((TitledBorder) jPanelPlace.getBorder()).setTitle(title);
 
@@ -92,7 +103,7 @@ public class ParametersEditorPanel extends JPanel {
 		for (Iterator<Param> iter = editableParameters.iterator(); iter.hasNext();) {
 			final Param param = iter.next();
 			JLabel label = new JLabel();
-			label.setText(param.getTitle());
+			label.setText(param.getTitle() + ":");
 			label.setName(param.getName() + "_label");
 
 			jPanelPlace.add(label, "skip");
@@ -198,23 +209,33 @@ public class ParametersEditorPanel extends JPanel {
 			index++;
 		}
 
+		this.lastDimension = ((MigLayout) this.jPanelPlace.getLayout()).preferredLayoutSize(this.jPanelPlace);
 		this.resetParameterValues();
 
 	}
 
+	public Dimension getLastDimension() {
+		return lastDimension;
+	}
+
 	public void resetParameterValues() {
+		this.resetParameterValues(false);
+	}
+
+	public void resetParameterValues(boolean fromDefaults) {
 		for (Map.Entry<Param, Component> entry : controlComponents.entrySet()) {
 			Param param = entry.getKey();
 			Component comp = entry.getValue();
 
 			TYPES type = param.getType();
+			Object value = fromDefaults ? param.getDefault_() : param.getValue();
 			if (type == TYPES.STRING) {
-				((JTextField) comp).setText(param.getValue() == null ? null : String.valueOf(param.getValue()));
+				((JTextField) comp).setText(value == null ? null : String.valueOf(value));
 			} else if (type == TYPES.INT) {
 				if (comp instanceof JFormattedTextField) {
-					((JFormattedTextField) comp).setValue(param.getValue());
+					((JFormattedTextField) comp).setValue(value);
 				} else if (comp instanceof JSpinner) {
-					((JSpinner) comp).setValue(param.getValue());
+					((JSpinner) comp).setValue(value);
 				} else {
 					throw new IllegalArgumentException(
 							"Internal error. Unable to properly cast stored component for parameter '"
@@ -222,16 +243,16 @@ public class ParametersEditorPanel extends JPanel {
 									+ ". Unknown class. Please, consult with developers.");
 				}
 			} else if (type == TYPES.DOUBLE) {
-				((JFormattedTextField) comp).setValue(param.getValue());
+				((JFormattedTextField) comp).setValue(value);
 			} else if (type == TYPES.COLOR) {
-				Color color = (Color) param.getValue();
+				Color color = (Color) value;
 				((JLabel) comp).setBackground(color);
 				selectedColors.put(param, color);
 			} else if (type == TYPES.LIST) {
 				((JComboBox) comp).setSelectedIndex(0);
-				if (param.getValue() != null) {
+				if (value != null) {
 					for (int i = 0; i <= param.getAllowed_values().length; i++) {
-						if (param.getValue().equals(param.getAllowed_values()[i])) {
+						if (value.equals(param.getAllowed_values()[i])) {
 							((JComboBox) comp).setSelectedItem(param.getVisual_values()[i]);
 							break;
 						}
@@ -252,33 +273,42 @@ public class ParametersEditorPanel extends JPanel {
 			Component comp = entry.getValue();
 
 			TYPES type = param.getType();
-			if (type == TYPES.STRING) {
-				param.setValue(((JTextField) comp).getText());
-			} else if (type == TYPES.INT) {
-				if (comp instanceof JFormattedTextField) {
+
+			try {
+				if (type == TYPES.STRING) {
+					param.setValue(((JTextField) comp).getText());
+				} else if (type == TYPES.INT) {
+					if (comp instanceof JFormattedTextField) {
+						param.setValue(((JFormattedTextField) comp).getValue());
+					} else if (comp instanceof JSpinner) {
+						param.setValue(((JSpinner) comp).getValue());
+					} else {
+						throw new IllegalArgumentException(
+								"Internal error. Unable to properly cast stored component for parameter '"
+										+ param.getName() + "' with component class " + comp.getClass()
+										+ ". Unknown class. Please, consult with developers.");
+					}
+				} else if (type == TYPES.DOUBLE) {
 					param.setValue(((JFormattedTextField) comp).getValue());
-				} else if (comp instanceof JSpinner) {
-					param.setValue(((JSpinner) comp).getValue());
+				} else if (type == TYPES.COLOR) {
+					param.setValue(selectedColors.get(param));
+				} else if (type == TYPES.LIST) {
+					param.setValue(param.getAllowed_values()[((JComboBox) comp).getSelectedIndex()]);
 				} else {
 					throw new IllegalArgumentException(
-							"Internal error. Unable to properly cast stored component for parameter '"
-									+ param.getName() + "' with component class " + comp.getClass()
-									+ ". Unknown class. Please, consult with developers.");
+							"Internal error. Unable to properly set default value to parameter '" + param.getName()
+									+ "' with type " + type + ". Unknown type. Please, consult with developers.");
 				}
-			} else if (type == TYPES.DOUBLE) {
-				param.setValue(((JFormattedTextField) comp).getValue());
-			} else if (type == TYPES.COLOR) {
-				param.setValue(selectedColors.get(param));
-			} else if (type == TYPES.LIST) {
-				param.setValue(param.getAllowed_values()[((JComboBox) comp).getSelectedIndex()]);
-			} else {
-				throw new IllegalArgumentException(
-						"Internal error. Unable to properly set default value to parameter '" + param.getName()
-								+ "' with type " + type + ". Unknown type. Please, consult with developers.");
+			} catch (IllegalParameterValueException ive) {
+				throw new IllegalParameterValueException("Error when applying parameter '" + param.getName() + "'", ive);
 			}
 		}
 
 		return this.parameters;
+	}
+
+	public void restoreDefaults() throws IllegalParameterValueException {
+		this.resetParameterValues(true);
 	}
 
 	/**
@@ -289,7 +319,6 @@ public class ParametersEditorPanel extends JPanel {
 	private JPanel getJPanelPlace() {
 		if (jPanelPlace == null) {
 			MigLayout mig = new MigLayout("", "[]0[right][200lp, fill]", "");
-
 			jPanelPlace = new JPanel();
 			jPanelPlace.setLayout(mig);
 			jPanelPlace.setName("paramPlace");

@@ -1,6 +1,7 @@
 package edu.mgupi.pass.modules.basic;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
@@ -8,6 +9,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.text.DecimalFormat;
+import java.util.Collection;
 
 import javax.imageio.ImageIO;
 
@@ -22,6 +24,8 @@ import edu.mgupi.pass.db.locuses.LocusSourcesFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
 import edu.mgupi.pass.db.locuses.LocusesFactory;
 import edu.mgupi.pass.filters.FilterChainsaw;
+import edu.mgupi.pass.filters.Param;
+import edu.mgupi.pass.filters.Param.TYPES;
 import edu.mgupi.pass.filters.java.GrayScaleFilter;
 import edu.mgupi.pass.filters.service.PlaceImageFilter;
 import edu.mgupi.pass.modules.ModuleHelper;
@@ -45,6 +49,18 @@ public class SimpleMatrixModuleTest {
 		if (module != null) {
 			module = null;
 		}
+	}
+	
+	@Test
+	public void testForModifyAnalyze() throws Exception {
+		Collection<Param> params = module.getParams();
+		try {
+			params.add(new Param("1", "2", TYPES.INT, 0));
+			fail("No exception throws!");
+		} catch (UnsupportedOperationException e) {
+			System.out.println("Received expected exception: " + e);
+		}
+
 	}
 
 	private DecimalFormat fmt = new DecimalFormat("0.0000");

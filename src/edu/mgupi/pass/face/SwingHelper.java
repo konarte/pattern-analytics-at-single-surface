@@ -246,8 +246,11 @@ public class SwingHelper {
 	private static void waitUntil(ConditionSet condition, Throwable watchedException) throws InterruptedException {
 		long time = System.currentTimeMillis();
 		boolean timeOK = false;
+		if (watchedException == null) { 
+			watchedException = new Exception();
+		}
 		while ((timeOK = ((System.currentTimeMillis() - time) < MAX_WAIT_TIME)) && condition.keepWorking()
-				&& ((watchedException != null && watchedException.getCause() == null) || watchedException == null)) {
+				&& watchedException.getCause() == null) {
 			Thread.sleep(100);
 		}
 		if (!timeOK) {

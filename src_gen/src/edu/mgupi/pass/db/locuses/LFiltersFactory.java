@@ -19,6 +19,49 @@ import java.util.List;
 
 public class LFiltersFactory {
 	private static final org.apache.log4j.Logger _logger = org.apache.log4j.Logger.getLogger(LFiltersFactory.class);
+	public static LFilters[] listBycodename(String codename) throws PersistentException {
+		try {
+			PersistentSession session = edu.mgupi.pass.db.surfaces.PassPersistentManager.instance().getSession();
+			return listBycodename(session, codename);
+		}
+		catch (Exception e) {
+			_logger.error("listBycodename(String codename)", e);
+			throw new PersistentException(e);
+		}
+	}
+	
+	public static LFilters[] listBycodename(PersistentSession session, String codename) throws PersistentException {
+		try {
+			Query query = session.createQuery("From edu.mgupi.pass.db.locuses.LFilters As LFilters Where LFilters.codename = ?");
+			query.setParameter(0, codename);
+			List list = query.list();
+			return (LFilters[]) list.toArray(new LFilters[list.size()]);
+		}
+		catch (Exception e) {
+			_logger.error("listBycodename(PersistentSession session, String codename)", e);
+			throw new PersistentException(e);
+		}
+	}
+	
+	public static LFilters loadBycodename(String codename) throws PersistentException {
+		try {
+			PersistentSession session = edu.mgupi.pass.db.surfaces.PassPersistentManager.instance().getSession();
+			return loadBycodename(session, codename);
+		}
+		catch (Exception e) {
+			_logger.error("loadBycodename(String codename)", e);
+			throw new PersistentException(e);
+		}
+	}
+	
+	public static LFilters loadBycodename(PersistentSession session, String codename) throws PersistentException {
+		LFilters[] lFilterses = listBycodename(session, codename);
+		if (lFilterses != null && lFilterses.length > 0)
+			return lFilterses[0];
+		else
+			return null;
+	}
+	
 	public static LFilters loadLFiltersByORMID(int idLFilter) throws PersistentException {
 		try {
 			PersistentSession session = edu.mgupi.pass.db.surfaces.PassPersistentManager.instance().getSession();

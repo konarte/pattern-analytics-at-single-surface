@@ -101,20 +101,17 @@ public class Application {
 
 		final FileChannel channel = new FileOutputStream(LOCK_FILE, false).getChannel();
 		final FileLock lock = channel.tryLock();
-		if (lock == null) {
-			JOptionPane.showMessageDialog(null, "Another instance of PASS already runned. Please, "
-					+ "close other application.", "Unable to start", JOptionPane.ERROR_MESSAGE);
-			System.exit(0);
 
-		}
 		// new File(LOCK_FILE).deleteOnExit();
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 
 			public void run() {
 				SecundomerList.printToOutput(System.out);
-				logger.debug("Shutdown PASS.");
+				logger.debug("Shutdown " + Const.FULL_PROGRAM_NAME);
 				try {
-					lock.release();
+					if (lock != null) {
+						lock.release();
+					}
 					channel.close();
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -140,6 +137,13 @@ public class Application {
 				//				JOptionPane.showMessageDialog(null, "Unexpected error when applying LookAndFeel. Try to run "
 				//						+ "application with '-nolaf' key (" + e + ")", "Invalid look and feel",
 				//						JOptionPane.WARNING_MESSAGE);
+			}
+
+			if (lock == null) {
+				JOptionPane.showMessageDialog(null, "Another instance of PASS already runned. Please, "
+						+ "close other application.", "Unable to start", JOptionPane.ERROR_MESSAGE);
+				System.exit(0);
+
 			}
 
 			splash.setSplashText("Подключение и инициализация БД...");

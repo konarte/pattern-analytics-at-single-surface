@@ -74,8 +74,8 @@ public class LocusAppliedModule implements Serializable {
 	
 	@Column(name="IdLocusModule", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D31202B70659D03339")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31202B70659D03339", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31202DC6AB8F052CF")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31202DC6AB8F052CF", strategy="native")	
 	private int idLocusModule;
 	
 	@OneToOne(targetEntity=edu.mgupi.pass.db.locuses.LModules.class)	

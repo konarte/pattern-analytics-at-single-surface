@@ -77,6 +77,12 @@ public class RetrieveAndUpdatePassData {
 		
 	}
 	
+	public void retrieveLFiltersBycodename() {
+		System.out.println("Retrieving LFilters by codename...");
+		// Please uncomment the follow line and fill in parameter(s)
+		//System.out.println(edu.mgupi.pass.db.locuses.LFiltersFactory.loadBycodename());
+	}
+	
 	public void retrieveByCriteria() throws PersistentException {
 		System.out.println("Retrieving DefectClasses by DefectClassesCriteria");
 		edu.mgupi.pass.db.defects.DefectClassesCriteria defectClassesCriteria = new edu.mgupi.pass.db.defects.DefectClassesCriteria();
@@ -206,6 +212,7 @@ public class RetrieveAndUpdatePassData {
 			RetrieveAndUpdatePassData retrieveAndUpdatePassData = new RetrieveAndUpdatePassData();
 			try {
 				retrieveAndUpdatePassData.retrieveAndUpdateTestData();
+				//retrieveAndUpdatePassData.retrieveLFiltersBycodename();
 				//retrieveAndUpdatePassData.retrieveByCriteria();
 			}
 			finally {

@@ -74,8 +74,8 @@ public class Defects implements Serializable {
 	
 	@Column(name="IdDefect", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D31202B70651003331")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31202B70651003331", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31202DC6AAE3052C7")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31202DC6AAE3052C7", strategy="native")	
 	private int idDefect;
 	
 	@Column(name="BeddingDepth", nullable=false)	

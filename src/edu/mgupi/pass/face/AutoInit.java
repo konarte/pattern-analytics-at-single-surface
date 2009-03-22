@@ -11,8 +11,10 @@ import org.orm.ORMDatabaseInitiator;
 import org.orm.PersistentTransaction;
 
 import edu.mgupi.pass.db.locuses.LFilters;
+import edu.mgupi.pass.db.locuses.LFiltersCriteria;
 import edu.mgupi.pass.db.locuses.LFiltersFactory;
 import edu.mgupi.pass.db.locuses.LModules;
+import edu.mgupi.pass.db.locuses.LModulesCriteria;
 import edu.mgupi.pass.db.locuses.LModulesFactory;
 import edu.mgupi.pass.db.locuses.LocusAppliedFilters;
 import edu.mgupi.pass.db.locuses.LocusAppliedFiltersFactory;
@@ -80,8 +82,10 @@ public class AutoInit {
 				// Filters first
 				Collection<Class<?>> filterClasses = ClassesHelper.getAvailableClasses(IFilter.class);
 
-				StringBuilder items = new StringBuilder();
+				//				StringBuilder items = new StringBuilder();
 				System.out.println("Registering filters (" + filterClasses.size() + " expected)...");
+
+				LFiltersCriteria fNICriteria = new LFiltersCriteria();
 				for (Class<?> clazz : filterClasses) {
 					IFilter filter = (IFilter) clazz.newInstance();
 					String name = filter.getName();
@@ -89,7 +93,12 @@ public class AutoInit {
 
 					System.out.print("Checking filter class " + codename + " (" + filter.getName() + ")...");
 
-					LFilters dbFilter = LFiltersFactory.loadLFiltersByQuery("codename = '" + codename + "'", null);
+					///LFiltersFactory.loadLFiltersByCriteria(LFiltersDeCriteria.)
+
+					//LFilters dbFilter = LFiltersFactory.loadLFiltersByQuery("codename = '" + codename + "'", null);
+					LFiltersCriteria fCriteria = new LFiltersCriteria();
+					fCriteria.codename.eq(codename);
+					LFilters dbFilter = LFiltersFactory.loadLFiltersByCriteria(fCriteria);
 					if (dbFilter == null) {
 						System.out.println(" CREATE");
 						dbFilter = LFiltersFactory.createLFilters();
@@ -100,39 +109,43 @@ public class AutoInit {
 						if (!dbFilter.getName().equals(name)) {
 							dbFilter.setName(name);
 							dbFilter.save();
-							System.out.println(" SKIP (but update changed name)");
+							System.out.println(" UPDATE (changed name)");
 						} else {
 							System.out.println(" SKIP (already exists)");
 						}
 					}
-					if (items.length() > 0) {
-						items.append(", ");
-					}
-					items.append("'").append(codename).append("'");
+
+					fNICriteria.codename.ne(codename);
+					//					
+					//					if (items.length() > 0) {
+					//						items.append(", ");
+					//					}
+					//					items.append("'").append(codename).append("'");
 				}
 
 				// Now we must clear non-existed filters (records with codenames
 				// not
 				// present in our classes).
 				// And only if that filters not using in table data
-				if (items.length() > 0) {
-					for (LFilters checkFilter : LFiltersFactory.listLFiltersByQuery("codename not in (" + items + ")",
-							null)) {
-						LocusAppliedFilters found = LocusAppliedFiltersFactory.loadLocusAppliedFiltersByQuery(
-								"LFiltersIdLFilter = " + checkFilter.getIdLFilter(), null);
-						if (found == null) {
-							System.out.println("Filter " + checkFilter.getCodename() + " (" + checkFilter.getName()
-									+ ") stored in database does not have reference "
-									+ "in LocusFilters table. Removing unexisted class reference.");
-							checkFilter.delete();
-						}
+				//				if (items.length() > 0) {
+				for (LFilters checkFilter : LFiltersFactory.listLFiltersByCriteria(fNICriteria)) {
+					LocusAppliedFilters found = LocusAppliedFiltersFactory.loadLocusAppliedFiltersByQuery(
+							"LFiltersIdLFilter = " + checkFilter.getIdLFilter(), null);
+					if (found == null) {
+						System.out.println("Filter " + checkFilter.getCodename() + " (" + checkFilter.getName()
+								+ ") stored in database does not have reference "
+								+ "in LocusFilters table. Removing unexisted class reference.");
+						checkFilter.delete();
 					}
 				}
+				//				}
 
 				// Processing modules, the same way
-				items = new StringBuilder();
+				//				items = new StringBuilder();
 				Collection<Class<?>> moduleClasses = ClassesHelper.getAvailableClasses(IModule.class);
 				System.out.println("Registering modules (" + moduleClasses.size() + " expected)...");
+
+				LModulesCriteria mNICriteria = new LModulesCriteria();
 				for (Class<?> clazz : moduleClasses) {
 					IModule module = (IModule) clazz.newInstance();
 					String name = module.getName();
@@ -140,7 +153,10 @@ public class AutoInit {
 
 					System.out.print("Checking module class " + codename + " (" + module.getName() + ")...");
 
-					LModules dbModule = LModulesFactory.loadLModulesByQuery("codename = '" + codename + "'", null);
+					LModulesCriteria mCriteria = new LModulesCriteria();
+					mCriteria.codename.eq(codename);
+					//LModules dbModule = LModulesFactory.loadLModulesByQuery("codename = '" + codename + "'", null);
+					LModules dbModule = LModulesFactory.loadLModulesByCriteria(mCriteria);
 					if (dbModule == null) {
 						System.out.println(" CREATE");
 						dbModule = LModulesFactory.createLModules();
@@ -151,32 +167,34 @@ public class AutoInit {
 						if (!dbModule.getName().equals(name)) {
 							dbModule.setName(name);
 							dbModule.save();
-							System.out.println(" SKIP (but update changed name)");
+							System.out.println(" UPDATE (changed name)");
 						} else {
 							System.out.println(" SKIP (already exists)");
 						}
 
 					}
-					if (items.length() > 0) {
-						items.append(", ");
-					}
-					items.append("'").append(codename).append("'");
+
+					mNICriteria.codename.ne(codename);
+
+					//					if (items.length() > 0) {
+					//						items.append(", ");
+					//					}
+					//					items.append("'").append(codename).append("'");
 				}
 
 				// And removing unnecessary modules
-				if (items.length() > 0) {
-					for (LModules checkModule : LModulesFactory.listLModulesByQuery("codename not in (" + items + ")",
-							null)) {
-						LocusAppliedModule found = LocusAppliedModuleFactory.loadLocusAppliedModuleByQuery(
-								"LModulesIDLModule = " + checkModule.getIdLModule(), null);
-						if (found == null) {
-							System.out.println("Module " + checkModule.getCodename() + " (" + checkModule.getName()
-									+ ") stored in database does not have reference "
-									+ "in Locuses table. Removing unexisted class reference.");
-							checkModule.delete();
-						}
+				//				if (items.length() > 0) {
+				for (LModules checkModule : LModulesFactory.listLModulesByCriteria(mNICriteria)) {
+					LocusAppliedModule found = LocusAppliedModuleFactory.loadLocusAppliedModuleByQuery(
+							"LModulesIDLModule = " + checkModule.getIdLModule(), null);
+					if (found == null) {
+						System.out.println("Module " + checkModule.getCodename() + " (" + checkModule.getName()
+								+ ") stored in database does not have reference "
+								+ "in Locuses table. Removing unexisted class reference.");
+						checkModule.delete();
 					}
 				}
+				//				}
 
 				transaction.commit();
 

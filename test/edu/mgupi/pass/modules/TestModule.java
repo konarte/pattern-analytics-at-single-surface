@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 import javax.imageio.ImageIO;
 
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.db.locuses.LocusModuleData;
 import edu.mgupi.pass.db.locuses.Locuses;
+import edu.mgupi.pass.face.template.ParametersEditorPanelTest;
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.Param.TYPES;
 import edu.mgupi.pass.util.IInitiable;
@@ -46,10 +48,12 @@ public class TestModule implements IModule, IInitiable {
 		params = new ArrayList<Param>();
 		params.add(TEST_PARAM1);
 		params.add(TEST_PARAM2);
+		ParametersEditorPanelTest.fillParameters(params);
+		params = Collections.unmodifiableCollection(params);
 	}
 
 	public String getName() {
-		return "Тестовый модуль анализа";
+		return "Warning. Тестовый модуль анализа";
 	}
 
 	@Override

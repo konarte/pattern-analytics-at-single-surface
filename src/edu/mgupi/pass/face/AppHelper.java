@@ -1,7 +1,10 @@
 package edu.mgupi.pass.face;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Window;
 import java.io.ByteArrayOutputStream;
@@ -12,7 +15,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -58,7 +65,7 @@ public class AppHelper {
 	private volatile Map<Class<? extends Window>, Window> windowsCollection = new HashMap<Class<? extends Window>, Window>();
 	private volatile Collection<Window> additionalWindows = new ArrayList<Window>();
 
-	private synchronized Window getWindow(Class<? extends Window> windowType, Frame owner, boolean force)
+	private synchronized Window getWindow(Frame owner, Class<? extends Window> windowType, boolean force)
 			throws Exception {
 		Window window = windowsCollection.get(windowType);
 
@@ -84,12 +91,12 @@ public class AppHelper {
 		return window;
 	}
 
-	private Window createWindow(Class<? extends Window> windowType, Frame owner, boolean force) throws Exception {
+	private Window createWindow(Frame owner, Class<? extends Window> windowType, boolean force) throws Exception {
 		if (windowType == null) {
 			throw new IllegalArgumentException("Internal error. 'windowType' must be not not null.");
 		}
 
-		return this.getWindow(windowType, owner, force);
+		return this.getWindow(owner, windowType, force);
 	}
 
 	public Window searchWindow(Class<? extends Window> windowType) {
@@ -97,16 +104,24 @@ public class AppHelper {
 	}
 
 	public Window registerAdditionalWindow(Class<? extends Window> windowType) throws Exception {
-		return createWindow(windowType, null, true);
+		return createWindow(null, windowType, true);
 	}
 
 	public Window openWindow(Class<? extends Window> windowType) {
-		return this.openWindow(windowType, null);
+		return this.openWindow(null, windowType);
 	}
 
-	public Window openWindow(Class<? extends Window> windowType, Frame owner) {
+	public Window openWindow(Frame owner, Class<? extends Window> windowType) {
+		return this.openWindow(owner, windowType, true);
+	}
+
+	public Window openWindowHidden(Frame owner, Class<? extends Window> windowType) {
+		return this.openWindow(owner, windowType, false);
+	}
+
+	private Window openWindow(Frame owner, Class<? extends Window> windowType, boolean show) {
 		try {
-			return this.openWindowImpl(windowType, owner);
+			return this.openWindowImpl(owner, windowType, show);
 		} catch (Exception e) {
 			logger.error("Error when creating window instance", e);
 			AppHelper.showExceptionDialog("Unexpected error when creating instance of '" + windowType
@@ -118,9 +133,11 @@ public class AppHelper {
 		}
 	}
 
-	protected Window openWindowImpl(Class<? extends Window> windowType, Frame owner) throws Exception {
-		Window frame = this.createWindow(windowType, owner, false);
-		frame.setVisible(true);
+	protected Window openWindowImpl(Frame owner, Class<? extends Window> windowType, boolean show) throws Exception {
+		Window frame = this.createWindow(owner, windowType, false);
+		if (show) {
+			frame.setVisible(true);
+		}
 		return frame;
 	}
 
@@ -165,31 +182,25 @@ public class AppHelper {
 		showExceptionDialog(null, message, e);
 	}
 
+	
 	public static void showExceptionDialog(Component parent, String message, Throwable e) {
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		e.printStackTrace(new PrintStream(out));
 
-		String stackTrace = out.toString().replaceAll("\n", "");
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+		panel.add(new JLabel("<html><h2>" + message + "</h2><b>" + e + "</b><hr></html>"), BorderLayout.NORTH);
 
-		//StringBuilder str = Utils.replaceAll(new StringBuilder(out.toString()), "\n", "");
-		//String str = Utils.replaceAll(out.toString(), "\n", "");
+		JTextArea area = new JTextArea(out.toString());
+		area.setEditable(false);
+		area.setFont(new Font(area.getFont().getName(), Font.PLAIN, 12));
 
-		//		JOptionPane option = new JOptionPane(message, JOptionPane.ERROR_MESSAGE);
-		//		JDialog dialog = option.createDialog("Error");
-		//		JTextArea jtext = new JTextArea(out.toString());
-		//		jtext.setPreferredSize(new Dimension(400, 300));
-		//		jtext.setEditable(false);
-		//		dialog.getContentPane().add(jtext, BorderLayout.SOUTH);
-		//		dialog.pack();
-		//		dialog.setVisible(true);
-		//
-		//		SwingHelper.printChildHierarchy(dialog);
-		//
-		//		dialog.dispose();
+		JScrollPane pane = new JScrollPane(area);
+		pane.setPreferredSize(new Dimension(600, 300));
+		panel.add(pane, BorderLayout.CENTER);
 
-		JOptionPane.showMessageDialog(parent, "<html><h2>" + message + "</h2><b>" + e + "</b><hr><pre>" + stackTrace
-				+ "</pre></html>", "Error", JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(parent, panel, "Error", JOptionPane.ERROR_MESSAGE);
 
 		try {
 			out.close();

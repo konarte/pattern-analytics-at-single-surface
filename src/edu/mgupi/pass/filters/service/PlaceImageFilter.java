@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +28,11 @@ public class PlaceImageFilter implements IFilter {
 	private Param BACKGROUND = new Param("Background", "Цвет фона", TYPES.COLOR, Color.WHITE);
 
 	public PlaceImageFilter() {
-		params = new ArrayList<Param>(2);
+		params = new ArrayList<Param>(3);
 		params.add(WIDTH);
 		params.add(HEIGHT);
 		params.add(PLACE);
+		params = Collections.unmodifiableCollection(params);
 	}
 
 	@Override

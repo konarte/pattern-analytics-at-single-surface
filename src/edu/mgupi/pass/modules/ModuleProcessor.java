@@ -109,15 +109,15 @@ public class ModuleProcessor {
 
 	private CacheInitiable<IModule> cachedModules = new CacheInitiable<IModule>();
 
-	public void setModule(Class<? extends IModule> moduleClass) throws InstantiationException, IllegalAccessException,
-			IOException, ModuleException, PersistentException {
+	public IModule setModule(Class<? extends IModule> moduleClass) throws InstantiationException,
+			IllegalAccessException, IOException, ModuleException, PersistentException {
 		if (moduleClass == null) {
 			throw new IllegalArgumentException("Internal error. moduleClass must be not null.");
 		}
 
 		if (this.module != null && moduleClass == this.module.getClass()) {
 			logger.debug("ModuleProcessor.registerModule class {} already set", moduleClass);
-			return;
+			return this.module;
 
 		}
 		logger.debug("Registering module as class {}", moduleClass);
@@ -125,6 +125,13 @@ public class ModuleProcessor {
 		IModule instance = cachedModules.getInstance(moduleClass);
 
 		this.module = instance;
+		this.updateModule();
+
+		return this.module;
+	}
+
+	public void updateModule() throws InstantiationException, IllegalAccessException, IOException, ModuleException,
+			PersistentException {
 		if (lastLocus != null) {
 
 			logger.debug("Do analyze after set new module");

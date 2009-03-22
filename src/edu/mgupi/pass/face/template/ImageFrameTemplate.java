@@ -2,6 +2,7 @@ package edu.mgupi.pass.face.template;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -57,7 +58,7 @@ public class ImageFrameTemplate extends JDialog {
 	private JPanel jPanelScaleBox = null;
 	private JCheckBox jCheckBoxScaleBox = null;
 
-	public void registerControlCheckbox(final JCheckBox controlCheckBox) {
+	public void registerControlCheckbox(final Frame parent, final JCheckBox controlCheckBox) {
 
 		if (registeredAlready) {
 			logger.error("Error when registering " + controlCheckBox + " for " + this);
@@ -78,7 +79,17 @@ public class ImageFrameTemplate extends JDialog {
 			private static final long serialVersionUID = 1L;
 
 			public void actionPerformed(ActionEvent e) {
-				ImageFrameTemplate.this.setVisible(controlCheckBox.isSelected());
+
+				if (parent.isVisible()) {
+					ImageFrameTemplate.this.setVisible(controlCheckBox.isSelected());
+				} else {
+					parent.addWindowListener(new WindowAdapter() {
+						public void windowOpened(WindowEvent e) {
+							ImageFrameTemplate.this.setVisible(controlCheckBox.isSelected());
+							parent.removeWindowListener(this);
+						}
+					});
+				}
 			}
 		});
 		controlCheckBox.setText(text);
