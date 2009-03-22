@@ -122,7 +122,7 @@ public class ParamHelperTest {
 		MyFilter myFilter = new MyFilter(paramList);
 
 		assertNotNull(ParamHelper.searchParameter("key1", myFilter, false));
-		assertNull(ParamHelper.searchParameter("key1", null, false));
+		assertNull(ParamHelper.searchParameter("key1", (IFilter) null, false));
 		assertNull(ParamHelper.searchParameter("key56", myFilter, false));
 
 		try {

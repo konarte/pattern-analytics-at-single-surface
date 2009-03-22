@@ -9,18 +9,22 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.TitledBorder;
@@ -227,7 +231,8 @@ public class SettingsDialog extends JDialog {
 	private JButton getJButtonCancel() {
 		if (jButtonCancel == null) {
 			jButtonCancel = new JButton();
-			jButtonCancel.setAction(new AbstractAction() {
+
+			Action cancelAction = new AbstractAction() {
 
 				/**
 				 * 
@@ -237,7 +242,14 @@ public class SettingsDialog extends JDialog {
 				public void actionPerformed(ActionEvent e) {
 					SettingsDialog.this.cancelSettings();
 				}
-			});
+			};
+
+			jButtonCancel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+					KeyStroke.getKeyStroke((char) KeyEvent.VK_ESCAPE), "cancel");
+			jButtonCancel.getActionMap().put("cancel", cancelAction);
+			jButtonCancel.setAction(cancelAction);
+
+			//
 			jButtonCancel.setName("cancel");
 			jButtonCancel.setText("Отмена");
 		}

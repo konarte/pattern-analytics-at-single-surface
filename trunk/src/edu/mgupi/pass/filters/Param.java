@@ -130,7 +130,7 @@ public class Param {
 		if (this.type == TYPES.DOUBLE) {
 			if (!(value instanceof Double)) {
 				throw new IllegalParameterValueException("Parameter " + this + " attempt to set up incorrect value "
-						+ value + ". This value must be a float.");
+						+ value + ". This value must be a double.");
 			}
 		}
 
