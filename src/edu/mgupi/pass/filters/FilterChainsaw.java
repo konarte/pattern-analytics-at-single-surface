@@ -8,6 +8,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.util.CacheIFactory;
 import edu.mgupi.pass.util.CacheInitiable;
 import edu.mgupi.pass.util.IInitiable;
 
@@ -24,18 +25,23 @@ public class FilterChainsaw {
 
 	private final static Logger logger = LoggerFactory.getLogger(FilterChainsaw.class);
 
-	private List<IFilter> filterList = new ArrayList<IFilter>();
+	protected List<IFilter> filterList = new ArrayList<IFilter>();
 
 	private CacheInitiable<IFilter> cacheInstance = null;
-	private boolean singleInstanceCaching = false;
+	protected boolean singleInstanceCaching = false;
+	//	protected boolean doNotCleanCacheInstance = false;
+
+	private BufferedImage sourceImage = null;
+	private BufferedImage lastFilteredImage;
 
 	public FilterChainsaw() {
-		//
+		this(false);
 	}
 
 	public FilterChainsaw(boolean singleInstanceCaching) {
 		this.singleInstanceCaching = singleInstanceCaching;
-		this.cacheInstance = new CacheInitiable<IFilter>();
+		this.cacheInstance = singleInstanceCaching ? CacheIFactory.getSingleInstanceFilters() : CacheIFactory
+				.getFreeListFilters();
 	}
 
 	/**
@@ -46,10 +52,16 @@ public class FilterChainsaw {
 	 */
 	public void close() {
 		this.reset();
-		if (singleInstanceCaching) {
-			this.clearFilters();
-			cacheInstance.close();
-		}
+		this.cacheInstance = null;
+		this.filterList = null;
+
+		//		if (cacheInstance != null) {
+		//			if (doNotCleanCacheInstance) {
+		//				cacheInstance.close();
+		//			}
+		//			cacheInstance = null;
+		//		}
+
 	}
 
 	/**
@@ -62,19 +74,10 @@ public class FilterChainsaw {
 		logger.debug("Reset all registered filters");
 
 		this.detachImage();
-
-		if (!singleInstanceCaching) {
-			this.clearFilters();
-		}
 		filterList.clear();
-	}
 
-	private void clearFilters() {
-		for (IFilter filter : filterList) {
-			if (filter instanceof IInitiable) {
-				((IInitiable) filter).close();
-			}
-		}
+		this.sourceImage = null;
+		this.lastFilteredImage = null;
 	}
 
 	/**
@@ -92,28 +95,21 @@ public class FilterChainsaw {
 	 */
 	public IFilter appendFilter(Class<? extends IFilter> filterClass) throws InstantiationException,
 			IllegalAccessException {
+		return this.appendFilter(this.filterList.size(), filterClass);
+	}
+
+	public IFilter appendFilter(int index, Class<? extends IFilter> filterClass) throws InstantiationException,
+			IllegalAccessException {
 		if (filterClass == null) {
 			throw new IllegalArgumentException("Internal error. filterClass must be not null.");
 		}
 
 		logger.debug("Appending filter as class {}", filterClass);
-		//		this.appendFilter(filterClass.newInstance());
 
-		//logger.debug("Appending filter as instance {}", filter);
+		IFilter filter = this.cacheInstance.getInstance(filterClass);
 
-		IFilter filter = null;
-
-		if (singleInstanceCaching) {
-			filter = this.cacheInstance.getInstance(filterClass);
-			if (this.searchFilterClass(filterClass) == -1) {
-				filterList.add(filter);
-			}
-		} else {
-			filter = filterClass.newInstance();
-			filterList.add(filter);
-			if (filter instanceof IInitiable) {
-				((IInitiable) filter).init();
-			}
+		if (!singleInstanceCaching || this.searchFilterClass(filterClass) == -1) {
+			filterList.add(index, filter);
 		}
 
 		if (this.sourceImage != null && filter instanceof IFilterAttachable) {
@@ -121,7 +117,6 @@ public class FilterChainsaw {
 		}
 
 		return filter;
-
 	}
 
 	//	/**
@@ -171,11 +166,7 @@ public class FilterChainsaw {
 				((IFilterAttachable) filter).onDetachFromImage(sourceImage);
 			}
 
-			if (!singleInstanceCaching) {
-				if (filter instanceof IInitiable) {
-					((IInitiable) filter).close();
-				}
-			}
+			this.cacheInstance.putDeleted(filter);
 			filterList.remove(pos);
 		} else {
 			logger.debug("FilterChainsaw.appendFilter, but pos {} is not in range", pos);
@@ -225,6 +216,10 @@ public class FilterChainsaw {
 		}
 	}
 
+	public int getFilterCount() {
+		return this.filterList.size();
+	}
+
 	/**
 	 * Return current registered filters. Actually, I don't want to care about
 	 * modifying given collection.
@@ -240,16 +235,20 @@ public class FilterChainsaw {
 	 * 
 	 * @param pos
 	 *            position will be move up.
+	 * @return true is moved, false if not
 	 */
-	public void moveUp(int pos) {
+	public boolean moveUp(int pos) {
 		if (pos > 0 && pos < filterList.size()) {
 			logger.trace("Moving index {} up", pos);
 
 			IFilter old = filterList.get(pos - 1);
 			filterList.set(pos - 1, filterList.get(pos));
 			filterList.set(pos, old);
+
+			return true;
 		} else {
 			logger.trace("Can't move up, position {} is not in range", pos);
+			return false;
 		}
 	}
 
@@ -258,20 +257,22 @@ public class FilterChainsaw {
 	 * 
 	 * @param pos
 	 *            position will be move down.
+	 * @return true is moved, false if not
 	 */
-	public void moveDown(int pos) {
+	public boolean moveDown(int pos) {
 		if (pos >= 0 && pos < filterList.size() - 1) {
 			logger.trace("Moving index {} down", pos);
 
 			IFilter old = filterList.get(pos + 1);
 			filterList.set(pos + 1, filterList.get(pos));
 			filterList.set(pos, old);
+			
+			return true;
 		} else {
 			logger.trace("Can't move down, position {} is not in range", pos);
+			return false;
 		}
 	}
-
-	private BufferedImage sourceImage = null;
 
 	/**
 	 * Start processing new image.
@@ -314,8 +315,6 @@ public class FilterChainsaw {
 			sourceImage = null;
 		}
 	}
-
-	private BufferedImage lastFilteredImage;
 
 	/**
 	 * Actual processing of image by prepared filter chain.
@@ -377,4 +376,5 @@ public class FilterChainsaw {
 		}
 		return buffer.toString();
 	}
+
 }

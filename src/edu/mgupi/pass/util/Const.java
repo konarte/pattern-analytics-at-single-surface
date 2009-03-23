@@ -22,7 +22,11 @@ public class Const {
 	public final static String VERSION = "0.1.R1";
 	public final static String BUILD = ResourceBundle.getBundle("mybuild").getString("build.number");
 
-	public final static String LAST_PROGRAM_NAME = " v." + Const.VERSION + " dev.b." + Const.BUILD;
-	public final static String FULL_PROGRAM_NAME = PROGRAM_NAME + LAST_PROGRAM_NAME;
+	public final static String PROGRAM_NAME_LAST = " v." + Const.VERSION + " dev.b." + Const.BUILD;
+	public final static String PROGRAM_NAME_FULL = PROGRAM_NAME + PROGRAM_NAME_LAST;
+
+	public final static String WEB_PROJECT_PAGE = "http://code.google.com/p/pattern-analytics-at-single-surface/";
+	public final static String WEB_HELP_PAGE = "http://code.google.com/p/pattern-analytics-at-single-surface/w/list";
+	public final static String USED_LIBRARIES = ResourceBundle.getBundle("used-apps").getString("libraries");
 
 }

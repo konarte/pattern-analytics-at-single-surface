@@ -29,10 +29,12 @@ import edu.mgupi.pass.filters.NoSuchParamException;
 import edu.mgupi.pass.filters.service.HistogramFilter;
 import edu.mgupi.pass.filters.service.ResizeFilter;
 import edu.mgupi.pass.sources.SourceStore;
+import edu.mgupi.pass.util.CacheIFactory;
 import edu.mgupi.pass.util.CacheInitiable;
 import edu.mgupi.pass.util.Const;
 import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
+
 
 /**
  * Main module processor.
@@ -83,7 +85,7 @@ public class ModuleProcessor {
 		// ;)
 		this.finishProcessing();
 
-		cachedModules.close();
+		this.cachedModules = null;
 		this.module = null;
 
 		if (this.processingFilters != null) {
@@ -107,7 +109,8 @@ public class ModuleProcessor {
 		logger.debug("ModuleProcessor closed");
 	}
 
-	private CacheInitiable<IModule> cachedModules = new CacheInitiable<IModule>();
+	private CacheInitiable<IModule> cachedModules = CacheIFactory.getSingleInstanceModules();
+		//new CacheInitiable<IModule>(MODE.SINGLE_INSTANCE);
 
 	public IModule setModule(Class<? extends IModule> moduleClass) throws InstantiationException,
 			IllegalAccessException, IOException, ModuleException, PersistentException {

@@ -32,19 +32,7 @@ public class AboutDialogTest {
 	@Test
 	public void testUI() throws Exception {
 
-		SwingHelper.addWorkAndWaitThis(new WorkSet() {
-			@Override
-			public void workImpl() throws Exception {
-				dialog.setVisible(true);
-			}
-		}, new ConditionSet() {
-			@Override
-			public boolean keepWorking() {
-				return dialog.isVisible() == false;
-			}
-		});
-
-		assertTrue(dialog.isVisible());
+		SwingTestHelper.showMeBackground(this.dialog);
 
 		final JButton ok = (JButton) SwingHelper.getChildNamed(dialog, "ok");
 		assertNotNull(ok);
@@ -53,6 +41,13 @@ public class AboutDialogTest {
 		assertNotNull(props);
 		TableModel model = props.getModel();
 		int rows = model.getRowCount();
+
+		assertTrue(rows > 0);
+
+		JTable libs = (JTable) SwingHelper.getChildNamed(dialog, "libraries");
+		assertNotNull(libs);
+		model = libs.getModel();
+		rows = model.getRowCount();
 
 		assertTrue(rows > 0);
 

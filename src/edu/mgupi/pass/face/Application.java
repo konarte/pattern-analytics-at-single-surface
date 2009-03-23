@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.util.Locale;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.db.surfaces.PassPersistentManager;
+import edu.mgupi.pass.util.CacheIFactory;
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Const;
 import edu.mgupi.pass.util.SecundomerList;
@@ -34,39 +36,11 @@ public class Application {
 		// Not allowed for any other instances
 	}
 
-	//
-	//	// Choose Windows Look and Feel by default
-	//	private final static String PREFFERED_LOOK_AND_FEEL;
-	//	static {
-	//		String OS = System.getProperty("os.name");
-	//		String VERSION = System.getProperty("os.version");
-	//		// Well, I don't know how to do this automatically :)
-	//		if (OS != null && VERSION != null) {
-	//			if (OS.startsWith("Windows") && (VERSION.startsWith("3.") || VERSION.startsWith("4."))) {
-	//				// Classic skin for Windows 95, 98, Me
-	//				PREFFERED_LOOK_AND_FEEL = "Windows Classic";
-	//			} else if (OS.startsWith("Windows")) {
-	//				// Windows 200, XP, 2003, Vista, other
-	//				PREFFERED_LOOK_AND_FEEL = "Windows";
-	//			} else if (OS.startsWith("Mac OS")) {
-	//				// Mac OS
-	//				PREFFERED_LOOK_AND_FEEL = "Nimbus";
-	//			} else {
-	//				PREFFERED_LOOK_AND_FEEL = null;
-	//			}
-	//		} else {
-	//			PREFFERED_LOOK_AND_FEEL = null;
-	//		}
-	//
-	//	}
-
-	// Changing Look And Feel, depends on current OS
 	private void changeLookAndFeel(String newLookAndFeel) throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException, UnsupportedLookAndFeelException {
 
 		logger.debug("Found look and feel: " + newLookAndFeel);
 
-		// If unexpected OS -- keep LaF by default
 		if (newLookAndFeel == null) {
 			return;
 		}
@@ -74,15 +48,6 @@ public class Application {
 		try {
 
 			UIManager.setLookAndFeel(newLookAndFeel);
-			//			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-			//				if (newLookAndFeel.equals(info.getName()) || newLookAndFeel.equals(info.getClassName())) {
-			//					logger.debug("Applying look and feel {}({})", info.getName(), info.getClassName());
-			//
-			//					UIManager.setLookAndFeel(info.getClassName());
-			//					break;
-			//				}
-			//			}
-			//			logger.debug("Not found any supported LaF for class '" + newLookAndFeel + "'");
 		} catch (Exception e) {
 			// If not found -- we don't care ^_^
 			// OK, choose cross-platform LaF
@@ -102,12 +67,11 @@ public class Application {
 		final FileChannel channel = new FileOutputStream(LOCK_FILE, false).getChannel();
 		final FileLock lock = channel.tryLock();
 
-		// new File(LOCK_FILE).deleteOnExit();
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 
 			public void run() {
 				SecundomerList.printToOutput(System.out);
-				logger.debug("Shutdown " + Const.FULL_PROGRAM_NAME);
+				CacheIFactory.close();
 				try {
 					if (lock != null) {
 						lock.release();
@@ -117,6 +81,14 @@ public class Application {
 					e.printStackTrace();
 				}
 				new File(LOCK_FILE).delete();
+				logger.debug("Shutdown " + Const.PROGRAM_NAME_FULL);
+
+				// Synchronization wait...
+				try {
+					Thread.sleep(200);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}));
 
@@ -126,6 +98,8 @@ public class Application {
 
 		MainFrame frame = null;
 		try {
+			// Set locale by default to English
+			Locale.setDefault(Locale.ENGLISH);
 
 			String newLookAndFeel = Config.getInstance().getLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
@@ -155,6 +129,7 @@ public class Application {
 			try {
 				frame = (MainFrame) AppHelper.getInstance().openWindow(MainFrame.class);
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				frame.preCache();
 			} catch (Exception e) {
 				throw e;
 			}
@@ -169,7 +144,7 @@ public class Application {
 	}
 
 	public static void main(String[] args) throws Exception {
-		logger.debug("Starting " + Const.FULL_PROGRAM_NAME);
+		logger.debug("Starting " + Const.PROGRAM_NAME_FULL);
 		new Application().run();
 	}
 }

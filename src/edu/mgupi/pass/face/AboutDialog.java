@@ -1,14 +1,20 @@
 package edu.mgupi.pass.face;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -26,10 +32,15 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Const;
 
 public class AboutDialog extends JDialog {
+
+	private final static Logger logger = LoggerFactory.getLogger(AboutDialog.class);
 
 	/**
 	 * 
@@ -37,9 +48,9 @@ public class AboutDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
 
 	private JPanel jContentPane = null;
-	private JPanel jPanel = null;
+	private JPanel jPanelButtons = null;
 	private JButton jButtonOK = null;
-	private JPanel jPanel1 = null;
+	private JPanel jPanelData = null;
 	private JLabel jLabelProgramTitle = null;
 
 	/**
@@ -55,7 +66,7 @@ public class AboutDialog extends JDialog {
 	 * 
 	 */
 	private void initialize() {
-		this.setSize(462, 380);
+		this.setSize(462, 526);
 		this.setName("aboutDialog");
 		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		this.setTitle("О программе...");
@@ -72,24 +83,25 @@ public class AboutDialog extends JDialog {
 		if (jContentPane == null) {
 			jContentPane = new JPanel();
 			jContentPane.setLayout(new BorderLayout());
-			jContentPane.add(getJPanel(), BorderLayout.SOUTH);
-			jContentPane.add(getJPanel1(), BorderLayout.CENTER);
+			jContentPane.add(getJPanelData(), BorderLayout.CENTER);
+			jContentPane.add(getJPanelButtons(), BorderLayout.SOUTH);
+
 		}
 		return jContentPane;
 	}
 
 	/**
-	 * This method initializes jPanel
+	 * This method initializes jPanelButtons
 	 * 
 	 * @return javax.swing.JPanel
 	 */
-	private JPanel getJPanel() {
-		if (jPanel == null) {
-			jPanel = new JPanel();
-			jPanel.setLayout(new FlowLayout());
-			jPanel.add(getJButtonOK(), null);
+	private JPanel getJPanelButtons() {
+		if (jPanelButtons == null) {
+			jPanelButtons = new JPanel();
+			jPanelButtons.setLayout(new FlowLayout());
+			jPanelButtons.add(getJButtonOK(), null);
 		}
-		return jPanel;
+		return jPanelButtons;
 	}
 
 	/**
@@ -126,22 +138,53 @@ public class AboutDialog extends JDialog {
 	}
 
 	private JLabel jLabelAuthor = null;
-	private JScrollPane jScrollPane = null;
+	private JScrollPane jScrollPaneProps = null;
 
-	private JTable jTableSystemProperties = null;
+	private JTable jTableProps = null;
+
+	private JScrollPane jScrollPaneLibraries = null;
+
+	private JTable jTableLibraries = null;
+
+	private JLabel jLabelProps = null;
+
+	private JLabel jLabelLibraries = null;
 
 	/**
-	 * This method initializes jPanel1
+	 * This method initializes jPanelData
 	 * 
 	 * @return javax.swing.JPanel
 	 */
-	private JPanel getJPanel1() {
-		if (jPanel1 == null) {
+	private JPanel getJPanelData() {
+		if (jPanelData == null) {
+			GridBagConstraints gridBagConstraints41 = new GridBagConstraints();
+			gridBagConstraints41.gridx = 0;
+			gridBagConstraints41.anchor = GridBagConstraints.CENTER;
+			gridBagConstraints41.insets = new Insets(5, 0, 0, 0);
+			gridBagConstraints41.gridy = 3;
+			jLabelLibraries = new JLabel();
+			jLabelLibraries.setText("Используемые библиотеки");
+			jLabelLibraries.setFont(new Font("Dialog", Font.BOLD, 12));
+			GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
+			gridBagConstraints3.gridx = 0;
+			gridBagConstraints3.anchor = GridBagConstraints.CENTER;
+			gridBagConstraints3.insets = new Insets(0, 0, 0, 0);
+			gridBagConstraints3.gridy = 1;
+			jLabelProps = new JLabel();
+			jLabelProps.setText("Системные переменные");
+			jLabelProps.setFont(new Font("Dialog", Font.BOLD, 12));
+			GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
+			gridBagConstraints2.fill = GridBagConstraints.BOTH;
+			gridBagConstraints2.gridy = 4;
+			gridBagConstraints2.weightx = 1.0;
+			gridBagConstraints2.weighty = 1.0D;
+			gridBagConstraints2.insets = new Insets(0, 15, 0, 15);
+			gridBagConstraints2.gridx = 0;
 			GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
 			gridBagConstraints4.fill = GridBagConstraints.BOTH;
 			gridBagConstraints4.gridy = 2;
 			gridBagConstraints4.weightx = 1.0;
-			gridBagConstraints4.weighty = 1.0;
+			gridBagConstraints4.weighty = 2.0D;
 			gridBagConstraints4.insets = new Insets(0, 15, 0, 15);
 			gridBagConstraints4.gridx = 0;
 			GridBagConstraints gridBagConstraints11 = new GridBagConstraints();
@@ -151,9 +194,31 @@ public class AboutDialog extends JDialog {
 			gridBagConstraints11.weightx = 1.0D;
 			gridBagConstraints11.anchor = GridBagConstraints.CENTER;
 			gridBagConstraints11.gridwidth = 1;
-			gridBagConstraints11.gridy = 3;
+			gridBagConstraints11.gridy = 5;
 			jLabelAuthor = new JLabel();
-			jLabelAuthor.setText("<html><br><hr>(c) raidan, Konart 2009</html>");
+			jLabelAuthor.addMouseListener(new MouseAdapter() {
+				public void mouseClicked(MouseEvent e) {
+					try {
+						Desktop.getDesktop().browse(new URI(Const.WEB_PROJECT_PAGE));
+					} catch (Exception e1) {
+						logger.debug("Error when opening link", e1);
+						AppHelper.showExceptionDialog("Unexpected eror when opening project link '"
+								+ Const.WEB_PROJECT_PAGE + "'.", e1);
+					}
+				}
+
+				public void mouseEntered(MouseEvent e) {
+					jLabelAuthor.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+				}
+
+				public void mouseReleased(MouseEvent e) {
+					jLabelAuthor.setCursor(Cursor.getDefaultCursor());
+				}
+
+			});
+
+			jLabelAuthor.setText("<html><center><hr>(c) raidan, Konart 2009</center>См. <a href=\""
+					+ Const.WEB_HELP_PAGE + "\">" + Const.WEB_PROJECT_PAGE + "</a></html>");
 			jLabelAuthor.setHorizontalAlignment(SwingConstants.CENTER);
 			jLabelAuthor.setHorizontalTextPosition(SwingConstants.TRAILING);
 			jLabelAuthor.setPreferredSize(new Dimension(200, 40));
@@ -165,39 +230,42 @@ public class AboutDialog extends JDialog {
 			gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
 			gridBagConstraints.gridx = 0;
 			jLabelProgramTitle = new JLabel();
-			jLabelProgramTitle.setText("<html><h3>" + Const.PROGRAM_NAME + "<br>" + Const.LAST_PROGRAM_NAME + "</h3>"
+			jLabelProgramTitle.setText("<html><h3>" + Const.PROGRAM_NAME + "<br>" + Const.PROGRAM_NAME_LAST + "</h3>"
 					+ "<b>Science content:</b> Konart<br><b>Code, design:</b> raidan</html>");
 
-			jPanel1 = new JPanel();
-			jPanel1.setLayout(new GridBagLayout());
-			jPanel1.setEnabled(true);
-			jPanel1.add(jLabelProgramTitle, gridBagConstraints);
-			jPanel1.add(jLabelAuthor, gridBagConstraints11);
-			jPanel1.add(getJScrollPane(), gridBagConstraints4);
+			jPanelData = new JPanel();
+			jPanelData.setLayout(new GridBagLayout());
+			jPanelData.setEnabled(true);
+			jPanelData.add(jLabelProgramTitle, gridBagConstraints);
+			jPanelData.add(jLabelProps, gridBagConstraints3);
+			jPanelData.add(getJScrollPaneProps(), gridBagConstraints4);
+			jPanelData.add(getJScrollPaneLibraries(), gridBagConstraints2);
+			jPanelData.add(jLabelAuthor, gridBagConstraints11);
+			jPanelData.add(jLabelLibraries, gridBagConstraints41);
 		}
-		return jPanel1;
+		return jPanelData;
 	}
 
 	/**
-	 * This method initializes jScrollPane
+	 * This method initializes jScrollPaneProps
 	 * 
 	 * @return javax.swing.JScrollPane
 	 */
-	private JScrollPane getJScrollPane() {
-		if (jScrollPane == null) {
-			jScrollPane = new JScrollPane();
-			jScrollPane.setViewportView(getJTableSystemProperties());
+	private JScrollPane getJScrollPaneProps() {
+		if (jScrollPaneProps == null) {
+			jScrollPaneProps = new JScrollPane();
+			jScrollPaneProps.setViewportView(getJTableProps());
 		}
-		return jScrollPane;
+		return jScrollPaneProps;
 	}
 
 	/**
-	 * This method initializes jTableSystemProperties
+	 * This method initializes jTableProps
 	 * 
 	 * @return javax.swing.JTable
 	 */
-	private JTable getJTableSystemProperties() {
-		if (jTableSystemProperties == null) {
+	private JTable getJTableProps() {
+		if (jTableProps == null) {
 
 			Properties props = System.getProperties();
 			String list[] = props.keySet().toArray(new String[0]);
@@ -210,7 +278,7 @@ public class AboutDialog extends JDialog {
 				cells[i][1] = props.getProperty(cells[i][0]);
 			}
 
-			jTableSystemProperties = new JTable(cells, new String[] { "Property", "Value" }) {
+			jTableProps = new JTable(cells, new String[] { "Property", "Value" }) {
 				/**
 				 * 
 				 */
@@ -220,11 +288,59 @@ public class AboutDialog extends JDialog {
 					return false;
 				}
 			};
-			jTableSystemProperties.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			jTableSystemProperties.setName("properties");
-			jTableSystemProperties.setCellSelectionEnabled(true);
+			jTableProps.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			jTableProps.setName("properties");
+			jTableProps.setCellSelectionEnabled(true);
 
 		}
-		return jTableSystemProperties;
+		return jTableProps;
+	}
+
+	/**
+	 * This method initializes jScrollPaneLibraries
+	 * 
+	 * @return javax.swing.JScrollPane
+	 */
+	private JScrollPane getJScrollPaneLibraries() {
+		if (jScrollPaneLibraries == null) {
+			jScrollPaneLibraries = new JScrollPane();
+			jScrollPaneLibraries.setViewportView(getJTableLibraries());
+		}
+		return jScrollPaneLibraries;
+	}
+
+	/**
+	 * This method initializes jTableLibraries
+	 * 
+	 * @return javax.swing.JTable
+	 */
+	private JTable getJTableLibraries() {
+		if (jTableLibraries == null) {
+
+			String libs[] = Const.USED_LIBRARIES.split(",");
+			Arrays.sort(libs);
+
+			String cells[][] = new String[libs.length][1];
+			for (int i = 0; i < libs.length; i++) {
+				cells[i][0] = libs[i];
+			}
+
+			jTableLibraries = new JTable(cells, new String[] { "Used library" }) {
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				public boolean isCellEditable(int row, int column) {
+					return false;
+				}
+
+			};
+			jTableLibraries.setName("libraries");
+			jTableLibraries.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			jTableLibraries.setName("libraries");
+			jTableLibraries.setCellSelectionEnabled(true);
+		}
+		return jTableLibraries;
 	}
 } //  @jve:decl-index=0:visual-constraint="7,1"

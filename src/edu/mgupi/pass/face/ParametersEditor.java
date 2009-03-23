@@ -4,27 +4,31 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Collection;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.face.template.ParametersEditorPanel;
 import edu.mgupi.pass.filters.IllegalParameterValueException;
-import edu.mgupi.pass.modules.IModule;
+import edu.mgupi.pass.filters.Param;
 
-public class ModuleParametersEditor extends JDialog {
+public class ParametersEditor extends JDialog {
 
-	Logger logger = LoggerFactory.getLogger(ModuleParametersEditor.class);
+	Logger logger = LoggerFactory.getLogger(ParametersEditor.class);
 
 	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
@@ -38,7 +42,7 @@ public class ModuleParametersEditor extends JDialog {
 	 * 
 	 * @param owner
 	 */
-	public ModuleParametersEditor(Frame owner) {
+	public ParametersEditor(Frame owner) {
 		super(owner, true);
 		initialize();
 	}
@@ -50,10 +54,11 @@ public class ModuleParametersEditor extends JDialog {
 	private void initialize() {
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				ModuleParametersEditor.this.cancelImpl();
+				ParametersEditor.this.cancelImpl();
 			}
 		});
-		this.setSize(271, 200);
+		this.setSize(400, 200);
+		this.setMinimumSize(new Dimension(400, 200));
 		this.setResizable(false);
 		this.setName("frameEditModuleParameters");
 		this.setContentPane(getJContentPane());
@@ -83,7 +88,6 @@ public class ModuleParametersEditor extends JDialog {
 	private ParametersEditorPanel getJPanelParams() {
 		if (jPanelParams == null) {
 			jPanelParams = new ParametersEditorPanel();
-			jPanelParams.setLayout(new GridBagLayout());
 		}
 		return jPanelParams;
 	}
@@ -120,7 +124,7 @@ public class ModuleParametersEditor extends JDialog {
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent e) {
-					ModuleParametersEditor.this.save();
+					ParametersEditor.this.save();
 				}
 			});
 			jButtonOK.setName("ok");
@@ -137,43 +141,46 @@ public class ModuleParametersEditor extends JDialog {
 	private JButton getJButtonCancel() {
 		if (jButtonCancel == null) {
 			jButtonCancel = new JButton();
-			jButtonCancel.setAction(new AbstractAction() {
+
+			Action cancelAction = new AbstractAction() {
 				/**
 				 * 
 				 */
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent e) {
-					ModuleParametersEditor.this.cancelImpl();
+					ParametersEditor.this.cancelImpl();
 				}
-			});
+			};
+
+			jButtonCancel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+					KeyStroke.getKeyStroke((char) KeyEvent.VK_ESCAPE), "cancel");
+			jButtonCancel.getActionMap().put("cancel", cancelAction);
+			jButtonCancel.setAction(cancelAction);
 			jButtonCancel.setName("cancel");
 			jButtonCancel.setText("Отмена");
 		}
 		return jButtonCancel;
 	}
 
-	private final static int MINIMUM_WIDTH_ADD = 20;
-	private final static int MINIMUM_HEIGHT_ADD = 40;
-
-	public void setModule(IModule module) {
-		if (module == null) {
-			throw new IllegalArgumentException("Internal error. 'module' must be not null.");
+	public void setParameters(String name, Collection<Param> parameters) {
+		if (parameters == null) {
+			throw new IllegalArgumentException("Internal error. 'parameters' must be not null.");
 		}
-		jPanelParams.setParameters(module.getName(), module.getParams());
-		Dimension layoutDim = jPanelParams.getLastDimension();
-		Dimension buttonsDim = ((FlowLayout) jPanelButtons.getLayout()).preferredLayoutSize(jPanelButtons);
-
-		this.setSize(layoutDim.width + MINIMUM_WIDTH_ADD, layoutDim.height + buttonsDim.height + MINIMUM_HEIGHT_ADD);
+		this.setTitle(name);
+		jPanelParams.setParameters(parameters);
+		//Dimension buttonsDim = ((FlowLayout) jPanelButtons.getLayout()).preferredLayoutSize(jPanelButtons);
+		//jPanelParams.fixParentBounds(this, 0, buttonsDim.height, true);
+		this.pack();
 		this.setLocationRelativeTo(this.getOwner());
-
 	}
 
 	private boolean ok = false;
 
 	private JButton jButtonRetoreDefaults = null;
 
-	public boolean open() {
+	public boolean open(String name, Collection<Param> parameters) {
+		this.setParameters(name, parameters);
 		this.setVisible(true);
 		return ok;
 	}
@@ -186,21 +193,21 @@ public class ModuleParametersEditor extends JDialog {
 
 	private void save() {
 		try {
-			ModuleParametersEditor.this.saveImpl();
+			ParametersEditor.this.saveImpl();
 		} catch (Throwable t) {
 			logger.error("Error when saving parameters for module", t);
-			AppHelper.showExceptionDialog(ModuleParametersEditor.this, "Error when applying module parameters.", t);
+			AppHelper.showExceptionDialog(ParametersEditor.this, "Error when applying module parameters.", t);
 		}
 	}
 
 	private void saveImpl() throws IllegalParameterValueException {
 		ok = false;
-		try {
-			jPanelParams.saveParameterValues();
-			ok = true;
-		} finally {
-			this.setVisible(false);
-		}
+
+		jPanelParams.saveParameterValues();
+
+		ok = true;
+		this.setVisible(false);
+
 	}
 
 	private void restoreDefaults() {
@@ -213,7 +220,7 @@ public class ModuleParametersEditor extends JDialog {
 				jPanelParams.restoreDefaults();
 			} catch (Throwable t) {
 				logger.error("Error when restoring defaults for module parameters", t);
-				AppHelper.showExceptionDialog(ModuleParametersEditor.this,
+				AppHelper.showExceptionDialog(ParametersEditor.this,
 						"Unexpected error when restoring defaults for module parameters.", t);
 			}
 		}
@@ -235,7 +242,7 @@ public class ModuleParametersEditor extends JDialog {
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent e) {
-					ModuleParametersEditor.this.restoreDefaults();
+					ParametersEditor.this.restoreDefaults();
 				}
 			});
 			jButtonRetoreDefaults.setText("Восстановить");

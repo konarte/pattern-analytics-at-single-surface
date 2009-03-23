@@ -210,7 +210,7 @@ public class AutoInit {
 	}
 
 	public static void main(String[] args) throws Exception {
-		System.out.println(Const.FULL_PROGRAM_NAME);
+		System.out.println(Const.PROGRAM_NAME_FULL);
 		System.out.println("auto-init module");
 
 		Options options = new Options();

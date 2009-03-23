@@ -93,7 +93,7 @@ public class SplashWindow extends JFrame {
 			gridBagConstraints.insets = new Insets(0, 5, 5, 5);
 			gridBagConstraints.gridy = 2;
 			jLabelVersion = new JLabel();
-			jLabelVersion.setText(Const.LAST_PROGRAM_NAME);
+			jLabelVersion.setText(Const.PROGRAM_NAME_LAST);
 			jLabelVersion.setFont(new Font("DialogInput", Font.BOLD, 14));
 			GridBagConstraints gridBagConstraints11 = new GridBagConstraints();
 			gridBagConstraints11.anchor = GridBagConstraints.SOUTHWEST;

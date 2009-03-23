@@ -45,6 +45,10 @@ public class PlaceImageFilter implements IFilter {
 		return params;
 	}
 
+	public String toString() {
+		return this.getName() + " (" + WIDTH.getValue() + "x" + HEIGHT.getValue() + " at " + PLACE.getValue() + ")";
+	}
+
 	@Override
 	public BufferedImage convert(BufferedImage source) throws FilterException {
 

@@ -7,6 +7,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Window;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -60,21 +62,30 @@ public class AppHelper {
 			instance.components.clear();
 			instance = null;
 		}
+		MainFrameDataStorage.reset();
 	}
 
 	private volatile Map<Class<? extends Window>, Window> windowsCollection = new HashMap<Class<? extends Window>, Window>();
 	private volatile Collection<Window> additionalWindows = new ArrayList<Window>();
 
-	private synchronized Window getWindow(Frame owner, Class<? extends Window> windowType, boolean force)
-			throws Exception {
+	private synchronized Window getWindow(Frame owner, Class<? extends Window> windowType, boolean force,
+			boolean ignoreEmptyFrame) throws Exception {
 		Window window = windowsCollection.get(windowType);
 
 		if (window == null || force) {
 
-			if (owner == null) {
+			if (owner == null && !ignoreEmptyFrame) {
 				window = windowType.newInstance();
 			} else {
 				window = windowType.getConstructor(Frame.class).newInstance(owner);
+
+				final Window myWindow = window;
+				// For dialog windows we requested focus
+				window.addWindowListener(new WindowAdapter() {
+					public void windowOpened(WindowEvent e) {
+						myWindow.requestFocus();
+					}
+				});
 			}
 
 			if (force) {
@@ -91,20 +102,17 @@ public class AppHelper {
 		return window;
 	}
 
-	private Window createWindow(Frame owner, Class<? extends Window> windowType, boolean force) throws Exception {
+	private Window createWindow(Frame owner, Class<? extends Window> windowType, boolean force, boolean ignoreEmptyFrame)
+			throws Exception {
 		if (windowType == null) {
 			throw new IllegalArgumentException("Internal error. 'windowType' must be not not null.");
 		}
 
-		return this.getWindow(owner, windowType, force);
+		return this.getWindow(owner, windowType, force, ignoreEmptyFrame);
 	}
 
 	public Window searchWindow(Class<? extends Window> windowType) {
 		return windowsCollection.get(windowType);
-	}
-
-	public Window registerAdditionalWindow(Class<? extends Window> windowType) throws Exception {
-		return createWindow(null, windowType, true);
 	}
 
 	public Window openWindow(Class<? extends Window> windowType) {
@@ -112,16 +120,24 @@ public class AppHelper {
 	}
 
 	public Window openWindow(Frame owner, Class<? extends Window> windowType) {
-		return this.openWindow(owner, windowType, true);
+		return this.openWindow(owner, windowType, true, false);
 	}
 
 	public Window openWindowHidden(Frame owner, Class<? extends Window> windowType) {
-		return this.openWindow(owner, windowType, false);
+		return this.openWindow(owner, windowType, false, false);
 	}
 
-	private Window openWindow(Frame owner, Class<? extends Window> windowType, boolean show) {
+	public Window openWindowDialogHidden(Frame owner, Class<? extends Window> windowType) {
+		return this.openWindow(owner, windowType, false, true);
+	}
+
+	public Window registerAdditionalWindow(Class<? extends Window> windowType) throws Exception {
+		return createWindow(null, windowType, true, false);
+	}
+
+	private Window openWindow(Frame owner, Class<? extends Window> windowType, boolean show, boolean ignoreEmptyFrame) {
 		try {
-			return this.openWindowImpl(owner, windowType, show);
+			return this.openWindowImpl(owner, windowType, show, ignoreEmptyFrame);
 		} catch (Exception e) {
 			logger.error("Error when creating window instance", e);
 			AppHelper.showExceptionDialog("Unexpected error when creating instance of '" + windowType
@@ -133,8 +149,9 @@ public class AppHelper {
 		}
 	}
 
-	protected Window openWindowImpl(Frame owner, Class<? extends Window> windowType, boolean show) throws Exception {
-		Window frame = this.createWindow(owner, windowType, false);
+	protected Window openWindowImpl(Frame owner, Class<? extends Window> windowType, boolean show,
+			boolean ignoreEmptyFrame) throws Exception {
+		Window frame = this.createWindow(owner, windowType, false, ignoreEmptyFrame);
 		if (show) {
 			frame.setVisible(true);
 		}
@@ -182,7 +199,6 @@ public class AppHelper {
 		showExceptionDialog(null, message, e);
 	}
 
-	
 	public static void showExceptionDialog(Component parent, String message, Throwable e) {
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -208,4 +224,5 @@ public class AppHelper {
 			logger.error("Error when closing stream", io);
 		}
 	}
+
 }

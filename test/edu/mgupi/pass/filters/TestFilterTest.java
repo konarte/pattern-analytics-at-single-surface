@@ -26,11 +26,15 @@ public class TestFilterTest {
 	@Before
 	public void setUp() throws Exception {
 		filter = new TestFilter();
+		filter.init();
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		filter = null;
+		if (filter != null) {
+			filter.close();
+			filter = null;
+		}
 	}
 
 	@Test
