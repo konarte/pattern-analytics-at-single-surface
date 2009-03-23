@@ -19,7 +19,7 @@ public class MyFilter implements IFilter, IInitiable {
 
 	protected void finalize() throws Throwable {
 		if (!done) {
-			System.err.println("Method closed does not called for " + this);
+			System.err.println("Method 'close' does not called for " + this);
 		}
 	}
 

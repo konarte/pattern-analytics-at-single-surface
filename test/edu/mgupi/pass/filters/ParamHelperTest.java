@@ -106,10 +106,10 @@ public class ParamHelperTest {
 
 		MyFilter myFilter = new MyFilter(paramList);
 
-		assertNotNull(ParamHelper.convertParamsToValues(myFilter));
-		assertNotNull(ParamHelper.convertParamsToValues((IFilter) null));
+		assertNotNull(ParamHelper.updateToMap(myFilter.getParams()));
+		assertNotNull(ParamHelper.updateToMap(null));
 
-		this.testGetParameter(ParamHelper.convertParamsToValues(myFilter));
+		this.testGetParameter(ParamHelper.updateToMap(myFilter.getParams()));
 	}
 
 	@Test

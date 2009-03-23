@@ -24,6 +24,13 @@ import edu.mgupi.pass.util.Const;
 import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
 
+/**
+ * Panel where we draw images. Support fit image to window size or display as
+ * it. Usually must include into JScrollPane.
+ * 
+ * @author raidan
+ * 
+ */
 public class ImagePanel extends JPanel implements ActionListener {
 
 	private final static Logger logger = LoggerFactory.getLogger(ImagePanel.class);
@@ -36,78 +43,86 @@ public class ImagePanel extends JPanel implements ActionListener {
 	private boolean square = false;
 	private BufferedImage myImage;
 
+	/**
+	 * Setting image to display.
+	 * 
+	 * @param image
+	 *            default image for display. If null -- no image shown on this
+	 *            panel.
+	 * @param square
+	 *            true if panel MUST be a square size
+	 */
 	public void setImage(BufferedImage image, boolean square) {
 		this.myImage = image;
 		this.square = square;
 		this.refreshFit();
 	}
 
+	/**
+	 * Setting image to display.
+	 * 
+	 * @param image
+	 *            default image for display. If null -- no image shown on this
+	 *            panel.
+	 * 
+	 * @see #setImage(BufferedImage, boolean)
+	 */
 	public void setImage(BufferedImage image) {
 		this.setImage(image, false);
 	}
 
-	private JScrollPane parent = null;
-	private boolean fitImageToWindowSize;
-
-	public void registerFitButton(final JCheckBox fitBox) {
-		this.registerFitButton(fitBox, null);
+	/**
+	 * Return about image
+	 * 
+	 * @return true if last image setted by {@link #setImage(BufferedImage)} was
+	 *         not null.
+	 */
+	public boolean hasImage() {
+		return this.myImage != null;
 	}
 
-	private ImagePanel previousImagePanel;
-	private JCheckBox fitBox;
+	/**
+	 * Registering checkbox control resizing image
+	 * 
+	 * @param fitBox
+	 *            checkbox, that controls -- fit image to size of parent panel
+	 *            (Frame, Window, etc.) or show it's in natural size
+	 */
+	public void registerFitButton(JCheckBox fitBox) {
 
-	public void registerFitButton(final JCheckBox fitBox, final ImagePanel previousImagePanel) {
-
-		if (previousImagePanel == this) {
-			throw new IllegalArgumentException(
-					"Internal error. Attempt to create link to the same imagePanel as previous panel.");
-		}
 		if (fitBox == null) {
 			throw new IllegalArgumentException("Internal error. 'fitBox' must be not null.");
 		}
-
-		this.fitBox = fitBox;
-		this.previousImagePanel = previousImagePanel;
-		fitBox.setActionCommand("changeMode");
 		fitBox.addActionListener(this);
+
 		this.setFitMode(fitBox.isSelected());
-
 	}
 
-	@Override
 	public void actionPerformed(ActionEvent e) {
-		String command = e.getActionCommand();
-		if (command == null) {
-			return;
-		}
-		if (command.equals("changeMode")) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Set action " + fitBox.isSelected() + " for " + ImagePanel.this);
-			}
-			this.setFitModeCascade(fitBox.isSelected());
+		JCheckBox checkBox = (JCheckBox) e.getSource();
+		if (logger.isTraceEnabled()) {
+			logger.trace("Set action " + checkBox.isSelected() + " for " + ImagePanel.this);
 		}
 
+		this.setFitMode(checkBox.isSelected());
 	}
 
-	private boolean cycleActionProtection = false;
-
-	private void setFitModeCascade(boolean fitImageToWindowSize) {
-		if (cycleActionProtection) {
-			return;
-		}
-		cycleActionProtection = true;
-		ImagePanel.this.setFitMode(fitImageToWindowSize);
-		if (ImagePanel.this.previousImagePanel != null) {
-			ImagePanel.this.previousImagePanel.setFitModeCascade(fitImageToWindowSize);
-		}
-		cycleActionProtection = false;
-	}
-
+	/**
+	 * Set up current mode
+	 * 
+	 * @param fitImageToWindowSize
+	 */
 	private void setFitMode(boolean fitImageToWindowSize) {
 		this.fitImageToWindowSize = fitImageToWindowSize;
 		this.refreshFit();
 	}
 
+	private boolean fitImageToWindowSize;
+	private JScrollPane parent = null;
+
+	/**
+	 * Refreshing mode, change current size if need
+	 */
 	private void refreshFit() {
 
 		if (logger.isTraceEnabled()) {
@@ -191,47 +206,10 @@ public class ImagePanel extends JPanel implements ActionListener {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
+		// Painting our image
 		synchronized (getTreeLock()) {
-			if (myImage != null) {
 
-				if (secundomerNormalDraw == null) {
-					Container topContainer = this.getTopLevelAncestor();
-					secundomerNormalDraw = SecundomerList.registerSecundomer("Draw simple image for "
-							+ (topContainer == null ? this.getName() : topContainer.getName()));
-					secundomerScaleDraw = SecundomerList.registerSecundomer("Draw scaled image for "
-							+ (topContainer == null ? this.getName() : topContainer.getName()));
-				}
-
-				if (this.fitImageToWindowSize) {
-					secundomerScaleDraw.start();
-
-					// Must set preferred size!
-					this.setPreferredSize(new Dimension((int) parent.getVisibleRect().getWidth(), (int) parent
-							.getVisibleRect().getHeight()));
-
-					try {
-						/*
-						 * Based of thumb maker by Marco Schmidt
-						 */
-						Dimension thumb = new Dimension(this.getWidth(), this.getHeight());
-
-						ResizeFilter.calcThumbSize(this.myImage, thumb);
-
-						g.drawImage(this.myImage, 0, 0, thumb.width, thumb.height, null);
-					} finally {
-						secundomerScaleDraw.stop();
-					}
-				} else {
-					secundomerNormalDraw.start();
-					try {
-						g.drawImage(this.myImage, 0, 0, null);
-					} finally {
-						secundomerNormalDraw.stop();
-					}
-				}
-
-			} else {
-
+			if (myImage == null) { // #1
 				// Simple visual cake :)
 				String text = "No image";
 
@@ -243,12 +221,49 @@ public class ImagePanel extends JPanel implements ActionListener {
 				graphics2D.drawString(text, this.getWidth() / 2 - (int) rect.getCenterX(), this.getHeight() / 2
 						- (int) rect.getCenterY());
 
-			}
+			} else { // #1 if
+
+				// Initializing counters
+				if (secundomerNormalDraw == null) {
+					Container topContainer = this.getTopLevelAncestor();
+					secundomerNormalDraw = SecundomerList.registerSecundomer("Draw simple image for "
+							+ (topContainer == null ? this.getName() : topContainer.getName()));
+					secundomerScaleDraw = SecundomerList.registerSecundomer("Draw scaled image for "
+							+ (topContainer == null ? this.getName() : topContainer.getName()));
+				}
+
+				if (this.fitImageToWindowSize) {
+					// If fit image to window size
+
+					secundomerScaleDraw.start();
+
+					// Must set preferred size!
+					this.setPreferredSize(new Dimension((int) parent.getVisibleRect().getWidth(), (int) parent
+							.getVisibleRect().getHeight()));
+
+					try {
+						Dimension thumb = new Dimension(this.getWidth(), this.getHeight());
+						// Use Resize helper
+						ResizeFilter.calcThumbSize(this.myImage, thumb);
+						g.drawImage(this.myImage, 0, 0, thumb.width, thumb.height, null);
+
+						// There is another way to draw images (and faster)...
+						// But, it's can't properly work with images in not-equal ColorModel (RGB and GrayScale, for example) 
+					} finally {
+						secundomerScaleDraw.stop();
+					}
+				} else {
+					// No fit, draw as it
+					secundomerNormalDraw.start();
+					try {
+						g.drawImage(this.myImage, 0, 0, null);
+					} finally {
+						secundomerNormalDraw.stop();
+					}
+				}
+
+			} // #1 if-else
 		}
 	};
-
-	public boolean hasImage() {
-		return this.myImage != null;
-	}
 
 }

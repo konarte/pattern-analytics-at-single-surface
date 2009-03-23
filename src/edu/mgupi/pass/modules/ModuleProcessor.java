@@ -52,8 +52,11 @@ import edu.mgupi.pass.util.SecundomerList;
 public class ModuleProcessor {
 	private final static Logger logger = LoggerFactory.getLogger(ModuleProcessor.class);
 
-	private FilterChainsaw thumbFilters;
-	private FilterChainsaw histoFilters;
+	private FilterChainsaw thumbCS;
+	private FilterChainsaw histoCS;
+
+	private FilterChainsaw processingChainsaw;
+	private FilterChainsaw preProcessingChainsaw;
 
 	private HistogramFilter histogramFilter;
 
@@ -71,19 +74,20 @@ public class ModuleProcessor {
 
 		histogramFilter = new HistogramFilter();
 
-		thumbFilters = new FilterChainsaw();
-		ResizeFilter resize = (ResizeFilter) thumbFilters.appendFilter(ResizeFilter.class);
+		thumbCS = new FilterChainsaw();
+		ResizeFilter resize = (ResizeFilter) thumbCS.appendFilter(ResizeFilter.class);
 		resize.getWIDTH().setValue(Const.THUMB_WIDTH);
 		resize.getHEIGHT().setValue(Const.THUMB_HEIGHT);
 
-		histoFilters = new FilterChainsaw();
+		histoCS = new FilterChainsaw();
 		//histoFilters.appendFilter(GrayScaleFilter.class);
-		histogramFilter = (HistogramFilter) histoFilters.appendFilter(HistogramFilter.class);
+		histogramFilter = (HistogramFilter) histoCS.appendFilter(HistogramFilter.class);
+
+		processingChainsaw = new FilterChainsaw();
+		preProcessingChainsaw = new FilterChainsaw(true);
 	}
 
 	private IModule module;
-	private FilterChainsaw processingFilters;
-	private FilterChainsaw preProcessingFilters;
 
 	// private FilterChainsaw
 
@@ -95,22 +99,22 @@ public class ModuleProcessor {
 		this.cachedModules = null;
 		this.module = null;
 
-		if (this.processingFilters != null) {
-			this.processingFilters.close();
-			this.processingFilters = null;
+		if (this.processingChainsaw != null) {
+			this.processingChainsaw.close();
+			this.processingChainsaw = null;
 		}
-		if (this.preProcessingFilters != null) {
-			this.preProcessingFilters.close();
-			this.preProcessingFilters = null;
+		if (this.preProcessingChainsaw != null) {
+			this.preProcessingChainsaw.close();
+			this.preProcessingChainsaw = null;
 		}
 
-		if (thumbFilters != null) {
-			thumbFilters.close();
-			thumbFilters = null;
+		if (thumbCS != null) {
+			thumbCS.close();
+			thumbCS = null;
 		}
-		if (histoFilters != null) {
-			histoFilters.close();
-			histoFilters = null;
+		if (histoCS != null) {
+			histoCS.close();
+			histoCS = null;
 		}
 
 		logger.debug("ModuleProcessor closed");
@@ -169,15 +173,15 @@ public class ModuleProcessor {
 		}
 	}
 
-	public void setChainsaw(FilterChainsaw processingFilters) {
-		logger.debug("Set main filter chain {}", processingFilters);
-		this.processingFilters = processingFilters;
-	}
-
-	public void setPreprocessingChainsaw(FilterChainsaw preProcessingFilters) {
-		logger.debug("Set pre-processing filter chain {}", preProcessingFilters);
-		this.preProcessingFilters = preProcessingFilters;
-	}
+	//	public void setChainsaw(FilterChainsaw processingFilters) {
+	//		logger.debug("Set main filter chain {}", processingFilters);
+	//		this.processingFilters = processingFilters;
+	//	}
+	//
+	//	public void setPreprocessingChainsaw(FilterChainsaw preProcessingFilters) {
+	//		logger.debug("Set pre-processing filter chain {}", preProcessingFilters);
+	//		this.preProcessingFilters = preProcessingFilters;
+	//	}
 
 	private BufferedImage lastProcessedImage;
 	private BufferedImage lastThumbImage;
@@ -236,33 +240,31 @@ public class ModuleProcessor {
 
 		FILTERING_HISTO.start();
 		try {
-			histoFilters.attachImage(image);
-			this.lastHistogramImage = histoFilters.filterSaw();
+			histoCS.attachImage(image);
+			this.lastHistogramImage = histoCS.filterSaw();
 			locus.setHistogram(histogramFilter.getLastHistogramChannel());
 		} finally {
 			FILTERING_HISTO.stop();
 		}
 
-		if (this.preProcessingFilters != null) {
+		if (this.preProcessingChainsaw != null) {
 			PREPROCESSING.start();
 			try {
-				this.preProcessingFilters.attachImage(image);
+				this.preProcessingChainsaw.attachImage(image);
 				logger.debug("Pre-processing image, cause main filter chain is setup");
-				image = this.preProcessingFilters.filterSaw();
+				image = this.preProcessingChainsaw.filterSaw();
 			} finally {
 				PREPROCESSING.stop();
 			}
 		}
 
-		if (this.processingFilters != null) {
-			FILTERING.start();
-			try {
-				this.processingFilters.attachImage(image);
-				logger.debug("Filtering image, cause main filter chain is setup");
-				image = this.processingFilters.filterSaw();
-			} finally {
-				FILTERING.stop();
-			}
+		FILTERING.start();
+		try {
+			this.processingChainsaw.attachImage(image);
+			logger.debug("Filtering image, cause main filter chain is setup");
+			image = this.processingChainsaw.filterSaw();
+		} finally {
+			FILTERING.stop();
 		}
 
 		logger.debug("Now we building histograms and thumb-image");
@@ -277,8 +279,8 @@ public class ModuleProcessor {
 
 		FILTERING_THUMB.start();
 		try {
-			thumbFilters.attachImage(image);
-			this.lastThumbImage = thumbFilters.filterSaw();
+			thumbCS.attachImage(image);
+			this.lastThumbImage = thumbCS.filterSaw();
 
 		} finally {
 			FILTERING_THUMB.stop();
@@ -328,14 +330,11 @@ public class ModuleProcessor {
 		lastThumbImage = null;
 		lastHistogramImage = null;
 
-		if (processingFilters != null) {
-			processingFilters.detachImage();
-		}
-		if (preProcessingFilters != null) {
-			preProcessingFilters.detachImage();
-		}
-		thumbFilters.detachImage();
-		histoFilters.detachImage();
+		processingChainsaw.detachImage();
+		preProcessingChainsaw.detachImage();
+
+		thumbCS.detachImage();
+		histoCS.detachImage();
 
 	}
 
@@ -363,13 +362,13 @@ public class ModuleProcessor {
 
 		FILTERS_DATA.start();
 		try {
-			if (this.processingFilters == null) {
+			if (this.processingChainsaw.getFilterCount() == 0) {
 				return; //
 			}
 
 			List<LocusAppliedFilters> lFilters = locus.getFilters();
 
-			for (IFilter filter : this.processingFilters.getFilters()) {
+			for (IFilter filter : this.processingChainsaw.getFilters()) {
 				LocusAppliedFilters locusFilter = LocusAppliedFiltersFactory.createLocusAppliedFilters();
 				//locusFilter.setOptions(ParamHelper.convertParamsToJSON(filter));
 
@@ -393,33 +392,34 @@ public class ModuleProcessor {
 		return this.module;
 	}
 
-	public FilterChainsaw getFilters() {
-		return this.processingFilters;
+	public FilterChainsaw getChainsaw() {
+		return this.processingChainsaw;
 	}
 
-	public FilterChainsaw getPreProcessingFilters() {
-		return this.preProcessingFilters;
+	public FilterChainsaw getPreChainsaw() {
+		return this.preProcessingChainsaw;
 	}
 
 	public FilterChainsaw getThumbFilters() {
-		return thumbFilters;
+		return thumbCS;
 	}
 
 	public FilterChainsaw getHistoFilters() {
-		return histoFilters;
+		return histoCS;
 	}
 
 	private SimpleDateFormat fmt = new SimpleDateFormat("dd.MM.yyy HH:mm:ss");
 
 	public void saveSettingsToFile(File file) throws FileNotFoundException {
-
-		if (this.processingFilters == null) {
-			throw new IllegalStateException("Internal error. Filters does not registered yet.");
-		}
-
 		if (this.module == null) {
 			throw new IllegalStateException("Internal error. Module does not registered yet.");
 		}
+
+		if (file == null) {
+			throw new IllegalArgumentException("Internal error. Input variable 'file' must be not null.");
+		}
+
+		logger.debug("Saving settings to file " + file.getAbsolutePath());
 
 		PrintWriter writer = new PrintWriter(file);
 		try {
@@ -431,7 +431,7 @@ public class ModuleProcessor {
 			writer.write("module=" + this.module.getClass().getCanonicalName() + "=");
 			writer.write(ParamHelper.convertParamsToJSON(this.module.getParams()));
 			writer.write("\n");
-			for (IFilter filter : this.processingFilters.getFilters()) {
+			for (IFilter filter : this.processingChainsaw.getFilters()) {
 				writer.write(filter.getClass().getCanonicalName() + "=");
 				writer.write(ParamHelper.convertParamsToJSON(filter));
 				writer.write("\n");
@@ -444,13 +444,19 @@ public class ModuleProcessor {
 	@SuppressWarnings("unchecked")
 	public void loadSettingsFromFile(File file) throws Exception {
 
-		if (this.processingFilters == null) {
-			throw new IllegalStateException("Internal error. Filters does not registered yet.");
+		if (this.module == null) {
+			throw new IllegalStateException("Internal error. Module does not registered yet.");
 		}
+
+		if (file == null) {
+			throw new IllegalArgumentException("Internal error. Input variable 'file' must be not null.");
+		}
+
+		logger.debug("Loading settings from file " + file.getAbsolutePath());
 
 		BufferedReader reader = new BufferedReader(new FileReader(file));
 		try {
-			this.processingFilters.removeAllFilters();
+			this.processingChainsaw.removeAllFilters();
 
 			String line = "";
 			boolean moduleSet = false;
@@ -460,6 +466,9 @@ public class ModuleProcessor {
 				idx++;
 				line = line.trim();
 				if (line.isEmpty()) {
+					continue; //
+				}
+				if (line.startsWith("#")) {
 					continue; //
 				}
 				if (line.startsWith("module=")) {
@@ -480,7 +489,7 @@ public class ModuleProcessor {
 					ParamHelper.fillParametersFromJSON(this.module.getParams(), params);
 
 					moduleSet = true;
-				} else if (!line.startsWith("#")) {
+				} else {
 					int pos = line.indexOf("=");
 					if (pos < 0) {
 						throw new Exception("Line " + idx + ". Illegal line. Can't find '=' symbol.");
@@ -488,7 +497,7 @@ public class ModuleProcessor {
 					String filterName = line.substring(0, pos);
 					String params = line.substring(pos + 1);
 
-					IFilter filter = this.processingFilters.appendFilter((Class<? extends IFilter>) Class
+					IFilter filter = this.processingChainsaw.appendFilter((Class<? extends IFilter>) Class
 							.forName(filterName));
 					ParamHelper.fillParametersFromJSON(filter, params);
 

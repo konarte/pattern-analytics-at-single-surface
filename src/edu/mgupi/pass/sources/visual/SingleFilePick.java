@@ -77,7 +77,7 @@ public class SingleFilePick implements ISource {
 	public void close() {
 		if (chooser != null) {
 			logger.debug("Closing single file pick.");
-
+			chooser.removeAll();
 			AppHelper.getInstance().unregisterAdditionalComponent(chooser);
 			chooser = null;
 		}

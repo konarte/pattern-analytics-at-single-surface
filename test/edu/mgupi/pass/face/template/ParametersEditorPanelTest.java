@@ -31,15 +31,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.mgupi.pass.face.ConditionSet;
-import edu.mgupi.pass.face.SwingHelper;
 import edu.mgupi.pass.face.SwingTestHelper;
-import edu.mgupi.pass.face.WorkSet;
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.ParamHelper;
 import edu.mgupi.pass.filters.ParamTest;
 import edu.mgupi.pass.filters.TestFilter;
 import edu.mgupi.pass.filters.Param.TYPES;
+import edu.mgupi.pass.util.WaitCondition;
+import edu.mgupi.pass.util.SwingHelper;
+import edu.mgupi.pass.util.WorkSet;
 
 public class ParametersEditorPanelTest {
 
@@ -95,7 +95,7 @@ public class ParametersEditorPanelTest {
 	public void testPrimarySetParameters() throws Exception {
 
 		TestFilter filter = new TestFilter();
-		panel.setParameters(filter.getParams());
+		panel.setModelData(filter.getParams());
 
 		SwingTestHelper.showMeBackground(this.parent);
 
@@ -104,7 +104,7 @@ public class ParametersEditorPanelTest {
 	@Test
 	public void testFullRenderVariants() throws Exception {
 
-		panel.setParameters(fullParams);
+		panel.setModelData(fullParams);
 
 		System.out.println("\n");
 		SwingHelper.printChildHierarchy(panel);
@@ -201,7 +201,7 @@ public class ParametersEditorPanelTest {
 				assertNotNull(button);
 				button.doClick();
 			}
-		}, new ConditionSet() {
+		}, new WaitCondition() {
 			@Override
 			public boolean keepWorking() {
 				return allChildrenClosed();
@@ -226,7 +226,7 @@ public class ParametersEditorPanelTest {
 				assertNotNull(button);
 				button.doClick();
 			}
-		}, new ConditionSet() {
+		}, new WaitCondition() {
 			@Override
 			public boolean keepWorking() {
 				return !allChildrenClosed();
@@ -245,7 +245,7 @@ public class ParametersEditorPanelTest {
 				assertNotNull(button);
 				button.doClick();
 			}
-		}, new ConditionSet() {
+		}, new WaitCondition() {
 			@Override
 			public boolean keepWorking() {
 				return !allChildrenClosed();
@@ -255,7 +255,7 @@ public class ParametersEditorPanelTest {
 
 	@Test
 	public void testEditColors() throws Exception {
-		panel.setParameters(fullParams);
+		panel.setModelData(fullParams);
 
 		SwingTestHelper.showMeBackground(this.parent);
 
@@ -296,7 +296,9 @@ public class ParametersEditorPanelTest {
 		assertNotNull(label);
 		assertEquals(Color.BLUE, label.getBackground());
 
-		Collection<Param> params = panel.saveParameterValues();
+		Collection<Param> params = panel.saveModelData();
+		assertTrue(params == fullParams);
+		
 		assertNull(ParamHelper.getParameter("p7", params).getValue());
 		assertEquals(Color.BLUE, ParamHelper.getParameter("p8", params).getValue());
 
@@ -305,7 +307,8 @@ public class ParametersEditorPanelTest {
 		this.clickButton("p8_color_selector");
 		this.clickEmulatedColor(Color.YELLOW);
 
-		params = panel.saveParameterValues();
+		params = panel.saveModelData();
+		assertTrue(params == fullParams);
 
 		assertEquals(Color.RED, ParamHelper.getParameter("p7", params).getValue());
 		assertEquals(Color.YELLOW, ParamHelper.getParameter("p8", params).getValue());
@@ -313,7 +316,7 @@ public class ParametersEditorPanelTest {
 
 	@Test
 	public void testEditStrings() throws Exception {
-		panel.setParameters(fullParams);
+		panel.setModelData(fullParams);
 		SwingTestHelper.showMeBackground(this.parent);
 
 		JTextField field5 = (JTextField) SwingHelper.getChildNamed(panel, "p5_field");
@@ -342,7 +345,7 @@ public class ParametersEditorPanelTest {
 
 		field6.setText("ISGREAT");
 
-		Collection<Param> params = panel.saveParameterValues();
+		Collection<Param> params = panel.saveModelData();
 		assertEquals("Evening post", ParamHelper.getParameter("p5", params).getValue());
 		assertEquals("", ParamHelper.getParameter("p5.1", params).getValue());
 		assertEquals("ISGREAT", ParamHelper.getParameter("p6", params).getValue());
@@ -350,7 +353,7 @@ public class ParametersEditorPanelTest {
 
 	@Test
 	public void testEditInt() throws Exception {
-		panel.setParameters(fullParams);
+		panel.setModelData(fullParams);
 		SwingTestHelper.showMeBackground(this.parent);
 
 		JFormattedTextField field = (JFormattedTextField) SwingHelper.getChildNamed(panel, "p1_int_field");
@@ -372,7 +375,7 @@ public class ParametersEditorPanelTest {
 
 		spinner.setValue(6);
 
-		Collection<Param> params = panel.saveParameterValues();
+		Collection<Param> params = panel.saveModelData();
 		assertEquals(15, ParamHelper.getParameter("p1", params).getValue());
 		assertEquals(6, ParamHelper.getParameter("p2", params).getValue());
 
@@ -391,7 +394,7 @@ public class ParametersEditorPanelTest {
 			System.out.println("Received expected exception: " + e);
 		}
 
-		params = panel.saveParameterValues();
+		params = panel.saveModelData();
 		assertEquals(31, ParamHelper.getParameter("p1", params).getValue());
 		assertEquals(6, ParamHelper.getParameter("p2", params).getValue());
 
@@ -399,7 +402,7 @@ public class ParametersEditorPanelTest {
 
 	@Test
 	public void testEditDouble() throws Exception {
-		panel.setParameters(fullParams);
+		panel.setModelData(fullParams);
 		SwingTestHelper.showMeBackground(this.parent);
 
 		JFormattedTextField field3 = (JFormattedTextField) SwingHelper.getChildNamed(panel, "p3_double_field");
@@ -419,7 +422,7 @@ public class ParametersEditorPanelTest {
 		field3.setValue(15.0);
 		field4.setValue(-6.0);
 
-		Collection<Param> params = panel.saveParameterValues();
+		Collection<Param> params = panel.saveModelData();
 		assertEquals(15.0, ParamHelper.getParameter("p3", params).getValue());
 		assertEquals(-6.0, ParamHelper.getParameter("p4", params).getValue());
 
@@ -439,7 +442,7 @@ public class ParametersEditorPanelTest {
 		}
 		field4.setValue(0.0);
 
-		params = panel.saveParameterValues();
+		params = panel.saveModelData();
 		assertEquals(222.2222222222, ParamHelper.getParameter("p3", params).getValue());
 		assertEquals(0.0, ParamHelper.getParameter("p4", params).getValue());
 
@@ -447,7 +450,7 @@ public class ParametersEditorPanelTest {
 
 	@Test
 	public void testEditCombobox() throws Exception {
-		panel.setParameters(fullParams);
+		panel.setModelData(fullParams);
 		SwingTestHelper.showMeBackground(this.parent);
 
 		JComboBox combo9 = (JComboBox) SwingHelper.getChildNamed(panel, "p9_combo_box");
@@ -466,13 +469,13 @@ public class ParametersEditorPanelTest {
 		combo9.setSelectedItem("Второй");
 		combo10.setSelectedItem("Третий");
 
-		Collection<Param> params = panel.saveParameterValues();
+		Collection<Param> params = panel.saveModelData();
 		assertEquals("цвай", ParamHelper.getParameter("p9", params).getValue());
 		assertEquals("драй", ParamHelper.getParameter("p10", params).getValue());
 
 		combo9.setSelectedItem("UNKNOWN");
 
-		params = panel.saveParameterValues();
+		params = panel.saveModelData();
 		assertEquals("цвай", ParamHelper.getParameter("p9", params).getValue());
 		assertEquals("драй", ParamHelper.getParameter("p10", params).getValue());
 	}
@@ -485,7 +488,7 @@ public class ParametersEditorPanelTest {
 		Collection<Param> params2 = new ArrayList<Param>();
 		params2.add(new Param("param2", "Параметр2", TYPES.INT, 5));
 
-		panel.setParameters(params1);
+		panel.setModelData(params1);
 		SwingTestHelper.showMeBackground(this.parent);
 
 		JFormattedTextField fmt = (JFormattedTextField) SwingHelper.getChildNamed(panel, "param1_int_field");
@@ -494,7 +497,7 @@ public class ParametersEditorPanelTest {
 		parent.setVisible(false);
 		SwingTestHelper.waitMe(this.parent);
 
-		panel.setParameters(params2);
+		panel.setModelData(params2);
 		SwingTestHelper.showMeBackground(this.parent);
 
 		fmt = (JFormattedTextField) SwingHelper.getChildNamed(panel, "param1_int_field");
@@ -506,7 +509,7 @@ public class ParametersEditorPanelTest {
 		parent.setVisible(false);
 		SwingTestHelper.waitMe(this.parent);
 
-		panel.setParameters(params2);
+		panel.setModelData(params2);
 		SwingTestHelper.showMeBackground(this.parent);
 
 		// Check for skipping recreating objects if parameters are the same as previous!
@@ -517,7 +520,7 @@ public class ParametersEditorPanelTest {
 	}
 
 	public void testSample() throws Exception {
-		panel.setParameters(fullParams);
+		panel.setModelData(fullParams);
 		SwingTestHelper.showMeBackground(this.parent);
 
 		SwingTestHelper.waitMe(this.parent);

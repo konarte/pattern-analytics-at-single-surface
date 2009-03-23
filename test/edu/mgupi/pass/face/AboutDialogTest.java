@@ -11,6 +11,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.mgupi.pass.util.SwingHelper;
+
 public class AboutDialogTest {
 	private AboutDialog dialog = null;
 

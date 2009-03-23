@@ -33,6 +33,12 @@ import edu.mgupi.pass.face.template.JTableReadOnly;
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Const;
 
+/**
+ * About dialog. Simple and easy.
+ * 
+ * @author raidan
+ * 
+ */
 public class AboutDialog extends JDialog {
 
 	private final static Logger logger = LoggerFactory.getLogger(AboutDialog.class);
@@ -54,6 +60,10 @@ public class AboutDialog extends JDialog {
 	public AboutDialog(Frame owner) {
 		super(owner, true);
 		initialize();
+	}
+
+	public void showDialog() {
+		getDialogAdapter().showDialogCancelOnly();
 	}
 
 	/**
@@ -99,10 +109,6 @@ public class AboutDialog extends JDialog {
 		return jPanelButtons;
 	}
 
-	public void showDialog() {
-		getDialogAdapter().showDialogCancelOnly();
-	}
-
 	private AbstractDialogAdapter myDialogAdapter = null; //  @jve:decl-index=0:
 
 	private AbstractDialogAdapter getDialogAdapter() {
@@ -111,7 +117,6 @@ public class AboutDialog extends JDialog {
 		}
 
 		myDialogAdapter = new AbstractDialogAdapter(this, true) {
-
 			@Override
 			protected void cancelImpl() throws Exception {
 				// do nothing
@@ -150,15 +155,10 @@ public class AboutDialog extends JDialog {
 
 	private JLabel jLabelAuthor = null;
 	private JScrollPane jScrollPaneProps = null;
-
 	private JTable jTableProps = null;
-
 	private JScrollPane jScrollPaneLibraries = null;
-
 	private JTable jTableLibraries = null;
-
 	private JLabel jLabelProps = null;
-
 	private JLabel jLabelLibraries = null;
 
 	/**
@@ -207,6 +207,9 @@ public class AboutDialog extends JDialog {
 			gridBagConstraints11.gridwidth = 1;
 			gridBagConstraints11.gridy = 5;
 			jLabelAuthor = new JLabel();
+
+			// Clicking on HTTP link
+			// Direct to internet page with our project 
 			jLabelAuthor.addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
 					try {
@@ -218,6 +221,7 @@ public class AboutDialog extends JDialog {
 					}
 				}
 
+				// Cursor with hand-point
 				public void mouseEntered(MouseEvent e) {
 					jLabelAuthor.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 				}
@@ -241,8 +245,8 @@ public class AboutDialog extends JDialog {
 			gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
 			gridBagConstraints.gridx = 0;
 			jLabelProgramTitle = new JLabel();
-			jLabelProgramTitle.setText("<html><h3>" + Const.PROGRAM_NAME_FIRST + "<br>" + Const.PROGRAM_NAME_LAST + "</h3>"
-					+ "<b>Science content:</b> Konart<br><b>Code, design:</b> raidan</html>");
+			jLabelProgramTitle.setText("<html><h3>" + Const.PROGRAM_NAME_FIRST + "<br>" + Const.PROGRAM_NAME_LAST
+					+ "</h3>" + "<b>Science content:</b> Konart<br><b>Code, design:</b> raidan</html>");
 
 			jPanelData = new JPanel();
 			jPanelData.setLayout(new GridBagLayout());

@@ -75,25 +75,32 @@ public class ParametersEditor extends JDialog implements ActionListener {
 
 			@Override
 			protected boolean saveImpl() throws Exception {
-				jPanelParams.saveParameterValues();
+				jPanelParams.saveModelData();
 				return true;
 			}
 		};
 		return myDialogAdapter;
 	}
 
-	protected void setParameters(String name, Collection<Param> parameters) {
+	protected void setParametersImpl(String name, Collection<Param> parameters) throws Exception {
 		if (parameters == null) {
 			throw new IllegalArgumentException("Internal error. 'parameters' must be not null.");
 		}
 		this.setTitle(name);
-		jPanelParams.setParameters(parameters);
+		jPanelParams.setModelData(parameters);
 		this.pack();
 		this.setLocationRelativeTo(this.getOwner());
 	}
 
 	public boolean openDialog(String name, Collection<Param> parameters) {
-		this.setParameters(name, parameters);
+		try {
+			this.setParametersImpl(name, parameters);
+		} catch (Exception e) {
+			logger.error("Error when setting params", e);
+			AppHelper.showExceptionDialog("Ошибка при установке параметров.", e);
+			return false;
+		}
+
 		return getDialogAdapter().openDialog();
 	}
 
@@ -200,8 +207,7 @@ public class ParametersEditor extends JDialog implements ActionListener {
 					jPanelParams.restoreDefaults();
 				} catch (Throwable t) {
 					logger.error("Error when restoring defaults for module parameters", t);
-					AppHelper.showExceptionDialog(this,
-							"Unexpected error when restoring defaults for module parameters.", t);
+					AppHelper.showExceptionDialog("Unexpected error when restoring defaults for module parameters.", t);
 				}
 			}
 

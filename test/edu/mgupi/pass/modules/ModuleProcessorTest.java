@@ -39,8 +39,8 @@ public class ModuleProcessorTest {
 	public void tearDown() throws Exception {
 		if (processor != null) {
 			processor.close();
-			assertNull(processor.getFilters());
-			assertNull(processor.getPreProcessingFilters());
+			assertNull(processor.getChainsaw());
+			assertNull(processor.getPreChainsaw());
 			processor = null;
 		}
 
@@ -55,15 +55,13 @@ public class ModuleProcessorTest {
 
 			processor.setModule(TestModule.class);
 
-			FilterChainsaw mainSaw = new FilterChainsaw();
+			FilterChainsaw mainSaw = processor.getChainsaw();
 			ResizeFilter resize = (ResizeFilter) mainSaw.appendFilter(ResizeFilter.class);
 			resize.getWIDTH().setValue(1024);
 			resize.getHEIGHT().setValue(1024);
 
-			processor.setChainsaw(mainSaw);
-
-			assertNotNull(processor.getFilters());
-			assertNull(processor.getPreProcessingFilters());
+			assertNotNull(processor.getChainsaw());
+			assertNotNull(processor.getPreChainsaw());
 
 			try {
 				Locuses myLocus = processor.startProcessing(source.getSingleSource());
@@ -97,14 +95,14 @@ public class ModuleProcessorTest {
 				 * 
 				 * 
 				 */
-				assertEquals(1, processor.getFilters().getFilterCount());
+				assertEquals(1, processor.getChainsaw().getFilterCount());
 				processor.saveSettingsToFile(new File("tmp/module-test-processed.init"));
 
-				processor.getFilters().removeAllFilters();
-				assertEquals(0, processor.getFilters().getFilterCount());
+				processor.getChainsaw().removeAllFilters();
+				assertEquals(0, processor.getChainsaw().getFilterCount());
 
 				processor.loadSettingsFromFile(new File("tmp/module-test-processed.init"));
-				assertEquals(1, processor.getFilters().getFilterCount());
+				assertEquals(1, processor.getChainsaw().getFilterCount());
 
 				processor.setModule(TestModule2.class);
 				assertNull(ModuleHelper.getTemporaryModuleImage(myLocus));
@@ -131,21 +129,17 @@ public class ModuleProcessorTest {
 
 			processor.setModule(TestModule.class);
 
-			FilterChainsaw preprocessingSaw = new FilterChainsaw();
-
+			FilterChainsaw preprocessingSaw = processor.getPreChainsaw();
 			ResizeFilter resize = (ResizeFilter) preprocessingSaw.appendFilter(ResizeFilter.class);
 			resize.getWIDTH().setValue(1024);
 			resize.getHEIGHT().setValue(1024);
 
-			processor.setPreprocessingChainsaw(preprocessingSaw);
+			
 
-			FilterChainsaw mainSaw = new FilterChainsaw();
-			preprocessingSaw.appendFilter(GrayScaleFilter.class);
+			processor.getChainsaw().appendFilter(GrayScaleFilter.class);
 
-			processor.setChainsaw(mainSaw);
-
-			assertNotNull(processor.getFilters());
-			assertNotNull(processor.getPreProcessingFilters());
+			assertNotNull(processor.getChainsaw());
+			assertNotNull(processor.getPreChainsaw());
 
 			try {
 				Locuses myLocus = processor.startProcessing(source.getSingleSource());

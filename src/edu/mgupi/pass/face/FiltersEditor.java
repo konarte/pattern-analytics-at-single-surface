@@ -39,6 +39,7 @@ import edu.mgupi.pass.filters.FilterChainsawTransaction2;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.FilterChainsawTransaction2.FilterStore;
 import edu.mgupi.pass.util.Config;
+import edu.mgupi.pass.util.SwingHelper;
 import edu.mgupi.pass.util.Config.DeletionMode;
 
 public class FiltersEditor extends JDialog implements ActionListener {
@@ -78,6 +79,7 @@ public class FiltersEditor extends JDialog implements ActionListener {
 	 * 
 	 */
 	private void initialize() {
+
 		this.setSize(700, 500);
 		this.setMinimumSize(new Dimension(700, 500));
 		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
@@ -86,13 +88,13 @@ public class FiltersEditor extends JDialog implements ActionListener {
 
 	}
 
-	public void setFilters(String title, FilterChainsaw filters) {
-		if (filters == null) {
+	public void setFilters(String title, FilterChainsaw chainsaw) throws Exception {
+		if (chainsaw == null) {
 			throw new IllegalArgumentException("Internal error. 'Processor.filters' must be not null.");
 		}
 
 		this.setTitle("Настройка фильтров " + title);
-		filterListModel.setChainsaw(new FilterChainsawTransaction2(filters));
+		filterListModel.setChainsaw(chainsaw);
 		filterListModel.updateFiltersImpl();
 		jListSelected.setSelectedIndex(0);
 		jListSelected.ensureIndexIsVisible(0);
@@ -110,16 +112,16 @@ public class FiltersEditor extends JDialog implements ActionListener {
 			@Override
 			protected void cancelImpl() throws Exception {
 				filterListModel.closeChainsaw();
-
 			}
 
 			@Override
 			protected void openDialogImpl() throws Exception {
+				//
 			}
 
 			@Override
 			protected boolean saveImpl() throws Exception {
-				jPanelParameters.saveParameterValues();
+				jPanelParameters.saveModelData();
 				logger.debug("Commiting changes...");
 
 				FilterChainsawTransaction2 chainsaw = filterListModel.getChainsaw();
@@ -136,7 +138,13 @@ public class FiltersEditor extends JDialog implements ActionListener {
 	}
 
 	public boolean openDialog(String title, FilterChainsaw filters) {
-		this.setFilters(title, filters);
+		try {
+			this.setFilters(title, filters);
+		} catch (Exception e) {
+			logger.error("Error when setting filters", e);
+			AppHelper.showExceptionDialog("Ошибка при установке фильтров.", e);
+			return false;
+		}
 		return getDialogAdapter().openDialog();
 	}
 
@@ -199,23 +207,26 @@ public class FiltersEditor extends JDialog implements ActionListener {
 		 */
 		private static final long serialVersionUID = 1L;
 
-		private FilterChainsawTransaction2 chainsaw = null;
+		private FilterChainsawTransaction2 transactionalSaw = null;
 
-		protected void setChainsaw(FilterChainsawTransaction2 chainsaw) {
-			this.chainsaw = chainsaw;
+		protected void setChainsaw(FilterChainsaw chainsaw) {
+			if (this.transactionalSaw != null) {
+				this.closeChainsaw();
+			}
+			this.transactionalSaw = new FilterChainsawTransaction2(chainsaw);
 		}
 
 		protected FilterChainsawTransaction2 getChainsaw() {
-			if (chainsaw == null) {
+			if (transactionalSaw == null) {
 				throw new IllegalStateException("Internal error. Chainsaw is diappeared.");
 			}
-			return chainsaw;
+			return transactionalSaw;
 		}
 
 		protected void closeChainsaw() {
-			if (this.chainsaw != null) {
-				this.chainsaw.close();
-				this.chainsaw = null;
+			if (this.transactionalSaw != null) {
+				this.transactionalSaw.close();
+				this.transactionalSaw = null;
 			}
 		}
 
@@ -254,12 +265,12 @@ public class FiltersEditor extends JDialog implements ActionListener {
 
 		@Override
 		public Object getElementAt(int index) {
-			return chainsaw == null ? null : chainsaw.getFilterStore(index);
+			return transactionalSaw == null ? null : transactionalSaw.getFilterStore(index);
 		}
 
 		@Override
 		public int getSize() {
-			return chainsaw == null ? 0 : chainsaw.getFilterCount();
+			return transactionalSaw == null ? 0 : transactionalSaw.getFilterCount();
 		}
 	}
 
@@ -423,10 +434,10 @@ public class FiltersEditor extends JDialog implements ActionListener {
 
 						logger.debug("Selecting filter {}", filter.name);
 
-						jPanelParameters.saveParameterValues();
+						jPanelParameters.saveModelData();
 
 						((TitledBorder) jPanelEditParameters.getBorder()).setTitle(filter.name + " - параметры");
-						jPanelParameters.setParameters(filter.parameters);
+						jPanelParameters.setModelData(filter.parameters);
 						FiltersEditor.this.pack();
 
 						logger.trace("Finished.");
@@ -434,7 +445,7 @@ public class FiltersEditor extends JDialog implements ActionListener {
 						logger.trace("Skip updating. No rows.");
 
 						((TitledBorder) jPanelEditParameters.getBorder()).setTitle("Модуль не выбран");
-						jPanelParameters.setParameters(null);
+						jPanelParameters.setModelData(null);
 
 					}
 					FiltersEditor.this.repaint();
@@ -447,8 +458,7 @@ public class FiltersEditor extends JDialog implements ActionListener {
 							this.onSelectItemImpl((JList) e.getSource());
 						} catch (Exception e1) {
 							logger.error("Error when applying filter options", e);
-							AppHelper.showExceptionDialog(FiltersEditor.this, "Unexpected error when filter options.",
-									e1);
+							AppHelper.showExceptionDialog("Unexpected error when filter options.", e1);
 						}
 					}
 				}
@@ -614,7 +624,7 @@ public class FiltersEditor extends JDialog implements ActionListener {
 				this.addFilterImpl();
 			} catch (Exception e) {
 				logger.error("Error when adding new filter", e);
-				AppHelper.showExceptionDialog(this, "Unexpected error when adding filter.", e);
+				AppHelper.showExceptionDialog("Unexpected error when adding filter.", e);
 			}
 		} else if (action == FilterActions.remove) {
 			int index = this.jListSelected.getSelectedIndex();

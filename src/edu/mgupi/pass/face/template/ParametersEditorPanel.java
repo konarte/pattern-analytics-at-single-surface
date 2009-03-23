@@ -6,7 +6,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Collection;
@@ -33,7 +32,15 @@ import edu.mgupi.pass.filters.IllegalParameterValueException;
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.Param.TYPES;
 
-public class ParametersEditorPanel extends JPanel implements ActionListener {
+/**
+ * Panel for edit parameters. Support all kind of available parameters. Work
+ * independent (all values to parameters does not set until called
+ * {@link #saveModelData()}).
+ * 
+ * @author raidan
+ * 
+ */
+public class ParametersEditorPanel extends JPanel {
 
 	private final static Logger logger = LoggerFactory.getLogger(ParametersEditorPanel.class);
 	private static final long serialVersionUID = 1L;
@@ -68,21 +75,32 @@ public class ParametersEditorPanel extends JPanel implements ActionListener {
 	}
 
 	private boolean hasPreviousWork = false;
-	private JPanel jPanelPlace = null;
 
+	// Model
 	private Collection<Param> parameters = null; //  @jve:decl-index=0:
+
+	// Help for runtime
 	private Map<Param, Color> selectedColors = new HashMap<Param, Color>(); //  @jve:decl-index=0:
 	private Map<Param, Component> controlComponents = new HashMap<Param, Component>(); //  @jve:decl-index=0:
 
-	public void setParameters(Collection<Param> editableParameters) {
+	/**
+	 * Set parameters to edit.
+	 * 
+	 * @param editableParameters
+	 *            parameters for edit. If null -- empty page will show.
+	 */
+	public void setModelData(Collection<Param> editableParameters) {
 
 		logger.debug("Applying parameters " + editableParameters);
 
-		// if received already loaded 
+		// If this data already loaded -- return 
+		// previousWork means that this is not first opening
+		// If this is first opening (and received parameters null) -- continue execution  
 		if (parameters == editableParameters && hasPreviousWork) {
 			return;
 		}
 
+		// Cleaning all
 		selectedColors.clear();
 		controlComponents.clear();
 		parameters = editableParameters;
@@ -98,16 +116,14 @@ public class ParametersEditorPanel extends JPanel implements ActionListener {
 			return;
 		}
 
-		//((TitledBorder) jPanelPlace.getBorder()).setTitle(title);
-
 		int index = 0;
+
+		// Rendering 
 		for (Iterator<Param> iter = editableParameters.iterator(); iter.hasNext();) {
 			final Param param = iter.next();
 			JLabel label = new JLabel();
 			label.setText(param.getTitle() + ":");
 			label.setName(param.getName() + "_label");
-
-			//jPanelPlace.add(label, "skip");
 
 			GridBagConstraints topGrid = new GridBagConstraints();
 			topGrid.weightx = 0;
@@ -120,7 +136,13 @@ public class ParametersEditorPanel extends JPanel implements ActionListener {
 			final TYPES type = param.getType();
 			final String name = param.getName();
 
-			Component renderComponent = null;
+			// Prepare constrains for render component
+			topGrid = new GridBagConstraints();
+			topGrid.weightx = 1;
+			topGrid.gridx = 1;
+			topGrid.gridy = index;
+			topGrid.anchor = GridBagConstraints.WEST;
+			topGrid.fill = GridBagConstraints.HORIZONTAL;
 
 			if (param.isMultiple()) {
 
@@ -133,13 +155,13 @@ public class ParametersEditorPanel extends JPanel implements ActionListener {
 				JComboBox comboBox = new JComboBox(param.getVisual_values());
 				comboBox.setName(name + "_combo_box");
 
-				renderComponent = comboBox;
+				jPanelPlace.add(comboBox, topGrid);
 				controlComponents.put(param, comboBox);
 			} else if (type == TYPES.STRING) {
 				JTextField field = new JTextField();
 				field.setName(name + "_field");
 
-				renderComponent = field;
+				jPanelPlace.add(field, topGrid);
 				controlComponents.put(param, field);
 			} else if (type == TYPES.INT) {
 
@@ -150,21 +172,21 @@ public class ParametersEditorPanel extends JPanel implements ActionListener {
 					JSpinner spinner = new JSpinner(model);
 					spinner.setName(name + "_spinner");
 
-					renderComponent = spinner;
+					jPanelPlace.add(spinner, topGrid);
 					controlComponents.put(param, spinner);
 
 				} else {
 					JFormattedTextField field = new JFormattedTextField(NumberFormat.getIntegerInstance());
 					field.setName(param.getName() + "_int_field");
 
-					renderComponent = field;
+					jPanelPlace.add(field, topGrid);
 					controlComponents.put(param, field);
 				}
 			} else if (type == TYPES.DOUBLE) {
 				JFormattedTextField field = new JFormattedTextField(new DecimalFormat("0.0#######"));
 				field.setName(name + "_double_field");
 
-				renderComponent = field;
+				jPanelPlace.add(field, topGrid);
 				controlComponents.put(param, field);
 			} else if (type == TYPES.COLOR) {
 
@@ -212,46 +234,47 @@ public class ParametersEditorPanel extends JPanel implements ActionListener {
 				gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
 				colorPanel.add(colorSample, gridBagConstraints);
 
-				renderComponent = colorPanel;
+				jPanelPlace.add(colorPanel, topGrid);
 				controlComponents.put(param, colorSample);
 
 			} else {
 				throw new IllegalArgumentException("Internal error. Unable to properly render parameter '" + name
 						+ "' with type " + type + ". Unknown type. Please, consult with developers.");
 			}
-
-			//jPanelPlace.add(renderComponent, iter.hasNext() ? "span, growx" : "wrap para");
-
-			topGrid = new GridBagConstraints();
-			topGrid.weightx = 1;
-			topGrid.gridx = 1;
-			topGrid.gridy = index;
-			topGrid.anchor = GridBagConstraints.WEST;
-			topGrid.fill = GridBagConstraints.HORIZONTAL;
-			jPanelPlace.add(renderComponent, topGrid);
-
-			//jPanelPlace.add(renderComponent, "width 100%!");
-			//jPanelPlace.add(renderComponent);
-
 			index++;
 		}
 
 		hasPreviousWork = true;
-		//		this.lastDimension = mig.preferredLayoutSize(this.jPanelPlace);
 		this.resetParameterValues();
 
 	}
 
-	//	
-	//
-	//	public Dimension getLastDimension() {
-	//		return lastDimension;
-	//	}
-
+	/**
+	 * Reset visual values from actual model values.
+	 */
 	public void resetParameterValues() {
 		this.resetParameterValues(false);
 	}
 
+	/**
+	 * Reset visual values from model default values (default as there are
+	 * created in Java code).
+	 * 
+	 * @throws IllegalParameterValueException
+	 */
+	public void restoreDefaults() throws IllegalParameterValueException {
+		this.resetParameterValues(true);
+	}
+
+	/**
+	 * Reset visual values from model values or defaults.
+	 * 
+	 * @param fromDefaults
+	 *            if true, that we load values from defaults, otherwise -- from
+	 *            normal values. Idea -- default values of parameters never
+	 *            changed (there are specified on creating in Java code), values can
+	 *            be changed and saved.
+	 */
 	public void resetParameterValues(boolean fromDefaults) {
 		for (Map.Entry<Param, Component> entry : controlComponents.entrySet()) {
 			Param param = entry.getKey();
@@ -297,7 +320,15 @@ public class ParametersEditorPanel extends JPanel implements ActionListener {
 		}
 	}
 
-	public Collection<Param> saveParameterValues() throws IllegalParameterValueException {
+	/**
+	 * Saving visual values to parameters.
+	 * 
+	 * @return same collection as we received in
+	 *         {@link #setModelData(Collection)}
+	 * 
+	 * @throws IllegalParameterValueException
+	 */
+	public Collection<Param> saveModelData() throws IllegalParameterValueException {
 
 		for (Map.Entry<Param, Component> entry : controlComponents.entrySet()) {
 			Param param = entry.getKey();
@@ -338,9 +369,7 @@ public class ParametersEditorPanel extends JPanel implements ActionListener {
 		return this.parameters;
 	}
 
-	public void restoreDefaults() throws IllegalParameterValueException {
-		this.resetParameterValues(true);
-	}
+	private JPanel jPanelPlace = null;
 
 	/**
 	 * This method initializes jPanelPlace
@@ -349,25 +378,10 @@ public class ParametersEditorPanel extends JPanel implements ActionListener {
 	 */
 	private JPanel getJPanelPlace() {
 		if (jPanelPlace == null) {
-			//			migLayout = new MigLayout("", "[]0[right][100%, fill]", "");
-			//migLayout = new MigLayout("", "wrap", "[right][0:pref,grow]", "");
-
-			//migLayout = new MigLayout("wrap,nocache", "[right][100%,fill]", "");
-			//			migLayout = new MigLayout("", "[grow]0[200, grow]", "");
-			//			new FlowLayout().;
 			jPanelPlace = new JPanel();
 			jPanelPlace.setLayout(new GridBagLayout());
-			//jPanelPlace.setLayout(new BoxLayout(jPanelPlace, BoxLayout.Y_AXIS));
 			jPanelPlace.setName("paramPlace");
-			//			jPanelPlace.setBorder(BorderFactory.createTitledBorder(null, "", TitledBorder.DEFAULT_JUSTIFICATION,
-			//					TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
 		}
 		return jPanelPlace;
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-
 	}
 }

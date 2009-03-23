@@ -17,6 +17,10 @@ public class FilterChainsawTransaction2 extends FilterChainsaw {
 
 	public FilterChainsawTransaction2(FilterChainsaw source) {
 		super(source.singleInstanceCaching);
+		
+		if (source == null) {
+			throw new IllegalArgumentException("Internal error. 'source' must be not null.");
+		}
 
 		logger.trace("CREATE");
 		this.source = source;
@@ -31,6 +35,10 @@ public class FilterChainsawTransaction2 extends FilterChainsaw {
 
 		source = null;
 
+	}
+
+	public FilterChainsaw getSource() {
+		return this.source;
 	}
 
 	@Override

@@ -64,11 +64,13 @@ public class Application {
 
 	private void run() throws Exception {
 
+		// Attempt to lock file
 		final FileChannel channel = new FileOutputStream(LOCK_FILE, false).getChannel();
 		final FileLock lock = channel.tryLock();
 
+		// Shutdown hook will automatically close locked channel (if it was locked)
+		// Then display some additional debug info
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-
 			public void run() {
 				SecundomerList.printToOutput(System.out);
 				CacheIFactory.close();
@@ -85,6 +87,8 @@ public class Application {
 			}
 		}));
 
+		// Open splash
+		// Splash is not a toy -- loading took at list 2 seconds!
 		SplashWindow splash = new SplashWindow();
 		splash.setSplashText("Загрузка...");
 		splash.setVisible(true);
@@ -103,6 +107,7 @@ public class Application {
 						+ "application with '-nolaf' key.", e);
 			}
 
+			// We want to make good impression, isn't it?
 			if (lock == null) {
 				JOptionPane.showMessageDialog(null, "Another instance of PASS already runned. Please, "
 						+ "close other application.", "Unable to start", JOptionPane.ERROR_MESSAGE);
@@ -110,6 +115,7 @@ public class Application {
 
 			}
 
+			// Hibernating...
 			splash.setSplashText("Подключение и инициализация БД...");
 
 			logger.debug("Initializing Hibernate...");
@@ -117,10 +123,16 @@ public class Application {
 
 			splash.setSplashText("Загрузка приложения...");
 			try {
-				frame = (MainFrame) AppHelper.getInstance().getFrame(MainFrame.class);
+
+				// Well, initialization
+				frame = (MainFrame) AppHelper.getInstance().getFrameImpl(MainFrame.class);
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+				// Caching all using windows -- this is good
+				// But, that until I write background caching ;)
 				frame.preCache();
 			} catch (Exception e) {
+				AppHelper.showExceptionDialog("Ошибка при загрузке приложения.", e);
 				throw e;
 			}
 		} finally {
@@ -133,6 +145,12 @@ public class Application {
 
 	}
 
+	/**
+	 * Entry point.
+	 * 
+	 * @param args
+	 * @throws Exception
+	 */
 	public static void main(String[] args) throws Exception {
 		logger.debug("Starting " + Const.PROGRAM_NAME_FULL);
 		new Application().run();

@@ -2,15 +2,15 @@ package edu.mgupi.pass.face.template;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 
+import javax.swing.AbstractAction;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -18,9 +18,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.WindowConstants;
 
-public class ImageFrameTemplate extends JDialog implements ActionListener {
-
-	//private final static Logger logger = LoggerFactory.getLogger(ImageFrameTemplate.class);  //  @jve:decl-index=0:
+/**
+ * Special Frame for showing images (hisogram and module images).
+ * 
+ * @author raidan
+ * 
+ */
+public class ImageFrameTemplate extends JDialog {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
@@ -34,6 +38,79 @@ public class ImageFrameTemplate extends JDialog implements ActionListener {
 	public ImageFrameTemplate() {
 		super();
 		initialize();
+	}
+
+	boolean registeredAlready = false;
+
+	/**
+	 * Register checkbox of parent frame, when it clicked -- we'll be show and
+	 * hide :)
+	 * 
+	 * @param controlCheckBox
+	 *            checkbox on parent window
+	 * 
+	 * @throws Exception
+	 */
+	public void registerControlCheckbox(final JCheckBox controlCheckBox) throws Exception {
+
+		if (registeredAlready) {
+			throw new IllegalStateException("Error when registering " + controlCheckBox + " for " + this
+					+ ". Already registered.");
+		}
+
+		this.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				controlCheckBox.setSelected(false);
+			}
+		});
+
+		final Window parent = (Window) controlCheckBox.getTopLevelAncestor();
+
+		String text = controlCheckBox.getText();
+		controlCheckBox.setAction(new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) { // #1
+				// If window opened -- immediately set state of this window 
+				if (parent.isVisible()) {
+					ImageFrameTemplate.this.setVisible(controlCheckBox.isSelected());
+				} else {
+					// If not already opened -- add to events
+					parent.addWindowListener(new WindowAdapter() {
+						public void windowOpened(WindowEvent e) {
+							ImageFrameTemplate.this.setVisible(controlCheckBox.isSelected());
+							parent.removeWindowListener(this);
+						}
+					});
+				}
+
+			} // #1 method
+		});
+
+		// Strange workaround. 'text' just disappearing.
+		controlCheckBox.setText(text);
+
+	}
+
+	/**
+	 * Set image to display on panel
+	 * 
+	 * @param image
+	 *            to display. Can be null (no image will shown).
+	 */
+	public void setImage(BufferedImage image) {
+		this.jPanelImage.setImage(image);
+	}
+
+	/**
+	 * Return info about image
+	 * 
+	 * @return true if last {@link #setImage(BufferedImage)} method received
+	 *         image, false if not (or not received either)
+	 */
+	public boolean hasImage() {
+		return this.jPanelImage != null && this.jPanelImage.hasImage();
 	}
 
 	/**
@@ -53,38 +130,6 @@ public class ImageFrameTemplate extends JDialog implements ActionListener {
 
 	private JPanel jPanelScaleBox = null;
 	private JCheckBox jCheckBoxScaleBox = null;
-
-	private Frame parent = null;
-	private JCheckBox controlCheckBox = null;
-
-	public void registerControlCheckbox(Frame parent, JCheckBox controlCheckBox) throws Exception {
-
-		if (this.controlCheckBox != null) {
-			throw new Exception("Error when registering " + controlCheckBox + " for " + this + ". Already set.");
-		}
-		if (parent == null) {
-			throw new IllegalArgumentException("Internal error. 'parent' must be not null.");
-		}
-		if (controlCheckBox == null) {
-			throw new IllegalArgumentException("Internal error. 'controlCheckBox' must be not null.");
-		}
-
-		this.parent = parent;
-		this.controlCheckBox = controlCheckBox;
-		this.addWindowListener(new OnHideWindowAdapter(controlCheckBox));
-		controlCheckBox.setActionCommand("hideMe");
-		controlCheckBox.addActionListener(this);
-
-	}
-
-	/**
-	 * Set image to display on panel
-	 * 
-	 * @param image
-	 */
-	public void setImage(BufferedImage image) {
-		this.jPanelImage.setImage(image);
-	}
 
 	/**
 	 * This method initializes jContentPane
@@ -127,19 +172,6 @@ public class ImageFrameTemplate extends JDialog implements ActionListener {
 		return jPanelImage;
 	}
 
-	private class OnHideWindowAdapter extends WindowAdapter {
-
-		private JCheckBox controlCheckBox;
-
-		public OnHideWindowAdapter(JCheckBox controlCheckBox) {
-			this.controlCheckBox = controlCheckBox;
-		}
-
-		public void windowClosing(WindowEvent e) {
-			controlCheckBox.setSelected(false);
-		}
-	}
-
 	/**
 	 * This method initializes jPanelScaleBox
 	 * 
@@ -176,33 +208,6 @@ public class ImageFrameTemplate extends JDialog implements ActionListener {
 			jCheckBoxScaleBox.setName("scaleButton");
 		}
 		return jCheckBoxScaleBox;
-	}
-
-	public boolean hasImage() {
-		return this.jPanelImage != null && this.jPanelImage.hasImage();
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-
-		String command = e.getActionCommand();
-		if (command == null) {
-			return;
-		}
-
-		if (command.equals("hideMe")) {
-			if (parent.isVisible()) {
-				this.setVisible(controlCheckBox.isSelected());
-			} else {
-				parent.addWindowListener(new WindowAdapter() {
-					public void windowOpened(WindowEvent e) {
-						ImageFrameTemplate.this.setVisible(controlCheckBox.isSelected());
-						parent.removeWindowListener(this);
-					}
-				});
-			}
-		}
-
 	}
 
 } // @jve:decl-index=0:visual-constraint="10,10"

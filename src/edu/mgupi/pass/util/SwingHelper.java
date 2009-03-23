@@ -1,4 +1,4 @@
-package edu.mgupi.pass.face;
+package edu.mgupi.pass.util;
 
 import java.awt.Component;
 import java.awt.Container;
@@ -12,6 +12,7 @@ import javax.swing.SwingUtilities;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * Helper class for Swing testing. Base idea is delayed execution (into another
@@ -188,7 +189,7 @@ public class SwingHelper {
 	 * 
 	 * @throws Exception
 	 */
-	public static void addWorkAndWaitThis(WorkSet actualWork, ConditionSet waitCondition) throws Exception {
+	public static void addWorkAndWaitThis(WorkSet actualWork, WaitCondition waitCondition) throws Exception {
 		waitUntil(waitCondition, addWorkNoWait(actualWork));
 	}
 
@@ -236,7 +237,7 @@ public class SwingHelper {
 	 */
 	public static void addWorkAndWaitForTheEnd(WorkSet actualWork) throws Exception {
 
-		waitUntil(new ConditionSet() {
+		waitUntil(new WaitCondition() {
 			public boolean keepWorking() {
 				return workCount < expectedWorkCount;
 			}
@@ -254,11 +255,11 @@ public class SwingHelper {
 	 * @param condition
 	 * @throws InterruptedException
 	 */
-	public static void waitUntil(ConditionSet condition) throws InterruptedException {
+	public static void waitUntil(WaitCondition condition) throws InterruptedException {
 		waitUntil(condition, null);
 	}
 
-	private static void waitUntil(ConditionSet condition, Throwable watchedException) throws InterruptedException {
+	private static void waitUntil(WaitCondition condition, Throwable watchedException) throws InterruptedException {
 		long time = System.currentTimeMillis();
 		boolean timeOK = false;
 		if (watchedException == null) {
