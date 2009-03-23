@@ -7,6 +7,7 @@ import edu.mgupi.pass.db.locuses.LFilters;
 import edu.mgupi.pass.db.locuses.LFiltersFactory;
 import edu.mgupi.pass.db.locuses.LModules;
 import edu.mgupi.pass.db.locuses.LModulesFactory;
+import edu.mgupi.pass.modules.IModule;
 
 public class MainFrameDataStorage {
 
@@ -29,6 +30,30 @@ public class MainFrameDataStorage {
 
 	private LModules[] moduleList = null;
 	private LFilters[] filterList = null;
+
+	public LModules getModuleByInstance(IModule moduleInstance) throws Exception {
+		LModules module = this.searchModuleByInstance(moduleInstance);
+		if (module == null) {
+			throw new Exception("Unable to find registered module '" + moduleInstance.getClass().getCanonicalName()
+					+ "'.");
+		}
+		return module;
+	}
+
+	public LModules searchModuleByInstance(IModule moduleInstance) throws Exception {
+
+		if (moduleInstance == null) {
+			throw new IllegalArgumentException("Internal error. 'moduleInstance' must be not null.");
+		}
+
+		String className = moduleInstance.getClass().getCanonicalName();
+		for (LModules module : this.listLModules()) {
+			if (module.getCodename().equals(className)) {
+				return module;
+			}
+		}
+		return null;
+	}
 
 	public LModules[] listLModulesIface() {
 		try {

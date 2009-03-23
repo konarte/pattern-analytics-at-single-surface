@@ -34,7 +34,7 @@ public class MainFrameTest {
 	public void setUp() throws Exception {
 		Config.getInstance().setReadOnly();
 
-		frame = (MainFrame) AppHelper.getInstance().openWindow(MainFrame.class);
+		frame = (MainFrame) AppHelper.getInstance().getFrame(MainFrame.class);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 

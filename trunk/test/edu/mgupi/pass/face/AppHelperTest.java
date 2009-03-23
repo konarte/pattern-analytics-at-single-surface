@@ -75,7 +75,8 @@ public class AppHelperTest {
 		SwingHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
-				splash = (SplashWindow) AppHelper.getInstance().openWindow(SplashWindow.class);
+				splash = (SplashWindow) AppHelper.getInstance().getFrame(SplashWindow.class);
+				splash.setVisible(true);
 
 			}
 		}, new ConditionSet() {
@@ -88,7 +89,7 @@ public class AppHelperTest {
 		assertNotNull(splash);
 		assertNotNull(AppHelper.getInstance().searchWindow(SplashWindow.class));
 
-		assertTrue(splash == AppHelper.getInstance().openWindow(SplashWindow.class));
+		assertTrue(splash == AppHelper.getInstance().getFrame(SplashWindow.class));
 
 		splash.setVisible(false);
 		splash.dispose();
@@ -103,8 +104,9 @@ public class AppHelperTest {
 		SwingHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
-				splash = (SplashWindow) AppHelper.getInstance().openWindow(SplashWindow.class);
-
+				splash = (SplashWindow) AppHelper.getInstance().getFrame(SplashWindow.class);
+				splash.setVisible(true);
+				
 			}
 		}, new ConditionSet() {
 			@Override
@@ -113,14 +115,14 @@ public class AppHelperTest {
 			}
 		});
 		assertNotNull(splash);
-		assertTrue(splash == AppHelper.getInstance().openWindow(SplashWindow.class));
+		assertTrue(splash == AppHelper.getInstance().getFrame(SplashWindow.class));
 
 		assertNull(AppHelper.getInstance().searchWindow(AboutDialog.class));
 
 		SwingHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
-				AppHelper.getInstance().openWindow(splash, AboutDialog.class);
+				AppHelper.getInstance().getDialog(AboutDialog.class).setVisible(true);
 
 			}
 		}, new ConditionSet() {
@@ -144,44 +146,52 @@ public class AppHelperTest {
 
 	@Test
 	public void testOpenWindowFrameIncorrect() throws Exception {
+		splash = null;
 		final SplashWindow mySplash = (SplashWindow) AppHelper.getInstance().registerAdditionalWindow(
 				SplashWindow.class);
+		assertNotNull(mySplash);
 
-		try {
-			SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
-				@Override
-				public void workImpl() throws Exception {
-					splash = (SplashWindow) AppHelper.getInstance().openWindowImpl(mySplash, SplashWindow.class, true,
-							false);
-				}
-			});
-			fail("No exception thrown!");
-		} catch (RuntimeException e) {
-			if (e.getCause() != null && e.getCause().getClass() == NoSuchMethodException.class) {
-				System.out.println("Received expected exception: " + e.getCause());
-			} else {
-				throw e;
+		//		try {
+		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+			@Override
+			public void workImpl() throws Exception {
+				splash = (SplashWindow) AppHelper.getInstance().getWindowImpl(SplashWindow.class, true);
+				splash.setVisible(true);
 			}
-		}
+		});
+		assertNotNull(splash);
+		assertFalse(splash == mySplash);
+		//			fail("No exception thrown!");
+		//		} catch (RuntimeException e) {
+		//			if (e.getCause() != null && e.getCause().getClass() == NoSuchMethodException.class) {
+		//				System.out.println("Received expected exception: " + e.getCause());
+		//			} else {
+		//				throw e;
+		//			}
+		//		}
 
-		try {
-			SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
-				@Override
-				public void workImpl() throws Exception {
-					AppHelper.getInstance().openWindowImpl(null, SettingsDialog.class, true, false);
-				}
-			});
-			fail("No exception thrown!");
-		} catch (RuntimeException e) {
-			if (e.getCause() != null && e.getCause().getClass() == InstantiationException.class) {
-				System.out.println("Received expected exception: " + e.getCause());
-			} else {
-				throw e;
-			}
-		}
+		//		try {
+
+		SwingTestHelper.showMeBackground(AppHelper.getInstance().getDialog(AboutDialog.class));
+		AboutDialog about = (AboutDialog) AppHelper.getInstance().searchWindow(AboutDialog.class);
+		assertNotNull(about);
+		about.setVisible(false);
+		about.dispose();
+
+		//			fail("No exception thrown!");
+		//		} catch (RuntimeException e) {
+		//			if (e.getCause() != null && e.getCause().getClass() == InstantiationException.class) {
+		//				System.out.println("Received expected exception: " + e.getCause());
+		//			} else {
+		//				throw e;
+		//			}
+		//		}
 
 		mySplash.setVisible(false);
 		mySplash.dispose();
+
+		splash.setVisible(false);
+		splash.dispose();
 
 	}
 
@@ -211,8 +221,10 @@ public class AppHelperTest {
 		SwingHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
-				commonWindow = (MyFrame) AppHelper.getInstance().openWindow(MyFrame.class);
-				mySplash = (MySplash) AppHelper.getInstance().openWindow(MySplash.class);
+				commonWindow = (MyFrame) AppHelper.getInstance().getFrame(MyFrame.class);
+				mySplash = (MySplash) AppHelper.getInstance().getFrame(MySplash.class);
+				commonWindow.setVisible(true);
+				mySplash.setVisible(true);
 			}
 		}, new ConditionSet() {
 			@Override

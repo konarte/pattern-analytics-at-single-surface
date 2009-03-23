@@ -165,7 +165,7 @@ public class FilterChainsawTransaction2 extends FilterChainsaw {
 
 		public String name;
 		public Collection<Param> parameters = EMPTY;
-		
+
 		public String toString() {
 			return name;
 		}

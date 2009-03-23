@@ -7,10 +7,10 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
-import javax.swing.AbstractAction;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -24,7 +24,7 @@ import edu.mgupi.pass.util.Const;
 import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
 
-public class ImagePanel extends JPanel {
+public class ImagePanel extends JPanel implements ActionListener {
 
 	private final static Logger logger = LoggerFactory.getLogger(ImagePanel.class);
 
@@ -54,6 +54,7 @@ public class ImagePanel extends JPanel {
 	}
 
 	private ImagePanel previousImagePanel;
+	private JCheckBox fitBox;
 
 	public void registerFitButton(final JCheckBox fitBox, final ImagePanel previousImagePanel) {
 
@@ -61,23 +62,30 @@ public class ImagePanel extends JPanel {
 			throw new IllegalArgumentException(
 					"Internal error. Attempt to create link to the same imagePanel as previous panel.");
 		}
+		if (fitBox == null) {
+			throw new IllegalArgumentException("Internal error. 'fitBox' must be not null.");
+		}
 
+		this.fitBox = fitBox;
 		this.previousImagePanel = previousImagePanel;
-		fitBox.setAction(new AbstractAction() {
-
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
-
-			public void actionPerformed(ActionEvent e) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Set action " + fitBox.isSelected() + " for " + ImagePanel.this);
-				}
-				ImagePanel.this.setFitModeCascade(fitBox.isSelected());
-			}
-		});
+		fitBox.setActionCommand("changeMode");
+		fitBox.addActionListener(this);
 		this.setFitMode(fitBox.isSelected());
+
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		String command = e.getActionCommand();
+		if (command == null) {
+			return;
+		}
+		if (command.equals("changeMode")) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Set action " + fitBox.isSelected() + " for " + ImagePanel.this);
+			}
+			this.setFitModeCascade(fitBox.isSelected());
+		}
 
 	}
 
@@ -242,4 +250,5 @@ public class ImagePanel extends JPanel {
 	public boolean hasImage() {
 		return this.myImage != null;
 	}
+
 }

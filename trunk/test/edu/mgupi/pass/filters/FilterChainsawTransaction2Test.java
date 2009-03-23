@@ -70,23 +70,23 @@ public class FilterChainsawTransaction2Test {
 
 		FilterStore store = chainsawTrans.getFilterStore(0);
 		assertEquals(filter.getName(), store.name);
-		ParamTest.compareInCollections(filter.getParams(), store.parameters, false);
+		ParamTest.compareInClonedCollections(filter.getParams(), store.parameters, false);
 
 		FilterStore store2 = chainsawTrans.getFilterStore(1);
 		assertEquals(filter2.getName(), store2.name);
-		ParamTest.compareInCollections(filter2.getParams(), store2.parameters, false);
+		ParamTest.compareInClonedCollections(filter2.getParams(), store2.parameters, false);
 
 		FilterStore store3 = chainsawTrans.getFilterStore(2);
 		assertEquals(filter3.getName(), store3.name);
-		ParamTest.compareInCollections(filter3.getParams(), store3.parameters, false);
+		ParamTest.compareInClonedCollections(filter3.getParams(), store3.parameters, false);
 
 		Param origParam = ParamHelper.getParameter("p2_string", filter2.getParams());
 		Param param = ParamHelper.getParameter("p2_string", store2.parameters);
-		ParamTest.compareTwoParameters(origParam, param);
+		ParamTest.compareTwoClonedParameters(origParam, param);
 		param.setValue("Мухлобойка");
 
-		ParamTest.compareTwoParametersDefinitions(origParam, param);
-		ParamTest.compareTwoParametersDefinitions(ParamHelper.getParameter("p2_string", filter2.getParams()), param);
+		ParamTest.compareTwoClonedParametersDefinitions(origParam, param);
+		ParamTest.compareTwoClonedParametersDefinitions(ParamHelper.getParameter("p2_string", filter2.getParams()), param);
 
 		assertFalse(origParam.getValue().equals(param.getValue()));
 
@@ -96,7 +96,7 @@ public class FilterChainsawTransaction2Test {
 		param = ParamHelper.getParameter("p2_string", store2.parameters);
 
 		// Bingo!
-		ParamTest.compareTwoParameters(origParam, param);
+		ParamTest.compareTwoClonedParameters(origParam, param);
 	}
 
 	@Test

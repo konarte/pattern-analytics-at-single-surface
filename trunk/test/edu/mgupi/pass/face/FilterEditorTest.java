@@ -47,15 +47,27 @@ public class FilterEditorTest {
 		dialog.setFilters("Тестовый показ", mySaw);
 		SwingTestHelper.showMeBackground(dialog);
 
-//		dialog.setVisible(true);
-//		SwingTestHelper.waitMe(dialog);
-//
-//		dialog.setFilters("Тестовый показ номер два!!!", mySaw);
-//		dialog.setVisible(true);
+		//		dialog.setVisible(true);
+		//		//SwingTestHelper.waitMe(dialog);
+		////
+		//		dialog.setFilters("Тестовый показ номер два!!!", mySaw);
+		//		dialog.setVisible(true);
 
 		//		SwingTestHelper.showMeBackground(dialog);
 		//
 		//SwingTestHelper.waitMe(dialog);
 	}
 
+	@SuppressWarnings("unchecked")
+	public void test() throws Exception {
+		FilterChainsaw mySaw = new FilterChainsaw();
+		//		processor.setChainsaw(mySaw);
+
+		for (Class<?> filterClass : ClassesHelper.getAvailableClasses(IFilter.class)) {
+			mySaw.appendFilter((Class<IFilter>) filterClass);
+		}
+
+		dialog.setFilters("Тестовый показ", mySaw);
+		dialog.setVisible(true);
+	}
 }

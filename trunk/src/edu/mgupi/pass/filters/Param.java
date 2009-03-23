@@ -1,5 +1,8 @@
 package edu.mgupi.pass.filters;
 
+import java.awt.Color;
+import java.util.Arrays;
+
 /**
  * Class for describe parameters can be processed in filters. This is only
  * describe! Filters will receive simple map of names and values on processing.
@@ -32,9 +35,9 @@ public class Param implements Cloneable {
 		this.low_border = lowBorder;
 		this.hi_border = hiBorder;
 	}
-
-	public Param(String name, String title, Object default_, Object[] allowedValues, String[] visualValues) {
-		this(name, title, TYPES.LIST, default_);
+	
+	public Param(String name, String title, TYPES type, Object default_, Object[] allowedValues, String[] visualValues) {
+		this(name, title, type, default_);
 
 		if (allowedValues != null && allowedValues.length > 0) {
 			if (visualValues != null && visualValues.length > 0) {
@@ -52,12 +55,14 @@ public class Param implements Cloneable {
 		}
 		this.allowed_values = allowedValues;
 		this.visual_values = visualValues;
+		this.multiple = true;
 	}
 
 	public static enum TYPES {
-		LIST, STRING, INT, DOUBLE, COLOR
+		STRING, INT, DOUBLE, COLOR
 	};
 
+	private boolean multiple;
 	private String name;
 	private String title;
 	private TYPES type;
@@ -127,8 +132,10 @@ public class Param implements Cloneable {
 			}
 
 			if (!found) {
+
 				throw new IllegalParameterValueException("Parameter " + this + " attempt to use incorrect value "
-						+ value + ". This is value not acceptable by allowed_parameters.");
+						+ value + ". This is value not acceptable by allowed_parameters. Allowed are: "
+						+ Arrays.toString(this.getAllowed_values()));
 			}
 		}
 
@@ -174,6 +181,34 @@ public class Param implements Cloneable {
 		}
 
 		this.value = value;
+	}
+	
+	public boolean isMultiple() {
+		return this.multiple;
+	}
+
+	protected String getStringValue() {
+		if (this.type == TYPES.COLOR) {
+			Color currentValue = (Color) this.value;
+			return currentValue == null ? null : String.valueOf(currentValue.getRGB());
+		}
+		return this.value == null ? (String) null : String.valueOf(this.value);
+	}
+
+	protected void setStringValue(String value) throws NumberFormatException, IllegalParameterValueException {
+		if (value == null) {
+			this.resetValue();
+			return;
+		}
+		if (type == TYPES.INT) {
+			this.setValue(Integer.parseInt(value));
+		} else if (type == TYPES.DOUBLE) {
+			this.setValue(Double.parseDouble(value));
+		} else if (type == TYPES.COLOR) {
+			this.setValue(new Color(Integer.parseInt(value)));
+		} else {
+			this.setValue(value);
+		}
 	}
 
 	public void resetValue() throws IllegalParameterValueException {

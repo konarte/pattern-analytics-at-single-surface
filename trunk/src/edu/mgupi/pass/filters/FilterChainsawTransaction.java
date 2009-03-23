@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FilterChainsawTransaction  {
+public class FilterChainsawTransaction {
 
 	private List<IFilter> filterPositions = new ArrayList<IFilter>();
 	private Map<IFilter, Collection<Param>> filterMap = new LinkedHashMap<IFilter, Collection<Param>>();
@@ -71,8 +71,6 @@ public class FilterChainsawTransaction  {
 			filterPositions.remove(pos);
 		}
 	}
-	
-	
 
 	public void commitChanged() {
 		for (IFilter filter : source.getFilters()) {

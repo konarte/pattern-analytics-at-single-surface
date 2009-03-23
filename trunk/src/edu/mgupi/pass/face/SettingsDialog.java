@@ -9,33 +9,39 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
-import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.face.template.AbstractDialogAdapter;
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Const;
+import edu.mgupi.pass.util.Config.DeletionMode;
+import edu.mgupi.pass.util.Config.SourceMode;
 
-public class SettingsDialog extends JDialog {
+public class SettingsDialog extends JDialog implements ActionListener {
 
 	private final static Logger logger = LoggerFactory.getLogger(SettingsDialog.class); // @jve:decl-index=0:
 
@@ -67,105 +73,97 @@ public class SettingsDialog extends JDialog {
 		this.setModal(true);
 		this.setTitle("Настройки");
 		this.setContentPane(getJContentPane());
-		Config.getInstance().getWindowPosition(this);
+
+		//Config.getInstance().getWindowPosition(this);
 
 		// -------------------
 
 		this.resetSettings();
 	}
 
-	public final static String SOURCE_MODE_CENTER = "Разместить в центре";
-	public final static String SOURCE_MODE_LEFT_TOP = "Разместить слева сверху";
-	public final static String SOURCE_MODE_SCALE = "Отмасштабировать";
+	private AbstractDialogAdapter myDialogAdapter = null; //  @jve:decl-index=0:
 
-	public final static String DEFAULT_SOURCE_MODE = SOURCE_MODE_LEFT_TOP;
+	private AbstractDialogAdapter getDialogAdapter() {
+		if (myDialogAdapter != null) {
+			return myDialogAdapter;
+		}
+		myDialogAdapter = new AbstractDialogAdapter(this) {
 
-	public final static int DEFAULT_BACKGROUND = Color.WHITE.getRGB(); // @jve:decl-index=0:
+			@Override
+			protected void cancelImpl() throws Exception {
+				SettingsDialog.this.resetSettings();
+			}
 
-	private String currentSource = null;
-	private Color currentBackground = null; // @jve:decl-index=0:
+			@Override
+			protected void openDialogImpl() throws Exception {
+				//
+			}
+
+			private boolean needRestartProcessing = false;
+			private boolean needSaveCommon = false;
+
+			@Override
+			protected boolean saveImpl() throws Exception {
+				needSaveCommon = false;
+				needRestartProcessing = false;
+
+				// LaF apply
+				String className = lafs.get(jComboBoxLaF.getSelectedItem());
+				Config.getInstance().setLookAndFeel(className);
+				if (!UIManager.getLookAndFeel().getClass().getName().equals(className)) {
+					AppHelper.getInstance().updateUI(className);
+					logger.debug("LaF changed. Save common.");
+					needSaveCommon = true;
+				}
+
+				if (Config.getInstance().setFilterDeleteConfirm(currentDeletionMode)) {
+					logger.debug("Deletion mode changed. Save common.");
+					needSaveCommon = true;
+				}
+
+				if (Config.getInstance().setCurrentSourceMode((SourceMode) jComboBoxSourceMode.getSelectedItem())) {
+					logger.debug("Selection source mode changed. Restart process.");
+					needRestartProcessing = true;
+				}
+
+				if (Config.getInstance().setCurrentBackground(newBackground.getRGB())) {
+					logger.debug("New background changed (to {}). Restart process.", newBackground.getRGB());
+					needRestartProcessing = true;
+				}
+
+				if (this.needSaveCommon) {
+					logger.debug("Saving settings...");
+					Config.getInstance().saveCommonConfig();
+				}
+
+				return this.needRestartProcessing;
+
+			}
+		};
+		return myDialogAdapter;
+	}
+
+	public boolean openDialog() {
+		return getDialogAdapter().openDialog();
+	}
+
 	private Color newBackground = null; // @jve:decl-index=0:
+	private DeletionMode currentDeletionMode = null; //  @jve:decl-index=0:
 
 	private void resetSettings() {
 
-		this.currentSource = Config.getInstance().getCurrentSourceMode(DEFAULT_SOURCE_MODE);
-		this.currentBackground = new Color(Config.getInstance().getCurrentBackground(DEFAULT_BACKGROUND));
+		SourceMode currentSource = Config.getInstance().getCurrentSourceMode();
 
 		jComboBoxLaF.setSelectedItem(UIManager.getLookAndFeel().getName());
 		jComboBoxSourceMode.setSelectedItem(currentSource);
+
+		Color currentBackground = new Color(Config.getInstance().getCurrentBackground());
 		newBackground = currentBackground;
-
 		jLabelBackgroundShow.setBackground(currentBackground);
-	}
 
-	private boolean needRestartProcessing = false;
-	private boolean needSaveCommon = false;
+		currentDeletionMode = Config.getInstance().getFilterDeleteMode();
+		this.cachedButtons.get(currentDeletionMode).setSelected(true);
 
-	private void applySettings() throws Exception {
-
-		needSaveCommon = false;
-		needRestartProcessing = false;
-
-		// LaF apply
-		String className = lafs.get(jComboBoxLaF.getSelectedItem());
-		Config.getInstance().setLookAndFeel(className);
-		if (!UIManager.getLookAndFeel().getClass().getName().equals(className)) {
-			AppHelper.getInstance().updateUI(className);
-			needSaveCommon = true;
-		}
-
-		String newSourceMode = (String) jComboBoxSourceMode.getSelectedItem();
-		// setup new source mode anyway
-		Config.getInstance().setCurrentSourceMode(newSourceMode);
-		if (!newSourceMode.equals(currentSource)) {
-			currentSource = newSourceMode;
-			needRestartProcessing = true;
-		}
-
-		Config.getInstance().setCurrentBackground(newBackground.getRGB());
-		if (!newBackground.equals(currentBackground)) {
-			currentBackground = newBackground;
-			needRestartProcessing = true;
-		}
-
-	}
-
-	private boolean ok = false;
-
-	public boolean open() {
-		this.setVisible(true);
-		return ok;
-	}
-
-	private void save() {
-		try {
-			this.saveImpl();
-		} catch (Exception e) {
-			logger.error("Error when applying settings", e);
-			AppHelper.showExceptionDialog(this, "Unexpected error when applying settings.", e);
-		}
-	}
-
-	private void saveImpl() throws Exception {
-		ok = false;
-
-		this.applySettings();
-
-		if (this.needSaveCommon) {
-			logger.debug("Saving settings...");
-			Config.getInstance().saveCommonConfig();
-		}
-
-		ok = this.needRestartProcessing;
-
-		this.setVisible(false);
-
-	}
-
-	private void cancelImpl() {
-		ok = false;
-		this.resetSettings();
-		SettingsDialog.this.setVisible(false);
 	}
 
 	/**
@@ -206,19 +204,8 @@ public class SettingsDialog extends JDialog {
 	private JButton getJButtonOK() {
 		if (jButtonOK == null) {
 			jButtonOK = new JButton();
-			jButtonOK.setAction(new AbstractAction() {
-
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public void actionPerformed(ActionEvent e) {
-					SettingsDialog.this.save();
-				}
-			});
-			jButtonOK.setName("ok");
 			jButtonOK.setText("OK");
+			getDialogAdapter().registerOKButton(jButtonOK);
 		}
 		return jButtonOK;
 	}
@@ -231,27 +218,8 @@ public class SettingsDialog extends JDialog {
 	private JButton getJButtonCancel() {
 		if (jButtonCancel == null) {
 			jButtonCancel = new JButton();
-
-			Action cancelAction = new AbstractAction() {
-
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public void actionPerformed(ActionEvent e) {
-					SettingsDialog.this.cancelImpl();
-				}
-			};
-
-			jButtonCancel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-					KeyStroke.getKeyStroke((char) KeyEvent.VK_ESCAPE), "cancel");
-			jButtonCancel.getActionMap().put("cancel", cancelAction);
-			jButtonCancel.setAction(cancelAction);
-
-			//
-			jButtonCancel.setName("cancel");
-			jButtonCancel.setText("Отмена");
+			jButtonCancel.setText("cancel");
+			getDialogAdapter().registerCancelButton(jButtonCancel);
 		}
 		return jButtonCancel;
 	}
@@ -281,23 +249,21 @@ public class SettingsDialog extends JDialog {
 	 */
 	private JPanel getJPanelLaF() {
 		if (jPanelLaF == null) {
-			GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
-			gridBagConstraints1.gridx = 0;
-			gridBagConstraints1.insets = new Insets(0, 0, 0, 5);
-			gridBagConstraints1.gridy = 0;
+			GridBagConstraints gridBagConstraints11 = new GridBagConstraints();
+			gridBagConstraints11.gridx = 0;
+			gridBagConstraints11.fill = GridBagConstraints.NONE;
+			gridBagConstraints11.anchor = GridBagConstraints.WEST;
+			gridBagConstraints11.weightx = 1.0D;
+			gridBagConstraints11.gridy = 0;
 			jLabelLaF = new JLabel();
 			jLabelLaF.setText("Стиль");
-			GridBagConstraints gridBagConstraints = new GridBagConstraints();
-			gridBagConstraints.fill = GridBagConstraints.NONE;
-			gridBagConstraints.gridx = 1;
 			jPanelLaF = new JPanel();
 			jPanelLaF.setLayout(new GridBagLayout());
 			jPanelLaF.setBorder(BorderFactory.createTitledBorder(null, "Настройки интерфейса",
 					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
 					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
 			jPanelLaF.setName("jPanelLaF");
-			jPanelLaF.add(jLabelLaF, gridBagConstraints1);
-			jPanelLaF.add(getJComboBoxLaF(), gridBagConstraints);
+			jPanelLaF.add(getJPanelLaFPlace(), gridBagConstraints11);
 		}
 		return jPanelLaF;
 	}
@@ -337,13 +303,13 @@ public class SettingsDialog extends JDialog {
 		if (jPanelSourceMode == null) {
 			GridBagConstraints gridBagConstraints10 = new GridBagConstraints();
 			gridBagConstraints10.gridx = 2;
-			gridBagConstraints10.fill = GridBagConstraints.NONE;
+			gridBagConstraints10.fill = GridBagConstraints.HORIZONTAL;
 			gridBagConstraints10.weightx = 0.0D;
 			gridBagConstraints10.anchor = GridBagConstraints.WEST;
 			gridBagConstraints10.insets = new Insets(0, 5, 0, 5);
 			gridBagConstraints10.gridy = 1;
 			jLabelBackgroundShow = new JLabel();
-			jLabelBackgroundShow.setText("     ");
+			jLabelBackgroundShow.setText(" ");
 			jLabelBackgroundShow.setOpaque(true);
 			GridBagConstraints gridBagConstraints9 = new GridBagConstraints();
 			gridBagConstraints9.gridx = 1;
@@ -395,6 +361,12 @@ public class SettingsDialog extends JDialog {
 
 	private JLabel jLabelBackgroundShow = null;
 
+	private JPanel jPanelLaFPlace = null;
+
+	private JPanel jPanelFilterEdit = null;
+
+	private JPanel jPanelFilterEditPlace = null;
+
 	/**
 	 * This method initializes jComboBoxSourceMode
 	 * 
@@ -402,8 +374,7 @@ public class SettingsDialog extends JDialog {
 	 */
 	private JComboBox getJComboBoxSourceMode() {
 		if (jComboBoxSourceMode == null) {
-			jComboBoxSourceMode = new JComboBox(new String[] { SOURCE_MODE_CENTER, SOURCE_MODE_LEFT_TOP,
-					SOURCE_MODE_SCALE });
+			jComboBoxSourceMode = new JComboBox(SourceMode.values());
 		}
 		return jComboBoxSourceMode;
 	}
@@ -449,17 +420,24 @@ public class SettingsDialog extends JDialog {
 	 */
 	private JPanel getJPanelSettingsCommon() {
 		if (jPanelSettingsCommon == null) {
+			GridBagConstraints gridBagConstraints12 = new GridBagConstraints();
+			gridBagConstraints12.weightx = 1.0D;
+			gridBagConstraints12.gridy = 1;
+			gridBagConstraints12.fill = GridBagConstraints.HORIZONTAL;
+			gridBagConstraints12.weighty = 1.0D;
+			gridBagConstraints12.anchor = GridBagConstraints.NORTH;
+			gridBagConstraints12.gridx = 0;
 			GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
-			gridBagConstraints4.anchor = GridBagConstraints.NORTHWEST;
-			gridBagConstraints4.gridy = -1;
-			gridBagConstraints4.ipadx = 0;
-			gridBagConstraints4.ipady = 0;
+			gridBagConstraints4.anchor = GridBagConstraints.NORTH;
+			gridBagConstraints4.gridy = 0;
 			gridBagConstraints4.weightx = 1.0D;
-			gridBagConstraints4.weighty = 1.0D;
-			gridBagConstraints4.gridx = -1;
+			gridBagConstraints4.weighty = 0.0D;
+			gridBagConstraints4.fill = GridBagConstraints.HORIZONTAL;
+			gridBagConstraints4.gridx = 0;
 			jPanelSettingsCommon = new JPanel();
 			jPanelSettingsCommon.setLayout(new GridBagLayout());
 			jPanelSettingsCommon.add(getJPanelLaF(), gridBagConstraints4);
+			jPanelSettingsCommon.add(getJPanelFilterEdit(), gridBagConstraints12);
 		}
 		return jPanelSettingsCommon;
 	}
@@ -472,24 +450,124 @@ public class SettingsDialog extends JDialog {
 	private JButton getJButtonBackground() {
 		if (jButtonBackground == null) {
 			jButtonBackground = new JButton();
-
-			jButtonBackground.setAction(new AbstractAction() {
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public void actionPerformed(ActionEvent e) {
-					Color newBack = JColorChooser.showDialog(SettingsDialog.this, "Выбор цвета для фона",
-							SettingsDialog.this.newBackground);
-					if (newBack != null) {
-						SettingsDialog.this.newBackground = newBack;
-						jLabelBackgroundShow.setBackground(newBack);
-					}
-				}
-			});
 			jButtonBackground.setText("...");
+			jButtonBackground.setName("backgroundColor");
+			jButtonBackground.setActionCommand("backgroundColor");
 		}
 		return jButtonBackground;
+	}
+
+	/**
+	 * This method initializes jPanelLaFPlace
+	 * 
+	 * @return javax.swing.JPanel
+	 */
+	private JPanel getJPanelLaFPlace() {
+		if (jPanelLaFPlace == null) {
+			GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
+			gridBagConstraints1.insets = new Insets(0, 0, 0, 5);
+			gridBagConstraints1.gridy = 0;
+			gridBagConstraints1.gridx = 0;
+			GridBagConstraints gridBagConstraints = new GridBagConstraints();
+			gridBagConstraints.fill = GridBagConstraints.NONE;
+			gridBagConstraints.gridy = 0;
+			gridBagConstraints.gridx = 1;
+			jPanelLaFPlace = new JPanel();
+			jPanelLaFPlace.setLayout(new GridBagLayout());
+			jPanelLaFPlace.add(getJComboBoxLaF(), gridBagConstraints);
+			jPanelLaFPlace.add(jLabelLaF, gridBagConstraints1);
+		}
+		return jPanelLaFPlace;
+	}
+
+	/**
+	 * This method initializes jPanelFilterEdit
+	 * 
+	 * @return javax.swing.JPanel
+	 */
+	private JPanel getJPanelFilterEdit() {
+		if (jPanelFilterEdit == null) {
+			GridBagConstraints gridBagConstraints13 = new GridBagConstraints();
+			gridBagConstraints13.gridx = 0;
+			gridBagConstraints13.anchor = GridBagConstraints.NORTHWEST;
+			gridBagConstraints13.weightx = 1.0D;
+			gridBagConstraints13.gridy = 0;
+			jPanelFilterEdit = new JPanel();
+			jPanelFilterEdit.setLayout(new GridBagLayout());
+			jPanelFilterEdit.setBorder(BorderFactory.createTitledBorder(null, "Редактирование фильтров",
+					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
+					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			jPanelFilterEdit.add(getJPanelFilterEditPlace(), gridBagConstraints13);
+
+		}
+		return jPanelFilterEdit;
+	}
+
+	private Map<DeletionMode, JRadioButton> cachedButtons = new HashMap<DeletionMode, JRadioButton>(); //  @jve:decl-index=0:
+
+	/**
+	 * This method initializes jPanelFilterEditPlace
+	 * 
+	 * @return javax.swing.JPanel
+	 */
+	private JPanel getJPanelFilterEditPlace() {
+		if (jPanelFilterEditPlace == null) {
+			jPanelFilterEditPlace = new JPanel();
+			jPanelFilterEditPlace.setLayout(new GridBagLayout());
+
+			ButtonGroup group = new ButtonGroup();
+			int index = 0;
+			for (final DeletionMode mode : DeletionMode.values()) {
+				GridBagConstraints gridBagConstraints = new GridBagConstraints();
+				gridBagConstraints.gridx = 0;
+				gridBagConstraints.gridy = index;
+				final JRadioButton button = new JRadioButton();
+				jPanelFilterEditPlace.add(button, gridBagConstraints);
+				button.addChangeListener(new ChangeListener() {
+					@Override
+					public void stateChanged(ChangeEvent e) {
+						currentDeletionMode = mode;
+					}
+				});
+
+				gridBagConstraints = new GridBagConstraints();
+				gridBagConstraints.gridx = 1;
+				gridBagConstraints.gridy = index;
+				gridBagConstraints.anchor = GridBagConstraints.WEST;
+				JLabel label = new JLabel();
+				label.setText(mode.toString());
+				label.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						button.setSelected(true);
+					}
+				});
+
+				jPanelFilterEditPlace.add(label, gridBagConstraints);
+
+				group.add(button);
+				cachedButtons.put(mode, button);
+
+				index++;
+			}
+
+		}
+		return jPanelFilterEditPlace;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		String command = e.getActionCommand();
+		if (command == null) {
+			return;
+		}
+		if (command.equals("background")) {
+			Color newBack = JColorChooser.showDialog(SettingsDialog.this, "Выбор цвета для фона", this.newBackground);
+			if (newBack != null) {
+				this.newBackground = newBack;
+				jLabelBackgroundShow.setBackground(newBack);
+			}
+		}
+
 	}
 } // @jve:decl-index=0:visual-constraint="10,10"

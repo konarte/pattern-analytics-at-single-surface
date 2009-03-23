@@ -34,7 +34,7 @@ public class AboutDialogTest {
 
 		SwingTestHelper.showMeBackground(this.dialog);
 
-		final JButton ok = (JButton) SwingHelper.getChildNamed(dialog, "ok");
+		final JButton ok = (JButton) SwingHelper.getChildNamed(dialog, "cancel");
 		assertNotNull(ok);
 
 		final JTable props = (JTable) SwingHelper.getChildNamed(dialog, "properties");

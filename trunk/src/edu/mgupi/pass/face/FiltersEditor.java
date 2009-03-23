@@ -10,10 +10,10 @@ import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import javax.swing.AbstractAction;
+import javax.swing.AbstractButton;
 import javax.swing.AbstractListModel;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
@@ -32,13 +32,16 @@ import javax.swing.event.ListSelectionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.face.template.AbstractDialogAdapter;
 import edu.mgupi.pass.face.template.ParametersEditorPanel;
 import edu.mgupi.pass.filters.FilterChainsaw;
 import edu.mgupi.pass.filters.FilterChainsawTransaction2;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.FilterChainsawTransaction2.FilterStore;
+import edu.mgupi.pass.util.Config;
+import edu.mgupi.pass.util.Config.DeletionMode;
 
-public class FiltersEditor extends JDialog {
+public class FiltersEditor extends JDialog implements ActionListener {
 	private final static Logger logger = LoggerFactory.getLogger(FiltersEditor.class); //  @jve:decl-index=0:
 
 	private static final long serialVersionUID = 1L;
@@ -51,6 +54,16 @@ public class FiltersEditor extends JDialog {
 	private JPanel jPanelButtons = null;
 	private JButton jButtonOK = null;
 	private JButton jButtonCancel = null;
+
+	private static enum FilterActions {
+		add, remove, up, down
+	};
+
+	private void registerButton(AbstractButton button, FilterActions action) {
+		button.setName(action.name());
+		button.setActionCommand(action.name());
+		SwingHelper.addListenerSafed(button, this);
+	}
 
 	/**
 	 * @param owner
@@ -70,16 +83,13 @@ public class FiltersEditor extends JDialog {
 		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		this.setTitle("Настройка фильтров");
 		this.setContentPane(getJContentPane());
-	}
 
-	private FilterListModel filterListModel = null;
+	}
 
 	public void setFilters(String title, FilterChainsaw filters) {
 		if (filters == null) {
 			throw new IllegalArgumentException("Internal error. 'Processor.filters' must be not null.");
 		}
-
-		this.lastSelected = null;
 
 		this.setTitle("Настройка фильтров " + title);
 		filterListModel.setChainsaw(new FilterChainsawTransaction2(filters));
@@ -89,50 +99,45 @@ public class FiltersEditor extends JDialog {
 
 	}
 
-	private FilterStore lastSelected = null; //  @jve:decl-index=0:
+	private AbstractDialogAdapter myDialogAdapter = null; //  @jve:decl-index=0:
 
-	private void onSelectItem(JList list) {
-
-		try {
-			this.onSelectItemImpl(list);
-		} catch (Exception e) {
-			logger.error("Error when applying filter options", e);
-			AppHelper.showExceptionDialog(this, "Unexpected error when filter options.", e);
+	private AbstractDialogAdapter getDialogAdapter() {
+		if (myDialogAdapter != null) {
+			return myDialogAdapter;
 		}
-	}
+		myDialogAdapter = new AbstractDialogAdapter(this) {
 
-	private void onSelectItemImpl(JList list) throws Exception {
-		FilterStore filter = (FilterStore) list.getSelectedValue();
-		if (filter != null) {
+			@Override
+			protected void cancelImpl() throws Exception {
+				filterListModel.closeChainsaw();
 
-			logger.debug("Selecting filter {} and last selected is null ? {}", filter.name, lastSelected == null);
-
-			if (lastSelected != null) {
-				jPanelParameters.saveParameterValues();
 			}
-			lastSelected = filter;
 
-			((TitledBorder) jPanelEditParameters.getBorder()).setTitle("Редактирование \"" + filter.name + "\"");
-			jPanelParameters.setParameters(filter.parameters);
-			this.pack();
+			@Override
+			protected void openDialogImpl() throws Exception {
+			}
 
-			logger.trace("Finished.");
-		} else {
-			logger.trace("Skip updating. No rows.");
+			@Override
+			protected boolean saveImpl() throws Exception {
+				jPanelParameters.saveParameterValues();
+				logger.debug("Commiting changes...");
 
-			((TitledBorder) jPanelEditParameters.getBorder()).setTitle("Модуль не выбран");
-			jPanelParameters.setParameters(null);
+				FilterChainsawTransaction2 chainsaw = filterListModel.getChainsaw();
 
-		}
-		this.repaint();
+				chainsaw.commitChanges();
+				chainsaw.close();
+				chainsaw = null;
+
+				return true;
+			}
+
+		};
+		return myDialogAdapter;
 	}
 
-	public boolean ok = false;
-
-	public boolean open(String title, FilterChainsaw filters) {
+	public boolean openDialog(String title, FilterChainsaw filters) {
 		this.setFilters(title, filters);
-		this.setVisible(true);
-		return ok;
+		return getDialogAdapter().openDialog();
 	}
 
 	private JPanel jPanelControlButtons = null;
@@ -147,56 +152,11 @@ public class FiltersEditor extends JDialog {
 
 	private JPanel jPanelFilters = null;
 
-	private void save() {
-		try {
-			this.saveImpl();
-		} catch (Exception e) {
-			logger.error("Error when applying filter options", e);
-			AppHelper.showExceptionDialog(this, "Unexpected error when filter options.", e);
-		}
-	}
-
-	private void saveImpl() throws Exception {
-		ok = false;
-
-		jPanelParameters.saveParameterValues();
-		logger.debug("Commiting changes...");
-
-		FilterChainsawTransaction2 chainsaw = this.filterListModel.getChainsaw();
-
-		chainsaw.commitChanges();
-		chainsaw.close();
-		chainsaw = null;
-
-		ok = true;
-		this.setVisible(false);
-
-	}
-
-	private void cancelImpl() {
-		ok = false;
-		this.filterListModel.closeChainsaw();
-		this.setVisible(false);
-	}
-
-	private void addFilter() {
-		try {
-			this.addFilterImpl();
-		} catch (Exception e) {
-			logger.error("Error when adding new filter", e);
-			AppHelper.showExceptionDialog(this, "Unexpected error when adding filter.", e);
-		}
-	}
-
 	@SuppressWarnings("unchecked")
 	private void addFilterImpl() throws Exception {
 
-		Window owner = this.getOwner();
-		Frame parent = owner != null && owner instanceof Frame ? (Frame) owner : null;
-
-		FilterListDialog list = (FilterListDialog) AppHelper.getInstance().openWindowDialogHidden(parent,
-				FilterListDialog.class);
-		String pickClass = list.open();
+		ListDialogFilters list = (ListDialogFilters) AppHelper.getInstance().getDialogImpl(ListDialogFilters.class);
+		String pickClass = list.openDialog();
 		if (pickClass != null) {
 
 			//int index = jListSelected.getSelectedIndex() + 1; //get selected index
@@ -213,14 +173,9 @@ public class FiltersEditor extends JDialog {
 		}
 	}
 
-	private void deleteFilter() {
+	private void deleteFilterImpl() {
 		int index = this.jListSelected.getSelectedIndex();
 		if (index < 0) {
-			return;
-		}
-
-		if (JOptionPane.showConfirmDialog(this, "Действительно удалить выбранный фильтр?",
-				"Подтверждение удаления фильтра", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
 			return;
 		}
 
@@ -228,16 +183,14 @@ public class FiltersEditor extends JDialog {
 
 		this.filterListModel.removeFilterImpl(index);
 
-		if (this.filterListModel.getSize() == 0) {
-			this.onSelectItem(this.jListSelected);
-		} else {
-			if (index >= filterListModel.getSize()) {
-				index--;
-			}
-			this.jListSelected.setSelectedIndex(index);
+		if (index >= filterListModel.getSize()) {
+			index--;
 		}
+		this.jListSelected.setSelectedIndex(index);
 
 	}
+
+	private FilterListModel filterListModel = null;
 
 	static class FilterListModel extends AbstractListModel {
 
@@ -368,7 +321,7 @@ public class FiltersEditor extends JDialog {
 			gridBagConstraints5.gridy = 1;
 			jPanelSelectFilters = new JPanel();
 			jPanelSelectFilters.setLayout(new GridBagLayout());
-			jPanelSelectFilters.setBorder(BorderFactory.createTitledBorder(null, "Управление фильтрами",
+			jPanelSelectFilters.setBorder(BorderFactory.createTitledBorder(null, "Выбранные фильтры",
 					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
 					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
 			jPanelSelectFilters.add(getJPanelFilters(), gridBagConstraints6);
@@ -463,10 +416,40 @@ public class FiltersEditor extends JDialog {
 
 			jListSelected.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			jListSelected.addListSelectionListener(new ListSelectionListener() {
+
+				private void onSelectItemImpl(JList list) throws Exception {
+					FilterStore filter = (FilterStore) list.getSelectedValue();
+					if (filter != null) {
+
+						logger.debug("Selecting filter {}", filter.name);
+
+						jPanelParameters.saveParameterValues();
+
+						((TitledBorder) jPanelEditParameters.getBorder()).setTitle(filter.name + " - параметры");
+						jPanelParameters.setParameters(filter.parameters);
+						FiltersEditor.this.pack();
+
+						logger.trace("Finished.");
+					} else {
+						logger.trace("Skip updating. No rows.");
+
+						((TitledBorder) jPanelEditParameters.getBorder()).setTitle("Модуль не выбран");
+						jPanelParameters.setParameters(null);
+
+					}
+					FiltersEditor.this.repaint();
+				}
+
 				@Override
 				public void valueChanged(ListSelectionEvent e) {
 					if (!e.getValueIsAdjusting()) {
-						FiltersEditor.this.onSelectItem((JList) e.getSource());
+						try {
+							this.onSelectItemImpl((JList) e.getSource());
+						} catch (Exception e1) {
+							logger.error("Error when applying filter options", e);
+							AppHelper.showExceptionDialog(FiltersEditor.this, "Unexpected error when filter options.",
+									e1);
+						}
 					}
 				}
 			});
@@ -500,19 +483,8 @@ public class FiltersEditor extends JDialog {
 	private JButton getJButtonOK() {
 		if (jButtonOK == null) {
 			jButtonOK = new JButton();
-			jButtonOK.setAction(new AbstractAction() {
-
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public void actionPerformed(ActionEvent e) {
-					FiltersEditor.this.save();
-				}
-			});
-			jButtonOK.setName("ok");
 			jButtonOK.setText("OK");
+			getDialogAdapter().registerOKButton(jButtonOK);
 		}
 		return jButtonOK;
 	}
@@ -525,19 +497,8 @@ public class FiltersEditor extends JDialog {
 	private JButton getJButtonCancel() {
 		if (jButtonCancel == null) {
 			jButtonCancel = new JButton();
-			jButtonCancel.setAction(new AbstractAction() {
-
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public void actionPerformed(ActionEvent e) {
-					FiltersEditor.this.cancelImpl();
-				}
-			});
-			jButtonCancel.setName("cancel");
-			jButtonCancel.setText("Отмена");
+			jButtonCancel.setText("cancel");
+			getDialogAdapter().registerCancelButton(jButtonCancel);
 		}
 		return jButtonCancel;
 	}
@@ -567,19 +528,8 @@ public class FiltersEditor extends JDialog {
 	private JButton getJButtonAdd() {
 		if (jButtonAdd == null) {
 			jButtonAdd = new JButton();
-			jButtonAdd.setAction(new AbstractAction() {
-
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public void actionPerformed(ActionEvent e) {
-					FiltersEditor.this.addFilter();
-				}
-			});
-			jButtonAdd.setName("");
 			jButtonAdd.setText("Добавить");
+			registerButton(jButtonAdd, FilterActions.add);
 		}
 		return jButtonAdd;
 	}
@@ -592,18 +542,8 @@ public class FiltersEditor extends JDialog {
 	private JButton getJButtonRemove() {
 		if (jButtonRemove == null) {
 			jButtonRemove = new JButton();
-			jButtonRemove.setAction(new AbstractAction() {
-
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public void actionPerformed(ActionEvent e) {
-					FiltersEditor.this.deleteFilter();
-				}
-			});
 			jButtonRemove.setText("Удалить");
+			registerButton(jButtonRemove, FilterActions.remove);
 		}
 		return jButtonRemove;
 	}
@@ -616,23 +556,8 @@ public class FiltersEditor extends JDialog {
 	private JButton getJButtonUp() {
 		if (jButtonUp == null) {
 			jButtonUp = new JButton();
-			jButtonUp.setAction(new AbstractAction() {
-
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public void actionPerformed(ActionEvent e) {
-					int index = jListSelected.getSelectedIndex();
-					if (filterListModel.moveUp(index)) {
-						jListSelected.setSelectedIndex(index - 1);
-						jListSelected.ensureIndexIsVisible(index - 1);
-					}
-				}
-			});
 			jButtonUp.setText("Up");
-			jButtonUp.setName("up");
+			registerButton(jButtonUp, FilterActions.up);
 		}
 		return jButtonUp;
 	}
@@ -645,23 +570,8 @@ public class FiltersEditor extends JDialog {
 	private JButton getJButtonDown() {
 		if (jButtonDown == null) {
 			jButtonDown = new JButton();
-			jButtonDown.setAction(new AbstractAction() {
-
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public void actionPerformed(ActionEvent e) {
-					int index = jListSelected.getSelectedIndex();
-					if (filterListModel.moveDown(index)) {
-						jListSelected.setSelectedIndex(index + 1);
-						jListSelected.ensureIndexIsVisible(index + 1);
-					}
-				}
-			});
-			jButtonDown.setName("down");
 			jButtonDown.setText("Down");
+			registerButton(jButtonDown, FilterActions.down);
 		}
 		return jButtonDown;
 	}
@@ -685,6 +595,56 @@ public class FiltersEditor extends JDialog {
 			jPanelFilters.add(getJScrollPaneSelected(), BorderLayout.CENTER);
 		}
 		return jPanelFilters;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		if (event.getActionCommand() == null) {
+			return;
+		}
+		FilterActions action = null;
+		try {
+			action = FilterActions.valueOf(event.getActionCommand());
+		} catch (IllegalArgumentException iae) {
+			logger.debug("Received unknown action: " + event.getActionCommand());
+		}
+
+		if (action == FilterActions.add) {
+			try {
+				this.addFilterImpl();
+			} catch (Exception e) {
+				logger.error("Error when adding new filter", e);
+				AppHelper.showExceptionDialog(this, "Unexpected error when adding filter.", e);
+			}
+		} else if (action == FilterActions.remove) {
+			int index = this.jListSelected.getSelectedIndex();
+			if (index < 0) {
+				return;
+			}
+
+			if (Config.getInstance().getFilterDeleteMode() != DeletionMode.confirm
+					|| JOptionPane.showConfirmDialog(this, "Действительно удалить выбранный фильтр?",
+							"Подтверждение удаления фильтра", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+				this.deleteFilterImpl();
+			}
+
+		} else if (action == FilterActions.up) {
+			int index = jListSelected.getSelectedIndex();
+			if (filterListModel.moveUp(index)) {
+				jListSelected.setSelectedIndex(index - 1);
+				jListSelected.ensureIndexIsVisible(index - 1);
+			}
+		} else if (action == FilterActions.down) {
+			int index = jListSelected.getSelectedIndex();
+			if (filterListModel.moveDown(index)) {
+				jListSelected.setSelectedIndex(index + 1);
+				jListSelected.ensureIndexIsVisible(index + 1);
+			}
+		} else {
+			JOptionPane.showMessageDialog(this, "Internal error. Unknown action: " + action, "Internal error",
+					JOptionPane.OK_OPTION);
+		}
+
 	}
 
 } //  @jve:decl-index=0:visual-constraint="10,10"

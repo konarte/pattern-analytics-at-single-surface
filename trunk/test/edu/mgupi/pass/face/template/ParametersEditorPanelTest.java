@@ -37,6 +37,7 @@ import edu.mgupi.pass.face.SwingTestHelper;
 import edu.mgupi.pass.face.WorkSet;
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.ParamHelper;
+import edu.mgupi.pass.filters.ParamTest;
 import edu.mgupi.pass.filters.TestFilter;
 import edu.mgupi.pass.filters.Param.TYPES;
 
@@ -45,29 +46,7 @@ public class ParametersEditorPanelTest {
 	private JDialog parent;
 	private ParametersEditorPanel panel;
 
-	private static Collection<Param> fullParams = fillParameters(new ArrayList<Param>());
-
-	public static Collection<Param> fillParameters(Collection<Param> fullParams) {
-		fullParams.add(new Param("p1", "Параметр1", TYPES.INT, 11));
-		fullParams.add(new Param("p2", "Параметр2", TYPES.INT, 1, 0, 10));
-
-		fullParams.add(new Param("p3", "Параметр3", TYPES.DOUBLE, 2.0));
-		fullParams.add(new Param("p4", "Параметр4", TYPES.DOUBLE, 5.0, 0, 10));
-
-		fullParams.add(new Param("p5", "Параметр5", TYPES.STRING, null));
-		fullParams.add(new Param("p5.1", "Параметр5.1", TYPES.STRING, ""));
-		fullParams.add(new Param("p6", "Параметр6", TYPES.STRING, "Тестовая строка"));
-
-		fullParams.add(new Param("p7", "Параметр7", TYPES.COLOR, null));
-		fullParams.add(new Param("p8", "Параметр8", TYPES.COLOR, Color.BLUE));
-
-		fullParams.add(new Param("p9", "Параметр9", null, new Object[] { "айн", "цвай", "драй" }, new String[] {
-				"Первый", "Второй", "Третий" }));
-		fullParams.add(new Param("p10", "Параметр10", "цвай", new Object[] { "айн", "цвай", "драй" }, new String[] {
-				"Первый", "Второй", "Третий" }));
-
-		return fullParams;
-	}
+	private static Collection<Param> fullParams = ParamTest.fillParameters(new ArrayList<Param>());
 
 	@Before
 	public void setUp() throws Exception {
@@ -134,8 +113,8 @@ public class ParametersEditorPanelTest {
 
 		JPanel place = (JPanel) SwingHelper.getChildNamed(panel, "paramPlace");
 		assertNotNull(place);
-//		TitledBorder border = (TitledBorder) place.getBorder();
-//		assertEquals("Sample params", border.getTitle());
+		//		TitledBorder border = (TitledBorder) place.getBorder();
+		//		assertEquals("Sample params", border.getTitle());
 
 		assertNotNull(SwingHelper.getChildNamed(panel, "p1_label"));
 		assertNotNull(SwingHelper.getChildNamed(panel, "p2_label"));

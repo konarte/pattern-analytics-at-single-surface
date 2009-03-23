@@ -1,10 +1,12 @@
 package edu.mgupi.pass.filters;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -12,7 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.mgupi.pass.face.template.ParametersEditorPanelTest;
+import edu.mgupi.pass.filters.Param.TYPES;
 
 public class ParamTest {
 
@@ -27,7 +29,7 @@ public class ParamTest {
 	@Test
 	public void testClone() throws CloneNotSupportedException, NoSuchParamException {
 		Collection<Param> params = new ArrayList<Param>();
-		ParametersEditorPanelTest.fillParameters(params);
+		ParamTest.fillParameters(params);
 
 		assertFalse(params.isEmpty());
 
@@ -36,27 +38,52 @@ public class ParamTest {
 			cloned.add((Param) param.clone());
 		}
 
-		ParamTest.compareInCollections(params, cloned, false);
+		ParamTest.compareInClonedCollections(params, cloned, false);
 	}
 
-	public static void compareTwoParameters(Param firstParam, Param secondParam) {
-		compareTwoParametersDefinitions(firstParam, secondParam);
+	public static void compareTwoClonedParameters(Param firstParam, Param secondParam) {
+		compareTwoParameters(firstParam, secondParam, true);
+	}
+
+	public static void compareTwoParameters(Param firstParam, Param secondParam, boolean cloned) {
+		compareTwoParametersDefinitions(firstParam, secondParam, cloned);
 		assertEquals(firstParam.getValue(), secondParam.getValue());
 	}
 
-	public static void compareTwoParametersDefinitions(Param firstParam, Param secondParam) {
-		assertTrue(firstParam.getAllowed_values() == secondParam.getAllowed_values());
+	public static void compareTwoClonedParametersDefinitions(Param firstParam, Param secondParam) {
+		compareTwoParametersDefinitions(firstParam, secondParam, true);
+	}
+
+	public static void compareTwoParametersDefinitions(Param firstParam, Param secondParam, boolean cloned) {
+		if (cloned) {
+			assertTrue(firstParam.getAllowed_values() == secondParam.getAllowed_values());
+			assertTrue(firstParam.getVisual_values() == secondParam.getVisual_values());
+		} else {
+			assertArrayEquals(firstParam.getAllowed_values(), secondParam.getAllowed_values());
+			assertArrayEquals(firstParam.getVisual_values(), secondParam.getVisual_values());
+		}
+
 		assertEquals(firstParam.getDefault_(), secondParam.getDefault_());
 		assertEquals(firstParam.getHi_border(), secondParam.getHi_border());
 		assertEquals(firstParam.getLow_border(), secondParam.getLow_border());
 		assertEquals(firstParam.getName(), secondParam.getName());
 		assertEquals(firstParam.getTitle(), secondParam.getTitle());
 		assertTrue(firstParam.getType() == secondParam.getType());
-		assertTrue(firstParam.getVisual_values() == secondParam.getVisual_values());
+
+	}
+
+	public static void compareInClonedCollections(Collection<Param> first, Collection<Param> second,
+			boolean definitionOnly) throws NoSuchParamException {
+		compareInCollections(first, second, definitionOnly, true);
 	}
 
 	public static void compareInCollections(Collection<Param> first, Collection<Param> second, boolean definitionOnly)
 			throws NoSuchParamException {
+		compareInCollections(first, second, definitionOnly, false);
+	}
+
+	public static void compareInCollections(Collection<Param> first, Collection<Param> second, boolean definitionOnly,
+			boolean cloned) throws NoSuchParamException {
 		if (first == null && second == null) {
 			return;
 		}
@@ -67,11 +94,32 @@ public class ParamTest {
 			assertFalse(sourceParam == clonedParam);
 
 			if (definitionOnly) {
-				ParamTest.compareTwoParametersDefinitions(sourceParam, clonedParam);
+				ParamTest.compareTwoParametersDefinitions(sourceParam, clonedParam, cloned);
 			} else {
-				ParamTest.compareTwoParameters(sourceParam, clonedParam);
+				ParamTest.compareTwoParameters(sourceParam, clonedParam, cloned);
 			}
 		}
 	}
 
+	public static Collection<Param> fillParameters(Collection<Param> fullParams) {
+		fullParams.add(new Param("p1", "Параметр1", TYPES.INT, 11));
+		fullParams.add(new Param("p2", "Параметр2", TYPES.INT, 1, 0, 10));
+
+		fullParams.add(new Param("p3", "Параметр3", TYPES.DOUBLE, 2.0));
+		fullParams.add(new Param("p4", "Параметр4", TYPES.DOUBLE, 5.0, 0, 10));
+
+		fullParams.add(new Param("p5", "Параметр5", TYPES.STRING, null));
+		fullParams.add(new Param("p5.1", "Параметр5.1", TYPES.STRING, ""));
+		fullParams.add(new Param("p6", "Параметр6", TYPES.STRING, "Тестовая строка"));
+
+		fullParams.add(new Param("p7", "Параметр7", TYPES.COLOR, null));
+		fullParams.add(new Param("p8", "Параметр8", TYPES.COLOR, Color.BLUE));
+
+		fullParams.add(new Param("p9", "Параметр9", TYPES.STRING, null, new Object[] { "айн", "цвай", "драй" },
+				new String[] { "Первый", "Второй", "Третий" }));
+		fullParams.add(new Param("p10", "Параметр10", TYPES.STRING, "цвай", new Object[] { "айн", "цвай", "драй" },
+				new String[] { "Первый", "Второй", "Третий" }));
+
+		return fullParams;
+	}
 }

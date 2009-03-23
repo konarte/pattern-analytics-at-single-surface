@@ -6,11 +6,11 @@ import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 
-import javax.swing.AbstractAction;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -18,12 +18,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.WindowConstants;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+public class ImageFrameTemplate extends JDialog implements ActionListener {
 
-public class ImageFrameTemplate extends JDialog {
-
-	private final static Logger logger = LoggerFactory.getLogger(ImageFrameTemplate.class);
+	//private final static Logger logger = LoggerFactory.getLogger(ImageFrameTemplate.class);  //  @jve:decl-index=0:
 
 	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
@@ -54,47 +51,30 @@ public class ImageFrameTemplate extends JDialog {
 		this.setBounds(10, 10, 300, 330);
 	}
 
-	private boolean registeredAlready = false;
 	private JPanel jPanelScaleBox = null;
 	private JCheckBox jCheckBoxScaleBox = null;
 
-	public void registerControlCheckbox(final Frame parent, final JCheckBox controlCheckBox) {
+	private Frame parent = null;
+	private JCheckBox controlCheckBox = null;
 
-		if (registeredAlready) {
-			logger.error("Error when registering " + controlCheckBox + " for " + this);
-			JOptionPane.showMessageDialog(null, "Internal error. Seems like dialog " + this.getName()
-					+ " already registered to another control box.", "Internal error.", JOptionPane.ERROR_MESSAGE);
-			return;
+	public void registerControlCheckbox(Frame parent, JCheckBox controlCheckBox) throws Exception {
+
+		if (this.controlCheckBox != null) {
+			throw new Exception("Error when registering " + controlCheckBox + " for " + this + ". Already set.");
+		}
+		if (parent == null) {
+			throw new IllegalArgumentException("Internal error. 'parent' must be not null.");
+		}
+		if (controlCheckBox == null) {
+			throw new IllegalArgumentException("Internal error. 'controlCheckBox' must be not null.");
 		}
 
+		this.parent = parent;
+		this.controlCheckBox = controlCheckBox;
 		this.addWindowListener(new OnHideWindowAdapter(controlCheckBox));
+		controlCheckBox.setActionCommand("hideMe");
+		controlCheckBox.addActionListener(this);
 
-		String text = controlCheckBox.getText();
-		String name = controlCheckBox.getName();
-		controlCheckBox.setAction(new AbstractAction() {
-
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
-
-			public void actionPerformed(ActionEvent e) {
-
-				if (parent.isVisible()) {
-					ImageFrameTemplate.this.setVisible(controlCheckBox.isSelected());
-				} else {
-					parent.addWindowListener(new WindowAdapter() {
-						public void windowOpened(WindowEvent e) {
-							ImageFrameTemplate.this.setVisible(controlCheckBox.isSelected());
-							parent.removeWindowListener(this);
-						}
-					});
-				}
-			}
-		});
-		controlCheckBox.setText(text);
-		controlCheckBox.setName(name);
-		registeredAlready = true;
 	}
 
 	/**
@@ -200,6 +180,29 @@ public class ImageFrameTemplate extends JDialog {
 
 	public boolean hasImage() {
 		return this.jPanelImage != null && this.jPanelImage.hasImage();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		String command = e.getActionCommand();
+		if (command == null) {
+			return;
+		}
+
+		if (command.equals("hideMe")) {
+			if (parent.isVisible()) {
+				this.setVisible(controlCheckBox.isSelected());
+			} else {
+				parent.addWindowListener(new WindowAdapter() {
+					public void windowOpened(WindowEvent e) {
+						ImageFrameTemplate.this.setVisible(controlCheckBox.isSelected());
+						parent.removeWindowListener(this);
+					}
+				});
+			}
+		}
+
 	}
 
 } // @jve:decl-index=0:visual-constraint="10,10"

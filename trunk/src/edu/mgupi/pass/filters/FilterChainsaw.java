@@ -154,9 +154,10 @@ public class FilterChainsaw {
 	 * 
 	 * @param pos
 	 *            we remove filter from this position.
+	 * @return true is removing is success, false if no such index
 	 * 
 	 */
-	public void removeFilter(int pos) {
+	public boolean removeFilter(int pos) {
 
 		if (pos >= 0 && pos < filterList.size()) {
 			IFilter filter = filterList.get(pos);
@@ -168,9 +169,16 @@ public class FilterChainsaw {
 
 			this.cacheInstance.putDeleted(filter);
 			filterList.remove(pos);
+			return true;
 		} else {
 			logger.debug("FilterChainsaw.appendFilter, but pos {} is not in range", pos);
+			return false;
 		}
+	}
+
+	public void removeAllFilters() {
+		while (this.removeFilter(0) == true)
+			;
 	}
 
 	public void removeFilter(Class<? extends IFilter> filterClass) {
@@ -266,7 +274,7 @@ public class FilterChainsaw {
 			IFilter old = filterList.get(pos + 1);
 			filterList.set(pos + 1, filterList.get(pos));
 			filterList.set(pos, old);
-			
+
 			return true;
 		} else {
 			logger.trace("Can't move down, position {} is not in range", pos);

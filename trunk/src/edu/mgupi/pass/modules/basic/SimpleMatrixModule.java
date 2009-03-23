@@ -28,8 +28,8 @@ public class SimpleMatrixModule implements IModule {
 	private final static String METHOD_FAST = "fast";
 	private final static String METHOD_SLOW = "slow";
 
-	private Param RENREDING_METHOD = new Param("RenderMethod", "Способ рендеринга", "fast", new Object[] { METHOD_FAST,
-			METHOD_SLOW }, new String[] { "Быстрый", "Медленный, многослойный" });
+	private Param RENREDING_METHOD = new Param("RenderMethod", "Способ рендеринга", TYPES.STRING, "fast", new Object[] {
+			METHOD_FAST, METHOD_SLOW }, new String[] { "Быстрый", "Медленный, многослойный" });
 	private Param CELL_SIZE = new Param("CellSize", "Размер ячейки", TYPES.INT, 10, 5, 15);
 
 	private Collection<Param> paramList = null;

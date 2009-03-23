@@ -1,7 +1,14 @@
 package edu.mgupi.pass.modules;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import org.orm.PersistentException;
@@ -26,6 +33,7 @@ import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.IllegalParameterValueException;
 import edu.mgupi.pass.filters.NoSuchParamException;
+import edu.mgupi.pass.filters.ParamHelper;
 import edu.mgupi.pass.filters.service.HistogramFilter;
 import edu.mgupi.pass.filters.service.ResizeFilter;
 import edu.mgupi.pass.sources.SourceStore;
@@ -34,7 +42,6 @@ import edu.mgupi.pass.util.CacheInitiable;
 import edu.mgupi.pass.util.Const;
 import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
-
 
 /**
  * Main module processor.
@@ -110,7 +117,8 @@ public class ModuleProcessor {
 	}
 
 	private CacheInitiable<IModule> cachedModules = CacheIFactory.getSingleInstanceModules();
-		//new CacheInitiable<IModule>(MODE.SINGLE_INSTANCE);
+
+	//new CacheInitiable<IModule>(MODE.SINGLE_INSTANCE);
 
 	public IModule setModule(Class<? extends IModule> moduleClass) throws InstantiationException,
 			IllegalAccessException, IOException, ModuleException, PersistentException {
@@ -401,4 +409,94 @@ public class ModuleProcessor {
 		return histoFilters;
 	}
 
+	private SimpleDateFormat fmt = new SimpleDateFormat("dd.MM.yyy HH:mm:ss");
+
+	public void saveSettingsToFile(File file) throws FileNotFoundException {
+
+		if (this.processingFilters == null) {
+			throw new IllegalStateException("Internal error. Filters does not registered yet.");
+		}
+
+		if (this.module == null) {
+			throw new IllegalStateException("Internal error. Module does not registered yet.");
+		}
+
+		PrintWriter writer = new PrintWriter(file);
+		try {
+			writer.write("# " + Const.PROGRAM_NAME_FULL + "\n");
+			writer.write("# Module Definiion File\n");
+			writer.write("# " + file.getName() + "\n");
+			writer.write("# " + fmt.format(new Date()) + "\n\n");
+
+			writer.write("module=" + this.module.getClass().getCanonicalName() + "=");
+			writer.write(ParamHelper.convertParamsToJSON(this.module.getParams()));
+			writer.write("\n");
+			for (IFilter filter : this.processingFilters.getFilters()) {
+				writer.write(filter.getClass().getCanonicalName() + "=");
+				writer.write(ParamHelper.convertParamsToJSON(filter));
+				writer.write("\n");
+			}
+		} finally {
+			writer.close();
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public void loadSettingsFromFile(File file) throws Exception {
+
+		if (this.processingFilters == null) {
+			throw new IllegalStateException("Internal error. Filters does not registered yet.");
+		}
+
+		BufferedReader reader = new BufferedReader(new FileReader(file));
+		try {
+			this.processingFilters.removeAllFilters();
+
+			String line = "";
+			boolean moduleSet = false;
+			int idx = 0;
+
+			while ((line = reader.readLine()) != null) {
+				idx++;
+				line = line.trim();
+				if (line.isEmpty()) {
+					continue; //
+				}
+				if (line.startsWith("module=")) {
+					if (moduleSet) {
+						throw new Exception("Line " + idx + ". File contains more than one module. "
+								+ this.module.getClass().getCanonicalName() + " already set up.");
+					}
+					String class_ = line.substring("module=".length());
+					int pos = class_.indexOf("=");
+					if (pos < 0) {
+						throw new Exception("Line " + idx
+								+ ". Illegal line. Can't find '=' symbol after module definition.");
+					}
+					String className = class_.substring(0, pos);
+					String params = class_.substring(pos + 1);
+
+					this.setModule((Class<? extends IModule>) Class.forName(className));
+					ParamHelper.fillParametersFromJSON(this.module.getParams(), params);
+
+					moduleSet = true;
+				} else if (!line.startsWith("#")) {
+					int pos = line.indexOf("=");
+					if (pos < 0) {
+						throw new Exception("Line " + idx + ". Illegal line. Can't find '=' symbol.");
+					}
+					String filterName = line.substring(0, pos);
+					String params = line.substring(pos + 1);
+
+					IFilter filter = this.processingFilters.appendFilter((Class<? extends IFilter>) Class
+							.forName(filterName));
+					ParamHelper.fillParametersFromJSON(filter, params);
+
+				}
+			}
+
+		} finally {
+			reader.close();
+		}
+	}
 }

@@ -2,8 +2,10 @@ package edu.mgupi.pass.face;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.event.ActionListener;
 import java.lang.reflect.Field;
 
+import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JMenu;
 import javax.swing.SwingUtilities;
@@ -21,6 +23,19 @@ import org.slf4j.LoggerFactory;
 public class SwingHelper {
 
 	private final static Logger logger = LoggerFactory.getLogger(SwingHelper.class);
+
+	public static void addListenerSafed(AbstractButton button, ActionListener listener) {
+		ActionListener[] listeners = button.getActionListeners();
+		if (listeners != null) {
+			for (ActionListener listen : listeners) {
+				if (listen == listener) {
+					throw new RuntimeException("Internal error. Listener " + listener + " already registered for "
+							+ button);
+				}
+			}
+		}
+		button.addActionListener(listener);
+	}
 
 	/**
 	 * Method (c) Ichiro Suzuki

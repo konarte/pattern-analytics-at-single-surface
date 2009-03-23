@@ -5,28 +5,22 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.ActionListener;
 import java.util.Collection;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.KeyStroke;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.face.template.AbstractDialogAdapter;
 import edu.mgupi.pass.face.template.ParametersEditorPanel;
-import edu.mgupi.pass.filters.IllegalParameterValueException;
 import edu.mgupi.pass.filters.Param;
 
-public class ParametersEditor extends JDialog {
+public class ParametersEditor extends JDialog implements ActionListener {
 
 	Logger logger = LoggerFactory.getLogger(ParametersEditor.class);
 
@@ -36,6 +30,7 @@ public class ParametersEditor extends JDialog {
 	private JPanel jPanelButtons = null;
 	private JButton jButtonOK = null;
 	private JButton jButtonCancel = null;
+	private JButton jButtonRetoreDefaults = null;
 
 	/**
 	 * This is the default constructor
@@ -52,17 +47,54 @@ public class ParametersEditor extends JDialog {
 	 * 
 	 */
 	private void initialize() {
-		this.addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				ParametersEditor.this.cancelImpl();
-			}
-		});
-		this.setSize(400, 200);
+		this.setSize(400, 300);
 		this.setMinimumSize(new Dimension(400, 200));
 		this.setResizable(false);
 		this.setName("frameEditModuleParameters");
 		this.setContentPane(getJContentPane());
 		this.setTitle("Редактирование параметров модуля");
+
+	}
+
+	private AbstractDialogAdapter myDialogAdapter = null; //  @jve:decl-index=0:
+
+	private AbstractDialogAdapter getDialogAdapter() {
+		if (myDialogAdapter != null) {
+			return myDialogAdapter;
+		}
+		myDialogAdapter = new AbstractDialogAdapter(this) {
+
+			@Override
+			protected void cancelImpl() throws Exception {
+				jPanelParams.resetParameterValues();
+			}
+
+			@Override
+			protected void openDialogImpl() throws Exception {
+			}
+
+			@Override
+			protected boolean saveImpl() throws Exception {
+				jPanelParams.saveParameterValues();
+				return true;
+			}
+		};
+		return myDialogAdapter;
+	}
+
+	protected void setParameters(String name, Collection<Param> parameters) {
+		if (parameters == null) {
+			throw new IllegalArgumentException("Internal error. 'parameters' must be not null.");
+		}
+		this.setTitle(name);
+		jPanelParams.setParameters(parameters);
+		this.pack();
+		this.setLocationRelativeTo(this.getOwner());
+	}
+
+	public boolean openDialog(String name, Collection<Param> parameters) {
+		this.setParameters(name, parameters);
+		return getDialogAdapter().openDialog();
 	}
 
 	/**
@@ -116,19 +148,8 @@ public class ParametersEditor extends JDialog {
 	private JButton getJButtonOK() {
 		if (jButtonOK == null) {
 			jButtonOK = new JButton();
-			jButtonOK.setAction(new AbstractAction() {
-
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public void actionPerformed(ActionEvent e) {
-					ParametersEditor.this.save();
-				}
-			});
-			jButtonOK.setName("ok");
 			jButtonOK.setText("OK");
+			getDialogAdapter().registerOKButton(jButtonOK);
 		}
 		return jButtonOK;
 	}
@@ -141,89 +162,10 @@ public class ParametersEditor extends JDialog {
 	private JButton getJButtonCancel() {
 		if (jButtonCancel == null) {
 			jButtonCancel = new JButton();
-
-			Action cancelAction = new AbstractAction() {
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public void actionPerformed(ActionEvent e) {
-					ParametersEditor.this.cancelImpl();
-				}
-			};
-
-			jButtonCancel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-					KeyStroke.getKeyStroke((char) KeyEvent.VK_ESCAPE), "cancel");
-			jButtonCancel.getActionMap().put("cancel", cancelAction);
-			jButtonCancel.setAction(cancelAction);
-			jButtonCancel.setName("cancel");
-			jButtonCancel.setText("Отмена");
+			jButtonCancel.setText("cancel");
+			getDialogAdapter().registerCancelButton(jButtonCancel);
 		}
 		return jButtonCancel;
-	}
-
-	public void setParameters(String name, Collection<Param> parameters) {
-		if (parameters == null) {
-			throw new IllegalArgumentException("Internal error. 'parameters' must be not null.");
-		}
-		this.setTitle(name);
-		jPanelParams.setParameters(parameters);
-		//Dimension buttonsDim = ((FlowLayout) jPanelButtons.getLayout()).preferredLayoutSize(jPanelButtons);
-		//jPanelParams.fixParentBounds(this, 0, buttonsDim.height, true);
-		this.pack();
-		this.setLocationRelativeTo(this.getOwner());
-	}
-
-	private boolean ok = false;
-
-	private JButton jButtonRetoreDefaults = null;
-
-	public boolean open(String name, Collection<Param> parameters) {
-		this.setParameters(name, parameters);
-		this.setVisible(true);
-		return ok;
-	}
-
-	private void cancelImpl() {
-		ok = false;
-		jPanelParams.resetParameterValues();
-		this.setVisible(false);
-	}
-
-	private void save() {
-		try {
-			ParametersEditor.this.saveImpl();
-		} catch (Throwable t) {
-			logger.error("Error when saving parameters for module", t);
-			AppHelper.showExceptionDialog(ParametersEditor.this, "Error when applying module parameters.", t);
-		}
-	}
-
-	private void saveImpl() throws IllegalParameterValueException {
-		ok = false;
-
-		jPanelParams.saveParameterValues();
-
-		ok = true;
-		this.setVisible(false);
-
-	}
-
-	private void restoreDefaults() {
-
-		if (JOptionPane.showConfirmDialog(this,
-				"Вы уверены, что хотите восстановить все значения параметров по-умолчанию?", "Восстановление значений",
-				JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-
-			try {
-				jPanelParams.restoreDefaults();
-			} catch (Throwable t) {
-				logger.error("Error when restoring defaults for module parameters", t);
-				AppHelper.showExceptionDialog(ParametersEditor.this,
-						"Unexpected error when restoring defaults for module parameters.", t);
-			}
-		}
 	}
 
 	/**
@@ -234,21 +176,36 @@ public class ParametersEditor extends JDialog {
 	private JButton getJButtonRetoreDefaults() {
 		if (jButtonRetoreDefaults == null) {
 			jButtonRetoreDefaults = new JButton();
-			jButtonRetoreDefaults.setAction(new AbstractAction() {
-
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public void actionPerformed(ActionEvent e) {
-					ParametersEditor.this.restoreDefaults();
-				}
-			});
 			jButtonRetoreDefaults.setText("Восстановить");
 			jButtonRetoreDefaults.setName("restoreDefaults");
+			jButtonRetoreDefaults.setActionCommand("restoreDefaults");
+			jButtonRetoreDefaults.addActionListener(this);
 		}
 		return jButtonRetoreDefaults;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		String command = e.getActionCommand();
+		if (command == null) {
+			return;
+		}
+
+		if (command.equals("restoreDefaults")) {
+			if (JOptionPane.showConfirmDialog(this,
+					"Вы уверены, что хотите восстановить все значения параметров по-умолчанию?",
+					"Восстановление значений", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+
+				try {
+					jPanelParams.restoreDefaults();
+				} catch (Throwable t) {
+					logger.error("Error when restoring defaults for module parameters", t);
+					AppHelper.showExceptionDialog(this,
+							"Unexpected error when restoring defaults for module parameters.", t);
+				}
+			}
+
+		}
 	}
 
 } //  @jve:decl-index=0:visual-constraint="10,10"

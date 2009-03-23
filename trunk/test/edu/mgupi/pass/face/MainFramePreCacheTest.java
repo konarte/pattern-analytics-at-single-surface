@@ -18,9 +18,10 @@ public class MainFramePreCacheTest {
 	public void setUp() throws Exception {
 		Config.getInstance().setReadOnly();
 
-		frame = (MainFrame) AppHelper.getInstance().openWindow(MainFrame.class);
+		frame = (MainFrame) AppHelper.getInstance().getFrame(MainFrame.class);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
+
 	}
 
 	@After
@@ -34,6 +35,8 @@ public class MainFramePreCacheTest {
 
 	@Test
 	public void testPreCache() throws Exception {
+		frame.preCache();
+
 		Thread.sleep(200);
 		assertTrue(frame.isVisible());
 	}
