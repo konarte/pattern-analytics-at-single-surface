@@ -50,7 +50,7 @@ public class SimpleMatrixModuleTest {
 			module = null;
 		}
 	}
-	
+
 	@Test
 	public void testForModifyAnalyze() throws Exception {
 		Collection<Param> params = module.getParams();

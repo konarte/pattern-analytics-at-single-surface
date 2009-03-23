@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
-import edu.mgupi.pass.filters.IllegalParameterValueException;
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.Param.TYPES;
 
@@ -25,10 +24,9 @@ public class ResizeFilter implements IFilter {
 
 	private Param WIDTH = new Param("Width", "Ширина", TYPES.INT, 0);
 	private Param HEIGHT = new Param("Height", "Высота", TYPES.INT, 0);
-	private Param INTERPOLATION_METHOD = new Param("Method", "Метод конвертирования",
-			RenderingHints.VALUE_INTERPOLATION_BILINEAR, new Object[] { RenderingHints.VALUE_INTERPOLATION_BICUBIC,
-					RenderingHints.VALUE_INTERPOLATION_BILINEAR, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR },
-			new String[] { "Bicubic (best)", "Bilinear (medium)", "Nearest point (worst)" });
+	private Param INTERPOLATION_METHOD = new Param("Method", "Метод конвертирования", TYPES.STRING, "biliner",
+			new Object[] { "bicubic", "biliner", "nearest_n" }, new String[] { "Bicubic (best)", "Bilinear (medium)",
+					"Nearest point (worst)" });
 
 	public ResizeFilter() {
 		params = new ArrayList<Param>(3);
@@ -58,15 +56,25 @@ public class ResizeFilter implements IFilter {
 		}
 
 		Dimension thumb = new Dimension((Integer) WIDTH.getValue(), (Integer) HEIGHT.getValue());
-		Object interpolationMethod = INTERPOLATION_METHOD.getValue();
+		String meth = (String) INTERPOLATION_METHOD.getValue();
 
-		if (!RenderingHints.KEY_INTERPOLATION.isCompatibleValue(interpolationMethod)) {
-			throw new IllegalParameterValueException("Unable to set value " + interpolationMethod + " from parameter "
-					+ INTERPOLATION_METHOD.getName() + " to 'RenderingHints.KEY_INTERPOLATION'.");
+		Object myMethod = RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+		if (meth != null) {
+			if (meth.equals("biliner")) {
+				myMethod = RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+			} else if (meth.equals("bicubic")) {
+				myMethod = RenderingHints.VALUE_INTERPOLATION_BICUBIC;
+			} else {
+				myMethod = RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
+			}
 		}
 
-		logger.debug("Resizing image to {}x{}, method {}", new Object[] { thumb.width, thumb.height,
-				interpolationMethod });
+		//		if (!RenderingHints.KEY_INTERPOLATION.isCompatibleValue(interpolationMethod)) {
+		//			throw new IllegalParameterValueException("Unable to set value " + interpolationMethod + " from parameter "
+		//					+ INTERPOLATION_METHOD.getName() + " to 'RenderingHints.KEY_INTERPOLATION'.");
+		//		}
+
+		logger.debug("Resizing image to {}x{}, method {}", new Object[] { thumb.width, thumb.height, myMethod });
 
 		Dimension newSize = calcThumbSize(source, thumb);
 
@@ -74,7 +82,7 @@ public class ResizeFilter implements IFilter {
 		// scale it to the new size on-the-fly
 		BufferedImage dest = new BufferedImage(newSize.width, newSize.height, BufferedImage.TYPE_INT_RGB);
 		Graphics2D graphics2D = dest.createGraphics();
-		graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, interpolationMethod);
+		graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, myMethod);
 		graphics2D.drawImage(source, 0, 0, newSize.width, newSize.height, null);
 
 		graphics2D.dispose();

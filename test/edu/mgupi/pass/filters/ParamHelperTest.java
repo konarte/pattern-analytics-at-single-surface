@@ -29,9 +29,9 @@ public class ParamHelperTest {
 	}
 
 	private void testGetParameter(Map<String, Object> sampleMap) throws NoSuchParamException {
-		assertEquals(44.56, ParamHelper.getParameterM("key3", sampleMap));
+		assertEquals("44.56", ParamHelper.getParameterM("key3", sampleMap));
 		assertEquals("14.55", ParamHelper.getParameterM("key1", sampleMap));
-		assertEquals(6, ParamHelper.getParameterM("key2", sampleMap));
+		assertEquals("6", ParamHelper.getParameterM("key2", sampleMap));
 
 		try {
 			assertEquals("NO", ParamHelper.getParameterM("key-x", sampleMap));
@@ -59,16 +59,16 @@ public class ParamHelperTest {
 	public void testGetParameter() throws NoSuchParamException {
 		Map<String, Object> sampleMap = new HashMap<String, Object>();
 		sampleMap.put("key1", "14.55");
-		sampleMap.put("key2", 6);
-		sampleMap.put("key3", 44.56);
+		sampleMap.put("key2", "6");
+		sampleMap.put("key3", "44.56");
 
 		this.testGetParameter(sampleMap);
 	}
 
 	private class MyFilter implements IFilter {
-		private List<Param> paramList = null;
+		private Collection<Param> paramList = null;
 
-		public MyFilter(List<Param> paramList) {
+		public MyFilter(Collection<Param> paramList) {
 			this.paramList = paramList;
 		}
 
@@ -107,7 +107,7 @@ public class ParamHelperTest {
 		MyFilter myFilter = new MyFilter(paramList);
 
 		assertNotNull(ParamHelper.convertParamsToValues(myFilter));
-		assertNotNull(ParamHelper.convertParamsToValues(null));
+		assertNotNull(ParamHelper.convertParamsToValues((IFilter) null));
 
 		this.testGetParameter(ParamHelper.convertParamsToValues(myFilter));
 	}
@@ -148,6 +148,26 @@ public class ParamHelperTest {
 		paramList.add(new Param("key3", "Ключ 3", TYPES.DOUBLE, 12.22));
 
 		MyFilter myFilter = new MyFilter(paramList);
-		assertEquals("{\"key1\":\"14.55\",\"key2\":6,\"key3\":12.22}", ParamHelper.convertParamsToJSON(myFilter));
+		assertEquals("{\"key1\":\"14.55\",\"key2\":\"6\",\"key3\":\"12.22\"}", ParamHelper
+				.convertParamsToJSON(myFilter));
+	}
+
+	@Test
+	public void testConvertParamsToJSONFull() throws Exception {
+		Collection<Param> paramList = new ArrayList<Param>();
+		ParamTest.fillParameters(paramList);
+
+		MyFilter myFilter = new MyFilter(paramList);
+		String converted = ParamHelper.convertParamsToJSON(myFilter);
+		System.out.println(converted);
+
+		Collection<Param> paramList2 = new ArrayList<Param>();
+		ParamTest.fillParameters(paramList2);
+		MyFilter myFilter2 = new MyFilter(paramList2);
+
+		ParamHelper.fillParametersFromJSON(myFilter2, converted);
+
+		ParamTest.compareInCollections(myFilter.getParams(), myFilter2.getParams(), true);
+		ParamTest.compareInCollections(myFilter.getParams(), myFilter2.getParams(), false);
 	}
 }

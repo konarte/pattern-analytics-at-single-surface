@@ -8,7 +8,6 @@ import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.mgupi.pass.face.template.ParametersEditorPanelTest;
 import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.Param;
@@ -24,13 +23,13 @@ public class MyFilter implements IFilter, IInitiable {
 		}
 	}
 
-	private Collection<Param> model = ParametersEditorPanelTest.fillParameters(new ArrayList<Param>());
+	private Collection<Param> model = ParamTest.fillParameters(new ArrayList<Param>());
 
 	private Collection<Param> parameters = null;
 
 	public MyFilter() {
 		parameters = new ArrayList<Param>();
-		ParametersEditorPanelTest.fillParameters(parameters);
+		ParamTest.fillParameters(parameters);
 		Collections.unmodifiableCollection(parameters);
 	}
 
@@ -47,7 +46,7 @@ public class MyFilter implements IFilter, IInitiable {
 
 		logger.debug(this + " CONVERT");
 
-		ParamTest.compareInCollections(model, parameters, true);
+		ParamTest.compareInClonedCollections(model, parameters, true);
 
 		return source;
 	}

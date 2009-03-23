@@ -74,7 +74,7 @@ public class CacheInitiable<E> {
 	}
 
 	protected void close() {
-		logger.debug("CACHE DONE : " +this + " (" + this.mode + ")");
+		logger.debug("CACHE DONE : " + this + " (" + this.mode + ")");
 		logger.debug("Total cached single classes: " + cachedValues.size());
 		for (E instance : cachedValues.values()) {
 			this.closeInstance(instance);

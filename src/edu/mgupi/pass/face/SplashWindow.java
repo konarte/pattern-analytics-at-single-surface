@@ -104,7 +104,7 @@ public class SplashWindow extends JFrame {
 			gridBagConstraints11.weighty = 1.0D;
 			gridBagConstraints11.fill = GridBagConstraints.NONE;
 			jLabelProgram = new JLabel();
-			jLabelProgram.setText(Const.PROGRAM_NAME);
+			jLabelProgram.setText(Const.PROGRAM_NAME_FIRST);
 			jLabelProgram.setFont(new Font("DialogInput", Font.BOLD, 18));
 			GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
 			gridBagConstraints1.gridx = 0;

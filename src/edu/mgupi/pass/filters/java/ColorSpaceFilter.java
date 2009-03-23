@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.Param;
+import edu.mgupi.pass.filters.Param.TYPES;
 
 public class ColorSpaceFilter implements IFilter {
 
@@ -29,7 +30,7 @@ public class ColorSpaceFilter implements IFilter {
 
 	// ColorSpace.CS_PYCC
 	// "Photo YCC"
-	private Param COLOR_MODE = new Param("ColorMode", "Режим цветности", ColorSpace.CS_GRAY,//
+	private Param COLOR_MODE = new Param("ColorMode", "Режим цветности", TYPES.INT, ColorSpace.CS_GRAY,//
 			new Integer[] { ColorSpace.CS_GRAY, ColorSpace.CS_LINEAR_RGB, ColorSpace.CS_CIEXYZ }, //
 			new String[] { "Gray scale", "linear RGB", "CIEXYZ" });
 

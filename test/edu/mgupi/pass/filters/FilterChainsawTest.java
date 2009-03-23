@@ -321,6 +321,5 @@ public class FilterChainsawTest {
 		assertTrue(filter == filter2);
 
 	}
-	
 
 }

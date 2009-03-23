@@ -22,9 +22,9 @@ public class PlaceImageFilter implements IFilter {
 	private Collection<Param> params;
 	private Param WIDTH = new Param("Width", "Ширина", TYPES.INT, 0);
 	private Param HEIGHT = new Param("Height", "Высота", TYPES.INT, 0);
-	private Param PLACE = new Param("Place", "Размещение", "center", new Object[] { "center", "topleft", "topright",
-			"bottomleft", "bottomright" }, new String[] { "По центру", "Слева сверху", "Справа сверху", "Слева снизу",
-			"Справа снизу" });
+	private Param PLACE = new Param("Place", "Размещение", TYPES.STRING, "center", new Object[] { "center", "topleft",
+			"topright", "bottomleft", "bottomright" }, new String[] { "По центру", "Слева сверху", "Справа сверху",
+			"Слева снизу", "Справа снизу" });
 	private Param BACKGROUND = new Param("Background", "Цвет фона", TYPES.COLOR, Color.WHITE);
 
 	public PlaceImageFilter() {

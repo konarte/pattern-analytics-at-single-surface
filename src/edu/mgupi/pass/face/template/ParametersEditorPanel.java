@@ -6,6 +6,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Collection;
@@ -32,7 +33,7 @@ import edu.mgupi.pass.filters.IllegalParameterValueException;
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.Param.TYPES;
 
-public class ParametersEditorPanel extends JPanel {
+public class ParametersEditorPanel extends JPanel implements ActionListener {
 
 	private final static Logger logger = LoggerFactory.getLogger(ParametersEditorPanel.class);
 	private static final long serialVersionUID = 1L;
@@ -120,7 +121,21 @@ public class ParametersEditorPanel extends JPanel {
 			final String name = param.getName();
 
 			Component renderComponent = null;
-			if (type == TYPES.STRING) {
+
+			if (param.isMultiple()) {
+
+				if (!(type == TYPES.STRING || type == TYPES.DOUBLE || type == TYPES.INT)) {
+					throw new IllegalArgumentException("Internal error. Unable to properly render parameter '" + name
+							+ "' with type " + type
+							+ ". Parameter marked as multiple. Please, consult with developers.");
+				}
+
+				JComboBox comboBox = new JComboBox(param.getVisual_values());
+				comboBox.setName(name + "_combo_box");
+
+				renderComponent = comboBox;
+				controlComponents.put(param, comboBox);
+			} else if (type == TYPES.STRING) {
 				JTextField field = new JTextField();
 				field.setName(name + "_field");
 
@@ -200,13 +215,6 @@ public class ParametersEditorPanel extends JPanel {
 				renderComponent = colorPanel;
 				controlComponents.put(param, colorSample);
 
-			} else if (type == TYPES.LIST) {
-				JComboBox comboBox = new JComboBox(param.getVisual_values());
-				comboBox.setName(name + "_combo_box");
-
-				renderComponent = comboBox;
-				controlComponents.put(param, comboBox);
-
 			} else {
 				throw new IllegalArgumentException("Internal error. Unable to properly render parameter '" + name
 						+ "' with type " + type + ". Unknown type. Please, consult with developers.");
@@ -251,7 +259,18 @@ public class ParametersEditorPanel extends JPanel {
 
 			TYPES type = param.getType();
 			Object value = fromDefaults ? param.getDefault_() : param.getValue();
-			if (type == TYPES.STRING) {
+
+			if (param.isMultiple()) {
+				((JComboBox) comp).setSelectedIndex(0);
+				if (value != null) {
+					for (int i = 0; i <= param.getAllowed_values().length; i++) {
+						if (value.equals(param.getAllowed_values()[i])) {
+							((JComboBox) comp).setSelectedItem(param.getVisual_values()[i]);
+							break;
+						}
+					}
+				}
+			} else if (type == TYPES.STRING) {
 				((JTextField) comp).setText(value == null ? null : String.valueOf(value));
 			} else if (type == TYPES.INT) {
 				if (comp instanceof JFormattedTextField) {
@@ -270,16 +289,6 @@ public class ParametersEditorPanel extends JPanel {
 				Color color = (Color) value;
 				((JLabel) comp).setBackground(color);
 				selectedColors.put(param, color);
-			} else if (type == TYPES.LIST) {
-				((JComboBox) comp).setSelectedIndex(0);
-				if (value != null) {
-					for (int i = 0; i <= param.getAllowed_values().length; i++) {
-						if (value.equals(param.getAllowed_values()[i])) {
-							((JComboBox) comp).setSelectedItem(param.getVisual_values()[i]);
-							break;
-						}
-					}
-				}
 			} else {
 				throw new IllegalArgumentException(
 						"Internal error. Unable to properly set default value to parameter '" + param.getName()
@@ -297,7 +306,9 @@ public class ParametersEditorPanel extends JPanel {
 			TYPES type = param.getType();
 
 			try {
-				if (type == TYPES.STRING) {
+				if (param.isMultiple()) {
+					param.setValue(param.getAllowed_values()[((JComboBox) comp).getSelectedIndex()]);
+				} else if (type == TYPES.STRING) {
 					param.setValue(((JTextField) comp).getText());
 				} else if (type == TYPES.INT) {
 					if (comp instanceof JFormattedTextField) {
@@ -314,8 +325,6 @@ public class ParametersEditorPanel extends JPanel {
 					param.setValue(((JFormattedTextField) comp).getValue());
 				} else if (type == TYPES.COLOR) {
 					param.setValue(selectedColors.get(param));
-				} else if (type == TYPES.LIST) {
-					param.setValue(param.getAllowed_values()[((JComboBox) comp).getSelectedIndex()]);
 				} else {
 					throw new IllegalArgumentException(
 							"Internal error. Unable to properly set default value to parameter '" + param.getName()
@@ -354,5 +363,11 @@ public class ParametersEditorPanel extends JPanel {
 			//					TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
 		}
 		return jPanelPlace;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+
 	}
 }

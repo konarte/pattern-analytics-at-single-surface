@@ -82,13 +82,6 @@ public class Application {
 				}
 				new File(LOCK_FILE).delete();
 				logger.debug("Shutdown " + Const.PROGRAM_NAME_FULL);
-
-				// Synchronization wait...
-				try {
-					Thread.sleep(200);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
 			}
 		}));
 
@@ -101,16 +94,13 @@ public class Application {
 			// Set locale by default to English
 			Locale.setDefault(Locale.ENGLISH);
 
-			String newLookAndFeel = Config.getInstance().getLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			String newLookAndFeel = Config.getInstance().getLookAndFeel();
 
 			try {
 				this.changeLookAndFeel(newLookAndFeel);
 			} catch (Exception e) {
 				AppHelper.showExceptionDialog("Unexpected error when applying LookAndFeel. Try to run "
 						+ "application with '-nolaf' key.", e);
-				//				JOptionPane.showMessageDialog(null, "Unexpected error when applying LookAndFeel. Try to run "
-				//						+ "application with '-nolaf' key (" + e + ")", "Invalid look and feel",
-				//						JOptionPane.WARNING_MESSAGE);
 			}
 
 			if (lock == null) {
@@ -127,7 +117,7 @@ public class Application {
 
 			splash.setSplashText("Загрузка приложения...");
 			try {
-				frame = (MainFrame) AppHelper.getInstance().openWindow(MainFrame.class);
+				frame = (MainFrame) AppHelper.getInstance().getFrame(MainFrame.class);
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				frame.preCache();
 			} catch (Exception e) {
@@ -139,7 +129,7 @@ public class Application {
 		}
 		frame.setVisible(true);
 
-		logger.debug("Application PASS ready...");
+		logger.debug("Application ready...");
 
 	}
 

@@ -10,31 +10,26 @@ import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Properties;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.KeyStroke;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.face.template.AbstractDialogAdapter;
+import edu.mgupi.pass.face.template.JTableReadOnly;
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Const;
 
@@ -49,7 +44,7 @@ public class AboutDialog extends JDialog {
 
 	private JPanel jContentPane = null;
 	private JPanel jPanelButtons = null;
-	private JButton jButtonOK = null;
+	private JButton jButtonCancel = null;
 	private JPanel jPanelData = null;
 	private JLabel jLabelProgramTitle = null;
 
@@ -71,7 +66,7 @@ public class AboutDialog extends JDialog {
 		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		this.setTitle("О программе...");
 		this.setContentPane(getJContentPane());
-		Config.getInstance().getWindowPosition(this);
+		Config.getInstance().loadWindowPosition(this);
 	}
 
 	/**
@@ -99,42 +94,58 @@ public class AboutDialog extends JDialog {
 		if (jPanelButtons == null) {
 			jPanelButtons = new JPanel();
 			jPanelButtons.setLayout(new FlowLayout());
-			jPanelButtons.add(getJButtonOK(), null);
+			jPanelButtons.add(getJButtonCancel(), null);
 		}
 		return jPanelButtons;
 	}
 
+	public void showDialog() {
+		getDialogAdapter().showDialogCancelOnly();
+	}
+
+	private AbstractDialogAdapter myDialogAdapter = null; //  @jve:decl-index=0:
+
+	private AbstractDialogAdapter getDialogAdapter() {
+		if (myDialogAdapter != null) {
+			return myDialogAdapter;
+		}
+
+		myDialogAdapter = new AbstractDialogAdapter(this, true) {
+
+			@Override
+			protected void cancelImpl() throws Exception {
+				// do nothing
+			}
+
+			@Override
+			protected void openDialogImpl() throws Exception {
+				// do nothing
+			}
+
+			@Override
+			protected boolean saveImpl() throws Exception {
+				// do nothing
+				return false;
+			}
+		};
+
+		return myDialogAdapter;
+	}
+
 	/**
-	 * This method initializes jButtonOK
+	 * This method initializes jButtonCancel
 	 * 
 	 * @return javax.swing.JButton
 	 */
-	private JButton getJButtonOK() {
-		if (jButtonOK == null) {
-			jButtonOK = new JButton();
-			Action okAction = new AbstractAction() {
+	private JButton getJButtonCancel() {
+		if (jButtonCancel == null) {
+			jButtonCancel = new JButton();
+			jButtonCancel.setHorizontalAlignment(SwingConstants.CENTER);
+			jButtonCancel.setText("cancel");
+			getDialogAdapter().registerCancelButton(jButtonCancel);
 
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public void actionPerformed(ActionEvent e) {
-					AboutDialog.this.setVisible(false);
-				}
-			};
-
-			jButtonOK.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-					KeyStroke.getKeyStroke((char) KeyEvent.VK_ESCAPE), "cancel");
-			jButtonOK.getActionMap().put("cancel", okAction);
-			jButtonOK.setAction(okAction);
-
-			jButtonOK.setHorizontalAlignment(SwingConstants.CENTER);
-			jButtonOK.setText("OK");
-			jButtonOK.setName("ok");
-			jButtonOK.setMnemonic(KeyEvent.VK_UNDEFINED);
 		}
-		return jButtonOK;
+		return jButtonCancel;
 	}
 
 	private JLabel jLabelAuthor = null;
@@ -230,7 +241,7 @@ public class AboutDialog extends JDialog {
 			gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
 			gridBagConstraints.gridx = 0;
 			jLabelProgramTitle = new JLabel();
-			jLabelProgramTitle.setText("<html><h3>" + Const.PROGRAM_NAME + "<br>" + Const.PROGRAM_NAME_LAST + "</h3>"
+			jLabelProgramTitle.setText("<html><h3>" + Const.PROGRAM_NAME_FIRST + "<br>" + Const.PROGRAM_NAME_LAST + "</h3>"
 					+ "<b>Science content:</b> Konart<br><b>Code, design:</b> raidan</html>");
 
 			jPanelData = new JPanel();
@@ -278,20 +289,8 @@ public class AboutDialog extends JDialog {
 				cells[i][1] = props.getProperty(cells[i][0]);
 			}
 
-			jTableProps = new JTable(cells, new String[] { "Property", "Value" }) {
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public boolean isCellEditable(int row, int column) {
-					return false;
-				}
-			};
-			jTableProps.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			jTableProps = new JTableReadOnly(cells, new String[] { "Property", "Value" });
 			jTableProps.setName("properties");
-			jTableProps.setCellSelectionEnabled(true);
-
 		}
 		return jTableProps;
 	}
@@ -325,21 +324,8 @@ public class AboutDialog extends JDialog {
 				cells[i][0] = libs[i];
 			}
 
-			jTableLibraries = new JTable(cells, new String[] { "Used library" }) {
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public boolean isCellEditable(int row, int column) {
-					return false;
-				}
-
-			};
+			jTableLibraries = new JTableReadOnly(cells, new String[] { "Used library" });
 			jTableLibraries.setName("libraries");
-			jTableLibraries.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			jTableLibraries.setName("libraries");
-			jTableLibraries.setCellSelectionEnabled(true);
 		}
 		return jTableLibraries;
 	}

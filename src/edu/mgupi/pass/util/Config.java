@@ -1,5 +1,6 @@
 package edu.mgupi.pass.util;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Window;
 import java.io.File;
@@ -7,6 +8,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import javax.swing.JCheckBox;
+import javax.swing.UIManager;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
@@ -113,9 +115,10 @@ public class Config {
 	}
 
 	public final static String PARAM_CURRENT_SOURCE_MODE = "sourceMode";
-	public final static String PARAM_CURRENT_BACKGROUND = "background";
+	public final static String PARAM_CURRENT_BACKGROUND = "imageBackground";
 
-	public final static String PARAM_LOOK_AND_FEEL = "laf";
+	public final static String PARAM_LOOK_AND_FEEL = "lookAndFeel";
+	public final static String PARAM_FILTER_DELETE_MODE = "filterDeleteMode";
 
 	//	public String getCurrentSourceMode() {
 	//		return this.currentConfigInstance.getString(PARAM_CURRENT_SOURCE_MODE);
@@ -129,40 +132,105 @@ public class Config {
 	//		return this.commonConfigInstance.getString(PARAM_LOOK_AND_FEEL);
 	//	}
 
-	public String getCurrentSourceMode(String default_) {
-		return readOnly ? default_ : this.currentConfigInstance.getString(PARAM_CURRENT_SOURCE_MODE, default_);
+	public static enum SourceMode {
+		center("Разместить в центре"), left_top("Разместить слева сверху"), scale("Отмасштабировать");
+
+		private String title;
+
+		private SourceMode(String title) {
+			this.title = title;
+		}
+
+		public String toString() {
+			return title;
+		}
+	};
+
+	public static enum DeletionMode {
+		confirm("Требовать подтверждение удаления каждого фильтра"), no_confirm("Удалять без подтверждения"), confirm_only_users(
+				"Требовать подтверждения только у пользователей");
+
+		private String title;
+
+		private DeletionMode(String title) {
+			this.title = title;
+		}
+
+		public String toString() {
+			return title;
+		}
 	}
 
-	public int getCurrentBackground(int default_) {
+	public SourceMode getCurrentSourceMode() {
+		final SourceMode default_ = SourceMode.left_top;
+		try {
+			return readOnly ? default_ : SourceMode.valueOf(this.currentConfigInstance.getString(
+					PARAM_CURRENT_SOURCE_MODE, default_.name()));
+		} catch (IllegalArgumentException iae) {
+			return default_;
+		}
+	}
+
+	public int getCurrentBackground() {
+		final int default_ = Color.WHITE.getRGB();
 		return readOnly ? default_ : this.currentConfigInstance.getInt(PARAM_CURRENT_BACKGROUND, default_);
 	}
 
-	public String getLookAndFeel(String default_) {
+	public String getLookAndFeel() {
+		final String default_ = UIManager.getSystemLookAndFeelClassName();
 		return readOnly ? default_ : this.commonConfigInstance.getString(PARAM_LOOK_AND_FEEL, default_);
 	}
 
-	public void setCurrentSourceMode(String value) {
-		if (readOnly) {
-			return;
+	public DeletionMode getFilterDeleteMode() {
+		final DeletionMode default_ = DeletionMode.confirm;
+		try {
+			return readOnly ? default_ : DeletionMode.valueOf(this.commonConfigInstance.getString(
+					PARAM_FILTER_DELETE_MODE, default_.name()));
+		} catch (IllegalArgumentException iae) {
+			return default_;
 		}
-		this.currentConfigInstance.setProperty(PARAM_CURRENT_SOURCE_MODE, value);
 	}
 
-	public void setCurrentBackground(int value) {
-		if (readOnly) {
-			return;
-		}
-		this.currentConfigInstance.setProperty(PARAM_CURRENT_BACKGROUND, value);
+	public boolean setCurrentSourceMode(SourceMode value) {
+		return this.setCurrentParameterImpl(PARAM_CURRENT_SOURCE_MODE, this.getCurrentSourceMode().name(),
+				value == null ? null : value.name());
 	}
 
-	public void setLookAndFeel(String value) {
-		if (readOnly) {
-			return;
-		}
-		this.commonConfigInstance.setProperty(PARAM_LOOK_AND_FEEL, value);
+	public boolean setCurrentBackground(int value) {
+		return this.setCurrentParameterImpl(PARAM_CURRENT_BACKGROUND, this.getCurrentBackground(), value);
 	}
 
-	public void setWindowPosition(Window window) {
+	public boolean setLookAndFeel(String value) {
+		return this.setCommonParameterImpl(PARAM_LOOK_AND_FEEL, this.getLookAndFeel(), value);
+	}
+
+	public boolean setFilterDeleteConfirm(DeletionMode value) {
+		return this.setCommonParameterImpl(PARAM_FILTER_DELETE_MODE, this.getFilterDeleteMode().name(),
+				value == null ? null : value.name());
+	}
+
+	private boolean setParameterImpl(Configuration config, String paramName, Object oldValue, Object newValue) {
+		if (readOnly) {
+			return false;
+		}
+//		logger.debug("OLD : " + oldValue.getClass() + ", NEW: " + newValue.getClass());
+		if (Utils.equals(newValue, oldValue)) {
+			return false;
+		} else {
+			config.setProperty(paramName, newValue);
+			return true;
+		}
+	}
+
+	private boolean setCurrentParameterImpl(String paramName, Object oldValue, Object newValue) {
+		return this.setParameterImpl(this.currentConfigInstance, paramName, oldValue, newValue);
+	}
+
+	private boolean setCommonParameterImpl(String paramName, Object oldValue, Object newValue) {
+		return this.setParameterImpl(this.commonConfigInstance, paramName, oldValue, newValue);
+	}
+
+	public void storeWindowPosition(Window window) {
 		if (readOnly) {
 			return;
 		}
@@ -186,7 +254,7 @@ public class Config {
 		}
 	}
 
-	public void setWindowCheckBoxes(Window window, JCheckBox... checkBoxes) {
+	public void storeWindowCheckBoxes(Window window, JCheckBox... checkBoxes) {
 		if (readOnly) {
 			return;
 		}
@@ -203,7 +271,7 @@ public class Config {
 
 	}
 
-	public void getWindowPosition(Window window) {
+	public void loadWindowPosition(Window window) {
 
 		if (readOnly) {
 			return;
@@ -233,7 +301,7 @@ public class Config {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void getWindowCheckBoxes(Window window) {
+	public void loadWindowCheckBoxes(Window window) {
 		if (readOnly) {
 			return;
 		}
@@ -312,5 +380,44 @@ public class Config {
 		}
 		return this.progressInterface;
 	}
-
+	//
+	//	static class ComplexParameter<E> {
+	//		//private Object[] values;
+	//		private Enum<? extends E> enum_;
+	//		private Enum<? extends E> default_;
+	//
+	//		private String[] visual;
+	//
+	//		public ComplexParameter(Enum enum_, String visual[], Enum<? extends E> default_) {
+	//			//this.values = values;
+	//			this.enum_ = enum_;
+	//			this.visual = visual;
+	//			this.default_ = default_;
+	//
+	//			this.confirmValue(default_);
+	//		}
+	//
+	//		public Object confirmValue(Enum<? extends E> enum_) {
+	//			if (enum_ == null) {
+	//				return default_;
+	//			}
+	//			return enum_;
+	//
+	//			//			if (enum_.equals(other))
+	//			//			for (Object obj : this.values) {
+	//			//				if (obj.equals(value)) {
+	//			//					return value;
+	//			//				}
+	//			//			}
+	//			//			return default_;
+	//		}
+	//
+	//		public String[] getVisualValues() {
+	//			return this.visual;
+	//		}
+	//
+	//		public Enum<? extends E> getDefaultValue() {
+	//			return default_;
+	//		}
+	//	}
 }

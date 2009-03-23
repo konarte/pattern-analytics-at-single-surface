@@ -1,5 +1,6 @@
 package edu.mgupi.pass.modules;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -87,6 +88,23 @@ public class ModuleProcessorTest {
 				assertNotNull(ModuleHelper.getTemporaryModuleImage(myLocus));
 
 				assertTrue(processor.getModule() == firstModule);
+
+				/***
+				 * 
+				 * 
+				 * WARNING! MUST BE CHECKED FOR ANOTHER JVM INSTANCE (for
+				 * serialization workaround)
+				 * 
+				 * 
+				 */
+				assertEquals(1, processor.getFilters().getFilterCount());
+				processor.saveSettingsToFile(new File("tmp/module-test-processed.init"));
+
+				processor.getFilters().removeAllFilters();
+				assertEquals(0, processor.getFilters().getFilterCount());
+
+				processor.loadSettingsFromFile(new File("tmp/module-test-processed.init"));
+				assertEquals(1, processor.getFilters().getFilterCount());
 
 				processor.setModule(TestModule2.class);
 				assertNull(ModuleHelper.getTemporaryModuleImage(myLocus));

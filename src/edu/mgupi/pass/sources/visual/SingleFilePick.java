@@ -13,49 +13,34 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.face.AppHelper;
+import edu.mgupi.pass.face.MainFrame;
 import edu.mgupi.pass.sources.ISource;
 import edu.mgupi.pass.sources.SourceStore;
 
 public class SingleFilePick implements ISource {
 
+	private final static Logger logger = LoggerFactory.getLogger(SingleFilePick.class);
+
 	private JFileChooser chooser = null;
 
 	public void init() {
 		//
+		logger.debug("Init single file pick.");
+
 		chooser = new JFileChooser();
 		AppHelper.getInstance().registerAdditionalComponent(chooser);
 
 		chooser.setCurrentDirectory(new File("."));
 		chooser.setMultiSelectionEnabled(false);
 
-		final String extensions[] = ImageIO.getReaderFormatNames();
-
-		final FileFilter filter = new FileFilter() {
-
-			@Override
-			public boolean accept(File f) {
-				if (f.isDirectory()) {
-					return true;
-				}
-				String name = f.getName();
-				for (String ext : extensions) {
-					if (name.endsWith(ext)) {
-						return true;
-					}
-				}
-				return false;
-			}
-
-			@Override
-			public String getDescription() {
-				return "All supported image types";
-			}
-		};
-
-		chooser.addChoosableFileFilter(filter);
+		chooser.addChoosableFileFilter(new FileNameExtensionFilter("All suppored image types", ImageIO
+				.getReaderFormatNames()));
 		chooser.setAccessory(new ImagePreviewer(chooser));
 
 	}
@@ -91,6 +76,8 @@ public class SingleFilePick implements ISource {
 
 	public void close() {
 		if (chooser != null) {
+			logger.debug("Closing single file pick.");
+
 			AppHelper.getInstance().unregisterAdditionalComponent(chooser);
 			chooser = null;
 		}
@@ -102,7 +89,7 @@ public class SingleFilePick implements ISource {
 		chooser.repaint();
 
 		// Let's pick them
-		int result = chooser.showOpenDialog(null);
+		int result = chooser.showOpenDialog(AppHelper.getInstance().searchWindow(MainFrame.class));
 		if (result == JFileChooser.APPROVE_OPTION) {
 			String imagePath = chooser.getSelectedFile().getPath();
 
