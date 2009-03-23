@@ -238,14 +238,14 @@ public class FilterChainsawTest {
 
 		chainsaw.removeFilter(0);
 		assertFalse(filter.isAttached());
-		assertTrue(filter.isDone());
+		assertFalse(filter.isDone());
 
 		assertTrue(filter2.isAttached());
 		assertFalse(filter2.isDone());
 
 		chainsaw.removeFilter(0);
 		assertFalse(filter2.isAttached());
-		assertTrue(filter2.isDone());
+		assertFalse(filter2.isDone());
 
 		chainsaw.filterSaw();
 
@@ -321,5 +321,6 @@ public class FilterChainsawTest {
 		assertTrue(filter == filter2);
 
 	}
+	
 
 }

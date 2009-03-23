@@ -151,7 +151,8 @@ public class AppHelperTest {
 			SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 				@Override
 				public void workImpl() throws Exception {
-					splash = (SplashWindow) AppHelper.getInstance().openWindowImpl(mySplash, SplashWindow.class, true);
+					splash = (SplashWindow) AppHelper.getInstance().openWindowImpl(mySplash, SplashWindow.class, true,
+							false);
 				}
 			});
 			fail("No exception thrown!");
@@ -167,7 +168,7 @@ public class AppHelperTest {
 			SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 				@Override
 				public void workImpl() throws Exception {
-					AppHelper.getInstance().openWindowImpl(null, SettingsDialog.class, true);
+					AppHelper.getInstance().openWindowImpl(null, SettingsDialog.class, true, false);
 				}
 			});
 			fail("No exception thrown!");

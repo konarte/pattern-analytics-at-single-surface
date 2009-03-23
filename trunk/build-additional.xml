@@ -2,12 +2,48 @@
 <project name="pass" basedir=".">
 	<!-- Common definition -->
 
+	<dirname property="current-dir" file="src" />
+	<target name="listLibraries">
+		<fileset dir="${dir}" id="tmp">
+			<include name="**/*.jar" />
+		</fileset>
+		<pathconvert pathsep="${sep}" property="tmp-out" refid="tmp">
+			<map from="${current-dir}\${dir}\" to="" />
+		</pathconvert>
+		<echo file="${file}" append="true" message="${tmp-out}${endsep}" />
+	</target>
+
 	<!-- Actual tasks -->
 	<target name="updateBuildNumber">
 		<buildnumber file="src/mybuild.properties" />
 		<copy todir="bin">
 			<fileset dir="src">
 				<include name="mybuild.properties" />
+			</fileset>
+		</copy>
+
+		<echo file="src/used-apps.properties" append="false">#Build Number for ANT. Do not edit!
+
+libraries=</echo>
+
+		<antcall target="listLibraries">
+			<param name="dir" value="model" />
+			<param name="file" value="src/used-apps.properties" />
+			<param name="sep" value="," />
+			<param name="endsep" value="," />
+		</antcall>
+
+		<antcall target="listLibraries">
+			<param name="dir" value="lib" />
+			<param name="file" value="src/used-apps.properties" />
+			<param name="sep" value="," />
+			<param name="endsep" value="" />
+		</antcall>
+
+
+		<copy todir="bin">
+			<fileset dir="src">
+				<include name="used-apps.properties" />
 			</fileset>
 		</copy>
 	</target>
@@ -39,9 +75,6 @@
 			<fileset dir="model/">
 				<include name="**/*.jar" />
 			</fileset>
-			<preserveintarget>
-				<include name=".svn/**" />
-			</preserveintarget>
 		</sync>
 
 		<fileset dir="target/lib" id="libs">

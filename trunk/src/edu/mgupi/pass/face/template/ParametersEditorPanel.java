@@ -2,8 +2,6 @@ package edu.mgupi.pass.face.template;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -16,7 +14,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
@@ -27,15 +24,17 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.border.TitledBorder;
 
-import net.miginfocom.swing.MigLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.mgupi.pass.filters.IllegalParameterValueException;
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.Param.TYPES;
 
 public class ParametersEditorPanel extends JPanel {
 
+	private final static Logger logger = LoggerFactory.getLogger(ParametersEditorPanel.class);
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -53,51 +52,52 @@ public class ParametersEditorPanel extends JPanel {
 	private void initialize() {
 		GridBagConstraints gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.gridx = 0;
-		gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-		gridBagConstraints.fill = GridBagConstraints.NONE;
+		gridBagConstraints.ipadx = 0;
+		gridBagConstraints.ipady = 0;
+		gridBagConstraints.insets = new Insets(10, 10, 10, 10);
 		gridBagConstraints.weightx = 1.0D;
 		gridBagConstraints.weighty = 1.0D;
+		gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+		gridBagConstraints.fill = GridBagConstraints.BOTH;
 		gridBagConstraints.gridy = 0;
-		this.setSize(300, 200);
+		this.setSize(400, 200);
 		this.setLayout(new GridBagLayout());
 		this.setName("paramEditorPanel");
 		this.add(getJPanelPlace(), gridBagConstraints);
 	}
 
+	private boolean hasPreviousWork = false;
 	private JPanel jPanelPlace = null;
 
 	private Collection<Param> parameters = null; //  @jve:decl-index=0:
 	private Map<Param, Color> selectedColors = new HashMap<Param, Color>(); //  @jve:decl-index=0:
 	private Map<Param, Component> controlComponents = new HashMap<Param, Component>(); //  @jve:decl-index=0:
 
-	private Dimension lastDimension = null; //  @jve:decl-index=0:
+	public void setParameters(Collection<Param> editableParameters) {
 
-	public void setParameters(String title, Collection<Param> editableParameters) {
+		logger.debug("Applying parameters " + editableParameters);
 
-		if (editableParameters == null) {
-			throw new IllegalArgumentException("Internal error. 'editableParameters' must be not null.");
-		}
-		if (title == null) {
-			throw new IllegalArgumentException("Internal error. 'title' must be not null.");
-		}
-
-		if (parameters == editableParameters) {
+		// if received already loaded 
+		if (parameters == editableParameters && hasPreviousWork) {
 			return;
 		}
 
-		lastDimension = null;
 		selectedColors.clear();
 		controlComponents.clear();
 		parameters = editableParameters;
 
 		jPanelPlace.removeAll();
 
-		((TitledBorder) jPanelPlace.getBorder()).setTitle(title);
+		// If received no parameters
+		if (editableParameters == null) {
+			JLabel label = new JLabel();
+			label.setText("Параметры отсутствуют");
+			label.setName("noparams");
+			jPanelPlace.add(label);
+			return;
+		}
 
-		//		int size = editableParameters.size();
-		//		GridLayout grid = (GridLayout) jPanelPlace.getLayout();
-		//		grid.setRows(size);
-		//		grid.setColumns(2);
+		//((TitledBorder) jPanelPlace.getBorder()).setTitle(title);
 
 		int index = 0;
 		for (Iterator<Param> iter = editableParameters.iterator(); iter.hasNext();) {
@@ -106,7 +106,15 @@ public class ParametersEditorPanel extends JPanel {
 			label.setText(param.getTitle() + ":");
 			label.setName(param.getName() + "_label");
 
-			jPanelPlace.add(label, "skip");
+			//jPanelPlace.add(label, "skip");
+
+			GridBagConstraints topGrid = new GridBagConstraints();
+			topGrid.weightx = 0;
+			topGrid.gridx = 0;
+			topGrid.gridy = index;
+			topGrid.anchor = GridBagConstraints.EAST;
+			topGrid.insets = new Insets(5, 5, 5, 5);
+			jPanelPlace.add(label, topGrid);
 
 			final TYPES type = param.getType();
 			final String name = param.getName();
@@ -204,19 +212,33 @@ public class ParametersEditorPanel extends JPanel {
 						+ "' with type " + type + ". Unknown type. Please, consult with developers.");
 			}
 
-			jPanelPlace.add(renderComponent, iter.hasNext() ? "span, growx" : "wrap para");
+			//jPanelPlace.add(renderComponent, iter.hasNext() ? "span, growx" : "wrap para");
+
+			topGrid = new GridBagConstraints();
+			topGrid.weightx = 1;
+			topGrid.gridx = 1;
+			topGrid.gridy = index;
+			topGrid.anchor = GridBagConstraints.WEST;
+			topGrid.fill = GridBagConstraints.HORIZONTAL;
+			jPanelPlace.add(renderComponent, topGrid);
+
+			//jPanelPlace.add(renderComponent, "width 100%!");
+			//jPanelPlace.add(renderComponent);
 
 			index++;
 		}
 
-		this.lastDimension = ((MigLayout) this.jPanelPlace.getLayout()).preferredLayoutSize(this.jPanelPlace);
+		hasPreviousWork = true;
+		//		this.lastDimension = mig.preferredLayoutSize(this.jPanelPlace);
 		this.resetParameterValues();
 
 	}
 
-	public Dimension getLastDimension() {
-		return lastDimension;
-	}
+	//	
+	//
+	//	public Dimension getLastDimension() {
+	//		return lastDimension;
+	//	}
 
 	public void resetParameterValues() {
 		this.resetParameterValues(false);
@@ -318,12 +340,18 @@ public class ParametersEditorPanel extends JPanel {
 	 */
 	private JPanel getJPanelPlace() {
 		if (jPanelPlace == null) {
-			MigLayout mig = new MigLayout("", "[]0[right][200lp, fill]", "");
+			//			migLayout = new MigLayout("", "[]0[right][100%, fill]", "");
+			//migLayout = new MigLayout("", "wrap", "[right][0:pref,grow]", "");
+
+			//migLayout = new MigLayout("wrap,nocache", "[right][100%,fill]", "");
+			//			migLayout = new MigLayout("", "[grow]0[200, grow]", "");
+			//			new FlowLayout().;
 			jPanelPlace = new JPanel();
-			jPanelPlace.setLayout(mig);
+			jPanelPlace.setLayout(new GridBagLayout());
+			//jPanelPlace.setLayout(new BoxLayout(jPanelPlace, BoxLayout.Y_AXIS));
 			jPanelPlace.setName("paramPlace");
-			jPanelPlace.setBorder(BorderFactory.createTitledBorder(null, "", TitledBorder.DEFAULT_JUSTIFICATION,
-					TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			//			jPanelPlace.setBorder(BorderFactory.createTitledBorder(null, "", TitledBorder.DEFAULT_JUSTIFICATION,
+			//					TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
 		}
 		return jPanelPlace;
 	}

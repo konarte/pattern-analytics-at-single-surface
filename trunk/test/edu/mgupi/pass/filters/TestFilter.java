@@ -85,6 +85,14 @@ public class TestFilter implements IFilter, IInitiable, IFilterAttachable {
 		if (source == null) {
 			throw new IllegalArgumentException("Internal error: image is null.");
 		}
+		
+		if (!init) {
+			throw new IllegalStateException("Internal error. Called convert without init.");
+		}
+		
+		if (done) {
+			throw new IllegalStateException("Internal error. Called convert after done.");
+		}
 
 		if (!attached) {
 			throw new IllegalStateException("Internal error. Called convert without onAttachToImage.");

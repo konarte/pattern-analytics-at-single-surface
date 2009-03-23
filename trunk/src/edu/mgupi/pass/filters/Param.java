@@ -7,7 +7,7 @@ package edu.mgupi.pass.filters;
  * @author raidan
  * 
  */
-public class Param {
+public class Param implements Cloneable {
 
 	public Param(String name, String title, TYPES type, Object default_) {
 		this.name = name;
@@ -184,5 +184,11 @@ public class Param {
 
 	public String toString() {
 		return this.title + " (" + this.name + ")";
+	}
+
+	public Object clone() throws CloneNotSupportedException {
+		Param cloned = (Param) super.clone();
+
+		return cloned;
 	}
 }

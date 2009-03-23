@@ -41,7 +41,7 @@ public class SwingHelper {
 
 		// Debug line
 		if (logger.isTraceEnabled()) {
-			logger.trace("Class: " + parent.getClass() + " Name: " + parent.getName());
+			logger.trace("Search: " + name + " Class: " + parent.getClass() + " Name: " + parent.getName());
 		}
 
 		if (name.equals(parent.getName())) {
@@ -246,7 +246,7 @@ public class SwingHelper {
 	private static void waitUntil(ConditionSet condition, Throwable watchedException) throws InterruptedException {
 		long time = System.currentTimeMillis();
 		boolean timeOK = false;
-		if (watchedException == null) { 
+		if (watchedException == null) {
 			watchedException = new Exception();
 		}
 		while ((timeOK = ((System.currentTimeMillis() - time) < MAX_WAIT_TIME)) && condition.keepWorking()

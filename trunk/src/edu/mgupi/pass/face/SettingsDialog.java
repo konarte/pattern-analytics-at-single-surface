@@ -148,18 +148,18 @@ public class SettingsDialog extends JDialog {
 
 	private void saveImpl() throws Exception {
 		ok = false;
-		try {
-			this.applySettings();
 
-			if (this.needSaveCommon) {
-				logger.debug("Saving settings...");
-				Config.getInstance().saveCommonConfig();
-			}
+		this.applySettings();
 
-			ok = this.needRestartProcessing;
-		} finally {
-			SettingsDialog.this.setVisible(false);
+		if (this.needSaveCommon) {
+			logger.debug("Saving settings...");
+			Config.getInstance().saveCommonConfig();
 		}
+
+		ok = this.needRestartProcessing;
+
+		this.setVisible(false);
+
 	}
 
 	private void cancelImpl() {
@@ -177,8 +177,8 @@ public class SettingsDialog extends JDialog {
 		if (jContentPane == null) {
 			jContentPane = new JPanel();
 			jContentPane.setLayout(new BorderLayout());
-			jContentPane.add(getJPanelButtons(), BorderLayout.SOUTH);
 			jContentPane.add(getJPanelCommon(), BorderLayout.CENTER);
+			jContentPane.add(getJPanelButtons(), java.awt.BorderLayout.SOUTH);
 		}
 		return jContentPane;
 	}

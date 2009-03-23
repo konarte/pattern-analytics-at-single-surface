@@ -3,6 +3,7 @@ package edu.mgupi.pass.face;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -17,11 +18,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
+import java.net.URI;
 import java.util.Collection;
-import java.util.Comparator;
 
 import javax.swing.AbstractAction;
+import javax.swing.AbstractListModel;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
@@ -50,14 +51,12 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.mgupi.pass.db.locuses.LFilters;
-import edu.mgupi.pass.db.locuses.LFiltersFactory;
 import edu.mgupi.pass.db.locuses.LModules;
-import edu.mgupi.pass.db.locuses.LModulesFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
 import edu.mgupi.pass.face.template.ImageFrameTemplate;
 import edu.mgupi.pass.face.template.ImagePanel;
 import edu.mgupi.pass.filters.FilterChainsaw;
+import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.java.GrayScaleFilter;
 import edu.mgupi.pass.filters.service.PlaceImageFilter;
@@ -107,14 +106,12 @@ public class MainFrame extends JFrame implements IProgress {
 	 * 
 	 */
 	private void initialize() throws Exception {
-		// Loading model data
-		this.loadModelImpl();
 
 		// Initializing interface
 
 		this.setJMenuBar(getJmainMenuBar());
 		this.setContentPane(getJContentPane());
-		this.setTitle(Const.FULL_PROGRAM_NAME);
+		this.setTitle(Const.PROGRAM_NAME_FULL);
 		this.setName("mainFrame");
 		this.setMinimumSize(new Dimension(600, 620));
 		this.setBounds(new Rectangle(150, 150, 800, 620));
@@ -125,39 +122,10 @@ public class MainFrame extends JFrame implements IProgress {
 		this.initImpl();
 	}
 
-	protected LModules[] moduleList = null;
-	protected LFilters[] filterList = null;
-
-	private void loadModelImpl() throws Exception {
-		moduleList = LModulesFactory.listLModulesByQuery(null, null);
-		if (moduleList == null || moduleList.length == 0) {
-			throw new Exception("No registered analyze modules found. Unable to work. Please, fill table 'LModules'.");
-		}
-
-		filterList = LFiltersFactory.listLFiltersByQuery(null, null);
-		if (filterList == null || filterList.length == 0) {
-			throw new Exception("No registered filters found. Unable to work. Please, fill table 'LFilters'.");
-		}
-
-		Arrays.sort(moduleList, new Comparator<LModules>() {
-			@Override
-			public int compare(LModules o1, LModules o2) {
-				if (o1 != null && o2 != null) {
-					return o1.getName().compareTo(o2.getName());
-				}
-				return 0;
-			}
-		});
-
-		Arrays.sort(filterList, new Comparator<LFilters>() {
-			@Override
-			public int compare(LFilters o1, LFilters o2) {
-				if (o1 != null && o2 != null) {
-					return o1.getName().compareTo(o2.getName());
-				}
-				return 0;
-			}
-		});
+	public void preCache() {
+		AppHelper.getInstance().openWindowHidden(this, SettingsDialog.class);
+		AppHelper.getInstance().openWindowHidden(this, AboutDialog.class);
+		AppHelper.getInstance().openWindowHidden(this, ParametersEditor.class);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -200,6 +168,7 @@ public class MainFrame extends JFrame implements IProgress {
 		FilterChainsaw saw = new FilterChainsaw();
 		saw.appendFilter(GrayScaleFilter.class);
 		mainModuleProcessor.setChainsaw(saw);
+		this.filtersModel.setChainsaw(saw);
 
 		logger.debug("Main frame init done.");
 	}
@@ -241,7 +210,6 @@ public class MainFrame extends JFrame implements IProgress {
 
 		AppHelper.reset();
 		this.clearMessage();
-		System.exit(0);
 	}
 
 	private SourceStore currentSource = null; //  @jve:decl-index=0:
@@ -265,7 +233,7 @@ public class MainFrame extends JFrame implements IProgress {
 
 		logger.debug("Start loading source " + source.getName());
 
-		this.setTitle(Const.FULL_PROGRAM_NAME + " -- " + source.getName());
+		this.setTitle(Const.PROGRAM_NAME_FULL + " -- " + source.getName());
 
 		// This is must be safe!!!!
 		// I can stop wherever I want!
@@ -401,6 +369,28 @@ public class MainFrame extends JFrame implements IProgress {
 		} else {
 			this.moduleFrame.setImage(null);
 		}
+	}
+
+	protected void restartProcessingByFilters() {
+		MainFrame.this.printMessage("Обновление примененных фильтров...");
+		SwingUtilities.invokeLater(new Runnable() {
+
+			public void run() {
+				try {
+					MainFrame.this.restartProcessingByFiltersImpl();
+				} catch (Throwable t) {
+					logger.error("Error when applying new filters", t);
+					AppHelper.showExceptionDialog(MainFrame.this, "Error when applying new filters", t);
+				} finally {
+					MainFrame.this.clearMessage();
+				}
+			}
+		});
+	}
+
+	protected void restartProcessingByFiltersImpl() throws Exception {
+		this.filtersModel.updateFiltersImpl();
+		this.startProcessing(this.currentSource);
 	}
 
 	public void clearMessage() {
@@ -559,8 +549,8 @@ public class MainFrame extends JFrame implements IProgress {
 
 				public void actionPerformed(ActionEvent e) {
 					// When this frame closed -- we totally exit the application
-
 					MainFrame.this.closeImpl();
+					System.exit(0);
 				}
 			});
 			jMenuItemExit.setText("Выход");
@@ -652,7 +642,23 @@ public class MainFrame extends JFrame implements IProgress {
 	private JMenuItem getJMenuItemHelp() {
 		if (jMenuItemHelp == null) {
 			jMenuItemHelp = new JMenuItem();
-			jMenuItemHelp.setAction(new NoAction());
+			jMenuItemHelp.setAction(new AbstractAction() {
+
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent e) {
+					try {
+						Desktop.getDesktop().browse(new URI(Const.WEB_HELP_PAGE));
+					} catch (Exception e1) {
+						logger.debug("Error when opening link", e1);
+						AppHelper.showExceptionDialog("Unexpected eror when opening help link '" + Const.WEB_HELP_PAGE
+								+ "'.", e1);
+					}
+				}
+			});
 			jMenuItemHelp.setText("Помощь");
 			jMenuItemHelp.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
 			jMenuItemHelp.setName("help");
@@ -958,6 +964,50 @@ public class MainFrame extends JFrame implements IProgress {
 		return jPanelFilters;
 	}
 
+	private FiltersModel filtersModel = null;
+
+	static class FiltersModel extends AbstractListModel {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private FilterChainsaw chainsaw = null;
+
+		protected void setChainsaw(FilterChainsaw chainsaw) {
+			this.chainsaw = chainsaw;
+		}
+
+		protected FilterChainsaw getChainsaw() {
+			if (chainsaw == null) {
+				throw new IllegalStateException("Internal error. Chainsaw is diappeared.");
+			}
+			return chainsaw;
+		}
+
+		protected void updateFiltersImpl() {
+			super.fireContentsChanged(this, 0, getChainsaw().getFilterCount());
+		}
+
+		@Override
+		public Object getElementAt(int index) {
+			return chainsaw == null ? null : chainsaw.getFilter(index);
+		}
+
+		@Override
+		public int getSize() {
+			return chainsaw == null ? 0 : chainsaw.getFilterCount();
+		}
+
+	}
+
+	private FiltersModel getFiltersModel() {
+		if (filtersModel == null) {
+			filtersModel = new FiltersModel();
+		}
+		return filtersModel;
+	}
+
 	/**
 	 * This method initializes jListFilters
 	 * 
@@ -965,7 +1015,7 @@ public class MainFrame extends JFrame implements IProgress {
 	 */
 	private JList getJListFilters() {
 		if (jListFilters == null) {
-			jListFilters = new JList(filterList);
+			jListFilters = new JList(getFiltersModel());
 			jListFilters.setCellRenderer(new DefaultListCellRenderer() {
 
 				/**
@@ -976,7 +1026,7 @@ public class MainFrame extends JFrame implements IProgress {
 				@Override
 				public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
 						boolean cellHasFocus) {
-					return super.getListCellRendererComponent(list, ((LFilters) value).getName(), index, isSelected,
+					return super.getListCellRendererComponent(list, ((IFilter) value).getName(), index, isSelected,
 							cellHasFocus);
 				}
 			});
@@ -993,7 +1043,21 @@ public class MainFrame extends JFrame implements IProgress {
 	private JButton getJButtonFiltersChange() {
 		if (jButtonFiltersChange == null) {
 			jButtonFiltersChange = new JButton();
-			jButtonFiltersChange.setAction(new NoAction());
+			jButtonFiltersChange.setAction(new AbstractAction() {
+
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent e) {
+					FiltersEditor editor = (FiltersEditor) AppHelper.getInstance().openWindowHidden(MainFrame.this,
+							FiltersEditor.class);
+					if (editor.open("Основные фильтры", MainFrame.this.mainModuleProcessor.getFilters())) {
+						MainFrame.this.restartProcessingByFilters();
+					}
+				}
+			});
 			jButtonFiltersChange.setText("Изменить");
 		}
 		return jButtonFiltersChange;
@@ -1271,7 +1335,7 @@ public class MainFrame extends JFrame implements IProgress {
 	 */
 	private JComboBox getJComboBoxModules() {
 		if (jComboBoxModules == null) {
-			jComboBoxModules = new JComboBox(moduleList);
+			jComboBoxModules = new JComboBox(MainFrameDataStorage.getInstance().listLModulesIface());
 			jComboBoxModules.setName("module");
 			jComboBoxModules.addActionListener(new ActionListener() {
 
@@ -1441,10 +1505,10 @@ public class MainFrame extends JFrame implements IProgress {
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent e) {
-					ModuleParametersEditor editor = (ModuleParametersEditor) AppHelper.getInstance().openWindowHidden(
-							MainFrame.this, ModuleParametersEditor.class);
-					editor.setModule(mainModuleProcessor.getModule());
-					if (editor.open()) {
+					ParametersEditor editor = (ParametersEditor) AppHelper.getInstance().openWindowHidden(
+							MainFrame.this, ParametersEditor.class);
+					if (editor.open(mainModuleProcessor.getModule().getName(), mainModuleProcessor.getModule()
+							.getParams())) {
 						MainFrame.this.restartProcessingByModule();
 
 					}
@@ -1457,9 +1521,9 @@ public class MainFrame extends JFrame implements IProgress {
 	}
 
 	/**
-	 * This method initializes jButtonCompare	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes jButtonCompare
+	 * 
+	 * @return javax.swing.JButton
 	 */
 	private JButton getJButtonCompare() {
 		if (jButtonCompare == null) {

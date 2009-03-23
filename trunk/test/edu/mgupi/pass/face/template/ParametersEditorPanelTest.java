@@ -26,7 +26,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
-import javax.swing.border.TitledBorder;
 
 import org.junit.After;
 import org.junit.Before;
@@ -34,6 +33,7 @@ import org.junit.Test;
 
 import edu.mgupi.pass.face.ConditionSet;
 import edu.mgupi.pass.face.SwingHelper;
+import edu.mgupi.pass.face.SwingTestHelper;
 import edu.mgupi.pass.face.WorkSet;
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.ParamHelper;
@@ -112,56 +112,30 @@ public class ParametersEditorPanelTest {
 		}
 	}
 
-	private void showMeBackground() throws Exception {
-		SwingHelper.addWorkAndWaitThis(new WorkSet() {
-
-			@Override
-			public void workImpl() throws Exception {
-				parent.setVisible(true);
-			}
-		}, new ConditionSet() {
-
-			@Override
-			public boolean keepWorking() {
-				return parent.isVisible() == false;
-			}
-		});
-	}
-
-	private void waitMe() throws Exception {
-		SwingHelper.waitUntil(new ConditionSet() {
-
-			@Override
-			public boolean keepWorking() {
-				return parent.isVisible() == true;
-			}
-		});
-	}
-
 	@Test
 	public void testPrimarySetParameters() throws Exception {
 
 		TestFilter filter = new TestFilter();
-		panel.setParameters(filter.getName(), filter.getParams());
+		panel.setParameters(filter.getParams());
 
-		this.showMeBackground();
+		SwingTestHelper.showMeBackground(this.parent);
 
 	}
 
 	@Test
 	public void testFullRenderVariants() throws Exception {
 
-		panel.setParameters("Sample params", fullParams);
+		panel.setParameters(fullParams);
 
 		System.out.println("\n");
 		SwingHelper.printChildHierarchy(panel);
 
-		this.showMeBackground();
+		SwingTestHelper.showMeBackground(this.parent);
 
 		JPanel place = (JPanel) SwingHelper.getChildNamed(panel, "paramPlace");
 		assertNotNull(place);
-		TitledBorder border = (TitledBorder) place.getBorder();
-		assertEquals("Sample params", border.getTitle());
+//		TitledBorder border = (TitledBorder) place.getBorder();
+//		assertEquals("Sample params", border.getTitle());
 
 		assertNotNull(SwingHelper.getChildNamed(panel, "p1_label"));
 		assertNotNull(SwingHelper.getChildNamed(panel, "p2_label"));
@@ -302,9 +276,9 @@ public class ParametersEditorPanelTest {
 
 	@Test
 	public void testEditColors() throws Exception {
-		panel.setParameters("Sample params", fullParams);
+		panel.setParameters(fullParams);
 
-		this.showMeBackground();
+		SwingTestHelper.showMeBackground(this.parent);
 
 		this.clickButton("p7_color_selector");
 		this.clickEmulatedColor(Color.GREEN);
@@ -360,8 +334,8 @@ public class ParametersEditorPanelTest {
 
 	@Test
 	public void testEditStrings() throws Exception {
-		panel.setParameters("Sample params", fullParams);
-		this.showMeBackground();
+		panel.setParameters(fullParams);
+		SwingTestHelper.showMeBackground(this.parent);
 
 		JTextField field5 = (JTextField) SwingHelper.getChildNamed(panel, "p5_field");
 		assertNotNull(field5);
@@ -397,8 +371,8 @@ public class ParametersEditorPanelTest {
 
 	@Test
 	public void testEditInt() throws Exception {
-		panel.setParameters("Sample params", fullParams);
-		this.showMeBackground();
+		panel.setParameters(fullParams);
+		SwingTestHelper.showMeBackground(this.parent);
 
 		JFormattedTextField field = (JFormattedTextField) SwingHelper.getChildNamed(panel, "p1_int_field");
 		assertNotNull(field);
@@ -446,8 +420,8 @@ public class ParametersEditorPanelTest {
 
 	@Test
 	public void testEditDouble() throws Exception {
-		panel.setParameters("Sample params", fullParams);
-		this.showMeBackground();
+		panel.setParameters(fullParams);
+		SwingTestHelper.showMeBackground(this.parent);
 
 		JFormattedTextField field3 = (JFormattedTextField) SwingHelper.getChildNamed(panel, "p3_double_field");
 		assertNotNull(field3);
@@ -494,8 +468,8 @@ public class ParametersEditorPanelTest {
 
 	@Test
 	public void testEditCombobox() throws Exception {
-		panel.setParameters("Sample params", fullParams);
-		this.showMeBackground();
+		panel.setParameters(fullParams);
+		SwingTestHelper.showMeBackground(this.parent);
 
 		JComboBox combo9 = (JComboBox) SwingHelper.getChildNamed(panel, "p9_combo_box");
 		assertNotNull(combo9);
@@ -532,17 +506,17 @@ public class ParametersEditorPanelTest {
 		Collection<Param> params2 = new ArrayList<Param>();
 		params2.add(new Param("param2", "Параметр2", TYPES.INT, 5));
 
-		panel.setParameters("Sample params1", params1);
-		this.showMeBackground();
+		panel.setParameters(params1);
+		SwingTestHelper.showMeBackground(this.parent);
 
 		JFormattedTextField fmt = (JFormattedTextField) SwingHelper.getChildNamed(panel, "param1_int_field");
 		assertNotNull(fmt);
 
 		parent.setVisible(false);
-		this.waitMe();
+		SwingTestHelper.waitMe(this.parent);
 
-		panel.setParameters("Sample params2", params2);
-		this.showMeBackground();
+		panel.setParameters(params2);
+		SwingTestHelper.showMeBackground(this.parent);
 
 		fmt = (JFormattedTextField) SwingHelper.getChildNamed(panel, "param1_int_field");
 		assertNull(fmt);
@@ -551,10 +525,10 @@ public class ParametersEditorPanelTest {
 		assertNotNull(fmt);
 
 		parent.setVisible(false);
-		this.waitMe();
+		SwingTestHelper.waitMe(this.parent);
 
-		panel.setParameters("Sample params2", params2);
-		this.showMeBackground();
+		panel.setParameters(params2);
+		SwingTestHelper.showMeBackground(this.parent);
 
 		// Check for skipping recreating objects if parameters are the same as previous!
 
@@ -564,9 +538,9 @@ public class ParametersEditorPanelTest {
 	}
 
 	public void testSample() throws Exception {
-		panel.setParameters("Sample params", fullParams);
-		this.showMeBackground();
+		panel.setParameters(fullParams);
+		SwingTestHelper.showMeBackground(this.parent);
 
-		this.waitMe();
+		SwingTestHelper.waitMe(this.parent);
 	}
 }
