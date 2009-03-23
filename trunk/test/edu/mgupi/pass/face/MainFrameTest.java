@@ -21,7 +21,10 @@ import edu.mgupi.pass.modules.TestModule;
 import edu.mgupi.pass.modules.TestModule2;
 import edu.mgupi.pass.modules.basic.SimpleMatrixModule;
 import edu.mgupi.pass.sources.TestSourceImpl;
+import edu.mgupi.pass.util.WaitCondition;
 import edu.mgupi.pass.util.Config;
+import edu.mgupi.pass.util.SwingHelper;
+import edu.mgupi.pass.util.WorkSet;
 
 public class MainFrameTest {
 
@@ -34,7 +37,7 @@ public class MainFrameTest {
 	public void setUp() throws Exception {
 		Config.getInstance().setReadOnly();
 
-		frame = (MainFrame) AppHelper.getInstance().getFrame(MainFrame.class);
+		frame = (MainFrame) AppHelper.getInstance().getFrameImpl(MainFrame.class);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 
@@ -170,7 +173,7 @@ public class MainFrameTest {
 			public void workImpl() throws Exception {
 				settings.doClick();
 			}
-		}, new ConditionSet() {
+		}, new WaitCondition() {
 			public boolean keepWorking() {
 				return AppHelper.getInstance().searchWindow(SettingsDialog.class) == null;
 			}

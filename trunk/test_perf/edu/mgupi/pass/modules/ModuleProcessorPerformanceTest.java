@@ -79,12 +79,10 @@ public class ModuleProcessorPerformanceTest {
 
 			processor.setModule(TestModule.class);
 
-			FilterChainsaw mainSaw = new FilterChainsaw();
+			FilterChainsaw mainSaw = processor.getChainsaw();
 			ResizeFilter resize = (ResizeFilter) mainSaw.appendFilter(ResizeFilter.class);
 			resize.getWIDTH().setValue(1024);
 			resize.getHEIGHT().setValue(1024);
-
-			processor.setChainsaw(mainSaw);
 
 			Secundomer sec = SecundomerList.registerSecundomer("Common processing time");
 

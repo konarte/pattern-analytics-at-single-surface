@@ -70,8 +70,8 @@ public class ParamHelper {
 		}
 		return value;
 	}
-
-	protected static Map<String, Object> convertParamsToValues(Collection<Param> parameters) {
+	
+	protected static Map<String, Object> updateToMap(Collection<Param> parameters) {
 		Map<String, Object> paramMap = new LinkedHashMap<String, Object>();
 		if (parameters == null) {
 			return paramMap;
@@ -88,11 +88,7 @@ public class ParamHelper {
 		return paramMap;
 	}
 
-	protected static Map<String, Object> convertParamsToValues(IFilter filter) {
-		return convertParamsToValues(filter == null ? null : filter.getParams());
-	}
-
-	protected static void updateFilterFromMap(Collection<Param> paramList, Map<String, String> map)
+	protected static void updateFromMap(Collection<Param> paramList, Map<String, String> map)
 			throws NumberFormatException, IllegalParameterValueException {
 		if (paramList == null) {
 			return;
@@ -107,37 +103,23 @@ public class ParamHelper {
 
 	}
 
-	protected static void updateFilterFromMap(IFilter filter, Map<String, String> map) throws NumberFormatException,
-			IllegalParameterValueException {
-		if (filter == null) {
-			return;
-		}
-		updateFilterFromMap(filter.getParams(), map);
-	}
-
 	public static String convertParamsToJSON(IFilter filter) {
 		if (filter == null) {
 			throw new IllegalArgumentException("Internal error. Filter is null.");
 		}
-
-		return JSONValue.toJSONString(convertParamsToValues(filter));
+		return JSONValue.toJSONString(updateToMap(filter.getParams()));
 	}
 
-	public static String convertParamsToJSON(Collection<Param> params) {
-		return JSONValue.toJSONString(convertParamsToValues(params));
-	}
-
-	@SuppressWarnings("unchecked")
 	public static void fillParametersFromJSON(IFilter filter, String value) throws ParseException,
 			NumberFormatException, IllegalParameterValueException {
 		if (filter == null) {
 			throw new IllegalArgumentException("Internal error. Filter is null.");
 		}
-		if (value == null) {
-			throw new IllegalArgumentException("Internal error. Value is null.");
-		}
+		fillParametersFromJSON(filter.getParams(), value);
+	}
 
-		updateFilterFromMap(filter, (Map<String, String>) JSONValue.parseWithException(value));
+	public static String convertParamsToJSON(Collection<Param> params) {
+		return JSONValue.toJSONString(updateToMap(params));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -152,7 +134,7 @@ public class ParamHelper {
 			return;
 		}
 
-		updateFilterFromMap(params, (Map<String, String>) JSONValue.parseWithException(value));
+		updateFromMap(params, (Map<String, String>) JSONValue.parseWithException(value));
 	}
 
 }

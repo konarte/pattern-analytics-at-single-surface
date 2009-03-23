@@ -17,7 +17,6 @@ import org.apache.commons.configuration.INIConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.mgupi.pass.face.SwingHelper;
 
 /**
  * Config class. Using apache config

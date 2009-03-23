@@ -2,19 +2,29 @@ package edu.mgupi.pass.face.template;
 
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.table.TableModel;
 
+/**
+ * Simple helper class for tables. Show non-editable table, selecting only rows.
+ * 
+ * @author raidan
+ * 
+ */
 public class JTableReadOnly extends JTable {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public JTableReadOnly(TableModel dm) {
-		super(dm);
-		this.setConfig();
-	}
-
+	/**
+	 * Default constructor with data.
+	 * 
+	 * @param rowData
+	 *            data
+	 * @param columnNames
+	 *            column names
+	 * 
+	 * @see javax.swing.JTable
+	 */
 	public JTableReadOnly(Object[][] rowData, Object[] columnNames) {
 		super(rowData, columnNames);
 		this.setConfig();
@@ -26,6 +36,7 @@ public class JTableReadOnly extends JTable {
 		this.setRowSelectionAllowed(true);
 	}
 
+	@Override
 	public boolean isCellEditable(int row, int column) {
 		return false;
 	}
