@@ -7,11 +7,23 @@ import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.modules.IModule;
 import edu.mgupi.pass.util.CacheInitiable.MODE;
 
+/**
+ * Main idea in using CacheInitiable -- using single instance for store same
+ * data.
+ * 
+ * @author raidan
+ * 
+ */
 public class CacheIFactory {
 
 	private static Lock fLFI = new ReentrantLock();
 	private static CacheInitiable<IFilter> freeListFiltersInstance = null;
 
+	/**
+	 * Return instance of free-list {@link CacheInitiable} for {@link IFilter} .
+	 * 
+	 * @return instance of cache
+	 */
 	public static CacheInitiable<IFilter> getFreeListFilters() {
 		fLFI.tryLock();
 		try {
@@ -27,6 +39,12 @@ public class CacheIFactory {
 	private static Lock sFI = new ReentrantLock();
 	private static CacheInitiable<IFilter> singleFilterInstance = null;
 
+	/**
+	 * Return instance of single-instance {@link CacheInitiable} for
+	 * {@link IFilter} .
+	 * 
+	 * @return instance of cache
+	 */
 	public static CacheInitiable<IFilter> getSingleInstanceFilters() {
 		sFI.tryLock();
 		try {
@@ -42,6 +60,12 @@ public class CacheIFactory {
 	private static Lock sMI = new ReentrantLock();
 	private static CacheInitiable<IModule> singleModuleInstance = null;
 
+	/**
+	 * Return instance of single-instance {@link CacheInitiable} for
+	 * {@link IModule} .
+	 * 
+	 * @return instance of cache
+	 */
 	public static CacheInitiable<IModule> getSingleInstanceModules() {
 		sMI.tryLock();
 		try {
@@ -54,6 +78,10 @@ public class CacheIFactory {
 		}
 	}
 
+	/**
+	 * Special close and clear method for cache. All registered caches are
+	 * cleaning and done!
+	 */
 	public static void close() {
 		if (freeListFiltersInstance != null) {
 			freeListFiltersInstance.close();
@@ -65,10 +93,6 @@ public class CacheIFactory {
 		if (singleModuleInstance != null) {
 			singleModuleInstance.close();
 		}
-	}
-
-	protected void finalize() throws Throwable {
-		close();
 	}
 
 }

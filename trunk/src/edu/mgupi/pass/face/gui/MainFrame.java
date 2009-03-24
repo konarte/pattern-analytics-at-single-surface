@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.db.locuses.LModules;
 import edu.mgupi.pass.db.locuses.Locuses;
+import edu.mgupi.pass.face.IProgress;
 import edu.mgupi.pass.face.gui.template.ImageFrameTemplate;
 import edu.mgupi.pass.face.gui.template.ImagePanel;
 import edu.mgupi.pass.filters.FilterChainsaw;
@@ -72,7 +73,6 @@ import edu.mgupi.pass.sources.SourceStore;
 import edu.mgupi.pass.sources.gui.SingleFilePick;
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Const;
-import edu.mgupi.pass.util.IProgress;
 import edu.mgupi.pass.util.SwingHelper;
 import edu.mgupi.pass.util.Config.SourceMode;
 
@@ -111,7 +111,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 	private void registerAction(AbstractButton button, Actions action) {
 		button.setName(action.name());
 		button.setActionCommand(action.name());
-		SwingHelper.addListenerSafed(button, this);
+		SwingHelper.addCheckedListener(button, this);
 	}
 
 	/**

@@ -6,7 +6,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-
 public class SplashWindowTest {
 
 	@Before
@@ -17,7 +16,7 @@ public class SplashWindowTest {
 	public void tearDown() throws Exception {
 	}
 
-	@Test
+	
 	public void testWindow() throws Exception {
 		SplashWindow window = new SplashWindow();
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -30,6 +29,18 @@ public class SplashWindowTest {
 		window.setVisible(false);
 		window.dispose();
 
+	}
+
+	@Test
+	public void testWindowIterate() throws Exception {
+
+		SplashWindow window = new SplashWindow("resources/splash/tooslow.jpg");
+		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		window.setVisible(true);
+
+		Thread.sleep(5000);
+		window.setVisible(false);
+		window.dispose();
 	}
 
 }

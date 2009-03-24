@@ -295,10 +295,30 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 		}
 	}
 
+	/**
+	 * This is what called on open dialog. Every time is open -- this method
+	 * will run.
+	 * 
+	 * @throws Exception
+	 */
 	protected abstract void openDialogImpl() throws Exception;
 
+	/**
+	 * This method user for saving data you need. Called only if pressed 'OK'
+	 * button (or {@link #save()} called directly.
+	 * 
+	 * @return true if you actually save/receive data, false if you nothing to
+	 *         do. Method {@link #save()} return this value.
+	 * @throws Exception
+	 */
 	protected abstract boolean saveImpl() throws Exception;
 
+	/**
+	 * Method used when user pressed 'Cancel' or escape button. You may do
+	 * uninitializing stuff.
+	 * 
+	 * @throws Exception
+	 */
 	protected abstract void cancelImpl() throws Exception;
 
 }

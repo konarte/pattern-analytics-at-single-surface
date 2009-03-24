@@ -20,7 +20,7 @@ public class Secundomer {
 
 	private String name;
 
-	public Secundomer(String name) {
+	protected Secundomer(String name) {
 		this.name = name;
 	}
 
