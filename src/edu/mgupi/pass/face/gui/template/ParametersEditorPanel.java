@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.filters.IllegalParameterValueException;
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.Param.TYPES;
+import edu.mgupi.pass.filters.Param.ParamType;
 
 /**
  * Panel for edit parameters. Support all kind of available parameters. Work
@@ -133,7 +133,7 @@ public class ParametersEditorPanel extends JPanel {
 			topGrid.insets = new Insets(5, 5, 5, 5);
 			jPanelPlace.add(label, topGrid);
 
-			final TYPES type = param.getType();
+			final ParamType type = param.getType();
 			final String name = param.getName();
 
 			// Prepare constrains for render component
@@ -146,7 +146,7 @@ public class ParametersEditorPanel extends JPanel {
 
 			if (param.isMultiple()) {
 
-				if (!(type == TYPES.STRING || type == TYPES.DOUBLE || type == TYPES.INT)) {
+				if (!(type == ParamType.STRING || type == ParamType.DOUBLE || type == ParamType.INT)) {
 					throw new IllegalArgumentException("Internal error. Unable to properly render parameter '" + name
 							+ "' with type " + type
 							+ ". Parameter marked as multiple. Please, consult with developers.");
@@ -157,13 +157,13 @@ public class ParametersEditorPanel extends JPanel {
 
 				jPanelPlace.add(comboBox, topGrid);
 				controlComponents.put(param, comboBox);
-			} else if (type == TYPES.STRING) {
+			} else if (type == ParamType.STRING) {
 				JTextField field = new JTextField();
 				field.setName(name + "_field");
 
 				jPanelPlace.add(field, topGrid);
 				controlComponents.put(param, field);
-			} else if (type == TYPES.INT) {
+			} else if (type == ParamType.INT) {
 
 				if (param.getLow_border() != Integer.MIN_VALUE && param.getHi_border() != Integer.MAX_VALUE) {
 
@@ -182,13 +182,13 @@ public class ParametersEditorPanel extends JPanel {
 					jPanelPlace.add(field, topGrid);
 					controlComponents.put(param, field);
 				}
-			} else if (type == TYPES.DOUBLE) {
+			} else if (type == ParamType.DOUBLE) {
 				JFormattedTextField field = new JFormattedTextField(new DecimalFormat("0.0#######"));
 				field.setName(name + "_double_field");
 
 				jPanelPlace.add(field, topGrid);
 				controlComponents.put(param, field);
-			} else if (type == TYPES.COLOR) {
+			} else if (type == ParamType.COLOR) {
 
 				selectedColors.put(param, (Color) param.getValue());
 
@@ -280,7 +280,7 @@ public class ParametersEditorPanel extends JPanel {
 			Param param = entry.getKey();
 			Component comp = entry.getValue();
 
-			TYPES type = param.getType();
+			ParamType type = param.getType();
 			Object value = fromDefaults ? param.getDefault_() : param.getValue();
 
 			if (param.isMultiple()) {
@@ -293,9 +293,9 @@ public class ParametersEditorPanel extends JPanel {
 						}
 					}
 				}
-			} else if (type == TYPES.STRING) {
+			} else if (type == ParamType.STRING) {
 				((JTextField) comp).setText(value == null ? null : String.valueOf(value));
-			} else if (type == TYPES.INT) {
+			} else if (type == ParamType.INT) {
 				if (comp instanceof JFormattedTextField) {
 					((JFormattedTextField) comp).setValue(value);
 				} else if (comp instanceof JSpinner) {
@@ -306,9 +306,9 @@ public class ParametersEditorPanel extends JPanel {
 									+ param.getName() + "' with component class " + comp.getClass()
 									+ ". Unknown class. Please, consult with developers.");
 				}
-			} else if (type == TYPES.DOUBLE) {
+			} else if (type == ParamType.DOUBLE) {
 				((JFormattedTextField) comp).setValue(value);
-			} else if (type == TYPES.COLOR) {
+			} else if (type == ParamType.COLOR) {
 				Color color = (Color) value;
 				((JLabel) comp).setBackground(color);
 				selectedColors.put(param, color);
@@ -334,14 +334,14 @@ public class ParametersEditorPanel extends JPanel {
 			Param param = entry.getKey();
 			Component comp = entry.getValue();
 
-			TYPES type = param.getType();
+			ParamType type = param.getType();
 
 			try {
 				if (param.isMultiple()) {
 					param.setValue(param.getAllowed_values()[((JComboBox) comp).getSelectedIndex()]);
-				} else if (type == TYPES.STRING) {
+				} else if (type == ParamType.STRING) {
 					param.setValue(((JTextField) comp).getText());
-				} else if (type == TYPES.INT) {
+				} else if (type == ParamType.INT) {
 					if (comp instanceof JFormattedTextField) {
 						param.setValue(((JFormattedTextField) comp).getValue());
 					} else if (comp instanceof JSpinner) {
@@ -352,9 +352,9 @@ public class ParametersEditorPanel extends JPanel {
 										+ param.getName() + "' with component class " + comp.getClass()
 										+ ". Unknown class. Please, consult with developers.");
 					}
-				} else if (type == TYPES.DOUBLE) {
+				} else if (type == ParamType.DOUBLE) {
 					param.setValue(((JFormattedTextField) comp).getValue());
-				} else if (type == TYPES.COLOR) {
+				} else if (type == ParamType.COLOR) {
 					param.setValue(selectedColors.get(param));
 				} else {
 					throw new IllegalArgumentException(

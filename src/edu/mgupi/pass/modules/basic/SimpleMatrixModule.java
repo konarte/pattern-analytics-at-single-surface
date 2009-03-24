@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.db.locuses.Locuses;
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.Param.TYPES;
+import edu.mgupi.pass.filters.Param.ParamType;
 import edu.mgupi.pass.modules.IModule;
 import edu.mgupi.pass.modules.ModuleCantProcessException;
 import edu.mgupi.pass.modules.ModuleException;
@@ -28,9 +28,9 @@ public class SimpleMatrixModule implements IModule {
 	private final static String METHOD_FAST = "fast";
 	private final static String METHOD_SLOW = "slow";
 
-	private Param RENREDING_METHOD = new Param("RenderMethod", "Способ рендеринга", TYPES.STRING, "fast", new Object[] {
+	private Param RENREDING_METHOD = new Param("RenderMethod", "Способ рендеринга", ParamType.STRING, "fast", new Object[] {
 			METHOD_FAST, METHOD_SLOW }, new String[] { "Быстрый", "Медленный, многослойный" });
-	private Param CELL_SIZE = new Param("CellSize", "Размер ячейки", TYPES.INT, 10, 5, 15);
+	private Param CELL_SIZE = new Param("CellSize", "Размер ячейки", ParamType.INT, 10, 5, 15);
 
 	private Collection<Param> paramList = null;
 

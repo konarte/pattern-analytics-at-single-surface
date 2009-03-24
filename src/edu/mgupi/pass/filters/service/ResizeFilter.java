@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.Param.TYPES;
+import edu.mgupi.pass.filters.Param.ParamType;
 
 public class ResizeFilter implements IFilter {
 
@@ -22,9 +22,9 @@ public class ResizeFilter implements IFilter {
 
 	private Collection<Param> params;
 
-	private Param WIDTH = new Param("Width", "Ширина", TYPES.INT, 0);
-	private Param HEIGHT = new Param("Height", "Высота", TYPES.INT, 0);
-	private Param INTERPOLATION_METHOD = new Param("Method", "Метод конвертирования", TYPES.STRING, "biliner",
+	private Param WIDTH = new Param("Width", "Ширина", ParamType.INT, 0);
+	private Param HEIGHT = new Param("Height", "Высота", ParamType.INT, 0);
+	private Param INTERPOLATION_METHOD = new Param("Method", "Метод конвертирования", ParamType.STRING, "biliner",
 			new Object[] { "bicubic", "biliner", "nearest_n" }, new String[] { "Bicubic (best)", "Bilinear (medium)",
 					"Nearest point (worst)" });
 

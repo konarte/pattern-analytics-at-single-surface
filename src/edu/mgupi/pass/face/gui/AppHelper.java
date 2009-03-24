@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.*;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -32,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.util.Config;
+import edu.mgupi.pass.util.IProgress;
 
 /**
  * Class for application support -- make easy change LookAndFeel, set window
@@ -75,7 +77,31 @@ public class AppHelper {
 		MainFrameDataStorage.reset();
 	}
 
-	private volatile Collection<Component> components = new ArrayList<Component>();
+	private IProgress progressInterface;
+
+	/**
+	 * Registering visual interface (for progress bar)
+	 * 
+	 * @param progressInterface
+	 */
+	public void setIProgressInstance(IProgress progressInterface) {
+		this.progressInterface = progressInterface;
+	}
+
+	/**
+	 * Return registered visual interface
+	 * 
+	 * @return current instance of IProgress
+	 */
+	public IProgress getProgressInstance() {
+		if (this.progressInterface == null) {
+			throw new IllegalStateException("Internal error. Progress interface does not setup yet.");
+		}
+		return this.progressInterface;
+	}
+
+	private Lock componentsLock = new ReentrantLock();
+	private Collection<Component> components = new ArrayList<Component>();
 
 	/**
 	 * Register additional component. This will helps on changing LookAndFeel.
@@ -86,8 +112,13 @@ public class AppHelper {
 	 * @see #updateUI(String)
 	 */
 	public Component registerAdditionalComponent(Component c) {
-		components.add(c);
-		return c;
+		componentsLock.lock();
+		try {
+			components.add(c);
+			return c;
+		} finally {
+			componentsLock.unlock();
+		}
 	}
 
 	/**
@@ -99,11 +130,13 @@ public class AppHelper {
 	 * @see #updateUI(String)
 	 */
 	public void unregisterAdditionalComponent(Component c) {
-		components.remove(c);
+		componentsLock.lock();
+		try {
+			components.remove(c);
+		} finally {
+			componentsLock.unlock();
+		}
 	}
-
-	private volatile Map<Class<? extends Window>, Window> windowsCollection = new HashMap<Class<? extends Window>, Window>();
-	private volatile Collection<Window> additionalWindows = new ArrayList<Window>();
 
 	/**
 	 * Register additional window (no caching and no return same instance after
@@ -169,6 +202,10 @@ public class AppHelper {
 		return this.getWindowImpl(windowType, false);
 	}
 
+	private Lock cachedLock = new ReentrantLock();
+	private volatile Map<Class<? extends Window>, Window> windowsCollection = new HashMap<Class<? extends Window>, Window>();
+	private volatile Collection<Window> additionalWindows = new ArrayList<Window>();
+
 	/**
 	 * Implementation
 	 * 
@@ -181,46 +218,52 @@ public class AppHelper {
 	protected synchronized Window getWindowImpl(Class<? extends Window> windowType, boolean additionalWindow)
 			throws Exception {
 
-		Window window = windowsCollection.get(windowType);
-
-		// Check for return (if this window cached) 
-		if (window != null && !additionalWindow) {
-			return window;
-		}
-
-		// Using default constructor
-		Constructor<? extends Window> constructor = null;
+		cachedLock.lock();
 		try {
-			constructor = windowType.getConstructor();
-			window = constructor.newInstance();
-		} catch (NoSuchMethodException me) {
 
-			// Using constructor with Frame, but give them shit :) 
-			constructor = windowType.getConstructor(Frame.class);
-			window = constructor.newInstance((Frame) null);
+			Window window = windowsCollection.get(windowType);
 
-			final Window myWindow = window;
-			window.addWindowListener(new WindowAdapter() {
-				public void windowOpened(WindowEvent e) {
-					myWindow.requestFocus();
-				}
-			});
+			// Check for return (if this window cached) 
+			if (window != null && !additionalWindow) {
+				return window;
+			}
 
-			// This is Dialog, I guess
-			window.setLocationRelativeTo(window.getOwner());
+			// Using default constructor
+			Constructor<? extends Window> constructor = null;
+			try {
+				constructor = windowType.getConstructor();
+				window = constructor.newInstance();
+			} catch (NoSuchMethodException me) {
 
+				// Using constructor with Frame, but give them shit :) 
+				constructor = windowType.getConstructor(Frame.class);
+				window = constructor.newInstance((Frame) null);
+
+				final Window myWindow = window;
+				window.addWindowListener(new WindowAdapter() {
+					public void windowOpened(WindowEvent e) {
+						myWindow.requestFocus();
+					}
+				});
+
+				// This is Dialog, I guess
+				window.setLocationRelativeTo(window.getOwner());
+
+			}
+			if (additionalWindow) {
+				// Register in special collection
+				logger.debug("Return force new instance of " + windowType + " :: " + window);
+				additionalWindows.add(window);
+			} else {
+				// Register in cache
+				windowsCollection.put(windowType, window);
+				Config.getInstance().loadWindowPosition(window);
+			}
+
+			return window;
+		} finally {
+			cachedLock.unlock();
 		}
-		if (additionalWindow) {
-			// Register in special collection
-			logger.debug("Return force new instance of " + windowType + " :: " + window);
-			additionalWindows.add(window);
-		} else {
-			// Register in cache
-			windowsCollection.put(windowType, window);
-			Config.getInstance().loadWindowPosition(window);
-		}
-
-		return window;
 	}
 
 	/**
@@ -233,7 +276,12 @@ public class AppHelper {
 	 * @return instance of {@link Window} or null, if not registered yet.
 	 */
 	public Window searchWindow(Class<? extends Window> windowType) {
-		return windowsCollection.get(windowType);
+		cachedLock.lock();
+		try {
+			return windowsCollection.get(windowType);
+		} finally {
+			cachedLock.unlock();
+		}
 	}
 
 	/**
@@ -251,16 +299,24 @@ public class AppHelper {
 	public void updateUI(String className) throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException, UnsupportedLookAndFeelException {
 
-		// Updating all opened components
-		UIManager.setLookAndFeel(className);
-		for (Window window : windowsCollection.values()) {
-			SwingUtilities.updateComponentTreeUI(window);
-		}
-		for (Window window : additionalWindows) {
-			SwingUtilities.updateComponentTreeUI(window);
-		}
-		for (Component c : components) {
-			SwingUtilities.updateComponentTreeUI(c);
+		componentsLock.lock();
+		cachedLock.lock();
+		try {
+
+			// Updating all opened components
+			UIManager.setLookAndFeel(className);
+			for (Window window : windowsCollection.values()) {
+				SwingUtilities.updateComponentTreeUI(window);
+			}
+			for (Window window : additionalWindows) {
+				SwingUtilities.updateComponentTreeUI(window);
+			}
+			for (Component c : components) {
+				SwingUtilities.updateComponentTreeUI(c);
+			}
+		} finally {
+			cachedLock.unlock();
+			componentsLock.unlock();
 		}
 
 	}
@@ -269,11 +325,18 @@ public class AppHelper {
 	 * 
 	 */
 	public void saveWindowPositions() {
-		for (Window window : windowsCollection.values()) {
-			Config.getInstance().storeWindowPosition(window);
-		}
-		for (Window window : additionalWindows) {
-			Config.getInstance().storeWindowPosition(window);
+		componentsLock.lock();
+		cachedLock.lock();
+		try {
+			for (Window window : windowsCollection.values()) {
+				Config.getInstance().storeWindowPosition(window);
+			}
+			for (Window window : additionalWindows) {
+				Config.getInstance().storeWindowPosition(window);
+			}
+		} finally {
+			cachedLock.unlock();
+			componentsLock.unlock();
 		}
 	}
 
@@ -312,4 +375,5 @@ public class AppHelper {
 			logger.error("Unexpected error when closing stream " + out, io);
 		}
 	}
+
 }

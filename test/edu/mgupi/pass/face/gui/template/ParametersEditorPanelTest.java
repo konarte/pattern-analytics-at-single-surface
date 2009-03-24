@@ -36,7 +36,7 @@ import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.ParamHelper;
 import edu.mgupi.pass.filters.ParamTest;
 import edu.mgupi.pass.filters.TestFilter;
-import edu.mgupi.pass.filters.Param.TYPES;
+import edu.mgupi.pass.filters.Param.ParamType;
 import edu.mgupi.pass.util.WaitCondition;
 import edu.mgupi.pass.util.SwingHelper;
 import edu.mgupi.pass.util.WorkSet;
@@ -194,7 +194,7 @@ public class ParametersEditorPanelTest {
 
 	private void clickButton(final String buttonName) throws Exception {
 		assertTrue(allChildrenClosed());
-		SwingHelper.addWorkAndWaitThis(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
 				JButton button = (JButton) SwingHelper.getChildNamed(panel, buttonName);
@@ -213,7 +213,7 @@ public class ParametersEditorPanelTest {
 	private void clickEmulatedColor(final Color color) throws Exception {
 		assertFalse(allChildrenClosed());
 
-		SwingHelper.addWorkAndWaitThis(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
 				Window chooserDialog = getOpenedWindow();
@@ -237,7 +237,7 @@ public class ParametersEditorPanelTest {
 	private void clickCancel() throws Exception {
 		assertFalse(allChildrenClosed());
 
-		SwingHelper.addWorkAndWaitThis(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
 				Window chooserDialog = getOpenedWindow();
@@ -483,10 +483,10 @@ public class ParametersEditorPanelTest {
 	@Test
 	public void testMultipleInstancing() throws Exception {
 		Collection<Param> params1 = new ArrayList<Param>();
-		params1.add(new Param("param1", "Параметр1", TYPES.INT, 5));
+		params1.add(new Param("param1", "Параметр1", ParamType.INT, 5));
 
 		Collection<Param> params2 = new ArrayList<Param>();
-		params2.add(new Param("param2", "Параметр2", TYPES.INT, 5));
+		params2.add(new Param("param2", "Параметр2", ParamType.INT, 5));
 
 		panel.setModelData(params1);
 		SwingTestHelper.showMeBackground(this.parent);

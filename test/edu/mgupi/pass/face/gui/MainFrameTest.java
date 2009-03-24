@@ -35,7 +35,7 @@ public class MainFrameTest {
 
 	@Before
 	public void setUp() throws Exception {
-		Config.getInstance().setReadOnly();
+		Config.setDebugInstance();
 
 		frame = (MainFrame) AppHelper.getInstance().getFrameImpl(MainFrame.class);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -53,7 +53,7 @@ public class MainFrameTest {
 			source = null;
 		}
 		if (frame != null) {
-			SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+			SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 				public void workImpl() throws Exception {
 					frame.setVisible(false);
 					frame.dispose();
@@ -68,7 +68,7 @@ public class MainFrameTest {
 	@Test
 	public void testLaFCycling() throws Exception {
 		for (final LookAndFeelInfo laf : UIManager.getInstalledLookAndFeels()) {
-			SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+			SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 				public void workImpl() throws Exception {
 					logger.debug("Applying class " + laf.getClassName());
 					AppHelper.getInstance().updateUI(laf.getClassName());
@@ -80,7 +80,7 @@ public class MainFrameTest {
 
 	@Test
 	public void testOpenImage() throws Exception {
-		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				AppHelper.getInstance().updateUI(UIManager.getCrossPlatformLookAndFeelClassName());
 			}
@@ -96,38 +96,38 @@ public class MainFrameTest {
 		assertFalse(scaleButton.isSelected());
 
 		// Fit image to window size
-		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				scaleButton.doClick();
 			}
 		});
 
-		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				frame.setBounds(100, 200, 1024, 768);
 			}
 		});
 
-		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				frame.setBounds(100, 200, 600, 600);
 			}
 		});
 
 		// Return default style
-		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				scaleButton.doClick();
 			}
 		});
 
-		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				frame.setBounds(100, 200, 1024, 768);
 			}
 		});
 
-		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				frame.setBounds(100, 200, 600, 600);
 			}
@@ -169,7 +169,7 @@ public class MainFrameTest {
 		final JMenuItem settings = (JMenuItem) SwingHelper.getChildNamed(frame, "settings");
 		assertNotNull(settings);
 
-		SwingHelper.addWorkAndWaitThis(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
 			public void workImpl() throws Exception {
 				settings.doClick();
 			}
@@ -183,7 +183,7 @@ public class MainFrameTest {
 				SettingsDialog.class), "cancel");
 		assertNotNull(cancel);
 
-		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				cancel.doClick();
 			}
@@ -205,7 +205,7 @@ public class MainFrameTest {
 		assertNotNull(histogram);
 		assertFalse(histogram.isSelected());
 
-		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				histogram.doClick();
 			}
@@ -214,7 +214,7 @@ public class MainFrameTest {
 		assertNotNull(frame.histogramFrame);
 		assertTrue(frame.histogramFrame.isVisible());
 
-		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				frame.histogramFrame.setLocation(300, 400);
 			}
@@ -224,7 +224,7 @@ public class MainFrameTest {
 		assertNotNull(moduleImage);
 		assertFalse(moduleImage.isSelected());
 
-		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				moduleImage.doClick();
 			}
@@ -233,13 +233,13 @@ public class MainFrameTest {
 		assertNotNull(frame.moduleFrame);
 		assertTrue(frame.moduleFrame.isVisible());
 
-		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				frame.moduleFrame.setLocation(300, 600);
 			}
 		});
 
-		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				histogram.doClick();
 				moduleImage.doClick();

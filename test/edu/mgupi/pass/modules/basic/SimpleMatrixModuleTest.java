@@ -25,7 +25,7 @@ import edu.mgupi.pass.db.locuses.Locuses;
 import edu.mgupi.pass.db.locuses.LocusesFactory;
 import edu.mgupi.pass.filters.FilterChainsaw;
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.Param.TYPES;
+import edu.mgupi.pass.filters.Param.ParamType;
 import edu.mgupi.pass.filters.java.GrayScaleFilter;
 import edu.mgupi.pass.filters.service.PlaceImageFilter;
 import edu.mgupi.pass.modules.ModuleHelper;
@@ -55,7 +55,7 @@ public class SimpleMatrixModuleTest {
 	public void testForModifyAnalyze() throws Exception {
 		Collection<Param> params = module.getParams();
 		try {
-			params.add(new Param("1", "2", TYPES.INT, 0));
+			params.add(new Param("1", "2", ParamType.INT, 0));
 			fail("No exception throws!");
 		} catch (UnsupportedOperationException e) {
 			System.out.println("Received expected exception: " + e);

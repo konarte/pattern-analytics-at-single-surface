@@ -1,4 +1,4 @@
-package edu.mgupi.pass.sources.visual;
+package edu.mgupi.pass.sources.gui;
 
 import java.awt.Dimension;
 import java.awt.Image;

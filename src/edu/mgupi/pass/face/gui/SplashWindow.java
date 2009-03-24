@@ -22,6 +22,12 @@ import javax.swing.WindowConstants;
 import edu.mgupi.pass.face.gui.template.ImagePanel;
 import edu.mgupi.pass.util.Const;
 
+/**
+ * Splash window. Simple and easy.
+ * 
+ * @author raidan
+ * 
+ */
 public class SplashWindow extends JFrame {
 
 	private static final long serialVersionUID = 1L;

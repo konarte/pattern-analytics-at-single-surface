@@ -11,8 +11,12 @@ import java.util.Arrays;
  * 
  */
 public class Param implements Cloneable {
+	
+	public static enum ParamType {
+		STRING, INT, DOUBLE, COLOR
+	};
 
-	public Param(String name, String title, TYPES type, Object default_) {
+	public Param(String name, String title, ParamType type, Object default_) {
 		this.name = name;
 		this.title = title;
 		this.type = type;
@@ -24,7 +28,7 @@ public class Param implements Cloneable {
 		}
 	}
 
-	public Param(String name, String title, TYPES type, Object default_, int lowBorder, int hiBorder) {
+	public Param(String name, String title, ParamType type, Object default_, int lowBorder, int hiBorder) {
 		this(name, title, type, default_);
 
 		if (hiBorder < lowBorder) {
@@ -36,7 +40,7 @@ public class Param implements Cloneable {
 		this.hi_border = hiBorder;
 	}
 
-	public Param(String name, String title, TYPES type, Object default_, Object[] allowedValues, String[] visualValues) {
+	public Param(String name, String title, ParamType type, Object default_, Object[] allowedValues, String[] visualValues) {
 		this(name, title, type, default_);
 
 		if (allowedValues != null && allowedValues.length > 0) {
@@ -57,15 +61,12 @@ public class Param implements Cloneable {
 		this.visual_values = visualValues;
 		this.multiple = true;
 	}
-
-	public static enum TYPES {
-		STRING, INT, DOUBLE, COLOR
-	};
+	
 
 	private boolean multiple;
 	private String name;
 	private String title;
-	private TYPES type;
+	private ParamType type;
 	private Object default_;
 	private int low_border = Integer.MIN_VALUE;
 	private int hi_border = Integer.MAX_VALUE;
@@ -80,7 +81,7 @@ public class Param implements Cloneable {
 		return title;
 	}
 
-	public TYPES getType() {
+	public ParamType getType() {
 		return type;
 	}
 
@@ -139,7 +140,7 @@ public class Param implements Cloneable {
 			}
 		}
 
-		if (this.type == TYPES.DOUBLE) {
+		if (this.type == ParamType.DOUBLE) {
 			if (value instanceof Long) {
 				value = ((Long) value).doubleValue();
 			} else {
@@ -151,7 +152,7 @@ public class Param implements Cloneable {
 			}
 		}
 
-		if (this.type == TYPES.INT) {
+		if (this.type == ParamType.INT) {
 			if (value instanceof Long) {
 				value = ((Long) value).intValue();
 			} else {
@@ -173,7 +174,7 @@ public class Param implements Cloneable {
 			}
 		}
 
-		if (this.type == TYPES.STRING) {
+		if (this.type == ParamType.STRING) {
 			if (!(value instanceof String)) {
 				throw new IllegalParameterValueException("Parameter " + this + " attempt to set up incorrect value "
 						+ value + ". This value must be a string.");
@@ -188,7 +189,7 @@ public class Param implements Cloneable {
 	}
 
 	protected String getStringValue() {
-		if (this.type == TYPES.COLOR) {
+		if (this.type == ParamType.COLOR) {
 			Color currentValue = (Color) this.value;
 			return currentValue == null ? null : String.valueOf(currentValue.getRGB());
 		}
@@ -200,11 +201,11 @@ public class Param implements Cloneable {
 			this.resetValue();
 			return;
 		}
-		if (type == TYPES.INT) {
+		if (type == ParamType.INT) {
 			this.setValue(Integer.parseInt(value));
-		} else if (type == TYPES.DOUBLE) {
+		} else if (type == ParamType.DOUBLE) {
 			this.setValue(Double.parseDouble(value));
-		} else if (type == TYPES.COLOR) {
+		} else if (type == ParamType.COLOR) {
 			this.setValue(new Color(Integer.parseInt(value)));
 		} else {
 			this.setValue(value);
