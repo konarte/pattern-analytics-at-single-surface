@@ -336,8 +336,13 @@ public class AppHelperTest {
 			SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 				@Override
 				public void workImpl() throws Exception {
-					AppHelper.showExceptionDialog("Fuck you fucking fuck. Wait 5 sec...", new Exception(
-							"I'm dead already :(", new RuntimeException("Stars will show me the way...")));
+					AppHelper
+							.showExceptionDialog(
+									"Принцип восприятия непредвзято создает паллиативный интеллект, условно. "
+											+ "Концепция ментально оспособляет закон внешнего мира. "
+											+ "Сомнение раскладывает на элементы неоднозначный структурализм. Wait 5 sec...",
+									new Exception("I'm dead already :(", new RuntimeException(
+											"Stars will show me the way...")));
 				}
 			});
 			fail("No exception thrown!");
