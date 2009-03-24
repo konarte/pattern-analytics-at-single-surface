@@ -12,13 +12,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.mgupi.pass.filters.FilterChainsawTransaction2.FilterStore;
+import edu.mgupi.pass.filters.FilterChainsawTransaction.FilterStore;
 import edu.mgupi.pass.util.MyFilter;
 
-public class FilterChainsawTransaction2Test {
+public class FilterChainsawTransactionTest {
 
 	private FilterChainsaw chainsaw = null;
-	private FilterChainsawTransaction2 chainsawTrans = null;
+	private FilterChainsawTransaction chainsawTrans = null;
 
 	@Before
 	public void setUp() throws Exception {
@@ -50,7 +50,7 @@ public class FilterChainsawTransaction2Test {
 		MyFilter filter3 = (MyFilter) chainsaw.appendFilter(MyFilter.class);
 		assertTrue(filter3 == chainsaw.getFilter(2));
 
-		chainsawTrans = new FilterChainsawTransaction2(chainsaw);
+		chainsawTrans = new FilterChainsawTransaction(chainsaw);
 
 		assertFalse(chainsaw.filterList == chainsawTrans.filterList);
 		assertTrue(chainsaw.singleInstanceCaching == chainsawTrans.singleInstanceCaching);
@@ -110,7 +110,7 @@ public class FilterChainsawTransaction2Test {
 		IFilter filter3 = (MyFilter) chainsaw.appendFilter(MyFilter.class);
 		assertTrue(filter3 == chainsaw.getFilter(2));
 
-		chainsawTrans = new FilterChainsawTransaction2(chainsaw);
+		chainsawTrans = new FilterChainsawTransaction(chainsaw);
 
 		FilterStore store = chainsawTrans.getFilterStore(0);
 		FilterStore store2 = chainsawTrans.getFilterStore(1);
@@ -163,7 +163,7 @@ public class FilterChainsawTransaction2Test {
 		IFilter filter3 = (MyFilter) chainsaw.appendFilter(MyFilter.class);
 		assertTrue(filter3 == chainsaw.getFilter(2));
 
-		chainsawTrans = new FilterChainsawTransaction2(chainsaw);
+		chainsawTrans = new FilterChainsawTransaction(chainsaw);
 
 		chainsawTrans.appendFilter(MyFilter.class);
 

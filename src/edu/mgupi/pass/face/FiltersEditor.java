@@ -35,9 +35,9 @@ import org.slf4j.LoggerFactory;
 import edu.mgupi.pass.face.template.AbstractDialogAdapter;
 import edu.mgupi.pass.face.template.ParametersEditorPanel;
 import edu.mgupi.pass.filters.FilterChainsaw;
-import edu.mgupi.pass.filters.FilterChainsawTransaction2;
+import edu.mgupi.pass.filters.FilterChainsawTransaction;
 import edu.mgupi.pass.filters.IFilter;
-import edu.mgupi.pass.filters.FilterChainsawTransaction2.FilterStore;
+import edu.mgupi.pass.filters.FilterChainsawTransaction.FilterStore;
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.SwingHelper;
 import edu.mgupi.pass.util.Config.DeletionMode;
@@ -124,7 +124,7 @@ public class FiltersEditor extends JDialog implements ActionListener {
 				jPanelParameters.saveModelData();
 				logger.debug("Commiting changes...");
 
-				FilterChainsawTransaction2 chainsaw = filterListModel.getChainsaw();
+				FilterChainsawTransaction chainsaw = filterListModel.getChainsaw();
 
 				chainsaw.commitChanges();
 				chainsaw.close();
@@ -207,16 +207,16 @@ public class FiltersEditor extends JDialog implements ActionListener {
 		 */
 		private static final long serialVersionUID = 1L;
 
-		private FilterChainsawTransaction2 transactionalSaw = null;
+		private FilterChainsawTransaction transactionalSaw = null;
 
 		protected void setChainsaw(FilterChainsaw chainsaw) {
 			if (this.transactionalSaw != null) {
 				this.closeChainsaw();
 			}
-			this.transactionalSaw = new FilterChainsawTransaction2(chainsaw);
+			this.transactionalSaw = new FilterChainsawTransaction(chainsaw);
 		}
 
-		protected FilterChainsawTransaction2 getChainsaw() {
+		protected FilterChainsawTransaction getChainsaw() {
 			if (transactionalSaw == null) {
 				throw new IllegalStateException("Internal error. Chainsaw is diappeared.");
 			}
