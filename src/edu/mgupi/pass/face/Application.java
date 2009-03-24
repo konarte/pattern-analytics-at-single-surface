@@ -134,6 +134,7 @@ public class Application {
 				// Caching all using windows -- this is good
 				// But, that until I write background caching ;)
 				frame.preCache();
+				frame.setVisible(true);
 			} catch (Exception e) {
 				AppHelper.showExceptionDialog("Ошибка при загрузке приложения.", e);
 				throw e;
@@ -142,9 +143,8 @@ public class Application {
 			splash.setVisible(false);
 			splash.dispose();
 		}
-		frame.setVisible(true);
 
-		logger.debug("Application ready...");
+		logger.debug("Application ready... Visible = " + frame.isVisible());
 
 	}
 

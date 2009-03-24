@@ -60,10 +60,10 @@ public class FiltersEditor extends JDialog implements ActionListener {
 		add, remove, up, down
 	};
 
-	private void registerButton(AbstractButton button, FilterActions action) {
+	private void registerAction(AbstractButton button, FilterActions action) {
 		button.setName(action.name());
 		button.setActionCommand(action.name());
-		SwingHelper.addListenerSafed(button, this);
+		SwingHelper.addCheckedListener(button, this);
 	}
 
 	/**
@@ -110,11 +110,6 @@ public class FiltersEditor extends JDialog implements ActionListener {
 		myDialogAdapter = new AbstractDialogAdapter(this) {
 
 			@Override
-			protected void cancelImpl() throws Exception {
-				filterListModel.closeChainsaw();
-			}
-
-			@Override
 			protected void openDialogImpl() throws Exception {
 				//
 			}
@@ -124,13 +119,15 @@ public class FiltersEditor extends JDialog implements ActionListener {
 				jPanelParameters.saveModelData();
 				logger.debug("Commiting changes...");
 
-				FilterChainsawTransaction chainsaw = filterListModel.getChainsaw();
-
-				chainsaw.commitChanges();
-				chainsaw.close();
-				chainsaw = null;
+				filterListModel.getChainsaw().commitChanges();
+				filterListModel.closeChainsaw();
 
 				return true;
+			}
+
+			@Override
+			protected void cancelImpl() throws Exception {
+				filterListModel.closeChainsaw();
 			}
 
 		};
@@ -429,8 +426,10 @@ public class FiltersEditor extends JDialog implements ActionListener {
 			jListSelected.addListSelectionListener(new ListSelectionListener() {
 
 				private void onSelectItemImpl(JList list) throws Exception {
-					FilterStore filter = (FilterStore) list.getSelectedValue();
-					if (filter != null) {
+					int index = list.getSelectedIndex();
+					if (index != -1) {
+
+						FilterStore filter = (FilterStore) list.getSelectedValue();
 
 						logger.debug("Selecting filter {}", filter.name);
 
@@ -441,12 +440,21 @@ public class FiltersEditor extends JDialog implements ActionListener {
 						FiltersEditor.this.pack();
 
 						logger.trace("Finished.");
+
+						jButtonRemove.setEnabled(true);
+
+						jButtonUp.setEnabled(index > 0);
+						jButtonDown.setEnabled(index < list.getModel().getSize() - 1);
+
 					} else {
 						logger.trace("Skip updating. No rows.");
 
 						((TitledBorder) jPanelEditParameters.getBorder()).setTitle("Модуль не выбран");
 						jPanelParameters.setModelData(null);
 
+						jButtonUp.setEnabled(false);
+						jButtonDown.setEnabled(false);
+						jButtonRemove.setEnabled(false);
 					}
 					FiltersEditor.this.repaint();
 				}
@@ -539,7 +547,7 @@ public class FiltersEditor extends JDialog implements ActionListener {
 		if (jButtonAdd == null) {
 			jButtonAdd = new JButton();
 			jButtonAdd.setText("Добавить");
-			registerButton(jButtonAdd, FilterActions.add);
+			registerAction(jButtonAdd, FilterActions.add);
 		}
 		return jButtonAdd;
 	}
@@ -553,7 +561,8 @@ public class FiltersEditor extends JDialog implements ActionListener {
 		if (jButtonRemove == null) {
 			jButtonRemove = new JButton();
 			jButtonRemove.setText("Удалить");
-			registerButton(jButtonRemove, FilterActions.remove);
+			jButtonRemove.setEnabled(false);
+			registerAction(jButtonRemove, FilterActions.remove);
 		}
 		return jButtonRemove;
 	}
@@ -567,7 +576,8 @@ public class FiltersEditor extends JDialog implements ActionListener {
 		if (jButtonUp == null) {
 			jButtonUp = new JButton();
 			jButtonUp.setText("Up");
-			registerButton(jButtonUp, FilterActions.up);
+			jButtonUp.setEnabled(false);
+			registerAction(jButtonUp, FilterActions.up);
 		}
 		return jButtonUp;
 	}
@@ -581,7 +591,8 @@ public class FiltersEditor extends JDialog implements ActionListener {
 		if (jButtonDown == null) {
 			jButtonDown = new JButton();
 			jButtonDown.setText("Down");
-			registerButton(jButtonDown, FilterActions.down);
+			jButtonDown.setEnabled(false);
+			registerAction(jButtonDown, FilterActions.down);
 		}
 		return jButtonDown;
 	}

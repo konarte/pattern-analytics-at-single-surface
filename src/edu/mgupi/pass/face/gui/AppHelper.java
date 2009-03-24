@@ -33,8 +33,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.face.IProgress;
 import edu.mgupi.pass.util.Config;
-import edu.mgupi.pass.util.IProgress;
 import edu.mgupi.pass.util.Utils;
 
 /**

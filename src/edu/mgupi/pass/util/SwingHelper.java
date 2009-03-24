@@ -23,7 +23,7 @@ public class SwingHelper {
 
 	private final static Logger logger = LoggerFactory.getLogger(SwingHelper.class);
 
-	public static void addListenerSafed(AbstractButton button, ActionListener listener) {
+	public static void addCheckedListener(AbstractButton button, ActionListener listener) {
 		ActionListener[] listeners = button.getActionListeners();
 		if (listeners != null) {
 			for (ActionListener listen : listeners) {

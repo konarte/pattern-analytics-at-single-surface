@@ -2,8 +2,13 @@ package edu.mgupi.pass.util;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.zip.*;
 
 /**
  * Common utils class. In common, this class is not required to test.
@@ -15,6 +20,9 @@ import java.util.List;
 public class Utils {
 
 	public static boolean equals(Object o1, Object o2) {
+		if (o1 == null && o2 == null) {
+			return true;
+		}
 		if ((o1 == null && o2 != null) || (o1 != null && o2 == null)) {
 			return false;
 		}
@@ -25,6 +33,11 @@ public class Utils {
 		if (text == null) {
 			return null;
 		}
+
+		if (text.length() <= maximumCols || maximumCols <= 0) {
+			return text;
+		}
+
 		StringBuilder source = new StringBuilder(text);
 		StringBuilder dest = new StringBuilder();
 
@@ -63,6 +76,62 @@ public class Utils {
 		} while (source.length() > 0);
 
 		return dest.toString();
+	}
+
+	/**
+	 * Загружает список файлов из каталога или из JAR-ника
+	 * 
+	 * @param path
+	 *            название ресурса (вида <code>com/raidan/dclog/core/</code>).
+	 *            Обязательно со слэшем на конце!
+	 * @param extension
+	 * @return Коллекцию файлов, пригодных к загрузке методом loadFromJAR
+	 * @throws IOException
+	 */
+	public static String[] listFilesFromJAR(String path, String extension) throws IOException {
+		URL url = Utils.class.getProtectionDomain().getCodeSource().getLocation();
+		if (url != null && url.getPath().endsWith(".jar")) {
+
+			ZipFile file = new ZipFile(url.getPath());
+			ZipEntry entry = file.getEntry(path);
+
+			if (entry == null) {
+				throw new IOException("Unable to find '" + path + "' from JAR file " + url);
+			}
+
+			if (!entry.isDirectory()) {
+				throw new IOException("Path '" + path + "' is not directory. Unable to load list.");
+			}
+
+			Collection<String> fileNames = new ArrayList<String>();
+
+			Enumeration<? extends ZipEntry> entries = file.entries();
+			while (entries.hasMoreElements()) {
+				entry = entries.nextElement();
+				String name = entry.getName();
+				if (name.startsWith(path) && !entry.isDirectory()) {
+					if (extension == null || name.endsWith(extension)) {
+						fileNames.add(name);
+					}
+				}
+			}
+
+			return fileNames.toArray(new String[fileNames.size()]);
+		} else {
+			File dir = new File(url.getPath() + path);
+			if (!dir.isDirectory()) {
+				throw new IOException("Path '" + path + "' is not directory. Unable to load list.");
+			}
+			File files[] = dir.listFiles();
+			Collection<String> fileNames = new ArrayList<String>();
+			for (File file : files) {
+				String fullPath = file.getCanonicalPath().replaceAll("\\\\", "/");
+				if (extension == null || fullPath.endsWith(extension)) {
+					fileNames.add(fullPath.substring(fullPath.lastIndexOf(path)));
+				}
+			}
+			return fileNames.toArray(new String[fileNames.size()]);
+		}
 	}
 
 	public static List<File> listFiles(final String dir, final String ext) {
@@ -143,4 +212,5 @@ public class Utils {
 		}
 		return buffer;
 	}
+
 }
