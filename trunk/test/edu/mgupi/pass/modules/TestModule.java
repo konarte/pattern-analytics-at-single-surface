@@ -21,7 +21,7 @@ import edu.mgupi.pass.db.locuses.LocusModuleData;
 import edu.mgupi.pass.db.locuses.Locuses;
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.ParamTest;
-import edu.mgupi.pass.filters.Param.TYPES;
+import edu.mgupi.pass.filters.Param.ParamType;
 import edu.mgupi.pass.util.IInitiable;
 
 /**
@@ -41,8 +41,8 @@ public class TestModule implements IModule, IInitiable {
 	}
 
 	private Collection<Param> params = null;
-	private Param TEST_PARAM1 = new Param("test", "Тестовый", TYPES.INT, 0);
-	private Param TEST_PARAM2 = new Param("test2", "Тестовый2", TYPES.STRING, "Hello");
+	private Param TEST_PARAM1 = new Param("test", "Тестовый", ParamType.INT, 0);
+	private Param TEST_PARAM2 = new Param("test2", "Тестовый2", ParamType.STRING, "Hello");
 
 	public TestModule() {
 		params = new ArrayList<Param>();

@@ -12,6 +12,14 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Special caching class for suppor Filters and Modules.
+ * 
+ * @author raidan
+ * 
+ * @param <E>
+ * 
+ */
 public class CacheInitiable<E> {
 
 	protected enum MODE {
@@ -19,19 +27,13 @@ public class CacheInitiable<E> {
 	};
 
 	private MODE mode;
-
 	protected CacheInitiable(MODE mode) {
 		this.mode = mode;
 	}
 
 	private final static Logger logger = LoggerFactory.getLogger(CacheInitiable.class);
 
-	protected Map<Class<? extends E>, E> cachedValues = new HashMap<Class<? extends E>, E>();
-	// Обязательно реализовать кэширование!
-	// Пригодится для FilterChainsaw
-	// Основная идея -- запоминание "удаленного" фильтра и его повторное использование
-	//  для этого мы имеем списки экземпляров свободных фильтров :)
-	//
+	private Map<Class<? extends E>, E> cachedValues = new HashMap<Class<? extends E>, E>();
 	private Collection<E> givenInstances = new ArrayList<E>();
 	private Map<Class<? extends E>, Set<E>> freeLists = new HashMap<Class<? extends E>, Set<E>>();
 

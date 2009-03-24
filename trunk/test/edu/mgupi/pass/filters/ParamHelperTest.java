@@ -16,7 +16,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.mgupi.pass.filters.Param.TYPES;
+import edu.mgupi.pass.filters.Param.ParamType;
 
 public class ParamHelperTest {
 
@@ -98,9 +98,9 @@ public class ParamHelperTest {
 	@Test
 	public void testConvertParamsToValues() throws FilterException {
 		List<Param> paramList = new ArrayList<Param>();
-		paramList.add(new Param("key1", "Ключ 1", TYPES.STRING, "14.55"));
-		paramList.add(new Param("key2", "Ключ 2", TYPES.INT, 6));
-		paramList.add(new Param("key3", "Ключ 3", TYPES.DOUBLE, 12.22));
+		paramList.add(new Param("key1", "Ключ 1", ParamType.STRING, "14.55"));
+		paramList.add(new Param("key2", "Ключ 2", ParamType.INT, 6));
+		paramList.add(new Param("key3", "Ключ 3", ParamType.DOUBLE, 12.22));
 
 		paramList.get(paramList.size() - 1).setValue(44.56);
 
@@ -115,9 +115,9 @@ public class ParamHelperTest {
 	@Test
 	public void testSearchParameter() throws NoSuchParamException {
 		ArrayList<Param> paramList = new ArrayList<Param>();
-		paramList.add(new Param("key1", "Ключ 1", TYPES.STRING, "14.55"));
-		paramList.add(new Param("key2", "Ключ 2", TYPES.INT, 6));
-		paramList.add(new Param("key3", "Ключ 3", TYPES.DOUBLE, 12.22));
+		paramList.add(new Param("key1", "Ключ 1", ParamType.STRING, "14.55"));
+		paramList.add(new Param("key2", "Ключ 2", ParamType.INT, 6));
+		paramList.add(new Param("key3", "Ключ 3", ParamType.DOUBLE, 12.22));
 
 		MyFilter myFilter = new MyFilter(paramList);
 
@@ -143,9 +143,9 @@ public class ParamHelperTest {
 	@Test
 	public void testConvertParamsToJSON() {
 		ArrayList<Param> paramList = new ArrayList<Param>();
-		paramList.add(new Param("key1", "Ключ 1", TYPES.STRING, "14.55"));
-		paramList.add(new Param("key2", "Ключ 2", TYPES.INT, 6));
-		paramList.add(new Param("key3", "Ключ 3", TYPES.DOUBLE, 12.22));
+		paramList.add(new Param("key1", "Ключ 1", ParamType.STRING, "14.55"));
+		paramList.add(new Param("key2", "Ключ 2", ParamType.INT, 6));
+		paramList.add(new Param("key3", "Ключ 3", ParamType.DOUBLE, 12.22));
 
 		MyFilter myFilter = new MyFilter(paramList);
 		assertEquals("{\"key1\":\"14.55\",\"key2\":\"6\",\"key3\":\"12.22\"}", ParamHelper

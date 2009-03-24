@@ -19,7 +19,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.mgupi.pass.util.WaitCondition;
-import edu.mgupi.pass.util.SwingHelper;
 import edu.mgupi.pass.util.WorkSet;
 
 public class AppHelperTest {
@@ -47,7 +46,7 @@ public class AppHelperTest {
 		splash = null;
 		splash2 = null;
 
-		SwingHelper.addWorkAndWaitThis(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
 				splash = (SplashWindow) AppHelper.getInstance().registerAdditionalWindow(SplashWindow.class);
@@ -76,7 +75,7 @@ public class AppHelperTest {
 	public void testOpenWindow() throws Exception {
 		splash = null;
 
-		SwingHelper.addWorkAndWaitThis(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
 				splash = (SplashWindow) AppHelper.getInstance().getFrameImpl(SplashWindow.class);
@@ -105,7 +104,7 @@ public class AppHelperTest {
 		splash = null;
 
 		assertNull(AppHelper.getInstance().searchWindow(SplashWindow.class));
-		SwingHelper.addWorkAndWaitThis(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
 				splash = (SplashWindow) AppHelper.getInstance().getFrameImpl(SplashWindow.class);
@@ -123,7 +122,7 @@ public class AppHelperTest {
 
 		assertNull(AppHelper.getInstance().searchWindow(AboutDialog.class));
 
-		SwingHelper.addWorkAndWaitThis(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
 				AppHelper.getInstance().getDialogImpl(AboutDialog.class).setVisible(true);
@@ -156,7 +155,7 @@ public class AppHelperTest {
 		assertNotNull(mySplash);
 
 		//		try {
-		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
 				splash = (SplashWindow) AppHelper.getInstance().getWindowImpl(SplashWindow.class, true);
@@ -215,14 +214,14 @@ public class AppHelperTest {
 
 		final LookAndFeelInfo[] looks = UIManager.getInstalledLookAndFeels();
 		assertTrue(looks.length > 0);
-		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
 				AppHelper.getInstance().updateUI(looks[0].getClassName());
 			}
 		});
 
-		SwingHelper.addWorkAndWaitThis(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
 				commonWindow = (MyFrame) AppHelper.getInstance().getFrameImpl(MyFrame.class);
@@ -240,7 +239,7 @@ public class AppHelperTest {
 		assertEquals(0, commonWindow.repaintCount);
 		assertEquals(0, mySplash.repaintCount);
 
-		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
 				AppHelper.getInstance().updateUI(looks[1].getClassName());
@@ -250,7 +249,7 @@ public class AppHelperTest {
 		assertEquals(1, commonWindow.repaintCount);
 		assertEquals(1, mySplash.repaintCount);
 
-		SwingHelper.addWorkAndWaitThis(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
 				registeredWindow = (MyFrame) AppHelper.getInstance().registerAdditionalWindow(MyFrame.class);
@@ -268,7 +267,7 @@ public class AppHelperTest {
 		assertEquals(0, registeredComp1.repaintCount);
 		assertEquals(0, registeredComp2.repaintCount);
 
-		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
 				AppHelper.getInstance().updateUI(looks[0].getClassName());
@@ -283,7 +282,7 @@ public class AppHelperTest {
 
 		AppHelper.getInstance().unregisterAdditionalComponent(registeredComp1);
 
-		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
 				AppHelper.getInstance().updateUI(looks[1].getClassName());
@@ -297,7 +296,7 @@ public class AppHelperTest {
 		assertEquals(2, registeredComp2.repaintCount);
 
 		AppHelper.reset();
-		SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
 				AppHelper.getInstance().updateUI(looks[0].getClassName());
@@ -334,7 +333,7 @@ public class AppHelperTest {
 		//		assertNotNull(testFrame);
 
 		try {
-			SwingHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+			SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 				@Override
 				public void workImpl() throws Exception {
 					AppHelper.showExceptionDialog("Fuck you fucking fuck. Wait 5 sec...", new Exception(

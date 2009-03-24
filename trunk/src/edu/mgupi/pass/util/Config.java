@@ -13,28 +13,28 @@ import javax.swing.UIManager;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.FileConfiguration;
-import org.apache.commons.configuration.INIConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Config class. Using apache config
+ * Config class. Using apache commons-config.
+ * 
+ * INIConfiguration mark as deprecated, but it works fine. I can't force to work
+ * hierarchy configurators.
  * 
  * @author raidan
  * 
  */
 
-// Well I can't make HierarchicalINIConfiguration to work
-@SuppressWarnings("deprecation")
 public class Config {
 
 	private final static Logger logger = LoggerFactory.getLogger(Config.class);
 
 	private Config() {
-		//
+		// singleton
 	}
 
-	private static volatile Config instance;
+	private static Config instance;
 
 	/**
 	 * Singleton ^_^
@@ -49,11 +49,11 @@ public class Config {
 		return instance;
 	}
 
-	private boolean readOnly = false;
-
-	public void setReadOnly() {
-		readOnly = true;
+	public static synchronized void setDebugInstance() {
+		getInstance().readOnly = true;
 	}
+
+	private boolean readOnly = false;
 
 	private final static String DEFAULT_COMMON_CONFIG_NAME = "config.ini";
 
@@ -61,14 +61,10 @@ public class Config {
 	private Configuration commonConfigInstance;
 	private FileConfiguration configInstance;
 
-	// protected void prepareConfig() {
-	// this.prepareConfig(configName == null ? DEFAULT_CONFIG_NAME :
-	// configName);
-	// }
-
+	@SuppressWarnings("deprecation")
 	protected void prepareConfig() {
 		try {
-			logger.trace("Loading config from file {}.", configName);
+			logger.trace("Loading config from file {}.", DEFAULT_COMMON_CONFIG_NAME);
 
 			File file = new File(DEFAULT_COMMON_CONFIG_NAME);
 			if (!file.exists()) {
@@ -79,59 +75,25 @@ public class Config {
 				}
 			}
 
-			configInstance = new INIConfiguration(DEFAULT_COMMON_CONFIG_NAME);
+			configInstance = new org.apache.commons.configuration.INIConfiguration(DEFAULT_COMMON_CONFIG_NAME);
 			configInstance.setEncoding("UTF-8");
 
 			currentConfigInstance = configInstance.subset("current");
 			commonConfigInstance = configInstance.subset("common");
-
-			// currentConfigInstance = new PropertiesConfiguration();
-			// Properties props =
-			// this.commonConfigInstance.getProperties("current.");
-			// for (Object key : props.keySet()) {
-			// String sKey = (String) key;
-			// this.currentConfigInstance.setProperty(sKey.substring("current.".length()),
-			// this.commonConfigInstance
-			// .getProperty(sKey));
-			// }
 
 		} catch (ConfigurationException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private String configName = null;
+	private final static String PARAM_CURRENT_SOURCE_MODE = "sourceMode";
+	private final static String PARAM_CURRENT_BACKGROUND = "imageBackground";
 
-	public void setConfigName(String configName) {
-		this.configName = configName;
-		this.prepareConfig();
-	}
-
-	public void resetConfigName() {
-		this.configName = null;
-		this.prepareConfig();
-	}
-
-	public final static String PARAM_CURRENT_SOURCE_MODE = "sourceMode";
-	public final static String PARAM_CURRENT_BACKGROUND = "imageBackground";
-
-	public final static String PARAM_LOOK_AND_FEEL = "lookAndFeel";
-	public final static String PARAM_FILTER_DELETE_MODE = "filterDeleteMode";
-
-	//	public String getCurrentSourceMode() {
-	//		return this.currentConfigInstance.getString(PARAM_CURRENT_SOURCE_MODE);
-	//	}
-	//
-	//	public int getCurrentBackground() {
-	//		return this.currentConfigInstance.getInt(PARAM_CURRENT_BACKGROUND);
-	//	}
-	//
-	//	public String getLookAndFeel() {
-	//		return this.commonConfigInstance.getString(PARAM_LOOK_AND_FEEL);
-	//	}
+	private final static String PARAM_LOOK_AND_FEEL = "lookAndFeel";
+	private final static String PARAM_FILTER_DELETE_MODE = "filterDeleteMode";
 
 	public static enum SourceMode {
-		center("Разместить в центре"), left_top("Разместить слева сверху"), scale("Отмасштабировать");
+		CENTER("Разместить в центре"), LEFT_TOP("Разместить слева сверху"), SCALE("Отмасштабировать");
 
 		private String title;
 
@@ -145,8 +107,8 @@ public class Config {
 	};
 
 	public static enum DeletionMode {
-		confirm("Требовать подтверждение удаления каждого фильтра"), no_confirm("Удалять без подтверждения"), confirm_only_users(
-				"Требовать подтверждения только у пользователей");
+		CONFIRM("Требовать подтверждение удаления каждого фильтра"), NO_CONFIRM("Удалять без подтверждения"), //
+		CONFIRM_USERS_ONLY("Требовать подтверждения только у пользователей");
 
 		private String title;
 
@@ -160,7 +122,7 @@ public class Config {
 	}
 
 	public SourceMode getCurrentSourceMode() {
-		final SourceMode default_ = SourceMode.left_top;
+		final SourceMode default_ = SourceMode.LEFT_TOP;
 		try {
 			return readOnly ? default_ : SourceMode.valueOf(this.currentConfigInstance.getString(
 					PARAM_CURRENT_SOURCE_MODE, default_.name()));
@@ -180,7 +142,7 @@ public class Config {
 	}
 
 	public DeletionMode getFilterDeleteMode() {
-		final DeletionMode default_ = DeletionMode.confirm;
+		final DeletionMode default_ = DeletionMode.CONFIRM;
 		try {
 			return readOnly ? default_ : DeletionMode.valueOf(this.commonConfigInstance.getString(
 					PARAM_FILTER_DELETE_MODE, default_.name()));
@@ -327,14 +289,6 @@ public class Config {
 
 	}
 
-	// public Configuration getCurrentConfig() {
-	// return this.currentConfigInstance;
-	// }
-	//
-	// public Configuration getCommonConfig() {
-	// return this.commonConfigInstance;
-	// }
-
 	public void saveCommonConfig() throws ConfigurationException {
 		if (readOnly) {
 			return;
@@ -344,78 +298,8 @@ public class Config {
 		}
 	}
 
-	// @SuppressWarnings("unchecked")
 	public void saveCurrentConfig() throws ConfigurationException {
-		// Iterator<String> iter = this.currentConfigInstance.getKeys();
-		// while (iter.hasNext()) {
-		// String key = iter.next();
-		// this.commonConfigInstance.setProperty("current." + key,
-		// this.commonConfigInstance.getProperty(key));
-		// }
-		//
 		this.saveCommonConfig();
 	}
 
-	private IProgress progressInterface;
-
-	/**
-	 * Registering visual interface (for progress bar)
-	 * 
-	 * @param progressInterface
-	 */
-	public void setIProgressInstance(IProgress progressInterface) {
-		this.progressInterface = progressInterface;
-	}
-
-	/**
-	 * Return registered visual interface
-	 * 
-	 * @return current instance of IProgress
-	 */
-	public IProgress getProgressInstance() {
-		if (this.progressInterface == null) {
-			throw new IllegalStateException("Internal error. Progress interface does not setup yet.");
-		}
-		return this.progressInterface;
-	}
-	//
-	//	static class ComplexParameter<E> {
-	//		//private Object[] values;
-	//		private Enum<? extends E> enum_;
-	//		private Enum<? extends E> default_;
-	//
-	//		private String[] visual;
-	//
-	//		public ComplexParameter(Enum enum_, String visual[], Enum<? extends E> default_) {
-	//			//this.values = values;
-	//			this.enum_ = enum_;
-	//			this.visual = visual;
-	//			this.default_ = default_;
-	//
-	//			this.confirmValue(default_);
-	//		}
-	//
-	//		public Object confirmValue(Enum<? extends E> enum_) {
-	//			if (enum_ == null) {
-	//				return default_;
-	//			}
-	//			return enum_;
-	//
-	//			//			if (enum_.equals(other))
-	//			//			for (Object obj : this.values) {
-	//			//				if (obj.equals(value)) {
-	//			//					return value;
-	//			//				}
-	//			//			}
-	//			//			return default_;
-	//		}
-	//
-	//		public String[] getVisualValues() {
-	//			return this.visual;
-	//		}
-	//
-	//		public Enum<? extends E> getDefaultValue() {
-	//			return default_;
-	//		}
-	//	}
 }

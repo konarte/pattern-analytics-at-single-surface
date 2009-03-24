@@ -69,7 +69,7 @@ import edu.mgupi.pass.modules.IModule;
 import edu.mgupi.pass.modules.ModuleHelper;
 import edu.mgupi.pass.modules.ModuleProcessor;
 import edu.mgupi.pass.sources.SourceStore;
-import edu.mgupi.pass.sources.visual.SingleFilePick;
+import edu.mgupi.pass.sources.gui.SingleFilePick;
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Const;
 import edu.mgupi.pass.util.IProgress;
@@ -164,7 +164,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			}
 		});
 
-		Config.getInstance().setIProgressInstance(this);
+		AppHelper.getInstance().setIProgressInstance(this);
 		this.clearMessage();
 
 		mainModuleProcessor = new ModuleProcessor();
@@ -326,7 +326,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		SourceMode sourceScaleMode = Config.getInstance().getCurrentSourceMode();
 		int background = Config.getInstance().getCurrentBackground();
 
-		if (sourceScaleMode == SourceMode.center || sourceScaleMode == SourceMode.left_top) {
+		if (sourceScaleMode == SourceMode.CENTER || sourceScaleMode == SourceMode.LEFT_TOP) {
 
 			preProcessing.removeFilter(ResizeFilter.class);
 
@@ -335,7 +335,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			place.getHEIGHT().setValue(Const.MAIN_IMAGE_HEIGHT);
 
 			place.getBACKGROUND().setValue(new Color(background));
-			place.getPLACE().setValue(sourceScaleMode == SourceMode.center ? "center" : "topleft");
+			place.getPLACE().setValue(sourceScaleMode == SourceMode.CENTER ? "center" : "topleft");
 
 		} else {
 			preProcessing.removeFilter(PlaceImageFilter.class);

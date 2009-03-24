@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.Param.TYPES;
+import edu.mgupi.pass.filters.Param.ParamType;
 import edu.mgupi.pass.sources.TestSourceImpl;
 
 public class ColorSpaceFilterTest {
@@ -44,7 +44,7 @@ public class ColorSpaceFilterTest {
 		assertTrue(params == filter.getParams());
 
 		try {
-			params.add(new Param("1", "2", TYPES.INT, 0));
+			params.add(new Param("1", "2", ParamType.INT, 0));
 			fail("No exception throws!");
 		} catch (UnsupportedOperationException e) {
 			System.out.println("Received expected exception: " + e);

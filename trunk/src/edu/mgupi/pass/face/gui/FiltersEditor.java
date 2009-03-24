@@ -632,7 +632,7 @@ public class FiltersEditor extends JDialog implements ActionListener {
 				return;
 			}
 
-			if (Config.getInstance().getFilterDeleteMode() != DeletionMode.confirm
+			if (Config.getInstance().getFilterDeleteMode() != DeletionMode.CONFIRM
 					|| JOptionPane.showConfirmDialog(this, "Действительно удалить выбранный фильтр?",
 							"Подтверждение удаления фильтра", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 				this.deleteFilterImpl();

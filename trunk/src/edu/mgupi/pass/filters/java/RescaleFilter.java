@@ -12,15 +12,15 @@ import org.slf4j.LoggerFactory;
 import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.Param.TYPES;
+import edu.mgupi.pass.filters.Param.ParamType;
 
 public class RescaleFilter implements IFilter {
 
 	private final static Logger logger = LoggerFactory.getLogger(RescaleFilter.class);
 
 	private Collection<Param> params;
-	private Param BRIGHTNESS = new Param("Brightness", "Яркость", TYPES.INT, 0, -255, 255);
-	private Param CONTRAST = new Param("Contrast", "Контраст", TYPES.INT, 100, 0, 255);
+	private Param BRIGHTNESS = new Param("Brightness", "Яркость", ParamType.INT, 0, -255, 255);
+	private Param CONTRAST = new Param("Contrast", "Контраст", ParamType.INT, 100, 0, 255);
 
 	public RescaleFilter() {
 		params = new ArrayList<Param>(2);

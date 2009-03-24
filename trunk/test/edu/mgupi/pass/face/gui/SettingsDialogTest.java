@@ -12,7 +12,7 @@ public class SettingsDialogTest {
 
 	@Before
 	public void setUp() throws Exception {
-		Config.getInstance().setReadOnly();
+		Config.setDebugInstance();
 		dialog = (SettingsDialog) AppHelper.getInstance().getDialogImpl(SettingsDialog.class);
 	}
 

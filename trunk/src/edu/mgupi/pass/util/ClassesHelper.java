@@ -11,6 +11,12 @@ import java.util.zip.ZipFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Special support class.
+ * 
+ * @author raidan
+ * 
+ */
 public class ClassesHelper {
 	private final static Logger logger = LoggerFactory.getLogger(ClassesHelper.class);
 

@@ -13,19 +13,19 @@ import org.slf4j.LoggerFactory;
 import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.Param.TYPES;
+import edu.mgupi.pass.filters.Param.ParamType;
 
 public class PlaceImageFilter implements IFilter {
 
 	private final static Logger logger = LoggerFactory.getLogger(PlaceImageFilter.class);
 
 	private Collection<Param> params;
-	private Param WIDTH = new Param("Width", "Ширина", TYPES.INT, 0);
-	private Param HEIGHT = new Param("Height", "Высота", TYPES.INT, 0);
-	private Param PLACE = new Param("Place", "Размещение", TYPES.STRING, "center", new Object[] { "center", "topleft",
+	private Param WIDTH = new Param("Width", "Ширина", ParamType.INT, 0);
+	private Param HEIGHT = new Param("Height", "Высота", ParamType.INT, 0);
+	private Param PLACE = new Param("Place", "Размещение", ParamType.STRING, "center", new Object[] { "center", "topleft",
 			"topright", "bottomleft", "bottomright" }, new String[] { "По центру", "Слева сверху", "Справа сверху",
 			"Слева снизу", "Справа снизу" });
-	private Param BACKGROUND = new Param("Background", "Цвет фона", TYPES.COLOR, Color.WHITE);
+	private Param BACKGROUND = new Param("Background", "Цвет фона", ParamType.COLOR, Color.WHITE);
 
 	public PlaceImageFilter() {
 		params = new ArrayList<Param>(3);

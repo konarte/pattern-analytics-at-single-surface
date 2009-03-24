@@ -14,7 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.mgupi.pass.filters.Param.TYPES;
+import edu.mgupi.pass.filters.Param.ParamType;
 
 public class ParamTest {
 
@@ -102,22 +102,22 @@ public class ParamTest {
 	}
 
 	public static Collection<Param> fillParameters(Collection<Param> fullParams) {
-		fullParams.add(new Param("p1", "Параметр1", TYPES.INT, 11));
-		fullParams.add(new Param("p2", "Параметр2", TYPES.INT, 1, 0, 10));
+		fullParams.add(new Param("p1", "Параметр1", ParamType.INT, 11));
+		fullParams.add(new Param("p2", "Параметр2", ParamType.INT, 1, 0, 10));
 
-		fullParams.add(new Param("p3", "Параметр3", TYPES.DOUBLE, 2.0));
-		fullParams.add(new Param("p4", "Параметр4", TYPES.DOUBLE, 5.0, 0, 10));
+		fullParams.add(new Param("p3", "Параметр3", ParamType.DOUBLE, 2.0));
+		fullParams.add(new Param("p4", "Параметр4", ParamType.DOUBLE, 5.0, 0, 10));
 
-		fullParams.add(new Param("p5", "Параметр5", TYPES.STRING, null));
-		fullParams.add(new Param("p5.1", "Параметр5.1", TYPES.STRING, ""));
-		fullParams.add(new Param("p6", "Параметр6", TYPES.STRING, "Тестовая строка"));
+		fullParams.add(new Param("p5", "Параметр5", ParamType.STRING, null));
+		fullParams.add(new Param("p5.1", "Параметр5.1", ParamType.STRING, ""));
+		fullParams.add(new Param("p6", "Параметр6", ParamType.STRING, "Тестовая строка"));
 
-		fullParams.add(new Param("p7", "Параметр7", TYPES.COLOR, null));
-		fullParams.add(new Param("p8", "Параметр8", TYPES.COLOR, Color.BLUE));
+		fullParams.add(new Param("p7", "Параметр7", ParamType.COLOR, null));
+		fullParams.add(new Param("p8", "Параметр8", ParamType.COLOR, Color.BLUE));
 
-		fullParams.add(new Param("p9", "Параметр9", TYPES.STRING, null, new Object[] { "айн", "цвай", "драй" },
+		fullParams.add(new Param("p9", "Параметр9", ParamType.STRING, null, new Object[] { "айн", "цвай", "драй" },
 				new String[] { "Первый", "Второй", "Третий" }));
-		fullParams.add(new Param("p10", "Параметр10", TYPES.STRING, "цвай", new Object[] { "айн", "цвай", "драй" },
+		fullParams.add(new Param("p10", "Параметр10", ParamType.STRING, "цвай", new Object[] { "айн", "цвай", "драй" },
 				new String[] { "Первый", "Второй", "Третий" }));
 
 		return fullParams;
