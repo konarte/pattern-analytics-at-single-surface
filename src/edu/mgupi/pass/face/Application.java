@@ -16,6 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.db.surfaces.PassPersistentManager;
+import edu.mgupi.pass.face.gui.AppHelper;
+import edu.mgupi.pass.face.gui.MainFrame;
+import edu.mgupi.pass.face.gui.SplashWindow;
 import edu.mgupi.pass.util.CacheIFactory;
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Const;

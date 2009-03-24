@@ -1,11 +1,11 @@
-package edu.mgupi.pass.face;
+package edu.mgupi.pass.face.gui;
 
 import java.awt.Frame;
 
 import javax.swing.JTable;
 
 import edu.mgupi.pass.db.locuses.LModules;
-import edu.mgupi.pass.face.template.JTableReadOnly;
+import edu.mgupi.pass.face.gui.template.JTableReadOnly;
 
 public class ListDialogModules extends ListDialogFilters {
 	/**

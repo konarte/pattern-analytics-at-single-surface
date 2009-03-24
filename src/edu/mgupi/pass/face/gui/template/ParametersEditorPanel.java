@@ -1,4 +1,4 @@
-package edu.mgupi.pass.face.template;
+package edu.mgupi.pass.face.gui.template;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -272,8 +272,8 @@ public class ParametersEditorPanel extends JPanel {
 	 * @param fromDefaults
 	 *            if true, that we load values from defaults, otherwise -- from
 	 *            normal values. Idea -- default values of parameters never
-	 *            changed (there are specified on creating in Java code), values can
-	 *            be changed and saved.
+	 *            changed (there are specified on creating in Java code), values
+	 *            can be changed and saved.
 	 */
 	public void resetParameterValues(boolean fromDefaults) {
 		for (Map.Entry<Param, Component> entry : controlComponents.entrySet()) {

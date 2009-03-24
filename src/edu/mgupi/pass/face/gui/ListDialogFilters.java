@@ -1,4 +1,4 @@
-package edu.mgupi.pass.face;
+package edu.mgupi.pass.face.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -18,8 +18,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
 import edu.mgupi.pass.db.locuses.LFilters;
-import edu.mgupi.pass.face.template.AbstractDialogAdapter;
-import edu.mgupi.pass.face.template.JTableReadOnly;
+import edu.mgupi.pass.face.gui.template.AbstractDialogAdapter;
+import edu.mgupi.pass.face.gui.template.JTableReadOnly;
 
 public class ListDialogFilters extends JDialog {
 

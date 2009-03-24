@@ -1,4 +1,4 @@
-package edu.mgupi.pass.face;
+package edu.mgupi.pass.face.gui;
 
 import java.util.Arrays;
 import java.util.Comparator;

@@ -35,7 +35,7 @@ public class Param implements Cloneable {
 		this.low_border = lowBorder;
 		this.hi_border = hiBorder;
 	}
-	
+
 	public Param(String name, String title, TYPES type, Object default_, Object[] allowedValues, String[] visualValues) {
 		this(name, title, type, default_);
 
@@ -182,7 +182,7 @@ public class Param implements Cloneable {
 
 		this.value = value;
 	}
-	
+
 	public boolean isMultiple() {
 		return this.multiple;
 	}

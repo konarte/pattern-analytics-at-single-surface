@@ -17,7 +17,7 @@ public class FilterChainsawTransaction extends FilterChainsaw {
 
 	public FilterChainsawTransaction(FilterChainsaw source) {
 		super(source.singleInstanceCaching);
-		
+
 		if (source == null) {
 			throw new IllegalArgumentException("Internal error. 'source' must be not null.");
 		}

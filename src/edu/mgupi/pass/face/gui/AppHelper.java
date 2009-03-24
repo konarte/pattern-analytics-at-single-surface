@@ -1,4 +1,4 @@
-package edu.mgupi.pass.face;
+package edu.mgupi.pass.face.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -131,7 +131,7 @@ public class AppHelper {
 	 * @throws Exception
 	 *             on any error
 	 */
-	protected Window getFrameImpl(Class<? extends Frame> windowType) throws Exception {
+	public Window getFrameImpl(Class<? extends Frame> windowType) throws Exception {
 		return this.getWindowImpl(windowType, false);
 	}
 

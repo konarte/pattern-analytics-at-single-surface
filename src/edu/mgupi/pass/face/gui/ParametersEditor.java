@@ -1,4 +1,4 @@
-package edu.mgupi.pass.face;
+package edu.mgupi.pass.face.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -16,8 +16,8 @@ import javax.swing.JPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.mgupi.pass.face.template.AbstractDialogAdapter;
-import edu.mgupi.pass.face.template.ParametersEditorPanel;
+import edu.mgupi.pass.face.gui.template.AbstractDialogAdapter;
+import edu.mgupi.pass.face.gui.template.ParametersEditorPanel;
 import edu.mgupi.pass.filters.Param;
 
 public class ParametersEditor extends JDialog implements ActionListener {

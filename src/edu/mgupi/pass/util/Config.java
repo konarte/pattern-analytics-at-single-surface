@@ -17,7 +17,6 @@ import org.apache.commons.configuration.INIConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Config class. Using apache config
  * 
@@ -212,7 +211,7 @@ public class Config {
 		if (readOnly) {
 			return false;
 		}
-//		logger.debug("OLD : " + oldValue.getClass() + ", NEW: " + newValue.getClass());
+		//		logger.debug("OLD : " + oldValue.getClass() + ", NEW: " + newValue.getClass());
 		if (Utils.equals(newValue, oldValue)) {
 			return false;
 		} else {

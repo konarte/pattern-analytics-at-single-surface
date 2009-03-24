@@ -70,7 +70,7 @@ public class ParamHelper {
 		}
 		return value;
 	}
-	
+
 	protected static Map<String, Object> updateToMap(Collection<Param> parameters) {
 		Map<String, Object> paramMap = new LinkedHashMap<String, Object>();
 		if (parameters == null) {
