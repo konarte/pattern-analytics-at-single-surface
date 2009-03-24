@@ -13,7 +13,6 @@ import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Helper class for Swing testing. Base idea is delayed execution (into another
  * thread) and waiting until its done.

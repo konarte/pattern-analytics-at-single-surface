@@ -1,4 +1,4 @@
-package edu.mgupi.pass.face;
+package edu.mgupi.pass.face.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
@@ -28,8 +28,8 @@ import javax.swing.WindowConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.mgupi.pass.face.template.AbstractDialogAdapter;
-import edu.mgupi.pass.face.template.JTableReadOnly;
+import edu.mgupi.pass.face.gui.template.AbstractDialogAdapter;
+import edu.mgupi.pass.face.gui.template.JTableReadOnly;
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Const;
 

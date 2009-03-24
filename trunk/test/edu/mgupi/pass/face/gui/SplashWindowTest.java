@@ -1,10 +1,11 @@
-package edu.mgupi.pass.face;
+package edu.mgupi.pass.face.gui;
 
 import javax.swing.JFrame;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 
 public class SplashWindowTest {
 

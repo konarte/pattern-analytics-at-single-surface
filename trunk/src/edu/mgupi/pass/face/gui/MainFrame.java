@@ -1,4 +1,4 @@
-package edu.mgupi.pass.face;
+package edu.mgupi.pass.face.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -57,8 +57,8 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.db.locuses.LModules;
 import edu.mgupi.pass.db.locuses.Locuses;
-import edu.mgupi.pass.face.template.ImageFrameTemplate;
-import edu.mgupi.pass.face.template.ImagePanel;
+import edu.mgupi.pass.face.gui.template.ImageFrameTemplate;
+import edu.mgupi.pass.face.gui.template.ImagePanel;
 import edu.mgupi.pass.filters.FilterChainsaw;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.Param;

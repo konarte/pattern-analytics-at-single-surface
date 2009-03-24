@@ -1,4 +1,4 @@
-package edu.mgupi.pass.face.template;
+package edu.mgupi.pass.face.gui.template;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -31,7 +31,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.mgupi.pass.face.SwingTestHelper;
+import edu.mgupi.pass.face.gui.SwingTestHelper;
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.ParamHelper;
 import edu.mgupi.pass.filters.ParamTest;

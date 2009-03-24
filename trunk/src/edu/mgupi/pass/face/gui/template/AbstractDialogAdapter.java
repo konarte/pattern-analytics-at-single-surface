@@ -1,4 +1,4 @@
-package edu.mgupi.pass.face.template;
+package edu.mgupi.pass.face.gui.template;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,7 +16,7 @@ import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.mgupi.pass.face.AppHelper;
+import edu.mgupi.pass.face.gui.AppHelper;
 
 /**
  * Help class for providing selection from opening dialogs. We open them, give
@@ -152,7 +152,7 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	 * 
 	 * @return true if pressed 'OK' button, false if 'Cancel' button or window
 	 *         was closed by window-button
-	 *         
+	 * 
 	 * @see #openDialogImpl()
 	 */
 	public boolean openDialog() {
@@ -177,8 +177,7 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 		} catch (Exception e) {
 			logger.error("Error when opening window", e);
-			AppHelper.showExceptionDialog("Ошибка при открытии окна '" + this.instance.getTitle() + "'",
-					e);
+			AppHelper.showExceptionDialog("Ошибка при открытии окна '" + this.instance.getTitle() + "'", e);
 			return false;
 		}
 	}
@@ -230,8 +229,7 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 		} catch (Exception e) {
 			logger.error("Error when opening window", e);
-			AppHelper.showExceptionDialog("Ошибка при открытии окна '" + this.instance.getTitle() + "'",
-					e);
+			AppHelper.showExceptionDialog("Ошибка при открытии окна '" + this.instance.getTitle() + "'", e);
 		}
 	}
 

@@ -1,4 +1,4 @@
-package edu.mgupi.pass.face.template;
+package edu.mgupi.pass.face.gui.template;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

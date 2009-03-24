@@ -18,8 +18,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.mgupi.pass.face.AppHelper;
-import edu.mgupi.pass.face.MainFrame;
+import edu.mgupi.pass.face.gui.AppHelper;
+import edu.mgupi.pass.face.gui.MainFrame;
 import edu.mgupi.pass.sources.ISource;
 import edu.mgupi.pass.sources.SourceStore;
 
