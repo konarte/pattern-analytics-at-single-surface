@@ -22,6 +22,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
@@ -294,6 +295,7 @@ public class AboutDialog extends JDialog {
 			}
 
 			jTableProps = new JTableReadOnly(cells, new String[] { "Property", "Value" });
+			jTableProps.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 			jTableProps.setName("properties");
 		}
 		return jTableProps;
@@ -329,6 +331,7 @@ public class AboutDialog extends JDialog {
 			}
 
 			jTableLibraries = new JTableReadOnly(cells, new String[] { "Used library" });
+			jTableLibraries.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 			jTableLibraries.setName("libraries");
 		}
 		return jTableLibraries;

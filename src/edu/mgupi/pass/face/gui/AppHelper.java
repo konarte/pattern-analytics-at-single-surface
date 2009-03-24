@@ -17,7 +17,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.locks.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.IProgress;
+import edu.mgupi.pass.util.Utils;
 
 /**
  * Class for application support -- make easy change LookAndFeel, set window
@@ -355,7 +357,8 @@ public class AppHelper {
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout());
-		panel.add(new JLabel("<html><h2>" + message + "</h2><b>" + e + "</b><hr></html>"), BorderLayout.NORTH);
+		panel.add(new JLabel("<html><h2>" + Utils.splitStingBySlices(message, 60, "<br>") + "</h2><b>" + e
+				+ "</b><hr></html>"), BorderLayout.NORTH);
 
 		// Creating text area for big stack :)
 		JTextArea area = new JTextArea(out.toString());

@@ -21,6 +21,50 @@ public class Utils {
 		return o1.equals(o2);
 	}
 
+	public static String splitStingBySlices(String text, int maximumCols, String delimiter) {
+		if (text == null) {
+			return null;
+		}
+		StringBuilder source = new StringBuilder(text);
+		StringBuilder dest = new StringBuilder();
+
+		do {
+			String slice = source.substring(0, maximumCols);
+
+			//			System.out.println("Found slice: " + slice);
+			int lastSpace = -1;
+			for (int i = slice.length() - 1; i > 0; i--) {
+				if (slice.charAt(i) == ' ') {
+					lastSpace = i;
+					break;
+				}
+			}
+
+			if (lastSpace != -1) {
+				//				System.out.println("Cut before " + lastSpace);
+
+				dest.append(slice.substring(0, lastSpace));
+				source.delete(0, lastSpace + 1);
+			} else {
+
+				//				System.out.println("Cut before " + maximumCols);
+				dest.append(slice);
+				source.delete(0, maximumCols);
+			}
+			if (source.length() > 0) {
+				dest.append(delimiter);
+
+				if (source.length() < maximumCols) {
+					dest.append(source);
+					source.delete(0, source.length());
+				}
+			}
+
+		} while (source.length() > 0);
+
+		return dest.toString();
+	}
+
 	public static List<File> listFiles(final String dir, final String ext) {
 		return listFiles(dir, new FileFilter() {
 
