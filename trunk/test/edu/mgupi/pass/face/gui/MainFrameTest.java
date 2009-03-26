@@ -4,7 +4,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import javax.swing.JButton;
+import java.io.File;
+
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
@@ -17,13 +18,13 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.inputs.TestInputImpl;
 import edu.mgupi.pass.modules.TestModule;
 import edu.mgupi.pass.modules.TestModule2;
 import edu.mgupi.pass.modules.basic.SimpleMatrixModule;
-import edu.mgupi.pass.sources.TestSourceImpl;
-import edu.mgupi.pass.util.WaitCondition;
 import edu.mgupi.pass.util.Config;
-import edu.mgupi.pass.util.SwingHelper;
+import edu.mgupi.pass.util.Utils;
+import edu.mgupi.pass.util.WaitCondition;
 import edu.mgupi.pass.util.WorkSet;
 
 public class MainFrameTest {
@@ -31,7 +32,7 @@ public class MainFrameTest {
 	private final static Logger logger = LoggerFactory.getLogger(MainFrameTest.class);
 
 	private MainFrame frame;
-	private TestSourceImpl source;
+	private TestInputImpl source;
 
 	@Before
 	public void setUp() throws Exception {
@@ -41,7 +42,7 @@ public class MainFrameTest {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 
-		source = new TestSourceImpl();
+		source = new TestInputImpl();
 		source.init();
 
 	}
@@ -52,16 +53,7 @@ public class MainFrameTest {
 			source.close();
 			source = null;
 		}
-		if (frame != null) {
-			SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
-				public void workImpl() throws Exception {
-					frame.setVisible(false);
-					frame.dispose();
-				}
-			});
-
-			frame = null;
-		}
+		SwingTestHelper.closeAllWindows();
 		AppHelper.reset();
 	}
 
@@ -86,12 +78,27 @@ public class MainFrameTest {
 			}
 		});
 
-		JMenuItem open = (JMenuItem) SwingHelper.getChildNamed(frame, "open");
+		JMenuItem open = (JMenuItem) Utils.getChildNamed(frame, "open");
 		assertNotNull(open);
 
-		this.frame.startProcessing(source.getSingleSource());
+		SwingTestHelper.clickOpenDialogButton(frame, "open");
+		SwingTestHelper.clickFileChooserCancel(frame);
 
-		final JCheckBox scaleButton = (JCheckBox) SwingHelper.getChildNamed(frame, "scaleButton");
+		SwingTestHelper.clickOpenDialogButton(frame, "open");
+
+		assertFalse(frame.isProcessStarted());
+		SwingTestHelper.clickFileChooserOK(frame, new File("test/suslik.jpg"));
+
+		// Frame must start!
+		// If not -- check fileChooser
+		SwingTestHelper.waitUntil(new WaitCondition() {
+			@Override
+			public boolean keepWorking() {
+				return frame.isProcessStarted() == false;
+			}
+		});
+
+		final JCheckBox scaleButton = (JCheckBox) Utils.getChildNamed(frame, "scaleButton");
 		assertNotNull(scaleButton);
 		assertFalse(scaleButton.isSelected());
 
@@ -133,75 +140,60 @@ public class MainFrameTest {
 			}
 		});
 
-		//
-		// this.addWork(new WorkSet() {
-		// public void work() throws Exception {
-		//
-		// addWorkNoWait(new WorkSet() {
-		// public void work() throws Exception {
-		// open.doClick();
-		// }
-		//
-		// });
-		//
-		// System.out.println("Dispatched!!!!!!!!!!!!");
-		//
-		// final SingleFilePick pick = (SingleFilePick)
-		// SwingTestHelper.getReflectedAccess(frame,
-		// "singleFilePicker");
-		// assertNotNull(pick);
-		//
-		// final JFileChooser chooser = (JFileChooser)
-		// SwingTestHelper.getReflectedAccess(pick, "chooser");
-		// assertNotNull(chooser);
-		//				
-		// chooser.dispatchEvent(new KeyEvent(chooser, KeyEvent.KEY_RELEASED,
-		// System.currentTimeMillis(), 0,
-		// KeyEvent.VK_UNDEFINED, (char) 27, KeyEvent.KEY_LOCATION_STANDARD));
-		//
-		// }
-		// });
+	}
+
+	@Test
+	public void testCloseImage() throws Exception {
+		final JMenuItem close = (JMenuItem) Utils.getChildNamed(frame, "close");
+		assertNotNull(close);
+
+		assertFalse(frame.isProcessStarted());
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+			public void workImpl() throws Exception {
+				close.doClick();
+			}
+		});
+		assertFalse(frame.isProcessStarted());
+
+		SwingTestHelper.clickOpenDialogButton(frame, "open");
+		SwingTestHelper.clickFileChooserOK(frame, new File("test/suslik.jpg"));
+
+		// Frame must start!
+		// If not -- check fileChooser
+		SwingTestHelper.waitUntil(new WaitCondition() {
+			@Override
+			public boolean keepWorking() {
+				return frame.isProcessStarted() == false;
+			}
+		});
+		
+		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+			public void workImpl() throws Exception {
+				close.doClick();
+			}
+		});
+		
+		assertFalse(frame.isProcessStarted());
 	}
 
 	@Test
 	public void testSettings() throws Exception {
 
-		final JMenuItem settings = (JMenuItem) SwingHelper.getChildNamed(frame, "settings");
-		assertNotNull(settings);
+		SwingTestHelper.clickOpenDialogButton(frame, "settings", SettingsDialog.class);
 
-		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
-			public void workImpl() throws Exception {
-				settings.doClick();
-			}
-		}, new WaitCondition() {
-			public boolean keepWorking() {
-				return AppHelper.getInstance().searchWindow(SettingsDialog.class) == null;
-			}
-		});
-		assertNotNull(AppHelper.getInstance().searchWindow(SettingsDialog.class));
-		final JButton cancel = (JButton) SwingHelper.getChildNamed(AppHelper.getInstance().searchWindow(
+		SwingTestHelper.clickCloseDialogButton((SettingsDialog) AppHelper.getInstance().searchWindow(
 				SettingsDialog.class), "cancel");
-		assertNotNull(cancel);
 
-		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
-			public void workImpl() throws Exception {
-				cancel.doClick();
-			}
-		});
-
-		SettingsDialog settingsDialog = (SettingsDialog) AppHelper.getInstance().searchWindow(SettingsDialog.class);
-		assertNotNull(settingsDialog);
-		assertFalse(settingsDialog.isVisible());
 	}
 
 	@Test
 	public void testMainHelpfulWindows() throws Exception {
 
 		assertFalse(this.frame.histogramFrame.hasImage());
-		this.frame.startProcessing(source.getSingleSource());
+		this.frame.startProcessingImpl(source.getSingleSource());
 		assertTrue(this.frame.histogramFrame.hasImage());
 
-		final JCheckBox histogram = (JCheckBox) SwingHelper.getChildNamed(frame, "histogram");
+		final JCheckBox histogram = (JCheckBox) Utils.getChildNamed(frame, "histogram");
 		assertNotNull(histogram);
 		assertFalse(histogram.isSelected());
 
@@ -220,7 +212,7 @@ public class MainFrameTest {
 			}
 		});
 
-		final JCheckBox moduleImage = (JCheckBox) SwingHelper.getChildNamed(frame, "moduleImage");
+		final JCheckBox moduleImage = (JCheckBox) Utils.getChildNamed(frame, "moduleImage");
 		assertNotNull(moduleImage);
 		assertFalse(moduleImage.isSelected());
 
@@ -254,7 +246,7 @@ public class MainFrameTest {
 	@Test
 	public void testChangeModulesPostModule() throws Exception {
 		assertFalse(this.frame.moduleFrame.hasImage());
-		this.frame.startProcessing(source.getSingleSource());
+		this.frame.startProcessingImpl(source.getSingleSource());
 
 		frame.setModule(SimpleMatrixModule.class);
 		assertTrue(this.frame.moduleFrame.hasImage());
@@ -281,7 +273,7 @@ public class MainFrameTest {
 		this.frame.setModule(TestModule.class);
 		assertFalse(this.frame.moduleFrame.hasImage());
 
-		this.frame.startProcessing(source.getSingleSource());
+		this.frame.startProcessingImpl(source.getSingleSource());
 		assertTrue(this.frame.moduleFrame.hasImage());
 
 	}
@@ -298,7 +290,7 @@ public class MainFrameTest {
 		this.frame.setModule(TestModule2.class);
 		assertFalse(this.frame.moduleFrame.hasImage());
 
-		this.frame.startProcessing(source.getSingleSource());
+		this.frame.startProcessingImpl(source.getSingleSource());
 		assertFalse(this.frame.moduleFrame.hasImage());
 
 	}

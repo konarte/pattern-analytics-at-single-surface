@@ -7,19 +7,20 @@ import javax.swing.JTable;
 import edu.mgupi.pass.db.locuses.LModules;
 import edu.mgupi.pass.face.gui.template.JTableReadOnly;
 
-public class ListDialogModules extends ListDialogFilters {
+public class ListModulesDialog extends ListFiltersDialog {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public ListDialogModules(Frame owner) {
+	public ListModulesDialog(Frame owner) {
 		super(owner);
 		this.setTitle("Список модулей");
+		this.setName("listModulesDialog");
 	}
 
 	protected JTable getTableDataImpl() {
-		LModules modules[] = MainFrameDataStorage.getInstance().listLModulesIface();
+		LModules modules[] = AppDataStorage.getInstance().listLModules();
 
 		String cells[][] = new String[modules.length][2];
 		for (int i = 0; i < modules.length; i++) {

@@ -27,6 +27,7 @@ public class CacheInitiable<E> {
 	};
 
 	private MODE mode;
+
 	protected CacheInitiable(MODE mode) {
 		this.mode = mode;
 	}

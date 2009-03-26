@@ -1,13 +1,13 @@
-package edu.mgupi.pass.sources;
+package edu.mgupi.pass.inputs;
 
 import java.awt.image.BufferedImage;
 
-public class SourceStore {
+public class InputStore {
 	private String name;
 	private BufferedImage sourceImage;
 	private byte[] fileData;
 
-	public SourceStore(String imageName, BufferedImage sourceImage, byte[] fileData) {
+	public InputStore(String imageName, BufferedImage sourceImage, byte[] fileData) {
 		this.name = imageName;
 		this.sourceImage = sourceImage;
 		this.fileData = fileData;

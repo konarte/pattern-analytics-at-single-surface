@@ -90,7 +90,7 @@ public class AutoInit {
 				for (Class<?> clazz : filterClasses) {
 					IFilter filter = (IFilter) clazz.newInstance();
 					String name = filter.getName();
-					String codename = filter.getClass().getCanonicalName();
+					String codename = filter.getClass().getName();
 
 					System.out.print("Checking filter class " + codename + " (" + filter.getName() + ")...");
 
@@ -147,7 +147,7 @@ public class AutoInit {
 				for (Class<?> clazz : moduleClasses) {
 					IModule module = (IModule) clazz.newInstance();
 					String name = module.getName();
-					String codename = module.getClass().getCanonicalName();
+					String codename = module.getClass().getName();
 
 					System.out.print("Checking module class " + codename + " (" + module.getName() + ")...");
 

@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.sources.TestSourceImpl;
+import edu.mgupi.pass.inputs.TestInputImpl;
 
 public class SimpleSharpFilterTest {
 
@@ -54,7 +54,7 @@ public class SimpleSharpFilterTest {
 
 	@Test
 	public void testProcess() throws Exception {
-		TestSourceImpl source = new TestSourceImpl();
+		TestInputImpl source = new TestInputImpl();
 		source.init();
 		try {
 

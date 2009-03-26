@@ -12,22 +12,18 @@ import edu.mgupi.pass.util.ClassesHelper;
 
 public class FilterEditorTest {
 
-	private FiltersEditor dialog = null;
+	private FiltersEditorDialog dialog = null;
 
 	@Before
 	public void setUp() throws Exception {
 		AppHelper.getInstance().updateUI(UIManager.getSystemLookAndFeelClassName());
-		dialog = new FiltersEditor(null);
+		dialog = new FiltersEditorDialog(null);
 		dialog.setLocation(300, 400);
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		if (dialog != null) {
-			dialog.setVisible(false);
-			dialog.dispose();
-			dialog = null;
-		}
+		SwingTestHelper.closeAllWindows();
 	}
 
 	@SuppressWarnings("unchecked")

@@ -113,8 +113,8 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 		button.setText("OK");
 
-		button.setName("ok");
-		button.setActionCommand("ok");
+		button.setName("OK");
+		button.setActionCommand("OK");
 		button.addActionListener(this);
 
 	}

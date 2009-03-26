@@ -97,8 +97,17 @@ public class Secundomer {
 	}
 
 	public String toString() {
-		return (name == null ? "" : name + ". ") + "Total: " + this.getTotalTime() + " msec (" + this.getTotalCalls()
-				+ "), avg = " + ((float) this.getTotalTime() / (float) this.getTotalCalls()) + " msec/call"
-				+ (this.cnt > 1 ? (", min = " + this.min + " msec, max = " + this.max + " msec") : "");
+		StringBuilder string = new StringBuilder();
+		if (name != null) {
+			string.append(name).append(". ");
+		}
+		string.append("Total: ").append(this.getTotalTime()).append(" msec (");
+		string.append(this.getTotalCalls()).append(")");
+		if (this.cnt > 1) {
+			string.append(", avg = ").append(((float) this.getTotalTime() / (float) this.getTotalCalls()));
+			string.append(" msec/call").append(", min = ").append(this.min).append(" msec, max = ");
+			string.append(this.max).append(" msec");
+		}
+		return string.toString();
 	}
 }

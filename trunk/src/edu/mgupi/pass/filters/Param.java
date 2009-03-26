@@ -11,7 +11,7 @@ import java.util.Arrays;
  * 
  */
 public class Param implements Cloneable {
-	
+
 	public static enum ParamType {
 		STRING, INT, DOUBLE, COLOR
 	};
@@ -40,7 +40,8 @@ public class Param implements Cloneable {
 		this.hi_border = hiBorder;
 	}
 
-	public Param(String name, String title, ParamType type, Object default_, Object[] allowedValues, String[] visualValues) {
+	public Param(String name, String title, ParamType type, Object default_, Object[] allowedValues,
+			String[] visualValues) {
 		this(name, title, type, default_);
 
 		if (allowedValues != null && allowedValues.length > 0) {
@@ -61,7 +62,6 @@ public class Param implements Cloneable {
 		this.visual_values = visualValues;
 		this.multiple = true;
 	}
-	
 
 	private boolean multiple;
 	private String name;

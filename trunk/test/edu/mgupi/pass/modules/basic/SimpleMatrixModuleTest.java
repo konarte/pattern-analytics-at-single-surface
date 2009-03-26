@@ -28,9 +28,9 @@ import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.Param.ParamType;
 import edu.mgupi.pass.filters.java.GrayScaleFilter;
 import edu.mgupi.pass.filters.service.PlaceImageFilter;
+import edu.mgupi.pass.inputs.InputStore;
+import edu.mgupi.pass.inputs.TestInputImpl;
 import edu.mgupi.pass.modules.ModuleHelper;
-import edu.mgupi.pass.sources.SourceStore;
-import edu.mgupi.pass.sources.TestSourceImpl;
 import edu.mgupi.pass.util.Const;
 import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
@@ -65,7 +65,7 @@ public class SimpleMatrixModuleTest {
 
 	private DecimalFormat fmt = new DecimalFormat("0.0000");
 
-	private void processModule(SourceStore sourceStore, BufferedImage alternativeImage, String desc) throws Exception {
+	private void processModule(InputStore sourceStore, BufferedImage alternativeImage, String desc) throws Exception {
 		Locuses locus = LocusesFactory.createLocuses();
 		LocusSources locusSource = LocusSourcesFactory.createLocusSources();
 		locusSource.setFilename(sourceStore.getName());
@@ -113,7 +113,7 @@ public class SimpleMatrixModuleTest {
 		System.out.println("HINT = " + RenderingHints.VALUE_INTERPOLATION_BILINEAR + " ("
 				+ RenderingHints.VALUE_INTERPOLATION_BILINEAR.getClass() + ")");
 
-		TestSourceImpl source = new TestSourceImpl();
+		TestInputImpl source = new TestInputImpl();
 		FilterChainsaw mySaw = new FilterChainsaw(true);
 		source.init();
 		try {
@@ -121,7 +121,7 @@ public class SimpleMatrixModuleTest {
 			Secundomer METHOD_FAST = SecundomerList.registerSecundomer("methodFast");
 			Secundomer METHOD_SLOW = SecundomerList.registerSecundomer("methodSlow");
 
-			SourceStore sourceStore = source.getSingleSource();
+			InputStore sourceStore = source.getSingleSource();
 
 			PlaceImageFilter place = (PlaceImageFilter) mySaw.appendFilter(PlaceImageFilter.class);
 			place.getWIDTH().setValue(Const.MAIN_IMAGE_WIDTH);

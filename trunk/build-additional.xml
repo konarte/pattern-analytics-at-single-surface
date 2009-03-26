@@ -53,12 +53,13 @@ libraries=</echo>
 		<include name="**/*.class" />
 		<include name="**/*.properties" />
 		<include name="**/*.jpg" />
+		<include name="**/*.gif" />
 		<include name="**/*.xml" />
 
-		<exclude name="**/test/**/*" />
+		<!--<exclude name="**/test/**/*" />
 		<exclude name="**/test?/**/*" />
 		<exclude name="**/*-test.properties" />
-		<exclude name="**/*Test.class" />
+		<exclude name="**/*Test.class" />-->
 	</patternset>
 
 	<property name="basicJar" value="pass.jar" />

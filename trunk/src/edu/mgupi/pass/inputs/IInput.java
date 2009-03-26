@@ -1,4 +1,4 @@
-package edu.mgupi.pass.sources;
+package edu.mgupi.pass.inputs;
 
 import java.io.IOException;
 
@@ -8,7 +8,7 @@ import java.io.IOException;
  * @author raidan
  */
 
-public interface ISource {
+public interface IInput {
 	/**
 	 * Init method for Source interface. All method for preparing (caching) must
 	 * be place here.
@@ -23,7 +23,7 @@ public interface ISource {
 	 * 
 	 * @throws IOException
 	 */
-	SourceStore getSingleSource() throws IOException;
+	InputStore getSingleSource() throws IOException;
 
 	// /**
 	// * Return collection of source images to process. Can be multiple ^_^.

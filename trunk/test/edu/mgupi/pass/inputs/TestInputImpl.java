@@ -1,4 +1,4 @@
-package edu.mgupi.pass.sources;
+package edu.mgupi.pass.inputs;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,9 +9,9 @@ import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TestSourceImpl implements ISource {
+public class TestInputImpl implements IInput {
 
-	private final static Logger logger = LoggerFactory.getLogger(TestSourceImpl.class);
+	private final static Logger logger = LoggerFactory.getLogger(TestInputImpl.class);
 
 	private boolean init = false;
 
@@ -47,7 +47,7 @@ public class TestSourceImpl implements ISource {
 
 	//private String imagePath = "test/suslik.jpg";
 
-	public SourceStore getSingleSource() throws IOException {
+	public InputStore getSingleSource() throws IOException {
 		if (!init) {
 			throw new IllegalStateException("Internal error. Please, call init first.");
 		}
@@ -63,7 +63,7 @@ public class TestSourceImpl implements ISource {
 			input.close();
 		}
 
-		return new SourceStore(file.getName(), ImageIO.read(file), buffer);
+		return new InputStore(file.getName(), ImageIO.read(file), buffer);
 	}
 	// private String imageDir = "test/multiple/*.jpg";
 	//

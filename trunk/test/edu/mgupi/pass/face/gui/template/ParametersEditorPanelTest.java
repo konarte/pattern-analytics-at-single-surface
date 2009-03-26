@@ -1,7 +1,6 @@
 package edu.mgupi.pass.face.gui.template;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
@@ -11,14 +10,12 @@ import static org.junit.Assert.fail;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Frame;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
@@ -37,9 +34,7 @@ import edu.mgupi.pass.filters.ParamHelper;
 import edu.mgupi.pass.filters.ParamTest;
 import edu.mgupi.pass.filters.TestFilter;
 import edu.mgupi.pass.filters.Param.ParamType;
-import edu.mgupi.pass.util.WaitCondition;
-import edu.mgupi.pass.util.SwingHelper;
-import edu.mgupi.pass.util.WorkSet;
+import edu.mgupi.pass.util.Utils;
 
 public class ParametersEditorPanelTest {
 
@@ -84,11 +79,7 @@ public class ParametersEditorPanelTest {
 
 	@After
 	public void tearDown() throws Exception {
-		if (parent != null) {
-			parent.setVisible(false);
-			parent.dispose();
-			parent = null;
-		}
+		SwingTestHelper.closeAllWindows();
 	}
 
 	@Test
@@ -107,150 +98,70 @@ public class ParametersEditorPanelTest {
 		panel.setModelData(fullParams);
 
 		System.out.println("\n");
-		SwingHelper.printChildHierarchy(panel);
+		SwingTestHelper.printChildHierarchy(panel);
 
 		SwingTestHelper.showMeBackground(this.parent);
 
-		JPanel place = (JPanel) SwingHelper.getChildNamed(panel, "paramPlace");
+		JPanel place = (JPanel) Utils.getChildNamed(panel, "paramPlace");
 		assertNotNull(place);
 		//		TitledBorder border = (TitledBorder) place.getBorder();
 		//		assertEquals("Sample params", border.getTitle());
 
-		assertNotNull(SwingHelper.getChildNamed(panel, "p1_label"));
-		assertNotNull(SwingHelper.getChildNamed(panel, "p2_label"));
-		assertNotNull(SwingHelper.getChildNamed(panel, "p3_label"));
-		assertNotNull(SwingHelper.getChildNamed(panel, "p4_label"));
-		assertNotNull(SwingHelper.getChildNamed(panel, "p5_label"));
-		assertNotNull(SwingHelper.getChildNamed(panel, "p5.1_label"));
-		assertNotNull(SwingHelper.getChildNamed(panel, "p6_label"));
-		assertNotNull(SwingHelper.getChildNamed(panel, "p7_label"));
-		assertNotNull(SwingHelper.getChildNamed(panel, "p8_label"));
-		assertNotNull(SwingHelper.getChildNamed(panel, "p9_label"));
-		assertNotNull(SwingHelper.getChildNamed(panel, "p10_label"));
+		assertNotNull(Utils.getChildNamed(panel, "p1_label"));
+		assertNotNull(Utils.getChildNamed(panel, "p2_label"));
+		assertNotNull(Utils.getChildNamed(panel, "p3_label"));
+		assertNotNull(Utils.getChildNamed(panel, "p4_label"));
+		assertNotNull(Utils.getChildNamed(panel, "p5_label"));
+		assertNotNull(Utils.getChildNamed(panel, "p5.1_label"));
+		assertNotNull(Utils.getChildNamed(panel, "p6_label"));
+		assertNotNull(Utils.getChildNamed(panel, "p7_label"));
+		assertNotNull(Utils.getChildNamed(panel, "p8_label"));
+		assertNotNull(Utils.getChildNamed(panel, "p9_label"));
+		assertNotNull(Utils.getChildNamed(panel, "p10_label"));
 
-		JFormattedTextField fmt = (JFormattedTextField) SwingHelper.getChildNamed(panel, "p1_int_field");
+		JFormattedTextField fmt = (JFormattedTextField) Utils.getChildNamed(panel, "p1_int_field");
 		assertNotNull(fmt);
 		assertEquals(11, fmt.getValue());
 
-		JSpinner spinner = (JSpinner) SwingHelper.getChildNamed(panel, "p2_spinner");
+		JSpinner spinner = (JSpinner) Utils.getChildNamed(panel, "p2_spinner");
 		assertNotNull(spinner);
 		assertEquals(1, spinner.getValue());
 
-		fmt = (JFormattedTextField) SwingHelper.getChildNamed(panel, "p3_double_field");
+		fmt = (JFormattedTextField) Utils.getChildNamed(panel, "p3_double_field");
 		assertNotNull(fmt);
 		assertEquals(2.0, fmt.getValue());
 
-		fmt = (JFormattedTextField) SwingHelper.getChildNamed(panel, "p4_double_field");
+		fmt = (JFormattedTextField) Utils.getChildNamed(panel, "p4_double_field");
 		assertNotNull(fmt);
 		assertEquals(5.0, fmt.getValue());
 
-		JTextField field = (JTextField) SwingHelper.getChildNamed(panel, "p5_field");
+		JTextField field = (JTextField) Utils.getChildNamed(panel, "p5_field");
 		assertNotNull(field);
 		assertEquals("", field.getText());
 
-		field = (JTextField) SwingHelper.getChildNamed(panel, "p5.1_field");
+		field = (JTextField) Utils.getChildNamed(panel, "p5.1_field");
 		assertNotNull(field);
 		assertEquals("", field.getText());
 
-		field = (JTextField) SwingHelper.getChildNamed(panel, "p6_field");
+		field = (JTextField) Utils.getChildNamed(panel, "p6_field");
 		assertNotNull(field);
 		assertEquals("Тестовая строка", field.getText());
 
-		JLabel label = (JLabel) SwingHelper.getChildNamed(panel, "p7_color_sample");
+		JLabel label = (JLabel) Utils.getChildNamed(panel, "p7_color_sample");
 		assertNotNull(label);
 		assertNotNull(label.getBackground());
 
-		label = (JLabel) SwingHelper.getChildNamed(panel, "p8_color_sample");
+		label = (JLabel) Utils.getChildNamed(panel, "p8_color_sample");
 		assertNotNull(label);
 		assertEquals(Color.BLUE, label.getBackground());
 
-		JComboBox combo = (JComboBox) SwingHelper.getChildNamed(panel, "p9_combo_box");
+		JComboBox combo = (JComboBox) Utils.getChildNamed(panel, "p9_combo_box");
 		assertNotNull(combo);
 		assertEquals("Первый", combo.getSelectedItem());
 
-		combo = (JComboBox) SwingHelper.getChildNamed(panel, "p10_combo_box");
+		combo = (JComboBox) Utils.getChildNamed(panel, "p10_combo_box");
 		assertNotNull(combo);
 		assertEquals("Второй", combo.getSelectedItem());
-	}
-
-	private boolean allChildrenClosed() {
-		for (Window window : parent.getOwnedWindows()) {
-			if (window.isVisible()) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private Window getOpenedWindow() {
-		for (Window window : parent.getOwnedWindows()) {
-			if (window.isVisible()) {
-				return window;
-			}
-		}
-		fail("No opened windows found.");
-		return null;
-	}
-
-	private void clickButton(final String buttonName) throws Exception {
-		assertTrue(allChildrenClosed());
-		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
-			@Override
-			public void workImpl() throws Exception {
-				JButton button = (JButton) SwingHelper.getChildNamed(panel, buttonName);
-				assertNotNull(button);
-				button.doClick();
-			}
-		}, new WaitCondition() {
-			@Override
-			public boolean keepWorking() {
-				return allChildrenClosed();
-			}
-		});
-		assertFalse(allChildrenClosed());
-	}
-
-	private void clickEmulatedColor(final Color color) throws Exception {
-		assertFalse(allChildrenClosed());
-
-		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
-			@Override
-			public void workImpl() throws Exception {
-				Window chooserDialog = getOpenedWindow();
-
-				JColorChooser chooser = (JColorChooser) SwingHelper.getReflectedFieldAccess(chooserDialog,
-						"chooserPane");
-				chooser.setColor(color);
-
-				JButton button = SwingHelper.getButtonByActionCommand(chooserDialog, "OK");
-				assertNotNull(button);
-				button.doClick();
-			}
-		}, new WaitCondition() {
-			@Override
-			public boolean keepWorking() {
-				return !allChildrenClosed();
-			}
-		});
-	}
-
-	private void clickCancel() throws Exception {
-		assertFalse(allChildrenClosed());
-
-		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
-			@Override
-			public void workImpl() throws Exception {
-				Window chooserDialog = getOpenedWindow();
-				JButton button = SwingHelper.getButtonByActionCommand(chooserDialog, "cancel");
-				assertNotNull(button);
-				button.doClick();
-			}
-		}, new WaitCondition() {
-			@Override
-			public boolean keepWorking() {
-				return !allChildrenClosed();
-			}
-		});
 	}
 
 	@Test
@@ -259,53 +170,53 @@ public class ParametersEditorPanelTest {
 
 		SwingTestHelper.showMeBackground(this.parent);
 
-		this.clickButton("p7_color_selector");
-		this.clickEmulatedColor(Color.GREEN);
+		SwingTestHelper.clickOpenDialogButton(parent, "p7_color_selector");
+		SwingTestHelper.clickColorChooserOK(parent, Color.GREEN);
 
-		JLabel label = (JLabel) SwingHelper.getChildNamed(panel, "p7_color_sample");
+		JLabel label = (JLabel) Utils.getChildNamed(panel, "p7_color_sample");
 		assertNotNull(label);
 		assertEquals(Color.GREEN, label.getBackground());
 
-		this.clickButton("p7_color_selector");
-		this.clickCancel();
-		label = (JLabel) SwingHelper.getChildNamed(panel, "p7_color_sample");
+		SwingTestHelper.clickOpenDialogButton(parent, "p7_color_selector");
+		SwingTestHelper.clickColorChooserCancel(parent);
+		label = (JLabel) Utils.getChildNamed(panel, "p7_color_sample");
 		assertNotNull(label);
 		assertEquals(Color.GREEN, label.getBackground());
 
-		label = (JLabel) SwingHelper.getChildNamed(panel, "p8_color_sample");
+		label = (JLabel) Utils.getChildNamed(panel, "p8_color_sample");
 		assertNotNull(label);
 		assertEquals(Color.BLUE, label.getBackground());
 
-		this.clickButton("p8_color_selector");
-		this.clickEmulatedColor(Color.YELLOW);
+		SwingTestHelper.clickOpenDialogButton(parent, "p8_color_selector");
+		SwingTestHelper.clickColorChooserOK(parent, Color.YELLOW);
 		assertEquals(Color.YELLOW, label.getBackground());
 
-		this.clickButton("p7_color_selector");
-		this.clickEmulatedColor(Color.RED);
+		SwingTestHelper.clickOpenDialogButton(parent, "p7_color_selector");
+		SwingTestHelper.clickColorChooserOK(parent, Color.RED);
 
-		label = (JLabel) SwingHelper.getChildNamed(panel, "p7_color_sample");
+		label = (JLabel) Utils.getChildNamed(panel, "p7_color_sample");
 		assertNotNull(label);
 		assertEquals(Color.RED, label.getBackground());
 
 		panel.resetParameterValues();
-		label = (JLabel) SwingHelper.getChildNamed(panel, "p7_color_sample");
+		label = (JLabel) Utils.getChildNamed(panel, "p7_color_sample");
 		assertNotNull(label);
 		assertNotSame(Color.RED, label.getBackground());
 
-		label = (JLabel) SwingHelper.getChildNamed(panel, "p8_color_sample");
+		label = (JLabel) Utils.getChildNamed(panel, "p8_color_sample");
 		assertNotNull(label);
 		assertEquals(Color.BLUE, label.getBackground());
 
 		Collection<Param> params = panel.saveModelData();
 		assertTrue(params == fullParams);
-		
+
 		assertNull(ParamHelper.getParameter("p7", params).getValue());
 		assertEquals(Color.BLUE, ParamHelper.getParameter("p8", params).getValue());
 
-		this.clickButton("p7_color_selector");
-		this.clickEmulatedColor(Color.RED);
-		this.clickButton("p8_color_selector");
-		this.clickEmulatedColor(Color.YELLOW);
+		SwingTestHelper.clickOpenDialogButton(parent, "p7_color_selector");
+		SwingTestHelper.clickColorChooserOK(parent, Color.RED);
+		SwingTestHelper.clickOpenDialogButton(parent, "p8_color_selector");
+		SwingTestHelper.clickColorChooserOK(parent, Color.YELLOW);
 
 		params = panel.saveModelData();
 		assertTrue(params == fullParams);
@@ -319,17 +230,17 @@ public class ParametersEditorPanelTest {
 		panel.setModelData(fullParams);
 		SwingTestHelper.showMeBackground(this.parent);
 
-		JTextField field5 = (JTextField) SwingHelper.getChildNamed(panel, "p5_field");
+		JTextField field5 = (JTextField) Utils.getChildNamed(panel, "p5_field");
 		assertNotNull(field5);
 		field5.setText("processing!");
 		field5.postActionEvent();
 
-		JTextField field51 = (JTextField) SwingHelper.getChildNamed(panel, "p5.1_field");
+		JTextField field51 = (JTextField) Utils.getChildNamed(panel, "p5.1_field");
 		assertNotNull(field51);
 		field51.setText("j is good");
 		field51.postActionEvent();
 
-		JTextField field6 = (JTextField) SwingHelper.getChildNamed(panel, "p6_field");
+		JTextField field6 = (JTextField) Utils.getChildNamed(panel, "p6_field");
 		assertNotNull(field6);
 		field6.setText("NO-doubt");
 		field6.postActionEvent();
@@ -356,12 +267,12 @@ public class ParametersEditorPanelTest {
 		panel.setModelData(fullParams);
 		SwingTestHelper.showMeBackground(this.parent);
 
-		JFormattedTextField field = (JFormattedTextField) SwingHelper.getChildNamed(panel, "p1_int_field");
+		JFormattedTextField field = (JFormattedTextField) Utils.getChildNamed(panel, "p1_int_field");
 		assertNotNull(field);
 		field.setValue(99);
 		field.postActionEvent();
 
-		JSpinner spinner = (JSpinner) SwingHelper.getChildNamed(panel, "p2_spinner");
+		JSpinner spinner = (JSpinner) Utils.getChildNamed(panel, "p2_spinner");
 		assertNotNull(spinner);
 		spinner.setValue(5);
 
@@ -405,12 +316,12 @@ public class ParametersEditorPanelTest {
 		panel.setModelData(fullParams);
 		SwingTestHelper.showMeBackground(this.parent);
 
-		JFormattedTextField field3 = (JFormattedTextField) SwingHelper.getChildNamed(panel, "p3_double_field");
+		JFormattedTextField field3 = (JFormattedTextField) Utils.getChildNamed(panel, "p3_double_field");
 		assertNotNull(field3);
 		field3.setValue(99);
 		field3.postActionEvent();
 
-		JFormattedTextField field4 = (JFormattedTextField) SwingHelper.getChildNamed(panel, "p4_double_field");
+		JFormattedTextField field4 = (JFormattedTextField) Utils.getChildNamed(panel, "p4_double_field");
 		assertNotNull(field4);
 		field4.setValue(5);
 
@@ -453,11 +364,11 @@ public class ParametersEditorPanelTest {
 		panel.setModelData(fullParams);
 		SwingTestHelper.showMeBackground(this.parent);
 
-		JComboBox combo9 = (JComboBox) SwingHelper.getChildNamed(panel, "p9_combo_box");
+		JComboBox combo9 = (JComboBox) Utils.getChildNamed(panel, "p9_combo_box");
 		assertNotNull(combo9);
 		combo9.setSelectedItem("Третий");
 
-		JComboBox combo10 = (JComboBox) SwingHelper.getChildNamed(panel, "p10_combo_box");
+		JComboBox combo10 = (JComboBox) Utils.getChildNamed(panel, "p10_combo_box");
 		assertNotNull(combo10);
 		combo10.setSelectedItem("Первый");
 
@@ -491,7 +402,7 @@ public class ParametersEditorPanelTest {
 		panel.setModelData(params1);
 		SwingTestHelper.showMeBackground(this.parent);
 
-		JFormattedTextField fmt = (JFormattedTextField) SwingHelper.getChildNamed(panel, "param1_int_field");
+		JFormattedTextField fmt = (JFormattedTextField) Utils.getChildNamed(panel, "param1_int_field");
 		assertNotNull(fmt);
 
 		parent.setVisible(false);
@@ -500,10 +411,10 @@ public class ParametersEditorPanelTest {
 		panel.setModelData(params2);
 		SwingTestHelper.showMeBackground(this.parent);
 
-		fmt = (JFormattedTextField) SwingHelper.getChildNamed(panel, "param1_int_field");
+		fmt = (JFormattedTextField) Utils.getChildNamed(panel, "param1_int_field");
 		assertNull(fmt);
 
-		fmt = (JFormattedTextField) SwingHelper.getChildNamed(panel, "param2_int_field");
+		fmt = (JFormattedTextField) Utils.getChildNamed(panel, "param2_int_field");
 		assertNotNull(fmt);
 
 		parent.setVisible(false);
@@ -514,7 +425,7 @@ public class ParametersEditorPanelTest {
 
 		// Check for skipping recreating objects if parameters are the same as previous!
 
-		JFormattedTextField newFmt = (JFormattedTextField) SwingHelper.getChildNamed(panel, "param2_int_field");
+		JFormattedTextField newFmt = (JFormattedTextField) Utils.getChildNamed(panel, "param2_int_field");
 		assertNotNull(newFmt);
 		assertTrue(fmt == newFmt);
 	}

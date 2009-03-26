@@ -19,7 +19,7 @@ public class Const {
 	public final static int MAIN_WINDOW_MINIMUM_HEIGHT = 300;
 
 	public final static String PROGRAM_NAME_FIRST = "Pattern Analytics at Single Surface";
-	public final static String VERSION = "0.1.R1";
+	public final static String VERSION = "0.1.R2";
 	public final static String BUILD = ResourceBundle.getBundle("mybuild").getString("build.number");
 
 	public final static String PROGRAM_NAME_LAST = " v." + Const.VERSION + " dev.b." + Const.BUILD;

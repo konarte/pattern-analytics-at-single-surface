@@ -26,11 +26,7 @@ public class MainFramePreCacheTest {
 
 	@After
 	public void tearDown() throws Exception {
-		if (frame != null) {
-			frame.setVisible(false);
-			frame.dispose();
-			frame = null;
-		}
+		SwingTestHelper.closeAllWindows();
 	}
 
 	@Test

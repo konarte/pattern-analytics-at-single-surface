@@ -16,7 +16,7 @@ import edu.mgupi.pass.filters.java.SimpleSharpFilter;
 import edu.mgupi.pass.filters.java.SimpleSmoothFilter;
 import edu.mgupi.pass.filters.service.HistogramFilter;
 import edu.mgupi.pass.filters.service.ResizeFilter;
-import edu.mgupi.pass.sources.TestSourceImpl;
+import edu.mgupi.pass.inputs.TestInputImpl;
 import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
 
@@ -67,11 +67,11 @@ import edu.mgupi.pass.util.SecundomerList;
  */
 public class FilterPerformanceTest {
 
-	TestSourceImpl source;
+	TestInputImpl source;
 
 	@Before
 	public void setUp() throws Exception {
-		source = new TestSourceImpl();
+		source = new TestInputImpl();
 		source.init();
 	}
 

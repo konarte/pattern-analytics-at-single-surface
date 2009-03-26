@@ -6,7 +6,7 @@ package edu.mgupi.pass.util;
  * @author raidan
  * 
  * @see WorkSet
- * @see SwingHelper
+ * @see Utils
  */
 public interface WaitCondition {
 
