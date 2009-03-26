@@ -21,7 +21,7 @@ import edu.mgupi.pass.db.locuses.LFilters;
 import edu.mgupi.pass.face.gui.template.AbstractDialogAdapter;
 import edu.mgupi.pass.face.gui.template.JTableReadOnly;
 
-public class ListDialogFilters extends JDialog {
+public class ListFiltersDialog extends JDialog {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
@@ -34,7 +34,7 @@ public class ListDialogFilters extends JDialog {
 	/**
 	 * @param owner
 	 */
-	public ListDialogFilters(Frame owner) {
+	public ListFiltersDialog(Frame owner) {
 		super(owner, true);
 		initialize();
 	}
@@ -44,8 +44,9 @@ public class ListDialogFilters extends JDialog {
 	 * 
 	 */
 	private void initialize() {
-		this.setSize(300, 200);
-		this.setMinimumSize(new Dimension(300, 200));
+		this.setSize(400, 300);
+		this.setName("listFiltersDialog");
+		this.setMinimumSize(new Dimension(400, 300));
 		this.setTitle("Список фильтров");
 		this.setContentPane(getJContentPane());
 	}
@@ -80,7 +81,7 @@ public class ListDialogFilters extends JDialog {
 					selectedClass = (String) (jTableData.getModel().getValueAt(index, getDataColumnIndex()));
 					return true;
 				} else {
-					JOptionPane.showMessageDialog(ListDialogFilters.this, "Необходимо выбрать строку.", "Внимание",
+					JOptionPane.showMessageDialog(ListFiltersDialog.this, "Необходимо выбрать строку.", "Внимание",
 							JOptionPane.WARNING_MESSAGE);
 					selectedClass = null;
 					return false;
@@ -167,7 +168,7 @@ public class ListDialogFilters extends JDialog {
 	}
 
 	protected JTable getTableDataImpl() {
-		LFilters filters[] = MainFrameDataStorage.getInstance().listLFiltersIface();
+		LFilters filters[] = AppDataStorage.getInstance().listLFilters();
 
 		String cells[][] = new String[filters.length][2];
 		for (int i = 0; i < filters.length; i++) {

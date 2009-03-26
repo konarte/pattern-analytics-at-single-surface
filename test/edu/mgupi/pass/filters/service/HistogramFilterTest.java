@@ -21,7 +21,7 @@ import edu.mgupi.pass.filters.java.ColorSpaceFilter;
 import edu.mgupi.pass.filters.java.GrayScaleFilter;
 import edu.mgupi.pass.filters.java.InvertFilter;
 import edu.mgupi.pass.filters.java.RescaleFilter;
-import edu.mgupi.pass.sources.TestSourceImpl;
+import edu.mgupi.pass.inputs.TestInputImpl;
 
 public class HistogramFilterTest {
 
@@ -61,7 +61,7 @@ public class HistogramFilterTest {
 
 	@Test
 	public void testProcess() throws Exception {
-		TestSourceImpl source = new TestSourceImpl();
+		TestInputImpl source = new TestInputImpl();
 		source.init();
 		try {
 			BufferedImage image = source.getSingleSource().getSourceImage();

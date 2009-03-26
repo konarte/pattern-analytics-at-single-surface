@@ -22,6 +22,7 @@ import edu.mgupi.pass.face.gui.SplashWindow;
 import edu.mgupi.pass.util.CacheIFactory;
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Const;
+import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
 
 /**
@@ -67,6 +68,12 @@ public class Application {
 
 	private void run() throws Exception {
 
+		Secundomer applicationRun = SecundomerList.registerSecundomer("Application run");
+		final Secundomer applicationTotal = SecundomerList.registerSecundomer("Application total work");
+
+		applicationRun.start();
+		applicationTotal.start();
+
 		// Attempt to lock file
 		final FileChannel channel = new FileOutputStream(LOCK_FILE, false).getChannel();
 		final FileLock lock = channel.tryLock();
@@ -75,6 +82,7 @@ public class Application {
 		// Then display some additional debug info
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 			public void run() {
+				applicationTotal.stop();
 				SecundomerList.printToOutput(System.out);
 				CacheIFactory.close();
 				try {
@@ -90,14 +98,23 @@ public class Application {
 			}
 		}));
 
-		// Open splash
-		// Splash is not a toy -- loading took at list 2 seconds!
-		SplashWindow splash = new SplashWindow();
-		splash.setSplashText("Загрузка...");
-		splash.setVisible(true);
-
+		SplashWindow splash = null;
 		MainFrame frame = null;
 		try {
+
+			// Open splash
+			// Splash is not a toy -- loading took at list 2 seconds!
+			try {
+				splash = new SplashWindow();
+				splash.setSplashText("Загрузка...");
+				splash.setVisible(true);
+			} catch (Exception e) {
+				applicationRun.stop();
+				AppHelper.showExceptionDialog("Ошибка при инициализации приложения.", e);
+				logger.error("Application error", e);
+				throw e;
+			}
+
 			// Set locale by default to English
 			Locale.setDefault(Locale.ENGLISH);
 
@@ -131,20 +148,24 @@ public class Application {
 				frame = (MainFrame) AppHelper.getInstance().getFrameImpl(MainFrame.class);
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-				// Caching all using windows -- this is good
-				// But, that until I write background caching ;)
+				// Caching all using windows -- this is good and fast (about 200-300 msec diff)
 				frame.preCache();
 				frame.setVisible(true);
 			} catch (Exception e) {
+				applicationRun.stop();
 				AppHelper.showExceptionDialog("Ошибка при загрузке приложения.", e);
+				logger.error("Application error", e);
 				throw e;
 			}
 		} finally {
-			splash.setVisible(false);
-			splash.dispose();
+			if (splash != null) {
+				splash.setVisible(false);
+				splash.dispose();
+			}
+			applicationRun.stop();
 		}
 
-		logger.debug("Application ready... Visible = " + frame.isVisible());
+		logger.debug("Application ready...");
 
 	}
 

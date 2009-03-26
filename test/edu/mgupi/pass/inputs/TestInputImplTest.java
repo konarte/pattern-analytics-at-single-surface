@@ -1,4 +1,4 @@
-package edu.mgupi.pass.sources;
+package edu.mgupi.pass.inputs;
 
 import static org.junit.Assert.fail;
 
@@ -8,13 +8,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TestSourceImplTest {
+public class TestInputImplTest {
 
-	private TestSourceImpl source = null;
+	private TestInputImpl source = null;
 
 	@Before
 	public void setUp() throws Exception {
-		source = new TestSourceImpl();
+		source = new TestInputImpl();
 	}
 
 	@After
@@ -45,7 +45,7 @@ public class TestSourceImplTest {
 
 		try {
 			source.init();
-			SourceStore store = source.getSingleSource();
+			InputStore store = source.getSingleSource();
 			System.out.println("Image " + store.getName() + " (" + store.getSourceImage().toString() + ")");
 		} finally {
 			source.close();

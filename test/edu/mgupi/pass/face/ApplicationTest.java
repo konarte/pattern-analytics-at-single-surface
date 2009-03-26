@@ -1,5 +1,7 @@
 package edu.mgupi.pass.face;
 
+import java.awt.Window;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,12 +35,12 @@ public class ApplicationTest {
 			}
 		}, new WaitCondition() {
 			public boolean keepWorking() {
-				return AppHelper.getInstance().searchWindow(MainFrame.class) == null;
+				Window expectedWindow = AppHelper.getInstance().searchWindow(MainFrame.class);
+				return expectedWindow == null || expectedWindow.isVisible() == false;
 			}
 		});
 		sec.stop();
 		SwingTestHelper.closeAllWindows();
-
 
 	}
 }

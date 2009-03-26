@@ -30,8 +30,8 @@ import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.Param.ParamType;
 import edu.mgupi.pass.filters.java.GrayScaleFilter;
-import edu.mgupi.pass.sources.SourceStore;
-import edu.mgupi.pass.sources.TestSourceImpl;
+import edu.mgupi.pass.inputs.InputStore;
+import edu.mgupi.pass.inputs.TestInputImpl;
 
 public class TestModuleTest {
 
@@ -86,11 +86,11 @@ public class TestModuleTest {
 	@Test
 	public void testAnalyze() throws IOException, ClassNotFoundException, ModuleException, FilterException {
 
-		TestSourceImpl source = new TestSourceImpl();
+		TestInputImpl source = new TestInputImpl();
 		source.init();
 		try {
 
-			SourceStore sourceStore = source.getSingleSource();
+			InputStore sourceStore = source.getSingleSource();
 
 			Locuses locus = LocusesFactory.createLocuses();
 			LocusSources locusSource = LocusSourcesFactory.createLocusSources();

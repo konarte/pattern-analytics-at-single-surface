@@ -12,7 +12,7 @@ import edu.mgupi.pass.db.surfaces.PassPersistentManager;
 import edu.mgupi.pass.filters.FilterChainsaw;
 import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.service.ResizeFilter;
-import edu.mgupi.pass.sources.TestSourceImpl;
+import edu.mgupi.pass.inputs.TestInputImpl;
 import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
 
@@ -73,7 +73,7 @@ public class ModuleProcessorPerformanceTest {
 	public void testCommonWork() throws InstantiationException, IllegalAccessException, FilterException, IOException,
 			ModuleException, PersistentException {
 		PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
-		TestSourceImpl source = new TestSourceImpl();
+		TestInputImpl source = new TestInputImpl();
 		source.init();
 		try {
 

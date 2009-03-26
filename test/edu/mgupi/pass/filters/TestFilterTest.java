@@ -17,7 +17,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.mgupi.pass.sources.TestSourceImpl;
+import edu.mgupi.pass.inputs.TestInputImpl;
 
 public class TestFilterTest {
 
@@ -68,7 +68,7 @@ public class TestFilterTest {
 
 	@Test
 	public void testProcess() throws Exception {
-		TestSourceImpl source = new TestSourceImpl();
+		TestInputImpl source = new TestInputImpl();
 		source.init();
 		try {
 

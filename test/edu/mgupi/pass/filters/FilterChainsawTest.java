@@ -19,7 +19,7 @@ import org.junit.Test;
 
 import edu.mgupi.pass.filters.java.ColorSpaceFilter;
 import edu.mgupi.pass.filters.java.RescaleFilter;
-import edu.mgupi.pass.sources.TestSourceImpl;
+import edu.mgupi.pass.inputs.TestInputImpl;
 
 /**
  * Test for common chainsaw
@@ -45,7 +45,7 @@ public class FilterChainsawTest {
 	}
 
 	@Test
-	public void testReset() throws InstantiationException, IllegalAccessException {
+	public void testReset() throws Exception {
 		chainsaw.appendFilter(TestFilter.class);
 		chainsaw.appendFilter(TestFilter.class);
 
@@ -65,7 +65,7 @@ public class FilterChainsawTest {
 	}
 
 	@Test
-	public void testAppendFilter() throws InstantiationException, IllegalAccessException {
+	public void testAppendFilter() throws Exception {
 		TestFilter filter = (TestFilter) chainsaw.appendFilter(TestFilter.class);
 
 		assertTrue(filter == chainsaw.getFilter(0));
@@ -98,7 +98,7 @@ public class FilterChainsawTest {
 	}
 
 	@Test
-	public void testRemoveFilter() throws InstantiationException, IllegalAccessException {
+	public void testRemoveFilter() throws Exception {
 		TestFilter filter = (TestFilter) chainsaw.appendFilter(TestFilter.class);
 		TestFilter filter2 = (TestFilter) chainsaw.appendFilter(TestFilter.class);
 
@@ -121,7 +121,7 @@ public class FilterChainsawTest {
 	}
 
 	@Test
-	public void testGetFilter() throws InstantiationException, IllegalAccessException {
+	public void testGetFilter() throws Exception {
 		TestFilter filter = (TestFilter) chainsaw.appendFilter(TestFilter.class);
 		TestFilter filter2 = (TestFilter) chainsaw.appendFilter(TestFilter.class);
 
@@ -134,7 +134,7 @@ public class FilterChainsawTest {
 	}
 
 	@Test
-	public void testMoveUpAndDown() throws InstantiationException, IllegalAccessException {
+	public void testMoveUpAndDown() throws Exception {
 		chainsaw.moveUp(0);
 		assertNull(chainsaw.getFilter(0));
 
@@ -184,7 +184,7 @@ public class FilterChainsawTest {
 	}
 
 	@Test
-	public void testAttachAndDetach() throws FilterException, InstantiationException, IllegalAccessException {
+	public void testAttachAndDetach() throws Exception {
 		BufferedImage image = new BufferedImage(256, 256, BufferedImage.TYPE_INT_RGB);
 
 		chainsaw.appendFilter(TestFilter.class);
@@ -271,7 +271,7 @@ public class FilterChainsawTest {
 
 	@Test
 	public void testCommonFilterSaw() throws Exception {
-		TestSourceImpl source = new TestSourceImpl();
+		TestInputImpl source = new TestInputImpl();
 		source.init();
 		try {
 
@@ -302,7 +302,7 @@ public class FilterChainsawTest {
 	}
 
 	@Test
-	public void testFilterSourceCaching() throws InstantiationException, IllegalAccessException {
+	public void testFilterSourceCaching() throws Exception {
 		chainsaw.close();
 		chainsaw = new FilterChainsaw(true);
 

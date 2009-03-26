@@ -1,9 +1,17 @@
 package edu.mgupi.pass.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Collection;
+
+import javax.swing.JButton;
 
 import org.junit.After;
 import org.junit.Before;
@@ -66,4 +74,58 @@ public class UtilsTest {
 		assertFalse(Utils.equals("h1", "h2"));
 	}
 
+	@Test
+	public void testAddCheckedListener() {
+		JButton button = new JButton();
+		JButton button2 = new JButton();
+
+		ActionListener listener = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				//			
+			}
+		};
+		
+		ActionListener listener2 = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				//			
+			}
+		};
+
+		Utils.addCheckedListener(button, listener);
+		Utils.addCheckedListener(button, listener2);
+		
+		Utils.addCheckedListener(button2, listener);
+		Utils.addCheckedListener(button2, listener2);
+
+		try {
+			Utils.addCheckedListener(button2, listener2);
+			fail("No exception thrown!");
+		} catch (IllegalArgumentException e) {
+			System.out.println("Received expected exception: " + e);
+		}
+		
+		try {
+			Utils.addCheckedListener(null, null);
+			fail("No exception thrown!");
+		} catch (IllegalArgumentException e) {
+			System.out.println("Received expected exception: " + e);
+		}
+		
+		try {
+			Utils.addCheckedListener(button, null);
+			fail("No exception thrown!");
+		} catch (IllegalArgumentException e) {
+			System.out.println("Received expected exception: " + e);
+		}
+		
+		try {
+			Utils.addCheckedListener(null, listener);
+			fail("No exception thrown!");
+		} catch (IllegalArgumentException e) {
+			System.out.println("Received expected exception: " + e);
+		}
+	}
+		 
 }

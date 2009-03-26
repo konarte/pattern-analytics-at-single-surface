@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.orm.PersistentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.face.gui.AppDataStorage;
 import edu.mgupi.pass.util.CacheIFactory;
 import edu.mgupi.pass.util.CacheInitiable;
 import edu.mgupi.pass.util.IInitiable;
@@ -91,32 +93,36 @@ public class FilterChainsaw {
 	 *             standard exception for {@link Class#newInstance()} method.
 	 * @throws IllegalAccessException
 	 *             standard exception for {@link Class#newInstance()} method.
+	 * @throws FilterException
+	 * @throws PersistentException
 	 * 
 	 */
 	public IFilter appendFilter(Class<? extends IFilter> filterClass) throws InstantiationException,
-			IllegalAccessException {
+			IllegalAccessException, FilterException, PersistentException {
 		return this.appendFilter(this.filterList.size(), filterClass);
 	}
 
 	public IFilter appendFilter(int index, Class<? extends IFilter> filterClass) throws InstantiationException,
-			IllegalAccessException {
+			IllegalAccessException, FilterException, PersistentException {
 		if (filterClass == null) {
 			throw new IllegalArgumentException("Internal error. filterClass must be not null.");
 		}
 
 		logger.debug("Appending filter as class {}", filterClass);
 
-		IFilter filter = this.cacheInstance.getInstance(filterClass);
+		IFilter instance = this.cacheInstance.getInstance(filterClass);
+		AppDataStorage.getInstance().checkUsingFilter(instance);
 
+		// If we using single caching -- we don't add additional instance to filter list
 		if (!singleInstanceCaching || this.searchFilterClass(filterClass) == -1) {
-			filterList.add(index, filter);
+			filterList.add(index, instance);
 		}
 
-		if (this.sourceImage != null && filter instanceof IFilterAttachable) {
-			((IFilterAttachable) filter).onAttachToImage(sourceImage);
+		if (this.sourceImage != null && instance instanceof IFilterAttachable) {
+			((IFilterAttachable) instance).onAttachToImage(sourceImage);
 		}
 
-		return filter;
+		return instance;
 	}
 
 	//	/**

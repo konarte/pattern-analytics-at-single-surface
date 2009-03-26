@@ -76,7 +76,7 @@ public class AppHelper {
 			instance.components.clear();
 			instance = null;
 		}
-		MainFrameDataStorage.reset();
+		AppDataStorage.reset();
 	}
 
 	private IProgress progressInterface;
@@ -135,6 +135,21 @@ public class AppHelper {
 		componentsLock.lock();
 		try {
 			components.remove(c);
+		} finally {
+			componentsLock.unlock();
+		}
+	}
+
+	/**
+	 * Return count of components, registered by
+	 * {@link #registerAdditionalComponent(Component)}
+	 * 
+	 * @return count of components
+	 */
+	public int getRegisteredComponentCount() {
+		componentsLock.lock();
+		try {
+			return components.size();
 		} finally {
 			componentsLock.unlock();
 		}
@@ -269,6 +284,37 @@ public class AppHelper {
 	}
 
 	/**
+	 * Return count of windows registered by
+	 * {@link #registerAdditionalWindow(Class)} or
+	 * {@link #getWindowImpl(Class, boolean)} with true flag
+	 * 
+	 * @return count of additional windows
+	 */
+	public int getAdditionalWindowsCount() {
+		cachedLock.lock();
+		try {
+			return additionalWindows.size();
+		} finally {
+			cachedLock.unlock();
+		}
+	}
+
+	/**
+	 * Return count of cached windows registered by
+	 * {@link #getWindowImpl(Class, boolean)} with false flag
+	 * 
+	 * @return count of cached windows
+	 */
+	public int getCachedWindowsCount() {
+		cachedLock.lock();
+		try {
+			return windowsCollection.size();
+		} finally {
+			cachedLock.unlock();
+		}
+	}
+
+	/**
 	 * Search window in registered cache. Cached filled by methods
 	 * {@link #getDialog(Class)}, {@link #getDialogImpl(Class)},
 	 * {@link #getFrameImpl(Class)}.
@@ -357,8 +403,8 @@ public class AppHelper {
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout());
-		panel.add(new JLabel("<html><h2>" + Utils.splitStingBySlices(message, 60, "<br>") + "</h2><b>" + e
-				+ "</b><hr></html>"), BorderLayout.NORTH);
+		panel.add(new JLabel("<html><h2>" + Utils.splitStingBySlices(message, 60, "<br>") + "</h2><b>"
+				+ Utils.splitStingBySlices(e.toString(), 100, "<br>") + "</b><hr></html>"), BorderLayout.NORTH);
 
 		// Creating text area for big stack :)
 		JTextArea area = new JTextArea(out.toString());

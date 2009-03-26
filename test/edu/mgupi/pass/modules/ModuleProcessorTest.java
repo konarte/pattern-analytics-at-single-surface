@@ -21,8 +21,8 @@ import edu.mgupi.pass.db.surfaces.PassPersistentManager;
 import edu.mgupi.pass.filters.FilterChainsaw;
 import edu.mgupi.pass.filters.java.GrayScaleFilter;
 import edu.mgupi.pass.filters.service.ResizeFilter;
+import edu.mgupi.pass.inputs.TestInputImpl;
 import edu.mgupi.pass.modules.basic.SimpleMatrixModule;
-import edu.mgupi.pass.sources.TestSourceImpl;
 import edu.mgupi.pass.util.SecundomerList;
 
 public class ModuleProcessorTest {
@@ -49,7 +49,7 @@ public class ModuleProcessorTest {
 	@Test
 	public void testCommonWork() throws Exception {
 		PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
-		TestSourceImpl source = new TestSourceImpl();
+		TestInputImpl source = new TestInputImpl();
 		source.init();
 		try {
 
@@ -123,7 +123,7 @@ public class ModuleProcessorTest {
 	@Test
 	public void testPreprocessingWork() throws Exception {
 		PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
-		TestSourceImpl source = new TestSourceImpl();
+		TestInputImpl source = new TestInputImpl();
 		source.init();
 		try {
 
@@ -133,8 +133,6 @@ public class ModuleProcessorTest {
 			ResizeFilter resize = (ResizeFilter) preprocessingSaw.appendFilter(ResizeFilter.class);
 			resize.getWIDTH().setValue(1024);
 			resize.getHEIGHT().setValue(1024);
-
-			
 
 			processor.getChainsaw().appendFilter(GrayScaleFilter.class);
 
@@ -189,7 +187,7 @@ public class ModuleProcessorTest {
 	@Test
 	public void testEmptyFilters() throws Exception {
 		PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
-		TestSourceImpl source = new TestSourceImpl();
+		TestInputImpl source = new TestInputImpl();
 		source.init();
 		try {
 

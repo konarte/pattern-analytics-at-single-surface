@@ -66,14 +66,14 @@ import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.java.GrayScaleFilter;
 import edu.mgupi.pass.filters.service.PlaceImageFilter;
 import edu.mgupi.pass.filters.service.ResizeFilter;
+import edu.mgupi.pass.inputs.InputStore;
+import edu.mgupi.pass.inputs.gui.SingleFilePick;
 import edu.mgupi.pass.modules.IModule;
 import edu.mgupi.pass.modules.ModuleHelper;
 import edu.mgupi.pass.modules.ModuleProcessor;
-import edu.mgupi.pass.sources.SourceStore;
-import edu.mgupi.pass.sources.gui.SingleFilePick;
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Const;
-import edu.mgupi.pass.util.SwingHelper;
+import edu.mgupi.pass.util.Utils;
 import edu.mgupi.pass.util.Config.SourceMode;
 
 public class MainFrame extends JFrame implements IProgress, ActionListener {
@@ -99,7 +99,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 
 	private static enum Actions {
 		notImplemented, // 
-		open, openMass, openFilterSet, saveFilterSet, settings, exit, //
+		open, close, openMass, openFilterSet, saveFilterSet, settings, exit, //
 		filterList, modulesList, //
 		help, about, //
 
@@ -111,7 +111,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 	private void registerAction(AbstractButton button, Actions action) {
 		button.setName(action.name());
 		button.setActionCommand(action.name());
-		SwingHelper.addCheckedListener(button, this);
+		Utils.addCheckedListener(button, this);
 	}
 
 	/**
@@ -148,10 +148,10 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 	public void preCache() throws Exception {
 		AppHelper.getInstance().getDialogImpl(SettingsDialog.class);
 		AppHelper.getInstance().getDialogImpl(AboutDialog.class);
-		AppHelper.getInstance().getDialogImpl(ParametersEditor.class);
-		AppHelper.getInstance().getDialogImpl(FiltersEditor.class);
-		AppHelper.getInstance().getDialogImpl(ListDialogFilters.class);
-		AppHelper.getInstance().getDialogImpl(ListDialogModules.class);
+		AppHelper.getInstance().getDialogImpl(ParametersEditorDialog.class);
+		AppHelper.getInstance().getDialogImpl(FiltersEditorDialog.class);
+		AppHelper.getInstance().getDialogImpl(ListFiltersDialog.class);
+		AppHelper.getInstance().getDialogImpl(ListModulesDialog.class);
 
 		this.getfSChooser();
 	}
@@ -181,7 +181,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		moduleFrame.registerControlCheckbox(this.jCheckBoxModuleGraphic);
 		moduleFrame.setTitle("Модуль не выбран");
 		moduleFrame.setName("moduleFrameWindow");
-		moduleFrame.setLocation(100, 200 + histogramFrame.getHeight());
+		moduleFrame.setLocation(100, 200 + histogramFrame.getHeight() + 20);
 		Config.getInstance().loadWindowPosition(moduleFrame);
 
 		Config.getInstance().loadWindowCheckBoxes(this);
@@ -191,8 +191,6 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 
 		LModules item = (LModules) jComboBoxModules.getSelectedItem();
 		MainFrame.this.setModule((Class<IModule>) Class.forName(item.getCodename()));
-
-		this.applySourcePreProcessor();
 
 		mainModuleProcessor.getChainsaw().appendFilter(GrayScaleFilter.class);
 		this.filtersModel.setChainsaw(mainModuleProcessor.getChainsaw());
@@ -240,16 +238,21 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		this.clearMessage();
 	}
 
-	private SourceStore currentSource = null; //  @jve:decl-index=0:
+	protected boolean isProcessStarted() {
+		return this.processStarted;
+	}
+
+	private boolean processStarted = false;
+	private InputStore currentSource = null; //  @jve:decl-index=0:
 	private Locuses currentLocus = null; // @jve:decl-index=0:
 
-	private String originalImageInfo = "";
+	private String originalImageInfo = ""; //  @jve:decl-index=0:
 	private String filteredImageInfo = "";
 
 	// private CacheInitiable<IFilter> preprocessingCache = new
 	// CacheInitiable<IFilter>(); // @jve:decl-index=0:
 
-	protected void startProcessing(SourceStore source) throws Exception {
+	protected void startProcessingImpl(InputStore source) throws Exception {
 
 		if (source == null) {
 			logger.debug("Nothing to process...");
@@ -259,37 +262,57 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			return;
 		}
 
+		this.closeProcessing();
+
 		logger.debug("Start loading source " + source.getName());
 
 		this.setTitle(Const.PROGRAM_NAME_FULL + " -- " + source.getName());
+		this.processStarted = true;
 
-		// This is must be safe!!!!
-		// I can stop wherever I want!
-		mainModuleProcessor.finishProcessing();
+		try {
+
+			this.applySourcePreProcessor();
+
+			// Main cycle
+			currentLocus = mainModuleProcessor.startProcessing(source);
+
+			BufferedImage sourceImage = source.getSourceImage();
+			BufferedImage filteredImage = mainModuleProcessor.getLastProcessedImage();
+			originalImageInfo = "" + sourceImage.getWidth() + "x" + sourceImage.getHeight() + " "
+					+ sourceImage.getColorModel().getPixelSize() + " bpp";
+
+			filteredImageInfo = "" + filteredImage.getWidth() + "x" + filteredImage.getHeight() + " "
+					+ filteredImage.getColorModel().getPixelSize() + " bpp";
+
+			jLabelImageInfo.setText(jTabbedPaneImages.getSelectedIndex() == 0 ? this.originalImageInfo
+					: this.filteredImageInfo);
+
+			// Locuses locus = mainModuleProcessor.startProcessing(source);
+			// REQUIRED SQUARE BASE!
+			this.jPanelImageFiltered.setImage(filteredImage, true);
+			this.jPanelImageSource.setImage(sourceImage);
+			this.histogramFrame.setImage(mainModuleProcessor.getLastHistogramImage());
+
+			this.applyModuleProcessing();
+		} catch (Exception e) {
+			this.processStarted = false;
+			throw e;
+		}
+
+	}
+
+	protected void closeProcessing() {
 		currentLocus = null;
-		currentSource = source;
+		currentSource = null;
+		originalImageInfo = "";
+		filteredImageInfo = "";
+		this.jPanelImageFiltered.setImage(null);
+		this.jPanelImageSource.setImage(null);
+		this.histogramFrame.setImage(null);
+		this.mainModuleProcessor.finishProcessing();
+		this.moduleFrame.setImage(null);
 
-		// Main cycle
-		currentLocus = mainModuleProcessor.startProcessing(source);
-
-		BufferedImage sourceImage = source.getSourceImage();
-		BufferedImage filteredImage = mainModuleProcessor.getLastProcessedImage();
-		originalImageInfo = "" + sourceImage.getWidth() + "x" + sourceImage.getHeight() + " "
-				+ sourceImage.getColorModel().getPixelSize() + " bpp";
-
-		filteredImageInfo = "" + filteredImage.getWidth() + "x" + filteredImage.getHeight() + " "
-				+ filteredImage.getColorModel().getPixelSize() + " bpp";
-
-		jLabelImageInfo.setText(jTabbedPaneImages.getSelectedIndex() == 0 ? this.originalImageInfo
-				: this.filteredImageInfo);
-
-		// Locuses locus = mainModuleProcessor.startProcessing(source);
-		// REQUIRED SQUARE BASE!
-		this.jPanelImageFiltered.setImage(filteredImage, true);
-		this.jPanelImageSource.setImage(sourceImage);
-		this.histogramFrame.setImage(mainModuleProcessor.getLastHistogramImage());
-		this.moduleFrame.setImage(ModuleHelper.getTemporaryModuleImage(this.currentLocus));
-
+		this.processStarted = false;
 	}
 
 	protected void restartProcessingBySource() {
@@ -311,8 +334,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 	}
 
 	protected void restartProcessingBySourceImpl() throws Exception {
-		this.applySourcePreProcessor();
-		this.startProcessing(this.currentSource);
+		this.startProcessingImpl(this.currentSource);
 	}
 
 	private void applySourcePreProcessor() throws Exception {
@@ -324,7 +346,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		FilterChainsaw preProcessing = mainModuleProcessor.getPreChainsaw();
 
 		SourceMode sourceScaleMode = Config.getInstance().getCurrentSourceMode();
-		int background = Config.getInstance().getCurrentBackground();
+		Color background = Config.getInstance().getCurrentBackground();
 
 		if (sourceScaleMode == SourceMode.CENTER || sourceScaleMode == SourceMode.LEFT_TOP) {
 
@@ -334,7 +356,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			place.getWIDTH().setValue(Const.MAIN_IMAGE_WIDTH);
 			place.getHEIGHT().setValue(Const.MAIN_IMAGE_HEIGHT);
 
-			place.getBACKGROUND().setValue(new Color(background));
+			place.getBACKGROUND().setValue(background);
 			place.getPLACE().setValue(sourceScaleMode == SourceMode.CENTER ? "center" : "topleft");
 
 		} else {
@@ -388,10 +410,8 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 
 	private void applyModuleProcessing() throws Exception {
 
-		if (currentLocus != null) {
+		if (this.processStarted) {
 			this.moduleFrame.setImage(ModuleHelper.getTemporaryModuleImage(this.currentLocus));
-		} else {
-			this.moduleFrame.setImage(null);
 		}
 	}
 
@@ -414,7 +434,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 
 	protected void restartProcessingByFiltersImpl() throws Exception {
 		this.filtersModel.updateFiltersImpl();
-		this.startProcessing(this.currentSource);
+		this.startProcessingImpl(this.currentSource);
 	}
 
 	public void clearMessage() {
@@ -465,6 +485,8 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			jMenuFile = new JMenu();
 			jMenuFile.setText("Файл");
 			jMenuFile.add(getJMenuItemOpen());
+			jMenuFile.add(getJMenuItemClose());
+			jMenuFile.addSeparator();
 			jMenuFile.add(getJMenuItemOpenMass());
 			jMenuFile.addSeparator();
 			jMenuFile.add(getJMenuItemOpenFilterSet());
@@ -906,6 +928,8 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 
 	private JMenuItem jMenuItemSaveFilterSet = null;
 
+	private JMenuItem jMenuItemClose = null;
+
 	static class FiltersModel extends AbstractListModel {
 
 		/**
@@ -1261,7 +1285,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 	 */
 	private JComboBox getJComboBoxModules() {
 		if (jComboBoxModules == null) {
-			jComboBoxModules = new JComboBox(MainFrameDataStorage.getInstance().listLModulesIface());
+			jComboBoxModules = new JComboBox(AppDataStorage.getInstance().listLModules());
 			jComboBoxModules.setName("module");
 			jComboBoxModules.addActionListener(new ActionListener() {
 
@@ -1501,6 +1525,21 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		return jMenuItemSaveFilterSet;
 	}
 
+	/**
+	 * This method initializes jMenuItemClose
+	 * 
+	 * @return javax.swing.JMenuItem
+	 */
+	private JMenuItem getJMenuItemClose() {
+		if (jMenuItemClose == null) {
+			jMenuItemClose = new JMenuItem();
+			jMenuItemClose.setText("Закрыть");
+			jMenuItemClose.setEnabled(false);
+			registerAction(jMenuItemClose, Actions.close);
+		}
+		return jMenuItemClose;
+	}
+
 	private JFileChooser fSChooser = null;
 
 	private JFileChooser getfSChooser() {
@@ -1539,13 +1578,17 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			// Open new image
 			try {
 				this.printMessage("Открытие нового годографа");
-				this.startProcessing(this.singleFilePicker.getSingleSource());
+				this.startProcessingImpl(this.singleFilePicker.getSingleSource());
+				this.jMenuItemClose.setEnabled(true);
 			} catch (Exception e1) {
 				logger.error("Error when picking new image for processing", e1);
 				AppHelper.showExceptionDialog("Error when processing image.", e1);
 			} finally {
 				this.clearMessage();
 			}
+		} else if (action == Actions.close) {
+			this.closeProcessing();
+			this.jMenuItemClose.setEnabled(false);
 		} else if (action == Actions.saveFilterSet) {
 			JFileChooser chooser = getfSChooser();
 			int ret = chooser.showSaveDialog(this);
@@ -1573,7 +1616,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 				try {
 					this.mainModuleProcessor.loadSettingsFromFile(newFile);
 					this.restartProcessingByFiltersImpl();
-					this.jComboBoxModules.setSelectedItem(MainFrameDataStorage.getInstance().getModuleByInstance(
+					this.jComboBoxModules.setSelectedItem(AppDataStorage.getInstance().getModuleByInstance(
 							this.mainModuleProcessor.getModule()));
 
 				} catch (Exception e1) {
@@ -1594,15 +1637,15 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			System.exit(0);
 		} else if (action == Actions.filterList) {
 			// View all registered filters
-			ListDialogFilters filterList = (ListDialogFilters) AppHelper.getInstance().getDialog(
-					ListDialogFilters.class);
+			ListFiltersDialog filterList = (ListFiltersDialog) AppHelper.getInstance().getDialog(
+					ListFiltersDialog.class);
 			if (filterList != null) {
 				filterList.showDialogCancelOnly();
 			}
 		} else if (action == Actions.modulesList) {
 			// View all registered modules
-			ListDialogModules modulesList = (ListDialogModules) AppHelper.getInstance().getDialog(
-					ListDialogModules.class);
+			ListModulesDialog modulesList = (ListModulesDialog) AppHelper.getInstance().getDialog(
+					ListModulesDialog.class);
 			if (modulesList != null) {
 				modulesList.showDialogCancelOnly();
 			}
@@ -1626,13 +1669,13 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			JOptionPane.showMessageDialog(null, "Not implemented yet.", "Info", JOptionPane.INFORMATION_MESSAGE);
 		} else if (action == Actions.editCurrentFilters) {
 			// 
-			FiltersEditor editor = (FiltersEditor) AppHelper.getInstance().getDialog(FiltersEditor.class);
+			FiltersEditorDialog editor = (FiltersEditorDialog) AppHelper.getInstance().getDialog(FiltersEditorDialog.class);
 			if (editor != null
 					&& editor.openDialog("Основные фильтры", MainFrame.this.mainModuleProcessor.getChainsaw())) {
 				this.restartProcessingByFilters();
 			}
 		} else if (action == Actions.editCurrentModuleParams) {
-			ParametersEditor editor = (ParametersEditor) AppHelper.getInstance().getDialog(ParametersEditor.class);
+			ParametersEditorDialog editor = (ParametersEditorDialog) AppHelper.getInstance().getDialog(ParametersEditorDialog.class);
 			if (editor != null
 					&& editor.openDialog(mainModuleProcessor.getModule().getName(), mainModuleProcessor.getModule()
 							.getParams())) {
@@ -1645,4 +1688,5 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		}
 
 	}
+
 }

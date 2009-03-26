@@ -20,9 +20,9 @@ import edu.mgupi.pass.face.gui.template.AbstractDialogAdapter;
 import edu.mgupi.pass.face.gui.template.ParametersEditorPanel;
 import edu.mgupi.pass.filters.Param;
 
-public class ParametersEditor extends JDialog implements ActionListener {
+public class ParametersEditorDialog extends JDialog implements ActionListener {
 
-	Logger logger = LoggerFactory.getLogger(ParametersEditor.class);
+	Logger logger = LoggerFactory.getLogger(ParametersEditorDialog.class);
 
 	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
@@ -37,7 +37,7 @@ public class ParametersEditor extends JDialog implements ActionListener {
 	 * 
 	 * @param owner
 	 */
-	public ParametersEditor(Frame owner) {
+	public ParametersEditorDialog(Frame owner) {
 		super(owner, true);
 		initialize();
 	}
@@ -50,7 +50,7 @@ public class ParametersEditor extends JDialog implements ActionListener {
 		this.setSize(400, 300);
 		this.setMinimumSize(new Dimension(400, 200));
 		this.setResizable(false);
-		this.setName("frameEditModuleParameters");
+		this.setName("parametersEditorDialog");
 		this.setContentPane(getJContentPane());
 		this.setTitle("Редактирование параметров модуля");
 

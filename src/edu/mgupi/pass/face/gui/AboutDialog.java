@@ -3,7 +3,6 @@ package edu.mgupi.pass.face.gui;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Desktop;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
@@ -162,6 +161,8 @@ public class AboutDialog extends JDialog {
 	private JLabel jLabelProps = null;
 	private JLabel jLabelLibraries = null;
 
+	private JLabel jLabelLink = null;
+
 	/**
 	 * This method initializes jPanelData
 	 * 
@@ -169,6 +170,38 @@ public class AboutDialog extends JDialog {
 	 */
 	private JPanel getJPanelData() {
 		if (jPanelData == null) {
+			GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
+			gridBagConstraints1.gridy = 6;
+			gridBagConstraints1.insets = new Insets(0, 0, 10, 0);
+			gridBagConstraints1.gridx = 0;
+			jLabelLink = new JLabel();
+
+			// Clicking on HTTP link
+			// Direct to internet page with our project 
+			jLabelLink.addMouseListener(new MouseAdapter() {
+				public void mouseClicked(MouseEvent e) {
+					try {
+						Desktop.getDesktop().browse(new URI(Const.WEB_PROJECT_PAGE));
+					} catch (Exception e1) {
+						logger.debug("Error when opening link", e1);
+						AppHelper.showExceptionDialog("Unexpected eror when opening project link '"
+								+ Const.WEB_PROJECT_PAGE + "'.", e1);
+					}
+				}
+
+				// Cursor with hand-point
+				public void mouseEntered(MouseEvent e) {
+					jLabelLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+				}
+
+				public void mouseReleased(MouseEvent e) {
+					jLabelLink.setCursor(Cursor.getDefaultCursor());
+				}
+
+			});
+			jLabelLink.setText("<html><center><a href=\"" + Const.WEB_HELP_PAGE + "\">" + Const.WEB_PROJECT_PAGE
+					+ "</a></html>");
+
 			GridBagConstraints gridBagConstraints41 = new GridBagConstraints();
 			gridBagConstraints41.gridx = 0;
 			gridBagConstraints41.anchor = GridBagConstraints.CENTER;
@@ -201,43 +234,21 @@ public class AboutDialog extends JDialog {
 			gridBagConstraints4.gridx = 0;
 			GridBagConstraints gridBagConstraints11 = new GridBagConstraints();
 			gridBagConstraints11.gridx = 0;
-			gridBagConstraints11.insets = new Insets(10, 0, 10, 0);
+			gridBagConstraints11.insets = new Insets(10, 0, 0, 0);
 			gridBagConstraints11.fill = GridBagConstraints.HORIZONTAL;
 			gridBagConstraints11.weightx = 1.0D;
 			gridBagConstraints11.anchor = GridBagConstraints.CENTER;
 			gridBagConstraints11.gridwidth = 1;
 			gridBagConstraints11.gridy = 5;
+
 			jLabelAuthor = new JLabel();
 
-			// Clicking on HTTP link
-			// Direct to internet page with our project 
-			jLabelAuthor.addMouseListener(new MouseAdapter() {
-				public void mouseClicked(MouseEvent e) {
-					try {
-						Desktop.getDesktop().browse(new URI(Const.WEB_PROJECT_PAGE));
-					} catch (Exception e1) {
-						logger.debug("Error when opening link", e1);
-						AppHelper.showExceptionDialog("Unexpected eror when opening project link '"
-								+ Const.WEB_PROJECT_PAGE + "'.", e1);
-					}
-				}
-
-				// Cursor with hand-point
-				public void mouseEntered(MouseEvent e) {
-					jLabelAuthor.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				}
-
-				public void mouseReleased(MouseEvent e) {
-					jLabelAuthor.setCursor(Cursor.getDefaultCursor());
-				}
-
-			});
-
-			jLabelAuthor.setText("<html><center><hr>(c) raidan, Konart 2009</center>См. <a href=\""
-					+ Const.WEB_HELP_PAGE + "\">" + Const.WEB_PROJECT_PAGE + "</a></html>");
+			jLabelAuthor.setText("<html><hr>(c) raidan, Konart 2009</html>");
 			jLabelAuthor.setHorizontalAlignment(SwingConstants.CENTER);
-			jLabelAuthor.setHorizontalTextPosition(SwingConstants.TRAILING);
-			jLabelAuthor.setPreferredSize(new Dimension(200, 40));
+			//jLabelAuthor.setHorizontalTextPosition(SwingConstants.TRAILING);
+			//jLabelAuthor.setPreferredSize(new Dimension(200, 40));
+			jLabelAuthor.setName("authors");
+
 			GridBagConstraints gridBagConstraints = new GridBagConstraints();
 			gridBagConstraints.insets = new Insets(0, 15, 5, 15);
 			gridBagConstraints.gridy = 0;
@@ -255,9 +266,10 @@ public class AboutDialog extends JDialog {
 			jPanelData.add(jLabelProgramTitle, gridBagConstraints);
 			jPanelData.add(jLabelProps, gridBagConstraints3);
 			jPanelData.add(getJScrollPaneProps(), gridBagConstraints4);
+			jPanelData.add(jLabelLibraries, gridBagConstraints41);
 			jPanelData.add(getJScrollPaneLibraries(), gridBagConstraints2);
 			jPanelData.add(jLabelAuthor, gridBagConstraints11);
-			jPanelData.add(jLabelLibraries, gridBagConstraints41);
+			jPanelData.add(jLabelLink, gridBagConstraints1);
 		}
 		return jPanelData;
 	}

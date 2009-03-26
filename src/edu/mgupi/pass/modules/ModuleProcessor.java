@@ -28,6 +28,7 @@ import edu.mgupi.pass.db.locuses.LocusSources;
 import edu.mgupi.pass.db.locuses.LocusSourcesFactory;
 import edu.mgupi.pass.db.locuses.Locuses;
 import edu.mgupi.pass.db.locuses.LocusesFactory;
+import edu.mgupi.pass.face.gui.AppDataStorage;
 import edu.mgupi.pass.filters.FilterChainsaw;
 import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
@@ -36,7 +37,7 @@ import edu.mgupi.pass.filters.NoSuchParamException;
 import edu.mgupi.pass.filters.ParamHelper;
 import edu.mgupi.pass.filters.service.HistogramFilter;
 import edu.mgupi.pass.filters.service.ResizeFilter;
-import edu.mgupi.pass.sources.SourceStore;
+import edu.mgupi.pass.inputs.InputStore;
 import edu.mgupi.pass.util.CacheIFactory;
 import edu.mgupi.pass.util.CacheInitiable;
 import edu.mgupi.pass.util.Const;
@@ -68,9 +69,11 @@ public class ModuleProcessor {
 	 * @throws IllegalAccessException
 	 * @throws IllegalParameterValueException
 	 * @throws NoSuchParamException
+	 * @throws FilterException
+	 * @throws PersistentException
 	 */
 	public ModuleProcessor() throws InstantiationException, IllegalAccessException, IllegalParameterValueException,
-			NoSuchParamException {
+			NoSuchParamException, FilterException, PersistentException {
 
 		histogramFilter = new HistogramFilter();
 
@@ -138,6 +141,7 @@ public class ModuleProcessor {
 		logger.debug("Registering module as class {}", moduleClass);
 
 		IModule instance = cachedModules.getInstance(moduleClass);
+		AppDataStorage.getInstance().checkUsingModule(instance);
 
 		this.module = instance;
 		this.updateModule();
@@ -209,7 +213,7 @@ public class ModuleProcessor {
 
 	private Locuses lastLocus = null;
 
-	public Locuses startProcessing(SourceStore store) throws FilterException, IOException, ModuleException,
+	public Locuses startProcessing(InputStore store) throws FilterException, IOException, ModuleException,
 			PersistentException {
 		if (this.module == null) {
 			throw new IllegalStateException("Internal error. module must be not null");
@@ -324,7 +328,7 @@ public class ModuleProcessor {
 		}
 	}
 
-	public void finishProcessing() throws PersistentException {
+	public void finishProcessing() {
 		lastLocus = null;
 		lastProcessedImage = null;
 		lastThumbImage = null;
@@ -347,7 +351,7 @@ public class ModuleProcessor {
 		LOCUS_DATA.start();
 		try {
 
-			String codename = module.getClass().getCanonicalName();
+			String codename = module.getClass().getName();
 			LModules lModule = LModulesFactory.loadLModulesByQuery("codename = '" + codename + "'", null);
 			if (lModule == null) {
 				throw new FilterException("Unexpected error. Unable to find properly registed module " + codename);
@@ -372,7 +376,7 @@ public class ModuleProcessor {
 				LocusAppliedFilters locusFilter = LocusAppliedFiltersFactory.createLocusAppliedFilters();
 				//locusFilter.setOptions(ParamHelper.convertParamsToJSON(filter));
 
-				String codename = filter.getClass().getCanonicalName();
+				String codename = filter.getClass().getName();
 				LFilters dbFilter = LFiltersFactory.loadLFiltersByQuery("codename = '" + codename + "'", null);
 				if (dbFilter == null) {
 					throw new FilterException("Unexpected error. Unable to find properly registed filter " + codename);
@@ -428,11 +432,11 @@ public class ModuleProcessor {
 			writer.write("# " + file.getName() + "\n");
 			writer.write("# " + fmt.format(new Date()) + "\n\n");
 
-			writer.write("module=" + this.module.getClass().getCanonicalName() + "=");
+			writer.write("module=" + this.module.getClass().getName() + "=");
 			writer.write(ParamHelper.convertParamsToJSON(this.module.getParams()));
 			writer.write("\n");
 			for (IFilter filter : this.processingChainsaw.getFilters()) {
-				writer.write(filter.getClass().getCanonicalName() + "=");
+				writer.write(filter.getClass().getName() + "=");
 				writer.write(ParamHelper.convertParamsToJSON(filter));
 				writer.write("\n");
 			}
@@ -474,7 +478,7 @@ public class ModuleProcessor {
 				if (line.startsWith("module=")) {
 					if (moduleSet) {
 						throw new Exception("Line " + idx + ". File contains more than one module. "
-								+ this.module.getClass().getCanonicalName() + " already set up.");
+								+ this.module.getClass().getName() + " already set up.");
 					}
 					String class_ = line.substring("module=".length());
 					int pos = class_.indexOf("=");

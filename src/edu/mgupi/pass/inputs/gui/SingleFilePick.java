@@ -1,4 +1,4 @@
-package edu.mgupi.pass.sources.gui;
+package edu.mgupi.pass.inputs.gui;
 
 import java.awt.Dimension;
 import java.awt.Image;
@@ -20,10 +20,10 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.face.gui.AppHelper;
 import edu.mgupi.pass.face.gui.MainFrame;
-import edu.mgupi.pass.sources.ISource;
-import edu.mgupi.pass.sources.SourceStore;
+import edu.mgupi.pass.inputs.IInput;
+import edu.mgupi.pass.inputs.InputStore;
 
-public class SingleFilePick implements ISource {
+public class SingleFilePick implements IInput {
 
 	private final static Logger logger = LoggerFactory.getLogger(SingleFilePick.class);
 
@@ -83,14 +83,14 @@ public class SingleFilePick implements ISource {
 		}
 	}
 
-	public SourceStore getSingleSource() throws IOException {
+	public InputStore getSingleSource() throws IOException {
 		// Do not forget about that!
 		// We can change LaF!
 		chooser.repaint();
 
 		// Let's pick them
 		int result = chooser.showOpenDialog(AppHelper.getInstance().searchWindow(MainFrame.class));
-		if (result == JFileChooser.APPROVE_OPTION) {
+		if (result == JFileChooser.APPROVE_OPTION && chooser.getSelectedFile() != null) {
 			String imagePath = chooser.getSelectedFile().getPath();
 
 			// Lake an TestSourceImpl
@@ -104,7 +104,7 @@ public class SingleFilePick implements ISource {
 				input.close();
 			}
 
-			return new SourceStore(file.getName(), ImageIO.read(file), buffer);
+			return new InputStore(file.getName(), ImageIO.read(file), buffer);
 		} else {
 			return null;
 		}

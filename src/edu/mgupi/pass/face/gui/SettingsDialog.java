@@ -9,13 +9,13 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -37,11 +37,16 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.face.gui.template.AbstractDialogAdapter;
 import edu.mgupi.pass.util.Config;
-import edu.mgupi.pass.util.Const;
 import edu.mgupi.pass.util.Config.DeletionMode;
 import edu.mgupi.pass.util.Config.SourceMode;
 
-public class SettingsDialog extends JDialog implements ActionListener {
+/**
+ * Settings dialog. Current (for loaded images) and common settings.
+ * 
+ * @author raidan
+ * 
+ */
+public class SettingsDialog extends JDialog {
 
 	private final static Logger logger = LoggerFactory.getLogger(SettingsDialog.class); // @jve:decl-index=0:
 
@@ -50,12 +55,14 @@ public class SettingsDialog extends JDialog implements ActionListener {
 	private JPanel jPanelButtons = null;
 	private JButton jButtonOK = null;
 	private JButton jButtonCancel = null;
-	private JPanel jPanelCommon = null;
+	private JPanel jPanelSettings = null;
 	private JPanel jPanelLaF = null;
 	private JComboBox jComboBoxLaF = null;
 	private JLabel jLabelLaF = null;
 
 	/**
+	 * Default constructor
+	 * 
 	 * @param owner
 	 */
 	public SettingsDialog(Frame owner) {
@@ -78,7 +85,17 @@ public class SettingsDialog extends JDialog implements ActionListener {
 
 		// -------------------
 
-		this.resetSettings();
+		this.resetControls();
+	}
+
+	/**
+	 * Default method for open this dialog.
+	 * 
+	 * @return true is changed Current settings, false if Current settings are
+	 *         not changed (Common settings does not affect to this)
+	 */
+	public boolean openDialog() {
+		return getDialogAdapter().openDialog();
 	}
 
 	private AbstractDialogAdapter myDialogAdapter = null; //  @jve:decl-index=0:
@@ -91,7 +108,7 @@ public class SettingsDialog extends JDialog implements ActionListener {
 
 			@Override
 			protected void cancelImpl() throws Exception {
-				SettingsDialog.this.resetSettings();
+				SettingsDialog.this.resetControls();
 			}
 
 			@Override
@@ -126,8 +143,8 @@ public class SettingsDialog extends JDialog implements ActionListener {
 					needRestartProcessing = true;
 				}
 
-				if (Config.getInstance().setCurrentBackground(newBackground.getRGB())) {
-					logger.debug("New background changed (to {}). Restart process.", newBackground.getRGB());
+				if (Config.getInstance().setCurrentBackground(newBackground)) {
+					logger.debug("New background changed (to {}). Restart process.", newBackground);
 					needRestartProcessing = true;
 				}
 
@@ -143,21 +160,20 @@ public class SettingsDialog extends JDialog implements ActionListener {
 		return myDialogAdapter;
 	}
 
-	public boolean openDialog() {
-		return getDialogAdapter().openDialog();
-	}
-
 	private Color newBackground = null; // @jve:decl-index=0:
 	private DeletionMode currentDeletionMode = null; //  @jve:decl-index=0:
 
-	private void resetSettings() {
+	/**
+	 * Reset current control by its values in {@link Config}
+	 */
+	protected void resetControls() {
 
 		SourceMode currentSource = Config.getInstance().getCurrentSourceMode();
 
 		jComboBoxLaF.setSelectedItem(UIManager.getLookAndFeel().getName());
 		jComboBoxSourceMode.setSelectedItem(currentSource);
 
-		Color currentBackground = new Color(Config.getInstance().getCurrentBackground());
+		Color currentBackground = Config.getInstance().getCurrentBackground();
 		newBackground = currentBackground;
 		jLabelBackgroundShow.setBackground(currentBackground);
 
@@ -175,7 +191,7 @@ public class SettingsDialog extends JDialog implements ActionListener {
 		if (jContentPane == null) {
 			jContentPane = new JPanel();
 			jContentPane.setLayout(new BorderLayout());
-			jContentPane.add(getJPanelCommon(), BorderLayout.CENTER);
+			jContentPane.add(getJPanelSettings(), BorderLayout.CENTER);
 			jContentPane.add(getJPanelButtons(), java.awt.BorderLayout.SOUTH);
 		}
 		return jContentPane;
@@ -225,21 +241,23 @@ public class SettingsDialog extends JDialog implements ActionListener {
 	}
 
 	/**
-	 * This method initializes jPanelCommon
+	 * This method initializes jPanelSettings
 	 * 
 	 * @return javax.swing.JPanel
 	 */
-	private JPanel getJPanelCommon() {
-		if (jPanelCommon == null) {
+	private JPanel getJPanelSettings() {
+		if (jPanelSettings == null) {
 			GridBagConstraints gridBagConstraints6 = new GridBagConstraints();
 			gridBagConstraints6.fill = GridBagConstraints.BOTH;
 			gridBagConstraints6.weighty = 1.0;
+			gridBagConstraints6.gridx = 0;
+			gridBagConstraints6.gridy = 0;
 			gridBagConstraints6.weightx = 1.0;
-			jPanelCommon = new JPanel();
-			jPanelCommon.setLayout(new GridBagLayout());
-			jPanelCommon.add(getJTabbedPaneSettings(), gridBagConstraints6);
+			jPanelSettings = new JPanel();
+			jPanelSettings.setLayout(new GridBagLayout());
+			jPanelSettings.add(getJTabbedPaneSettings(), gridBagConstraints6);
 		}
-		return jPanelCommon;
+		return jPanelSettings;
 	}
 
 	/**
@@ -270,7 +288,7 @@ public class SettingsDialog extends JDialog implements ActionListener {
 
 	private Map<String, String> lafs = new LinkedHashMap<String, String>(); // @jve:decl-index=0:
 
-	private JPanel jPanelSourceMode = null;
+	private JPanel jPanelSourceModePlace = null;
 
 	private JComboBox jComboBoxSourceMode = null;
 
@@ -295,12 +313,12 @@ public class SettingsDialog extends JDialog implements ActionListener {
 	}
 
 	/**
-	 * This method initializes jPanelSourceMode
+	 * This method initializes jPanelSourceModePlace
 	 * 
 	 * @return javax.swing.JPanel
 	 */
-	private JPanel getJPanelSourceMode() {
-		if (jPanelSourceMode == null) {
+	private JPanel getJPanelSourceModePlace() {
+		if (jPanelSourceModePlace == null) {
 			GridBagConstraints gridBagConstraints10 = new GridBagConstraints();
 			gridBagConstraints10.gridx = 2;
 			gridBagConstraints10.fill = GridBagConstraints.HORIZONTAL;
@@ -310,6 +328,7 @@ public class SettingsDialog extends JDialog implements ActionListener {
 			gridBagConstraints10.gridy = 1;
 			jLabelBackgroundShow = new JLabel();
 			jLabelBackgroundShow.setText(" ");
+			jLabelBackgroundShow.setName("backgroundSample");
 			jLabelBackgroundShow.setOpaque(true);
 			GridBagConstraints gridBagConstraints9 = new GridBagConstraints();
 			gridBagConstraints9.gridx = 1;
@@ -335,18 +354,15 @@ public class SettingsDialog extends JDialog implements ActionListener {
 			gridBagConstraints3.gridy = 0;
 			gridBagConstraints3.gridwidth = 2;
 			gridBagConstraints3.weightx = 1.0;
-			jPanelSourceMode = new JPanel();
-			jPanelSourceMode.setLayout(new GridBagLayout());
-			jPanelSourceMode.setBorder(BorderFactory.createTitledBorder(null, "Исходное изображение -> "
-					+ Const.MAIN_IMAGE_WIDTH + "x" + Const.MAIN_IMAGE_HEIGHT, TitledBorder.DEFAULT_JUSTIFICATION,
-					TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
-			jPanelSourceMode.add(jLabelSourceMode, gridBagConstraints5);
-			jPanelSourceMode.add(getJComboBoxSourceMode(), gridBagConstraints3);
-			jPanelSourceMode.add(jLabelBackground, gridBagConstraints7);
-			jPanelSourceMode.add(getJButtonBackground(), gridBagConstraints9);
-			jPanelSourceMode.add(jLabelBackgroundShow, gridBagConstraints10);
+			jPanelSourceModePlace = new JPanel();
+			jPanelSourceModePlace.setLayout(new GridBagLayout());
+			jPanelSourceModePlace.add(jLabelSourceMode, gridBagConstraints5);
+			jPanelSourceModePlace.add(getJComboBoxSourceMode(), gridBagConstraints3);
+			jPanelSourceModePlace.add(jLabelBackground, gridBagConstraints7);
+			jPanelSourceModePlace.add(getJButtonBackground(), gridBagConstraints9);
+			jPanelSourceModePlace.add(jLabelBackgroundShow, gridBagConstraints10);
 		}
-		return jPanelSourceMode;
+		return jPanelSourceModePlace;
 	}
 
 	private JTabbedPane jTabbedPaneSettings = null;
@@ -375,6 +391,7 @@ public class SettingsDialog extends JDialog implements ActionListener {
 	private JComboBox getJComboBoxSourceMode() {
 		if (jComboBoxSourceMode == null) {
 			jComboBoxSourceMode = new JComboBox(SourceMode.values());
+			jComboBoxSourceMode.setName("sourceMode");
 		}
 		return jComboBoxSourceMode;
 	}
@@ -387,6 +404,7 @@ public class SettingsDialog extends JDialog implements ActionListener {
 	private JTabbedPane getJTabbedPaneSettings() {
 		if (jTabbedPaneSettings == null) {
 			jTabbedPaneSettings = new JTabbedPane();
+			jTabbedPaneSettings.setName("settingsPane");
 			jTabbedPaneSettings.addTab("Текущие настройки", null, getJPanelSettingsCurrent(), null);
 			jTabbedPaneSettings.addTab("Общие настройки", null, getJPanelSettingsCommon(), null);
 		}
@@ -400,15 +418,17 @@ public class SettingsDialog extends JDialog implements ActionListener {
 	 */
 	private JPanel getJPanelSettingsCurrent() {
 		if (jPanelSettingsCurrent == null) {
-			GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
-			gridBagConstraints2.anchor = GridBagConstraints.NORTHWEST;
-			gridBagConstraints2.gridy = 0;
-			gridBagConstraints2.weighty = 1.0D;
-			gridBagConstraints2.weightx = 1.0D;
-			gridBagConstraints2.gridx = 0;
+			GridBagConstraints gridBagConstraints14 = new GridBagConstraints();
+			gridBagConstraints14.gridx = 0;
+			gridBagConstraints14.weightx = 1.0D;
+			gridBagConstraints14.weighty = 1.0D;
+			gridBagConstraints14.fill = GridBagConstraints.HORIZONTAL;
+			gridBagConstraints14.anchor = GridBagConstraints.NORTH;
+			gridBagConstraints14.gridy = 0;
 			jPanelSettingsCurrent = new JPanel();
 			jPanelSettingsCurrent.setLayout(new GridBagLayout());
-			jPanelSettingsCurrent.add(getJPanelSourceMode(), gridBagConstraints2);
+			jPanelSettingsCurrent.setName("settingsCurrent");
+			jPanelSettingsCurrent.add(getJPanelSourceMode(), gridBagConstraints14);
 		}
 		return jPanelSettingsCurrent;
 	}
@@ -436,6 +456,7 @@ public class SettingsDialog extends JDialog implements ActionListener {
 			gridBagConstraints4.gridx = 0;
 			jPanelSettingsCommon = new JPanel();
 			jPanelSettingsCommon.setLayout(new GridBagLayout());
+			jPanelSettingsCommon.setName("settingsCommon");
 			jPanelSettingsCommon.add(getJPanelLaF(), gridBagConstraints4);
 			jPanelSettingsCommon.add(getJPanelFilterEdit(), gridBagConstraints12);
 		}
@@ -450,9 +471,28 @@ public class SettingsDialog extends JDialog implements ActionListener {
 	private JButton getJButtonBackground() {
 		if (jButtonBackground == null) {
 			jButtonBackground = new JButton();
+
+			// Shit-head Visual Editor shows me Color chooser dialog
+			//  every time opening this page (if a use addActionListener for instance 
+			//  instead of setAction)
+			jButtonBackground.setAction(new AbstractAction() {
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					Color newBack = JColorChooser.showDialog(SettingsDialog.this, "Выбор цвета для фона",
+							SettingsDialog.this.newBackground);
+					if (newBack != null) {
+						SettingsDialog.this.newBackground = newBack;
+						jLabelBackgroundShow.setBackground(newBack);
+					}
+				}
+			});
 			jButtonBackground.setText("...");
 			jButtonBackground.setName("backgroundColor");
-			jButtonBackground.setActionCommand("backgroundColor");
 		}
 		return jButtonBackground;
 	}
@@ -505,6 +545,8 @@ public class SettingsDialog extends JDialog implements ActionListener {
 
 	private Map<DeletionMode, JRadioButton> cachedButtons = new HashMap<DeletionMode, JRadioButton>(); //  @jve:decl-index=0:
 
+	private JPanel jPanelSourceMode = null;
+
 	/**
 	 * This method initializes jPanelFilterEditPlace
 	 * 
@@ -522,13 +564,14 @@ public class SettingsDialog extends JDialog implements ActionListener {
 				gridBagConstraints.gridx = 0;
 				gridBagConstraints.gridy = index;
 				final JRadioButton button = new JRadioButton();
-				jPanelFilterEditPlace.add(button, gridBagConstraints);
+				button.setName(mode.name());
 				button.addChangeListener(new ChangeListener() {
 					@Override
 					public void stateChanged(ChangeEvent e) {
 						currentDeletionMode = mode;
 					}
 				});
+				jPanelFilterEditPlace.add(button, gridBagConstraints);
 
 				gridBagConstraints = new GridBagConstraints();
 				gridBagConstraints.gridx = 1;
@@ -555,19 +598,26 @@ public class SettingsDialog extends JDialog implements ActionListener {
 		return jPanelFilterEditPlace;
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		String command = e.getActionCommand();
-		if (command == null) {
-			return;
+	/**
+	 * This method initializes jPanelSourceMode
+	 * 
+	 * @return javax.swing.JPanel
+	 */
+	private JPanel getJPanelSourceMode() {
+		if (jPanelSourceMode == null) {
+			GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
+			gridBagConstraints2.anchor = GridBagConstraints.NORTHWEST;
+			gridBagConstraints2.gridy = -1;
+			gridBagConstraints2.weightx = 1.0D;
+			gridBagConstraints2.weighty = 1.0D;
+			gridBagConstraints2.gridx = -1;
+			jPanelSourceMode = new JPanel();
+			jPanelSourceMode.setLayout(new GridBagLayout());
+			jPanelSourceMode.setBorder(BorderFactory.createTitledBorder(null, "Исходное изображение -> 1024x1024",
+					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
+					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			jPanelSourceMode.add(getJPanelSourceModePlace(), gridBagConstraints2);
 		}
-		if (command.equals("background")) {
-			Color newBack = JColorChooser.showDialog(SettingsDialog.this, "Выбор цвета для фона", this.newBackground);
-			if (newBack != null) {
-				this.newBackground = newBack;
-				jLabelBackgroundShow.setBackground(newBack);
-			}
-		}
-
+		return jPanelSourceMode;
 	}
 } // @jve:decl-index=0:visual-constraint="10,10"

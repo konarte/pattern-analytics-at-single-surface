@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.Param.ParamType;
-import edu.mgupi.pass.sources.TestSourceImpl;
+import edu.mgupi.pass.inputs.TestInputImpl;
 
 public class ColorSpaceFilterTest {
 	private final static Logger logger = LoggerFactory.getLogger(ColorSpaceFilterTest.class);
@@ -68,7 +68,7 @@ public class ColorSpaceFilterTest {
 
 	@Test
 	public void testProcess() throws Exception {
-		TestSourceImpl source = new TestSourceImpl();
+		TestInputImpl source = new TestInputImpl();
 		source.init();
 		try {
 

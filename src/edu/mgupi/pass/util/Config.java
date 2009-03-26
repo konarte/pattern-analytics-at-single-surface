@@ -124,40 +124,39 @@ public class Config {
 	public SourceMode getCurrentSourceMode() {
 		final SourceMode default_ = SourceMode.LEFT_TOP;
 		try {
-			return readOnly ? default_ : SourceMode.valueOf(this.currentConfigInstance.getString(
-					PARAM_CURRENT_SOURCE_MODE, default_.name()));
+			return SourceMode.valueOf(this.currentConfigInstance.getString(PARAM_CURRENT_SOURCE_MODE, default_.name()));
 		} catch (IllegalArgumentException iae) {
 			return default_;
 		}
 	}
 
-	public int getCurrentBackground() {
-		final int default_ = Color.WHITE.getRGB();
-		return readOnly ? default_ : this.currentConfigInstance.getInt(PARAM_CURRENT_BACKGROUND, default_);
+	public Color getCurrentBackground() {
+		final Color default_ = Color.WHITE;
+		return new Color(this.currentConfigInstance.getInt(PARAM_CURRENT_BACKGROUND, default_.getRGB()));
 	}
 
 	public String getLookAndFeel() {
 		final String default_ = UIManager.getSystemLookAndFeelClassName();
-		return readOnly ? default_ : this.commonConfigInstance.getString(PARAM_LOOK_AND_FEEL, default_);
+		return this.commonConfigInstance.getString(PARAM_LOOK_AND_FEEL, default_);
 	}
 
 	public DeletionMode getFilterDeleteMode() {
 		final DeletionMode default_ = DeletionMode.CONFIRM;
 		try {
-			return readOnly ? default_ : DeletionMode.valueOf(this.commonConfigInstance.getString(
-					PARAM_FILTER_DELETE_MODE, default_.name()));
+			return DeletionMode.valueOf(this.commonConfigInstance.getString(PARAM_FILTER_DELETE_MODE, default_.name()));
 		} catch (IllegalArgumentException iae) {
 			return default_;
 		}
 	}
 
 	public boolean setCurrentSourceMode(SourceMode value) {
-		return this.setCurrentParameterImpl(PARAM_CURRENT_SOURCE_MODE, this.getCurrentSourceMode().name(),
-				value == null ? null : value.name());
+		return this
+				.setCurrentParameterImpl(PARAM_CURRENT_SOURCE_MODE, this.getCurrentSourceMode().name(), value.name());
 	}
 
-	public boolean setCurrentBackground(int value) {
-		return this.setCurrentParameterImpl(PARAM_CURRENT_BACKGROUND, this.getCurrentBackground(), value);
+	public boolean setCurrentBackground(Color value) {
+		return this.setCurrentParameterImpl(PARAM_CURRENT_BACKGROUND, this.getCurrentBackground().getRGB(), value
+				.getRGB());
 	}
 
 	public boolean setLookAndFeel(String value) {
@@ -165,14 +164,13 @@ public class Config {
 	}
 
 	public boolean setFilterDeleteConfirm(DeletionMode value) {
-		return this.setCommonParameterImpl(PARAM_FILTER_DELETE_MODE, this.getFilterDeleteMode().name(),
-				value == null ? null : value.name());
+		return this.setCommonParameterImpl(PARAM_FILTER_DELETE_MODE, this.getFilterDeleteMode().name(), value.name());
 	}
 
 	private boolean setParameterImpl(Configuration config, String paramName, Object oldValue, Object newValue) {
-		if (readOnly) {
-			return false;
-		}
+		//		if (readOnly) {
+		//			return false;
+		//		}
 		//		logger.debug("OLD : " + oldValue.getClass() + ", NEW: " + newValue.getClass());
 		if (Utils.equals(newValue, oldValue)) {
 			return false;
@@ -208,7 +206,7 @@ public class Config {
 		config.setProperty("width", window.getWidth());
 		config.setProperty("height", window.getHeight());
 
-		Component component = SwingHelper.getChildNamed(window, "scaleButton");
+		Component component = Utils.getChildNamed(window, "scaleButton");
 		if (component != null && component instanceof JCheckBox) {
 			config.setProperty("scaleButton", ((JCheckBox) component).isSelected());
 		}
@@ -248,7 +246,7 @@ public class Config {
 		window.setBounds(config.getInt("x", window.getX()), config.getInt("y", window.getY()), config.getInt("width",
 				window.getWidth()), config.getInt("height", window.getHeight()));
 
-		Component component = SwingHelper.getChildNamed(window, "scaleButton");
+		Component component = Utils.getChildNamed(window, "scaleButton");
 		if (component != null && component instanceof JCheckBox) {
 			boolean selected = config.getBoolean("scaleButton", false);
 			JCheckBox box = (JCheckBox) component;
@@ -275,7 +273,7 @@ public class Config {
 		Iterator<String> iter = config.getKeys();
 		while (iter.hasNext()) {
 			String key = iter.next();
-			Component component = SwingHelper.getChildNamed(window, key);
+			Component component = Utils.getChildNamed(window, key);
 			if (component != null && component instanceof JCheckBox) {
 				boolean selected = config.getBoolean(key);
 				JCheckBox box = (JCheckBox) component;

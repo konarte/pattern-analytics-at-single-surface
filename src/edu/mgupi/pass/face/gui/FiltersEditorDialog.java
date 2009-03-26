@@ -29,6 +29,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.orm.PersistentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,14 +37,15 @@ import edu.mgupi.pass.face.gui.template.AbstractDialogAdapter;
 import edu.mgupi.pass.face.gui.template.ParametersEditorPanel;
 import edu.mgupi.pass.filters.FilterChainsaw;
 import edu.mgupi.pass.filters.FilterChainsawTransaction;
+import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.FilterChainsawTransaction.FilterStore;
 import edu.mgupi.pass.util.Config;
-import edu.mgupi.pass.util.SwingHelper;
+import edu.mgupi.pass.util.Utils;
 import edu.mgupi.pass.util.Config.DeletionMode;
 
-public class FiltersEditor extends JDialog implements ActionListener {
-	private final static Logger logger = LoggerFactory.getLogger(FiltersEditor.class); //  @jve:decl-index=0:
+public class FiltersEditorDialog extends JDialog implements ActionListener {
+	private final static Logger logger = LoggerFactory.getLogger(FiltersEditorDialog.class); //  @jve:decl-index=0:
 
 	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
@@ -63,13 +65,13 @@ public class FiltersEditor extends JDialog implements ActionListener {
 	private void registerAction(AbstractButton button, FilterActions action) {
 		button.setName(action.name());
 		button.setActionCommand(action.name());
-		SwingHelper.addCheckedListener(button, this);
+		Utils.addCheckedListener(button, this);
 	}
 
 	/**
 	 * @param owner
 	 */
-	public FiltersEditor(Frame owner) {
+	public FiltersEditorDialog(Frame owner) {
 		super(owner, true);
 		initialize();
 	}
@@ -81,6 +83,7 @@ public class FiltersEditor extends JDialog implements ActionListener {
 	private void initialize() {
 
 		this.setSize(700, 500);
+		this.setName("filtersEditorDialog");
 		this.setMinimumSize(new Dimension(700, 500));
 		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		this.setTitle("Настройка фильтров");
@@ -160,7 +163,7 @@ public class FiltersEditor extends JDialog implements ActionListener {
 	@SuppressWarnings("unchecked")
 	private void addFilterImpl() throws Exception {
 
-		ListDialogFilters list = (ListDialogFilters) AppHelper.getInstance().getDialogImpl(ListDialogFilters.class);
+		ListFiltersDialog list = (ListFiltersDialog) AppHelper.getInstance().getDialogImpl(ListFiltersDialog.class);
 		String pickClass = list.openDialog();
 		if (pickClass != null) {
 
@@ -232,7 +235,7 @@ public class FiltersEditor extends JDialog implements ActionListener {
 		}
 
 		public void addFilterImpl(int index, Class<IFilter> filterClass) throws InstantiationException,
-				IllegalAccessException {
+				IllegalAccessException, FilterException, PersistentException {
 			this.getChainsaw().appendFilter(index, filterClass);
 			super.fireIntervalAdded(this, index, index);
 		}
@@ -437,7 +440,7 @@ public class FiltersEditor extends JDialog implements ActionListener {
 
 						((TitledBorder) jPanelEditParameters.getBorder()).setTitle(filter.name + " - параметры");
 						jPanelParameters.setModelData(filter.parameters);
-						FiltersEditor.this.pack();
+						FiltersEditorDialog.this.pack();
 
 						logger.trace("Finished.");
 
@@ -456,7 +459,7 @@ public class FiltersEditor extends JDialog implements ActionListener {
 						jButtonDown.setEnabled(false);
 						jButtonRemove.setEnabled(false);
 					}
-					FiltersEditor.this.repaint();
+					FiltersEditorDialog.this.repaint();
 				}
 
 				@Override

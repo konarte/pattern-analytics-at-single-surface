@@ -3,7 +3,7 @@ package edu.mgupi.pass.face.gui;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableModel;
 
@@ -11,7 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.mgupi.pass.util.SwingHelper;
+import edu.mgupi.pass.util.Utils;
 
 public class AboutDialogTest {
 	private AboutDialog dialog = null;
@@ -24,11 +24,7 @@ public class AboutDialogTest {
 
 	@After
 	public void tearDown() throws Exception {
-		if (dialog != null) {
-			dialog.setVisible(false);
-			dialog.dispose();
-			dialog = null;
-		}
+		SwingTestHelper.closeAllWindows();
 	}
 
 	@Test
@@ -36,22 +32,41 @@ public class AboutDialogTest {
 
 		SwingTestHelper.showMeBackground(this.dialog);
 
-		final JButton ok = (JButton) SwingHelper.getChildNamed(dialog, "cancel");
-		assertNotNull(ok);
-
-		final JTable props = (JTable) SwingHelper.getChildNamed(dialog, "properties");
+		JTable props = (JTable) Utils.getChildNamed(dialog, "properties");
 		assertNotNull(props);
 		TableModel model = props.getModel();
 		int rows = model.getRowCount();
 
 		assertTrue(rows > 0);
 
-		JTable libs = (JTable) SwingHelper.getChildNamed(dialog, "libraries");
+		JTable libs = (JTable) Utils.getChildNamed(dialog, "libraries");
 		assertNotNull(libs);
 		model = libs.getModel();
 		rows = model.getRowCount();
 
 		assertTrue(rows > 0);
+
+		final JLabel authors = (JLabel) Utils.getChildNamed(dialog, "authors");
+		assertNotNull(authors);
+
+		// Seems there is no listeners to Desktop or DesktopPeer :(
+		// Can't check success of opening link
+
+		//		AWTEventListener listener = new AWTEventListener() {
+		//			@Override
+		//			public void eventDispatched(AWTEvent event) {
+		//				System.out.println("EVENT RECEIVED: " + event);
+		//
+		//			}
+		//		};
+		//		Toolkit.getDefaultToolkit().addAWTEventListener(listener, Event.ACTION_EVENT);
+
+		//		authors.dispatchEvent(new MouseEvent(authors, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(),
+		//				MouseEvent.BUTTON1, 1, 1, 1, false));
+
+		// OK button must close dialog!
+		
+		SwingTestHelper.clickCloseDialogButton(dialog, "cancel");
 
 	}
 

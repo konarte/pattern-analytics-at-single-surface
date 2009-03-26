@@ -56,7 +56,7 @@ public class SplashWindow extends JFrame {
 		initialize(imagePath);
 	}
 
-	private final static String RESOURCE_PATH = "resources/splash";
+	private final static String RESOURCE_PATH = "resources/splash/";
 
 	/**
 	 * This method initializes this
@@ -129,6 +129,8 @@ public class SplashWindow extends JFrame {
 			jLabelVersion = new JLabel();
 			jLabelVersion.setText(Const.PROGRAM_NAME_LAST);
 			jLabelVersion.setFont(new Font("DialogInput", Font.BOLD, 14));
+			jLabelVersion.setName("version");
+
 			GridBagConstraints gridBagConstraints11 = new GridBagConstraints();
 			gridBagConstraints11.anchor = GridBagConstraints.SOUTHWEST;
 			gridBagConstraints11.insets = new Insets(5, 5, 0, 5);
@@ -140,6 +142,8 @@ public class SplashWindow extends JFrame {
 			jLabelProgram = new JLabel();
 			jLabelProgram.setText(Const.PROGRAM_NAME_FIRST);
 			jLabelProgram.setFont(new Font("DialogInput", Font.BOLD, 18));
+			jLabelProgram.setName("program");
+
 			GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
 			gridBagConstraints1.gridx = 0;
 			gridBagConstraints1.anchor = GridBagConstraints.SOUTHWEST;
@@ -147,6 +151,8 @@ public class SplashWindow extends JFrame {
 			gridBagConstraints1.gridy = 3;
 			jLabelInfo = new JLabel();
 			jLabelInfo.setText("Загрузка...");
+			jLabelInfo.setName("title");
+
 			jPanelSplash = new ImagePanel();
 			jPanelSplash.setLayout(new GridBagLayout());
 			jPanelSplash.add(jLabelProgram, gridBagConstraints11);

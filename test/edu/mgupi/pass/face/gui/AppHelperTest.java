@@ -7,8 +7,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.awt.Component;
 import java.awt.Window;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.UIManager;
@@ -30,6 +35,7 @@ public class AppHelperTest {
 	@After
 	public void tearDown() throws Exception {
 		AppHelper.reset();
+		SwingTestHelper.closeAllWindows();
 	}
 
 	@Test
@@ -74,20 +80,7 @@ public class AppHelperTest {
 	@Test
 	public void testOpenWindow() throws Exception {
 		splash = null;
-
-		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
-			@Override
-			public void workImpl() throws Exception {
-				splash = (SplashWindow) AppHelper.getInstance().getFrameImpl(SplashWindow.class);
-				splash.setVisible(true);
-
-			}
-		}, new WaitCondition() {
-			@Override
-			public boolean keepWorking() {
-				return splash == null || !splash.isVisible();
-			}
-		});
+		splash = (SplashWindow) SwingTestHelper.openDialog(SplashWindow.class, true);
 
 		assertNotNull(splash);
 		assertNotNull(AppHelper.getInstance().searchWindow(SplashWindow.class));
@@ -103,40 +96,12 @@ public class AppHelperTest {
 	public void testOpenWindowFrame() throws Exception {
 		splash = null;
 
-		assertNull(AppHelper.getInstance().searchWindow(SplashWindow.class));
-		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
-			@Override
-			public void workImpl() throws Exception {
-				splash = (SplashWindow) AppHelper.getInstance().getFrameImpl(SplashWindow.class);
-				splash.setVisible(true);
+		splash = (SplashWindow) SwingTestHelper.openDialog(SplashWindow.class, true);
 
-			}
-		}, new WaitCondition() {
-			@Override
-			public boolean keepWorking() {
-				return splash == null || !splash.isVisible();
-			}
-		});
 		assertNotNull(splash);
 		assertTrue(splash == AppHelper.getInstance().getFrameImpl(SplashWindow.class));
 
-		assertNull(AppHelper.getInstance().searchWindow(AboutDialog.class));
-
-		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
-			@Override
-			public void workImpl() throws Exception {
-				AppHelper.getInstance().getDialogImpl(AboutDialog.class).setVisible(true);
-
-			}
-		}, new WaitCondition() {
-			@Override
-			public boolean keepWorking() {
-				return AppHelper.getInstance().searchWindow(AboutDialog.class) == null
-						|| !AppHelper.getInstance().searchWindow(AboutDialog.class).isVisible();
-			}
-		});
-
-		Window about = AppHelper.getInstance().searchWindow(AboutDialog.class);
+		Window about = SwingTestHelper.openDialog(AboutDialog.class, true);
 		assertNotNull(about);
 
 		about.setVisible(false);
@@ -148,47 +113,21 @@ public class AppHelperTest {
 	}
 
 	@Test
-	public void testOpenWindowFrameIncorrect() throws Exception {
+	public void testOpenWindowFrameMore() throws Exception {
 		splash = null;
 		final SplashWindow mySplash = (SplashWindow) AppHelper.getInstance().registerAdditionalWindow(
 				SplashWindow.class);
 		assertNotNull(mySplash);
 
-		//		try {
-		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
-			@Override
-			public void workImpl() throws Exception {
-				splash = (SplashWindow) AppHelper.getInstance().getWindowImpl(SplashWindow.class, true);
-				splash.setVisible(true);
-			}
-		});
+		splash = (SplashWindow) SwingTestHelper.openDialog(SplashWindow.class, true);
 		assertNotNull(splash);
 		assertFalse(splash == mySplash);
-		//			fail("No exception thrown!");
-		//		} catch (RuntimeException e) {
-		//			if (e.getCause() != null && e.getCause().getClass() == NoSuchMethodException.class) {
-		//				System.out.println("Received expected exception: " + e.getCause());
-		//			} else {
-		//				throw e;
-		//			}
-		//		}
-
-		//		try {
 
 		SwingTestHelper.showMeBackground(AppHelper.getInstance().getDialogImpl(AboutDialog.class));
 		AboutDialog about = (AboutDialog) AppHelper.getInstance().searchWindow(AboutDialog.class);
 		assertNotNull(about);
 		about.setVisible(false);
 		about.dispose();
-
-		//			fail("No exception thrown!");
-		//		} catch (RuntimeException e) {
-		//			if (e.getCause() != null && e.getCause().getClass() == InstantiationException.class) {
-		//				System.out.println("Received expected exception: " + e.getCause());
-		//			} else {
-		//				throw e;
-		//			}
-		//		}
 
 		mySplash.setVisible(false);
 		mySplash.dispose();
@@ -221,20 +160,8 @@ public class AppHelperTest {
 			}
 		});
 
-		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
-			@Override
-			public void workImpl() throws Exception {
-				commonWindow = (MyFrame) AppHelper.getInstance().getFrameImpl(MyFrame.class);
-				mySplash = (MySplash) AppHelper.getInstance().getFrameImpl(MySplash.class);
-				commonWindow.setVisible(true);
-				mySplash.setVisible(true);
-			}
-		}, new WaitCondition() {
-			@Override
-			public boolean keepWorking() {
-				return commonWindow == null || mySplash == null || !commonWindow.isVisible() || !mySplash.isVisible();
-			}
-		});
+		commonWindow = (MyFrame) SwingTestHelper.openDialog(MyFrame.class, true);
+		mySplash = (MySplash) SwingTestHelper.openDialog(MySplash.class, true);
 
 		assertEquals(0, commonWindow.repaintCount);
 		assertEquals(0, mySplash.repaintCount);
@@ -336,13 +263,14 @@ public class AppHelperTest {
 			SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 				@Override
 				public void workImpl() throws Exception {
-					AppHelper
-							.showExceptionDialog(
-									"Принцип восприятия непредвзято создает паллиативный интеллект, условно. "
-											+ "Концепция ментально оспособляет закон внешнего мира. "
-											+ "Сомнение раскладывает на элементы неоднозначный структурализм. Wait 5 sec...",
-									new Exception("I'm dead already :(", new RuntimeException(
-											"Stars will show me the way...")));
+					AppHelper.showExceptionDialog(
+							"Принцип восприятия непредвзято создает паллиативный интеллект, условно. "
+									+ "Концепция ментально оспособляет закон внешнего мира. "
+									+ "Сомнение раскладывает на элементы неоднозначный структурализм. Wait 5 sec...",
+							new Exception("Много много много разного такого разного такого супер-текста. "
+									+ "Количество текста не поддается осмыслению. А нам надо проверить, "
+									+ "чтобы экран не разосрался вширь.", new RuntimeException(
+									"Stars will show me the way...")));
 				}
 			});
 			fail("No exception thrown!");
@@ -357,6 +285,97 @@ public class AppHelperTest {
 
 		//		testFrame.dispose();
 		//		testFrame.setVisible(false);
+
+	}
+
+	private Random rand = new Random();
+
+	@Test
+	public void testThreadedComponents() throws Exception {
+		Thread threads[] = new Thread[100];
+		for (int i = 0; i < threads.length; i++) {
+			final int index = i;
+			threads[i] = new Thread(new Runnable() {
+				public void run() {
+					Collection<Component> componentList = new ArrayList<Component>();
+					for (int idx = 0; idx < 10; idx++) {
+						Component comp = new Component() {
+							private static final long serialVersionUID = 1L;
+						};
+						componentList.add(comp);
+						AppHelper.getInstance().registerAdditionalComponent(comp);
+						try {
+							Thread.sleep(rand.nextInt(100));
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+					for (Component comp : componentList) {
+						AppHelper.getInstance().unregisterAdditionalComponent(comp);
+						try {
+							Thread.sleep(rand.nextInt(100));
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+					System.out.println(new Date() + " Thread " + index + " done");
+				}
+			});
+
+		}
+		for (Thread t : threads) {
+			t.start();
+		}
+
+		SwingTestHelper.waitUntil(new WaitCondition() {
+			@Override
+			public boolean keepWorking() {
+				// We must remove all components before done
+				return AppHelper.getInstance().getRegisteredComponentCount() > 0;
+			}
+		});
+
+	}
+
+	@Test
+	public void testThreadedWindows() throws Exception {
+		final int TOTAL_COUNT = 100;
+		final int INTERNAL_COUNT = 10;
+
+		Thread threads[] = new Thread[TOTAL_COUNT];
+		for (int i = 0; i < threads.length; i++) {
+			final int index = i;
+			threads[i] = new Thread(new Runnable() {
+				public void run() {
+					for (int idx = 0; idx < INTERNAL_COUNT; idx++) {
+						try {
+							AppHelper.getInstance().getWindowImpl(Window.class, idx % 2 == 0);
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+						try {
+							Thread.sleep(rand.nextInt(100));
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+					System.out.println(new Date() + " Thread " + index + " done");
+				}
+			});
+
+		}
+		for (Thread t : threads) {
+			t.start();
+		}
+
+		SwingTestHelper.waitUntil(new WaitCondition() {
+			@Override
+			public boolean keepWorking() {
+				// We must remove all components before done
+				return AppHelper.getInstance().getCachedWindowsCount() != 1
+						|| AppHelper.getInstance().getAdditionalWindowsCount() != TOTAL_COUNT * (INTERNAL_COUNT / 2);
+			}
+		});
 
 	}
 
