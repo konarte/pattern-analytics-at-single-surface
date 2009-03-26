@@ -9,6 +9,8 @@ import static org.junit.Assert.fail;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Collection;
 
 import javax.swing.JButton;
@@ -128,4 +130,12 @@ public class UtilsTest {
 		}
 	}
 		 
+	@Test
+	public void testLoadFromResource() throws IOException {
+		File file = new File("test/resources/splash/scout.gif");
+		FileInputStream input = new FileInputStream(file);
+		
+		byte[] data = Utils.loadFromResource("resources/splash/scout.gif");
+		assertEquals(input.getChannel().size(), data.length);
+	}
 }

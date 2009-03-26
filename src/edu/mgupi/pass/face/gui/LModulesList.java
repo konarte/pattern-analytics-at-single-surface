@@ -7,16 +7,16 @@ import javax.swing.JTable;
 import edu.mgupi.pass.db.locuses.LModules;
 import edu.mgupi.pass.face.gui.template.JTableReadOnly;
 
-public class ListModulesDialog extends ListFiltersDialog {
+public class LModulesList extends LFiltersList {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public ListModulesDialog(Frame owner) {
+	public LModulesList(Frame owner) {
 		super(owner);
 		this.setTitle("Список модулей");
-		this.setName("listModulesDialog");
+		this.setName("lModulesList");
 	}
 
 	protected JTable getTableDataImpl() {

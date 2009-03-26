@@ -148,10 +148,10 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 	public void preCache() throws Exception {
 		AppHelper.getInstance().getDialogImpl(SettingsDialog.class);
 		AppHelper.getInstance().getDialogImpl(AboutDialog.class);
-		AppHelper.getInstance().getDialogImpl(ParametersEditorDialog.class);
-		AppHelper.getInstance().getDialogImpl(FiltersEditorDialog.class);
-		AppHelper.getInstance().getDialogImpl(ListFiltersDialog.class);
-		AppHelper.getInstance().getDialogImpl(ListModulesDialog.class);
+		AppHelper.getInstance().getDialogImpl(ParametersEditor.class);
+		AppHelper.getInstance().getDialogImpl(FiltersEditor.class);
+		AppHelper.getInstance().getDialogImpl(LFiltersList.class);
+		AppHelper.getInstance().getDialogImpl(LModulesList.class);
 
 		this.getfSChooser();
 	}
@@ -1637,15 +1637,15 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			System.exit(0);
 		} else if (action == Actions.filterList) {
 			// View all registered filters
-			ListFiltersDialog filterList = (ListFiltersDialog) AppHelper.getInstance().getDialog(
-					ListFiltersDialog.class);
+			LFiltersList filterList = (LFiltersList) AppHelper.getInstance().getDialog(
+					LFiltersList.class);
 			if (filterList != null) {
 				filterList.showDialogCancelOnly();
 			}
 		} else if (action == Actions.modulesList) {
 			// View all registered modules
-			ListModulesDialog modulesList = (ListModulesDialog) AppHelper.getInstance().getDialog(
-					ListModulesDialog.class);
+			LModulesList modulesList = (LModulesList) AppHelper.getInstance().getDialog(
+					LModulesList.class);
 			if (modulesList != null) {
 				modulesList.showDialogCancelOnly();
 			}
@@ -1669,13 +1669,13 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			JOptionPane.showMessageDialog(null, "Not implemented yet.", "Info", JOptionPane.INFORMATION_MESSAGE);
 		} else if (action == Actions.editCurrentFilters) {
 			// 
-			FiltersEditorDialog editor = (FiltersEditorDialog) AppHelper.getInstance().getDialog(FiltersEditorDialog.class);
+			FiltersEditor editor = (FiltersEditor) AppHelper.getInstance().getDialog(FiltersEditor.class);
 			if (editor != null
 					&& editor.openDialog("Основные фильтры", MainFrame.this.mainModuleProcessor.getChainsaw())) {
 				this.restartProcessingByFilters();
 			}
 		} else if (action == Actions.editCurrentModuleParams) {
-			ParametersEditorDialog editor = (ParametersEditorDialog) AppHelper.getInstance().getDialog(ParametersEditorDialog.class);
+			ParametersEditor editor = (ParametersEditor) AppHelper.getInstance().getDialog(ParametersEditor.class);
 			if (editor != null
 					&& editor.openDialog(mainModuleProcessor.getModule().getName(), mainModuleProcessor.getModule()
 							.getParams())) {

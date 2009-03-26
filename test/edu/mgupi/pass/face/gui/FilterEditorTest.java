@@ -12,12 +12,12 @@ import edu.mgupi.pass.util.ClassesHelper;
 
 public class FilterEditorTest {
 
-	private FiltersEditorDialog dialog = null;
+	private FiltersEditor dialog = null;
 
 	@Before
 	public void setUp() throws Exception {
 		AppHelper.getInstance().updateUI(UIManager.getSystemLookAndFeelClassName());
-		dialog = new FiltersEditorDialog(null);
+		dialog = new FiltersEditor(null);
 		dialog.setLocation(300, 400);
 	}
 

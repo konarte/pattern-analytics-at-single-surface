@@ -21,7 +21,7 @@ import edu.mgupi.pass.db.locuses.LFilters;
 import edu.mgupi.pass.face.gui.template.AbstractDialogAdapter;
 import edu.mgupi.pass.face.gui.template.JTableReadOnly;
 
-public class ListFiltersDialog extends JDialog {
+public class LFiltersList extends JDialog {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
@@ -34,7 +34,7 @@ public class ListFiltersDialog extends JDialog {
 	/**
 	 * @param owner
 	 */
-	public ListFiltersDialog(Frame owner) {
+	public LFiltersList(Frame owner) {
 		super(owner, true);
 		initialize();
 	}
@@ -45,7 +45,7 @@ public class ListFiltersDialog extends JDialog {
 	 */
 	private void initialize() {
 		this.setSize(400, 300);
-		this.setName("listFiltersDialog");
+		this.setName("lFiltersList");
 		this.setMinimumSize(new Dimension(400, 300));
 		this.setTitle("Список фильтров");
 		this.setContentPane(getJContentPane());
@@ -81,7 +81,7 @@ public class ListFiltersDialog extends JDialog {
 					selectedClass = (String) (jTableData.getModel().getValueAt(index, getDataColumnIndex()));
 					return true;
 				} else {
-					JOptionPane.showMessageDialog(ListFiltersDialog.this, "Необходимо выбрать строку.", "Внимание",
+					JOptionPane.showMessageDialog(LFiltersList.this, "Необходимо выбрать строку.", "Внимание",
 							JOptionPane.WARNING_MESSAGE);
 					selectedClass = null;
 					return false;
@@ -111,8 +111,8 @@ public class ListFiltersDialog extends JDialog {
 		if (jContentPane == null) {
 			jContentPane = new JPanel();
 			jContentPane.setLayout(new BorderLayout());
-			jContentPane.add(getJPanelButtons(), BorderLayout.SOUTH);
 			jContentPane.add(getJPanelPlace(), BorderLayout.CENTER);
+			jContentPane.add(getJPanelButtons(), BorderLayout.SOUTH);
 		}
 		return jContentPane;
 	}
@@ -160,8 +160,8 @@ public class ListFiltersDialog extends JDialog {
 						getDialogAdapter().save();
 					}
 				}
-
 			});
+			jTableData.setName("data");
 		}
 
 		return jTableData;
