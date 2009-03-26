@@ -20,9 +20,9 @@ import edu.mgupi.pass.face.gui.template.AbstractDialogAdapter;
 import edu.mgupi.pass.face.gui.template.ParametersEditorPanel;
 import edu.mgupi.pass.filters.Param;
 
-public class ParametersEditorDialog extends JDialog implements ActionListener {
+public class ParametersEditor extends JDialog implements ActionListener {
 
-	Logger logger = LoggerFactory.getLogger(ParametersEditorDialog.class);
+	Logger logger = LoggerFactory.getLogger(ParametersEditor.class);
 
 	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
@@ -37,7 +37,7 @@ public class ParametersEditorDialog extends JDialog implements ActionListener {
 	 * 
 	 * @param owner
 	 */
-	public ParametersEditorDialog(Frame owner) {
+	public ParametersEditor(Frame owner) {
 		super(owner, true);
 		initialize();
 	}

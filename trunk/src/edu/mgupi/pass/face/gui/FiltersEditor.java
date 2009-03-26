@@ -44,8 +44,8 @@ import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Utils;
 import edu.mgupi.pass.util.Config.DeletionMode;
 
-public class FiltersEditorDialog extends JDialog implements ActionListener {
-	private final static Logger logger = LoggerFactory.getLogger(FiltersEditorDialog.class); //  @jve:decl-index=0:
+public class FiltersEditor extends JDialog implements ActionListener {
+	private final static Logger logger = LoggerFactory.getLogger(FiltersEditor.class); //  @jve:decl-index=0:
 
 	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
@@ -71,7 +71,7 @@ public class FiltersEditorDialog extends JDialog implements ActionListener {
 	/**
 	 * @param owner
 	 */
-	public FiltersEditorDialog(Frame owner) {
+	public FiltersEditor(Frame owner) {
 		super(owner, true);
 		initialize();
 	}
@@ -163,7 +163,7 @@ public class FiltersEditorDialog extends JDialog implements ActionListener {
 	@SuppressWarnings("unchecked")
 	private void addFilterImpl() throws Exception {
 
-		ListFiltersDialog list = (ListFiltersDialog) AppHelper.getInstance().getDialogImpl(ListFiltersDialog.class);
+		LFiltersList list = (LFiltersList) AppHelper.getInstance().getDialogImpl(LFiltersList.class);
 		String pickClass = list.openDialog();
 		if (pickClass != null) {
 
@@ -440,7 +440,7 @@ public class FiltersEditorDialog extends JDialog implements ActionListener {
 
 						((TitledBorder) jPanelEditParameters.getBorder()).setTitle(filter.name + " - параметры");
 						jPanelParameters.setModelData(filter.parameters);
-						FiltersEditorDialog.this.pack();
+						FiltersEditor.this.pack();
 
 						logger.trace("Finished.");
 
@@ -459,7 +459,7 @@ public class FiltersEditorDialog extends JDialog implements ActionListener {
 						jButtonDown.setEnabled(false);
 						jButtonRemove.setEnabled(false);
 					}
-					FiltersEditorDialog.this.repaint();
+					FiltersEditor.this.repaint();
 				}
 
 				@Override
@@ -631,6 +631,7 @@ public class FiltersEditorDialog extends JDialog implements ActionListener {
 			action = FilterActions.valueOf(event.getActionCommand());
 		} catch (IllegalArgumentException iae) {
 			logger.debug("Received unknown action: " + event.getActionCommand());
+			return;
 		}
 
 		if (action == FilterActions.add) {
@@ -666,7 +667,7 @@ public class FiltersEditorDialog extends JDialog implements ActionListener {
 			}
 		} else {
 			JOptionPane.showMessageDialog(this, "Internal error. Unknown action: " + action, "Internal error",
-					JOptionPane.OK_OPTION);
+					JOptionPane.ERROR_MESSAGE);
 		}
 
 	}
