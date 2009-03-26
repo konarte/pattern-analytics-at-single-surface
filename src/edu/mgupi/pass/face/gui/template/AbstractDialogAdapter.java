@@ -31,6 +31,7 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 	private JDialog instance;
 	private boolean saveRequired = false;
+	private AbstractEditorTableModel editorMode = null;
 
 	/**
 	 * Common constructor.
@@ -39,7 +40,22 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	 *            reference to dialog we adapting, required
 	 */
 	public AbstractDialogAdapter(JDialog instance) {
-		this(instance, false);
+		this(instance, null, false);
+	}
+
+	/**
+	 * Common constructor.
+	 * 
+	 * @param instance
+	 *            reference to dialog we adapting, required
+	 * @param editorModel
+	 */
+	public AbstractDialogAdapter(JDialog instance, AbstractEditorTableModel editorModel) {
+		this(instance, editorModel, false);
+	}
+
+	public AbstractDialogAdapter(JDialog instance, boolean saveRequired) {
+		this(instance, null, saveRequired);
 	}
 
 	/**
@@ -47,14 +63,14 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	 * @param instance
 	 *            is required parameter, contains reference to dialog we
 	 *            adapting
-	 * 
+	 * @param editorModel
 	 * @param saveRequired
 	 *            if true -- this dialog will require entering value, i.e.
 	 *            method {@link #saveImpl()} must return true for accepting and
 	 *            closing dialog; if false -- this method can return true or
 	 *            false
 	 */
-	public AbstractDialogAdapter(JDialog instance, boolean saveRequired) {
+	public AbstractDialogAdapter(JDialog instance, final AbstractEditorTableModel editorModel, boolean saveRequired) {
 
 		if (instance == null) {
 			throw new IllegalArgumentException("Internal error. 'instance' must be not null.");
@@ -62,6 +78,7 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 		this.instance = instance;
 		this.saveRequired = saveRequired;
+		this.editorMode = editorModel;
 
 		// Do not forget about listeners
 		this.instance.addWindowListener(new WindowAdapter() {
@@ -105,6 +122,11 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	 * @see #save()
 	 */
 	public void registerOKButton(JButton button) {
+
+		if (okButton != null) {
+			throw new IllegalStateException("'okButton' already registered (" + okButton.getText() + ").");
+		}
+
 		this.okButton = button;
 
 		if (!button.getText().equals("OK")) {
@@ -130,6 +152,11 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	 * @see #cancel()
 	 */
 	public void registerCancelButton(JButton button) {
+
+		if (cancelButton != null) {
+			throw new IllegalStateException("'cancelButton' already registered (" + cancelButton.getText() + ").");
+		}
+
 		this.cancelButton = button;
 
 		if (!button.getText().equals("cancel")) {
@@ -169,6 +196,9 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 		}
 
 		try {
+			if (editorMode != null) {
+				editorMode.open();
+			}
 			this.openDialogImpl();
 			this.instance.setVisible(true);
 			logger.debug("Dialog " + instance.getTitle() + " finished. Return " + setOK);
@@ -216,6 +246,9 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 		}
 
 		try {
+			if (editorMode != null) {
+				editorMode.open();
+			}
 			this.openDialogImpl();
 
 			SwingUtilities.invokeLater(new Runnable() {
@@ -242,6 +275,8 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	public void save() {
 
 		// kekeke
+		// This is potentially strange situation, at least during tests
+		// Do not forget, that dialogs int 'cancelOnly' mode can't do 'save' action
 		if (cancelOnly) {
 			logger.debug("Dialog " + instance.getTitle() + " skipped saving. ReadOnly mode.");
 			return;
@@ -251,7 +286,11 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 		setOK = false;
 		try {
+			
 			setOK = this.saveImpl();
+			if (editorMode != null) {
+				editorMode.close();
+			}
 
 			if (setOK || !saveRequired) {
 				logger.debug("Dialog " + instance.getTitle() + " done job. After save is " + setOK);
@@ -283,7 +322,12 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 		setOK = false;
 		try {
+			
+			
 			this.cancelImpl();
+			if (editorMode != null) {
+				editorMode.close();
+			}
 
 			logger.debug("Dialog " + instance.getTitle() + " done job. After cancel is " + setOK);
 		} catch (Exception e) {

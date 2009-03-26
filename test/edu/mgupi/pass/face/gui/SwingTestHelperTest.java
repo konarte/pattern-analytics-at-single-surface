@@ -18,6 +18,7 @@ import javax.swing.JColorChooser;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import org.junit.After;
 import org.junit.Before;
@@ -374,8 +375,23 @@ public class SwingTestHelperTest {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				tempDialog = new JDialog(myFrame, true);
-				tempDialog.setVisible(true);
+				try {
+					// Main idea -- I must register window through AppHelper 
+					final JDialog testDialog = (JDialog) AppHelper.getInstance().getDialogImpl(JDialog.class);
+					SwingUtilities.invokeLater(new Runnable() {
+						@Override
+						public void run() {
+							testDialog.setVisible(true);
+						}
+					});
+
+					// But, I wan't to create additional methods, received parent frames 
+					tempDialog = new JDialog(myFrame, true);
+					tempDialog.setModal(true);
+					tempDialog.setVisible(true);
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
 
 			}
 		});
@@ -385,7 +401,6 @@ public class SwingTestHelperTest {
 
 		SwingTestHelper.clickOpenDialogButton(myFrame, "OK", JDialog.class);
 
-		assertNull(tempDialog);
 		tempDialog = (JDialog) AppHelper.getInstance().searchWindow(JDialog.class);
 		assertNotNull(tempDialog);
 		assertTrue(tempDialog.isVisible());
@@ -413,6 +428,7 @@ public class SwingTestHelperTest {
 		tempDialog.setVisible(false);
 		tempDialog = null;
 
+		SwingTestHelper.closeAllWindows();
 		SwingTestHelper.clickOpenDialogButton(myFrame, "OK", null);
 		assertNotNull(tempDialog);
 		assertTrue(tempDialog.isVisible());

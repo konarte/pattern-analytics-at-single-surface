@@ -13,7 +13,7 @@ public class CreatePassData {
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : name
 			ledumgupipassdbdefectsDefectClasses.save();
 			edu.mgupi.pass.db.defects.DefectTypes ledumgupipassdbdefectsDefectTypes = edu.mgupi.pass.db.defects.DefectTypesFactory.createDefectTypes();
-			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : defectClass, defectImage, name
+			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : defectClass, name
 			ledumgupipassdbdefectsDefectTypes.save();
 			edu.mgupi.pass.db.defects.Defects ledumgupipassdbdefectsDefects = edu.mgupi.pass.db.defects.DefectsFactory.createDefects();
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : defectType, length, width, depth, beddingDepth
@@ -55,10 +55,10 @@ public class CreatePassData {
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : name
 			ledumgupipassdbsensorsSensorClasses.save();
 			edu.mgupi.pass.db.sensors.SensorTypes ledumgupipassdbsensorsSensorTypes = edu.mgupi.pass.db.sensors.SensorTypesFactory.createSensorTypes();
-			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : sensorClass, sensorImage, name
+			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : sensorClass, name
 			ledumgupipassdbsensorsSensorTypes.save();
 			edu.mgupi.pass.db.surfaces.SurfaceClasses ledumgupipassdbsurfacesSurfaceClasses = edu.mgupi.pass.db.surfaces.SurfaceClassesFactory.createSurfaceClasses();
-			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : surfaceImage, name
+			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : name
 			ledumgupipassdbsurfacesSurfaceClasses.save();
 			edu.mgupi.pass.db.surfaces.Surfaces ledumgupipassdbsurfacesSurfaces = edu.mgupi.pass.db.surfaces.SurfacesFactory.createSurfaces();
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : surfaceMode, multiLayer, length, width, height

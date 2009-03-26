@@ -12,6 +12,7 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import org.orm.PersistentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,6 +95,13 @@ public class Application {
 					e.printStackTrace();
 				}
 				new File(LOCK_FILE).delete();
+				
+				try {
+					PassPersistentManager.instance().disposePersistentManager();
+				} catch (PersistentException e) {
+					e.printStackTrace();
+				}
+				
 				logger.debug("Shutdown " + Const.PROGRAM_NAME_FULL);
 			}
 		}));

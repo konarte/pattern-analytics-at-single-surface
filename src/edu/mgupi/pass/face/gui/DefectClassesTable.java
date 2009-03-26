@@ -1,0 +1,83 @@
+package edu.mgupi.pass.face.gui;
+
+import java.awt.Frame;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.swing.JLabel;
+import javax.swing.JTable;
+
+import edu.mgupi.pass.db.defects.DefectClasses;
+import edu.mgupi.pass.db.defects.DefectClassesFactory;
+import edu.mgupi.pass.face.gui.template.AbstractEditorTableModel;
+import edu.mgupi.pass.face.gui.template.CommonEditorTableModel;
+import edu.mgupi.pass.face.gui.template.TableEditorTemplate;
+import edu.mgupi.pass.face.gui.template.TableEditorTemplateTest.RecordEditorTemplateImpl;
+
+public class DefectClassesTable extends TableEditorTemplate {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public DefectClassesTable(Frame owner) {
+		super(owner);
+		initialize();
+	}
+
+	/**
+	 * This method initializes this
+	 * 
+	 */
+	private void initialize() {
+		this.setName("defectClassesTable");
+		this.setTitle("Редактирование классов дефектов");
+
+	}
+
+	private AbstractEditorTableModel tableModel = null;
+
+	@Override
+	protected AbstractEditorTableModel getTableModelImpl(JTable owner) {
+		if (tableModel == null) {
+			tableModel = new CommonEditorTableModel(owner, RecordEditorTemplateImpl.class) {
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				protected Object createInstanceImpl() {
+					return DefectClassesFactory.createDefectClasses();
+				}
+
+				@Override
+				protected String[] getColumns() {
+					return new String[] { "ID", "Класс дефекта" };
+				}
+
+				@SuppressWarnings("unchecked")
+				@Override
+				protected List getDataImpl() throws Exception {
+					List<DefectClasses> classes = new ArrayList<DefectClasses>();
+					classes.addAll(Arrays.asList(DefectClassesFactory.listDefectClassesByQuery(null, null)));
+					return classes;
+				}
+
+				@Override
+				public Object getValueAt(int rowIndex, int columnIndex) {
+					DefectClasses defect = (DefectClasses) data.get(rowIndex);
+					return columnIndex == 0 ? String.valueOf(defect.getIdDefectClass()) : defect.getName();
+				}
+			};
+		}
+		return tableModel;
+	}
+
+	@Override
+	protected void tablePostInit(JTable owner) {
+		AbstractEditorTableModel model = (AbstractEditorTableModel) owner.getModel();
+		model.setHorizontalAlignMode(0, JLabel.CENTER);
+		model.setColumnWidth(1, 200);
+	}
+
+} //  @jve:decl-index=0:visual-constraint="10,10"
