@@ -2,7 +2,6 @@ package edu.mgupi.pass.face.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -10,63 +9,41 @@ import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-import javax.swing.AbstractButton;
-import javax.swing.AbstractListModel;
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.WindowConstants;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
-import org.orm.PersistentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.face.gui.template.AbstractDialogAdapter;
+import edu.mgupi.pass.face.gui.template.AbstractEditorTableModel;
+import edu.mgupi.pass.face.gui.template.JTableReadOnly;
 import edu.mgupi.pass.face.gui.template.ParametersEditorPanel;
 import edu.mgupi.pass.filters.FilterChainsaw;
 import edu.mgupi.pass.filters.FilterChainsawTransaction;
-import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.FilterChainsawTransaction.FilterStore;
-import edu.mgupi.pass.util.Config;
-import edu.mgupi.pass.util.Utils;
-import edu.mgupi.pass.util.Config.DeletionMode;
 
-public class FiltersEditor extends JDialog implements ActionListener {
+public class FiltersEditor extends JDialog /* implements ActionListener */{
 	private final static Logger logger = LoggerFactory.getLogger(FiltersEditor.class); //  @jve:decl-index=0:
 
 	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
 	private JPanel jPanelSelectFilters = null;
 	private JPanel jPanelEditParameters = null;
-	private JScrollPane jScrollPaneSelected = null;
 	private ParametersEditorPanel jPanelParameters = null;
-	private JList jListSelected = null;
 	private JPanel jPanelButtons = null;
 	private JButton jButtonOK = null;
 	private JButton jButtonCancel = null;
-
-	private static enum FilterActions {
-		add, remove, up, down
-	};
-
-	private void registerAction(AbstractButton button, FilterActions action) {
-		button.setName(action.name());
-		button.setActionCommand(action.name());
-		Utils.addCheckedListener(button, this);
-	}
 
 	/**
 	 * @param owner
@@ -97,10 +74,7 @@ public class FiltersEditor extends JDialog implements ActionListener {
 		}
 
 		this.setTitle("Настройка фильтров " + title);
-		filterListModel.setChainsaw(chainsaw);
-		filterListModel.updateFiltersImpl();
-		jListSelected.setSelectedIndex(0);
-		jListSelected.ensureIndexIsVisible(0);
+		getTableModel().setChainsaw(chainsaw);
 
 	}
 
@@ -110,11 +84,10 @@ public class FiltersEditor extends JDialog implements ActionListener {
 		if (myDialogAdapter != null) {
 			return myDialogAdapter;
 		}
-		myDialogAdapter = new AbstractDialogAdapter(this) {
+		myDialogAdapter = new AbstractDialogAdapter(this, getTableModel()) {
 
 			@Override
 			protected void openDialogImpl() throws Exception {
-				//
 			}
 
 			@Override
@@ -122,15 +95,12 @@ public class FiltersEditor extends JDialog implements ActionListener {
 				jPanelParameters.saveModelData();
 				logger.debug("Commiting changes...");
 
-				filterListModel.getChainsaw().commitChanges();
-				filterListModel.closeChainsaw();
-
+				tableModel.getChainsaw().commitChanges();
 				return true;
 			}
 
 			@Override
 			protected void cancelImpl() throws Exception {
-				filterListModel.closeChainsaw();
 			}
 
 		};
@@ -160,119 +130,9 @@ public class FiltersEditor extends JDialog implements ActionListener {
 
 	private JPanel jPanelFilters = null;
 
-	@SuppressWarnings("unchecked")
-	private void addFilterImpl() throws Exception {
+	private JScrollPane jScrollPaneData = null;
 
-		LFiltersList list = (LFiltersList) AppHelper.getInstance().getDialogImpl(LFiltersList.class);
-		String pickClass = list.openDialog();
-		if (pickClass != null) {
-
-			//int index = jListSelected.getSelectedIndex() + 1; //get selected index
-			int index = filterListModel.getSize();
-
-			logger.debug("Attempt to open class " + pickClass + ", " + filterListModel.getSize()
-					+ " items alredy opened, " + index + " position");
-
-			this.filterListModel.addFilterImpl(index, (Class<IFilter>) Class.forName(pickClass));
-
-			this.jListSelected.setSelectedIndex(index);
-			this.jListSelected.ensureIndexIsVisible(index);
-
-		}
-	}
-
-	private void deleteFilterImpl() {
-		int index = this.jListSelected.getSelectedIndex();
-		if (index < 0) {
-			return;
-		}
-
-		logger.debug("Attempt to remove (" + index + ") " + this.jListSelected.getSelectedValue());
-
-		this.filterListModel.removeFilterImpl(index);
-
-		if (index >= filterListModel.getSize()) {
-			index--;
-		}
-		this.jListSelected.setSelectedIndex(index);
-
-	}
-
-	private FilterListModel filterListModel = null;
-
-	static class FilterListModel extends AbstractListModel {
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		private FilterChainsawTransaction transactionalSaw = null;
-
-		protected void setChainsaw(FilterChainsaw chainsaw) {
-			if (this.transactionalSaw != null) {
-				this.closeChainsaw();
-			}
-			this.transactionalSaw = new FilterChainsawTransaction(chainsaw);
-		}
-
-		protected FilterChainsawTransaction getChainsaw() {
-			if (transactionalSaw == null) {
-				throw new IllegalStateException("Internal error. Chainsaw is diappeared.");
-			}
-			return transactionalSaw;
-		}
-
-		protected void closeChainsaw() {
-			if (this.transactionalSaw != null) {
-				this.transactionalSaw.close();
-				this.transactionalSaw = null;
-			}
-		}
-
-		public void updateFiltersImpl() {
-			super.fireContentsChanged(this, 0, this.getSize());
-		}
-
-		public void addFilterImpl(int index, Class<IFilter> filterClass) throws InstantiationException,
-				IllegalAccessException, FilterException, PersistentException {
-			this.getChainsaw().appendFilter(index, filterClass);
-			super.fireIntervalAdded(this, index, index);
-		}
-
-		public void removeFilterImpl(int index) {
-			this.getChainsaw().removeFilter(index);
-			super.fireIntervalRemoved(this, index, index);
-		}
-
-		public boolean moveUp(int index) {
-			if (this.getChainsaw().moveUp(index)) {
-				super.fireContentsChanged(this, index - 1, index);
-				return true;
-			} else {
-				return false;
-			}
-		}
-
-		public boolean moveDown(int index) {
-			if (this.getChainsaw().moveDown(index)) {
-				super.fireContentsChanged(this, index, index + 1);
-				return true;
-			} else {
-				return false;
-			}
-		}
-
-		@Override
-		public Object getElementAt(int index) {
-			return transactionalSaw == null ? null : transactionalSaw.getFilterStore(index);
-		}
-
-		@Override
-		public int getSize() {
-			return transactionalSaw == null ? 0 : transactionalSaw.getFilterCount();
-		}
-	}
+	private JTable jTableData = null;
 
 	/**
 	 * This method initializes jContentPane
@@ -322,7 +182,7 @@ public class FiltersEditor extends JDialog implements ActionListener {
 			gridBagConstraints6.gridx = 0;
 			gridBagConstraints6.anchor = GridBagConstraints.NORTH;
 			gridBagConstraints6.weighty = 1.0D;
-			gridBagConstraints6.weightx = 1.0D;
+			gridBagConstraints6.weightx = 0.0D;
 			gridBagConstraints6.fill = GridBagConstraints.BOTH;
 			gridBagConstraints6.gridy = 0;
 			GridBagConstraints gridBagConstraints5 = new GridBagConstraints();
@@ -366,21 +226,6 @@ public class FiltersEditor extends JDialog implements ActionListener {
 	}
 
 	/**
-	 * This method initializes jScrollPaneSelected
-	 * 
-	 * @return javax.swing.JScrollPane
-	 */
-	private JScrollPane getJScrollPaneSelected() {
-		if (jScrollPaneSelected == null) {
-			jScrollPaneSelected = new JScrollPane();
-			jScrollPaneSelected.setPreferredSize(new Dimension(230, 120));
-			jScrollPaneSelected.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-			jScrollPaneSelected.setViewportView(getJListSelected());
-		}
-		return jScrollPaneSelected;
-	}
-
-	/**
 	 * This method initializes jPanelParameters
 	 * 
 	 * @return javax.swing.JPanel
@@ -390,95 +235,6 @@ public class FiltersEditor extends JDialog implements ActionListener {
 			jPanelParameters = new ParametersEditorPanel();
 		}
 		return jPanelParameters;
-	}
-
-	private FilterListModel getFilterListModel() {
-		if (filterListModel == null) {
-			filterListModel = new FilterListModel();
-		}
-		return filterListModel;
-	}
-
-	/**
-	 * This method initializes jListSelected
-	 * 
-	 * @return javax.swing.JList
-	 */
-	private JList getJListSelected() {
-		if (jListSelected == null) {
-			jListSelected = new JList(getFilterListModel());
-
-			jListSelected.setCellRenderer(new DefaultListCellRenderer() {
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
-						boolean cellHasFocus) {
-					FilterStore store = ((FilterStore) value);
-					if (store == null) {
-						throw new RuntimeException("Unexpected error! Store = null.");
-					}
-
-					return super.getListCellRendererComponent(list, store.name, index, isSelected, cellHasFocus);
-				}
-			});
-
-			jListSelected.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			jListSelected.addListSelectionListener(new ListSelectionListener() {
-
-				private void onSelectItemImpl(JList list) throws Exception {
-					int index = list.getSelectedIndex();
-					if (index != -1) {
-
-						FilterStore filter = (FilterStore) list.getSelectedValue();
-
-						logger.debug("Selecting filter {}", filter.name);
-
-						jPanelParameters.saveModelData();
-
-						((TitledBorder) jPanelEditParameters.getBorder()).setTitle(filter.name + " - параметры");
-						jPanelParameters.setModelData(filter.parameters);
-						FiltersEditor.this.pack();
-
-						logger.trace("Finished.");
-
-						jButtonRemove.setEnabled(true);
-
-						jButtonUp.setEnabled(index > 0);
-						jButtonDown.setEnabled(index < list.getModel().getSize() - 1);
-
-					} else {
-						logger.trace("Skip updating. No rows.");
-
-						((TitledBorder) jPanelEditParameters.getBorder()).setTitle("Модуль не выбран");
-						jPanelParameters.setModelData(null);
-
-						jButtonUp.setEnabled(false);
-						jButtonDown.setEnabled(false);
-						jButtonRemove.setEnabled(false);
-					}
-					FiltersEditor.this.repaint();
-				}
-
-				@Override
-				public void valueChanged(ListSelectionEvent e) {
-					if (!e.getValueIsAdjusting()) {
-						try {
-							this.onSelectItemImpl((JList) e.getSource());
-						} catch (Exception e1) {
-							logger.error("Error when applying filter options", e);
-							AppHelper.showExceptionDialog("Unexpected error when filter options.", e1);
-						}
-					}
-				}
-			});
-
-			jListSelected.setVisibleRowCount(10);
-
-		}
-		return jListSelected;
 	}
 
 	/**
@@ -550,7 +306,7 @@ public class FiltersEditor extends JDialog implements ActionListener {
 		if (jButtonAdd == null) {
 			jButtonAdd = new JButton();
 			jButtonAdd.setText("Добавить");
-			registerAction(jButtonAdd, FilterActions.add);
+			getTableModel().registerAddRowButton(jButtonAdd);
 		}
 		return jButtonAdd;
 	}
@@ -564,8 +320,7 @@ public class FiltersEditor extends JDialog implements ActionListener {
 		if (jButtonRemove == null) {
 			jButtonRemove = new JButton();
 			jButtonRemove.setText("Удалить");
-			jButtonRemove.setEnabled(false);
-			registerAction(jButtonRemove, FilterActions.remove);
+			getTableModel().registerDeleteRowButton(jButtonRemove);
 		}
 		return jButtonRemove;
 	}
@@ -579,8 +334,7 @@ public class FiltersEditor extends JDialog implements ActionListener {
 		if (jButtonUp == null) {
 			jButtonUp = new JButton();
 			jButtonUp.setText("Up");
-			jButtonUp.setEnabled(false);
-			registerAction(jButtonUp, FilterActions.up);
+			getTableModel().registerUpRowButton(jButtonUp);
 		}
 		return jButtonUp;
 	}
@@ -594,8 +348,7 @@ public class FiltersEditor extends JDialog implements ActionListener {
 		if (jButtonDown == null) {
 			jButtonDown = new JButton();
 			jButtonDown.setText("Down");
-			jButtonDown.setEnabled(false);
-			registerAction(jButtonDown, FilterActions.down);
+			getTableModel().registerDownRowButton(jButtonDown);
 		}
 		return jButtonDown;
 	}
@@ -616,60 +369,172 @@ public class FiltersEditor extends JDialog implements ActionListener {
 			gridBagConstraints2.fill = GridBagConstraints.BOTH;
 			jPanelFilters = new JPanel();
 			jPanelFilters.setLayout(new BorderLayout());
-			jPanelFilters.add(getJScrollPaneSelected(), BorderLayout.CENTER);
+			jPanelFilters.add(getJScrollPaneData(), BorderLayout.CENTER);
 		}
 		return jPanelFilters;
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent event) {
-		if (event.getActionCommand() == null) {
-			return;
+	/**
+	 * This method initializes jScrollPaneData
+	 * 
+	 * @return javax.swing.JScrollPane
+	 */
+	private JScrollPane getJScrollPaneData() {
+		if (jScrollPaneData == null) {
+			jScrollPaneData = new JScrollPane();
+			jScrollPaneData.setPreferredSize(new Dimension(250, 400));
+			jScrollPaneData.setViewportView(getJTableData());
 		}
-		FilterActions action = null;
-		try {
-			action = FilterActions.valueOf(event.getActionCommand());
-		} catch (IllegalArgumentException iae) {
-			logger.debug("Received unknown action: " + event.getActionCommand());
-			return;
+		return jScrollPaneData;
+	}
+
+	private final static String[] columns = new String[] { "№", "Фильтр" };
+
+	/**
+	 * This method initializes jTableData
+	 * 
+	 * @return javax.swing.JTable
+	 */
+	private JTable getJTableData() {
+		if (jTableData == null) {
+			jTableData = new JTableReadOnly();
+			jTableData.setModel(getTableModel());
+			jTableData.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+
+			getTableModel().setHorizontalAlignMode(0, JLabel.CENTER);
+			getTableModel().setColumnWidth(1, 200);
 		}
+		return jTableData;
+	}
 
-		if (action == FilterActions.add) {
-			try {
-				this.addFilterImpl();
-			} catch (Exception e) {
-				logger.error("Error when adding new filter", e);
-				AppHelper.showExceptionDialog("Unexpected error when adding filter.", e);
-			}
-		} else if (action == FilterActions.remove) {
-			int index = this.jListSelected.getSelectedIndex();
-			if (index < 0) {
-				return;
-			}
+	static class MyTableModel extends AbstractEditorTableModel {
 
-			if (Config.getInstance().getFilterDeleteMode() != DeletionMode.CONFIRM
-					|| JOptionPane.showConfirmDialog(this, "Действительно удалить выбранный фильтр?",
-							"Подтверждение удаления фильтра", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-				this.deleteFilterImpl();
-			}
+		private static final long serialVersionUID = 1L;
 
-		} else if (action == FilterActions.up) {
-			int index = jListSelected.getSelectedIndex();
-			if (filterListModel.moveUp(index)) {
-				jListSelected.setSelectedIndex(index - 1);
-				jListSelected.ensureIndexIsVisible(index - 1);
-			}
-		} else if (action == FilterActions.down) {
-			int index = jListSelected.getSelectedIndex();
-			if (filterListModel.moveDown(index)) {
-				jListSelected.setSelectedIndex(index + 1);
-				jListSelected.ensureIndexIsVisible(index + 1);
-			}
-		} else {
-			JOptionPane.showMessageDialog(this, "Internal error. Unknown action: " + action, "Internal error",
-					JOptionPane.ERROR_MESSAGE);
+		private FiltersEditor parent;
+
+		public MyTableModel(JTable owner, FiltersEditor parent) {
+			super(owner);
+			this.parent = parent;
 		}
 
+		private FilterChainsawTransaction transactionalSaw = null;
+
+		protected void setChainsaw(FilterChainsaw chainsaw) {
+			this.transactionalSaw = new FilterChainsawTransaction(chainsaw);
+			super.fireTableDataChanged();
+		}
+
+		protected FilterChainsawTransaction getChainsaw() {
+			if (transactionalSaw == null) {
+				throw new IllegalStateException("Internal error. Chainsaw is diappeared.");
+			}
+			return transactionalSaw;
+		}
+
+		protected void openImpl() throws Exception {
+			//
+		}
+
+		protected void closeImpl() throws Exception {
+			if (this.transactionalSaw != null) {
+				this.transactionalSaw.close();
+				this.transactionalSaw = null;
+			}
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		protected boolean addRowImpl(int rowIdx) throws Exception {
+			LFiltersList list = (LFiltersList) AppHelper.getInstance().getDialogImpl(LFiltersList.class);
+			String pickClass = list.openDialog();
+			if (pickClass != null) {
+				this.getChainsaw().appendFilter(rowIdx, (Class<IFilter>) Class.forName(pickClass));
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		protected boolean deleteRowsImpl(int rowIdx[]) throws Exception {
+			for (@SuppressWarnings("unused")
+			int idx : rowIdx) {
+				this.getChainsaw().removeFilter(rowIdx[0]);
+			}
+			return true;
+		}
+
+		@Override
+		protected boolean editRowImpl(int rowIdx) throws Exception {
+			throw new IllegalStateException("Internal error. This method is prohibited.");
+		}
+
+		@Override
+		protected boolean moveDownImpl(int[] rowIdx) throws Exception {
+			for (int i = rowIdx.length - 1; i >= 0; i--) {
+				this.getChainsaw().moveDown(rowIdx[i]);
+			}
+			return true;
+		}
+
+		@Override
+		protected boolean moveUpImpl(int[] rowIdx) throws Exception {
+			for (int i = 0; i < rowIdx.length; i++) {
+				this.getChainsaw().moveUp(rowIdx[i]);
+			}
+			return true;
+		}
+
+		@Override
+		protected void rowSelectionImpl(int rowIdx) throws Exception {
+
+			if (rowIdx != -1) {
+				FilterStore filter = (FilterStore) this.getChainsaw().getFilterStore(rowIdx);
+
+				parent.jPanelParameters.saveModelData();
+
+				((TitledBorder) parent.jPanelEditParameters.getBorder()).setTitle(filter.name + " - параметры");
+				parent.jPanelParameters.setModelData(filter.parameters);
+				parent.pack();
+
+			} else {
+				((TitledBorder) parent.jPanelEditParameters.getBorder()).setTitle("Фильтр не выбран");
+				parent.jPanelParameters.setModelData(null);
+			}
+
+			parent.repaint();
+		}
+
+		@Override
+		public int getColumnCount() {
+			return columns.length;
+		}
+
+		@Override
+		public int getRowCount() {
+			return this.transactionalSaw == null ? 0 : this.transactionalSaw.getFilterCount();
+		}
+
+		@Override
+		public Object getValueAt(int rowIndex, int columnIndex) {
+			return columnIndex == 0 ? String.valueOf(rowIndex + 1) : transactionalSaw.getFilterStore(rowIndex).name;
+		}
+
+		@Override
+		public String getColumnName(int column) {
+			return columns[column];
+		}
+
+	};
+
+	private MyTableModel tableModel = null;
+
+	private MyTableModel getTableModel() {
+		if (tableModel == null) {
+			tableModel = new MyTableModel(getJTableData(), this);
+		}
+
+		return tableModel;
 	}
 
 } //  @jve:decl-index=0:visual-constraint="10,10"

@@ -48,6 +48,7 @@ public class TransactionsTest {
 		}
 
 		transaction.commit();
+		PassPersistentManager.instance().disposePersistentManager();
 	}
 
 	@Test
@@ -144,27 +145,46 @@ public class TransactionsTest {
 			e.printStackTrace();
 			//transaction2.rollback();
 			transaction.rollback();
-//		} finally {
-//
-//			//session.close();
-//
-//			transaction = PassPersistentManager.instance().getSession().beginTransaction();
-//
-//			DefectTypesCriteria tc = new DefectTypesCriteria();
-//			tc.name.ilike("TEST-%");
-//			for (DefectTypes t : DefectTypesFactory.listDefectTypesByCriteria(tc)) {
-//				t.delete();
-//			}
-//
-//			DefectClassesCriteria cc = new DefectClassesCriteria();
-//			cc.name.ilike("TEST-%");
-//			for (DefectClasses c : DefectClassesFactory.listDefectClassesByCriteria(cc)) {
-//				c.delete();
-//			}
-//
-//			transaction.commit();
+			//		} finally {
+			//
+			//			//session.close();
+			//
+			//			transaction = PassPersistentManager.instance().getSession().beginTransaction();
+			//
+			//			DefectTypesCriteria tc = new DefectTypesCriteria();
+			//			tc.name.ilike("TEST-%");
+			//			for (DefectTypes t : DefectTypesFactory.listDefectTypesByCriteria(tc)) {
+			//				t.delete();
+			//			}
+			//
+			//			DefectClassesCriteria cc = new DefectClassesCriteria();
+			//			cc.name.ilike("TEST-%");
+			//			for (DefectClasses c : DefectClassesFactory.listDefectClassesByCriteria(cc)) {
+			//				c.delete();
+			//			}
+			//
+			//			transaction.commit();
 
 		}
 
+	}
+
+	@Test
+	public void testBigWork() throws Exception {
+		PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
+		
+		System.out.println("BIGWORK");
+
+		for (int i = 0; i < 100; i++) {
+			DefectClasses defectClass = DefectClassesFactory.createDefectClasses();
+			defectClass.setName("TEST-sample-x" + i);
+			defectClass.save();
+			
+			System.out.println("Saved " + i);
+			Thread.sleep(10);
+			
+		}
+
+		transaction.commit();
 	}
 }

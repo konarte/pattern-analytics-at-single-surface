@@ -68,7 +68,6 @@ public class SplashWindow extends JFrame {
 		this.setResizable(false);
 		this.setName("splashFrame");
 		this.setBounds(new Rectangle(0, 0, 450, 400));
-		Point point = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
 
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.setContentPane(getJContentPane());
@@ -94,6 +93,7 @@ public class SplashWindow extends JFrame {
 
 		this.jPanelSplash.setImage(image);
 
+		Point point = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
 		this.setLocation((int) point.getX() - this.getWidth() / 2, (int) point.getY() - this.getHeight() / 2);
 	}
 

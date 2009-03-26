@@ -30,9 +30,12 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import org.orm.PersistentException;
+import org.orm.PersistentManager.SessionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.db.surfaces.PassPersistentManager;
 import edu.mgupi.pass.face.IProgress;
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Utils;
@@ -366,7 +369,14 @@ public class AppHelper {
 			cachedLock.unlock();
 			componentsLock.unlock();
 		}
+	}
 
+	public void setDatabaseSessionType(SessionType sessionType) throws PersistentException {
+		if (PassPersistentManager.instance().getSessionType() != sessionType) {
+			logger.debug("Switching persistance type. Disposing persistance manager first...");
+			PassPersistentManager.instance().disposePersistentManager();
+			PassPersistentManager.setSessionType(sessionType);
+		}
 	}
 
 	/**
@@ -423,6 +433,11 @@ public class AppHelper {
 			// I can't imaging that happens :)
 			logger.error("Unexpected error when closing stream " + out, io);
 		}
+	}
+
+	public static void showFieldRequiredDialog(String fieldName) {
+		JOptionPane.showMessageDialog(null, "Поле '" + fieldName + "' обязательно для заполнения.", "Ожидание ввода",
+				JOptionPane.ERROR_MESSAGE);
 	}
 
 }

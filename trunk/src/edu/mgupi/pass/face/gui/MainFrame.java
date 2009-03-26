@@ -97,11 +97,12 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 	protected ImageFrameTemplate moduleFrame = null;
 	protected ModuleProcessor mainModuleProcessor = null; // @jve:decl-index=0:
 
-	private static enum Actions {
-		notImplemented, // 
-		open, close, openMass, openFilterSet, saveFilterSet, settings, exit, //
-		filterList, modulesList, //
-		help, about, //
+	protected static enum Actions {
+		NOT_IMPLEMENTED, // 
+		OPEN, CLOSE, OPEN_MASS, OPEN_FILTER_SET, SAVE_FILTER_SET, SETTINGS, EXIT, //
+		FILTER_LIST, MODULE_LIST, //
+		DEFECT_CLASSES, DEFECT_TYPES, //
+		HELP, ABOUT, //
 
 		// buttons
 		editCurrentFilters, editCurrentModuleParams
@@ -152,6 +153,10 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		AppHelper.getInstance().getDialogImpl(FiltersEditor.class);
 		AppHelper.getInstance().getDialogImpl(LFiltersList.class);
 		AppHelper.getInstance().getDialogImpl(LModulesList.class);
+
+		AppHelper.getInstance().getDialogImpl(DefectClassesTable.class);
+		AppHelper.getInstance().getDialogImpl(DefectTypesTable.class);
+		//AppHelper.getInstance().getDialogImpl(DefectClassesRecord0.class);
 
 		this.getfSChooser();
 	}
@@ -211,8 +216,8 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			this.fSChooser.removeAll();
 			this.fSChooser = null;
 		}
-		this.currentSource = null;
-		this.currentLocus = null;
+
+		this.closeProcessing();
 
 		if (mainModuleProcessor != null) {
 			try {
@@ -274,6 +279,8 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			this.applySourcePreProcessor();
 
 			// Main cycle
+
+			currentSource = source;
 			currentLocus = mainModuleProcessor.startProcessing(source);
 
 			BufferedImage sourceImage = source.getSourceImage();
@@ -416,6 +423,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 	}
 
 	protected void restartProcessingByFilters() {
+		logger.debug("Restarting process by filters...");
 		MainFrame.this.printMessage("Обновление примененных фильтров...");
 		SwingUtilities.invokeLater(new Runnable() {
 
@@ -510,7 +518,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			jMenuItemOpen = new JMenuItem();
 			jMenuItemOpen.setText("Открыть");
 			jMenuItemOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
-			registerAction(jMenuItemOpen, Actions.open);
+			registerAction(jMenuItemOpen, Actions.OPEN);
 		}
 		return jMenuItemOpen;
 	}
@@ -524,7 +532,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		if (jMenuItemOpenMass == null) {
 			jMenuItemOpenMass = new JMenuItem();
 			jMenuItemOpenMass.setText("Массовая загрузка");
-			registerAction(jMenuItemOpenMass, Actions.notImplemented);
+			registerAction(jMenuItemOpenMass, Actions.NOT_IMPLEMENTED);
 		}
 		return jMenuItemOpenMass;
 	}
@@ -538,7 +546,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		if (jMenuItemSettings == null) {
 			jMenuItemSettings = new JMenuItem();
 			jMenuItemSettings.setText("Настройки...");
-			registerAction(jMenuItemSettings, Actions.settings);
+			registerAction(jMenuItemSettings, Actions.SETTINGS);
 		}
 		return jMenuItemSettings;
 	}
@@ -552,7 +560,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		if (jMenuItemExit == null) {
 			jMenuItemExit = new JMenuItem();
 			jMenuItemExit.setText("Выход");
-			registerAction(jMenuItemExit, Actions.exit);
+			registerAction(jMenuItemExit, Actions.EXIT);
 		}
 		return jMenuItemExit;
 	}
@@ -570,6 +578,10 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			jMenuDatabase.add(getJMenuItemAvailableModules());
 			jMenuDatabase.addSeparator();
 
+			jMenuDatabase.add(getJMenuItemDefectClasses());
+			jMenuDatabase.add(getJMenuItemDefectTypes());
+			jMenuDatabase.addSeparator();
+
 			jMenuDatabase.add(getJMenuItemMaterials());
 		}
 		return jMenuDatabase;
@@ -584,7 +596,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		if (jMenuItemMaterials == null) {
 			jMenuItemMaterials = new JMenuItem();
 			jMenuItemMaterials.setText("Материалы");
-			this.registerAction(jMenuItemMaterials, Actions.notImplemented);
+			this.registerAction(jMenuItemMaterials, Actions.NOT_IMPLEMENTED);
 		}
 		return jMenuItemMaterials;
 	}
@@ -645,7 +657,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			jMenuItemHelp = new JMenuItem();
 			jMenuItemHelp.setText("Помощь");
 			jMenuItemHelp.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
-			registerAction(jMenuItemHelp, Actions.help);
+			registerAction(jMenuItemHelp, Actions.HELP);
 		}
 		return jMenuItemHelp;
 	}
@@ -659,7 +671,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		if (jMenuItemAbout == null) {
 			jMenuItemAbout = new JMenuItem();
 			jMenuItemAbout.setText("О программе...");
-			registerAction(jMenuItemAbout, Actions.about);
+			registerAction(jMenuItemAbout, Actions.ABOUT);
 		}
 		return jMenuItemAbout;
 	}
@@ -1079,7 +1091,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		if (jButtonSensorSearch == null) {
 			jButtonSensorSearch = new JButton();
 			jButtonSensorSearch.setText("Найти");
-			this.registerAction(jButtonSensorSearch, Actions.notImplemented);
+			this.registerAction(jButtonSensorSearch, Actions.NOT_IMPLEMENTED);
 		}
 		return jButtonSensorSearch;
 	}
@@ -1150,7 +1162,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		if (jButtonSurface == null) {
 			jButtonSurface = new JButton();
 			jButtonSurface.setText("Найти");
-			registerAction(jButtonSurface, Actions.notImplemented);
+			registerAction(jButtonSurface, Actions.NOT_IMPLEMENTED);
 		}
 		return jButtonSurface;
 	}
@@ -1217,7 +1229,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			jButtonTeach = new JButton();
 			jButtonTeach.setText("Обучение...");
 			jButtonTeach.setEnabled(false);
-			registerAction(jButtonTeach, Actions.notImplemented);
+			registerAction(jButtonTeach, Actions.NOT_IMPLEMENTED);
 		}
 		return jButtonTeach;
 	}
@@ -1464,7 +1476,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			jButtonCompare = new JButton();
 			jButtonCompare.setText("Сравнение...");
 			jButtonCompare.setEnabled(false);
-			registerAction(jButtonCompare, Actions.notImplemented);
+			registerAction(jButtonCompare, Actions.NOT_IMPLEMENTED);
 		}
 		return jButtonCompare;
 	}
@@ -1478,7 +1490,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		if (jMenuItemAvailableFilters == null) {
 			jMenuItemAvailableFilters = new JMenuItem();
 			jMenuItemAvailableFilters.setText("Зарегистрированные фильтры");
-			registerAction(jMenuItemAvailableFilters, Actions.filterList);
+			registerAction(jMenuItemAvailableFilters, Actions.FILTER_LIST);
 		}
 		return jMenuItemAvailableFilters;
 	}
@@ -1492,7 +1504,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		if (jMenuItemAvailableModules == null) {
 			jMenuItemAvailableModules = new JMenuItem();
 			jMenuItemAvailableModules.setText("Зарегистрированные модули");
-			registerAction(jMenuItemAvailableModules, Actions.modulesList);
+			registerAction(jMenuItemAvailableModules, Actions.MODULE_LIST);
 		}
 		return jMenuItemAvailableModules;
 	}
@@ -1506,7 +1518,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		if (jMenuItemOpenFilterSet == null) {
 			jMenuItemOpenFilterSet = new JMenuItem();
 			jMenuItemOpenFilterSet.setText("Загрузить набор фильтров");
-			registerAction(jMenuItemOpenFilterSet, Actions.openFilterSet);
+			registerAction(jMenuItemOpenFilterSet, Actions.OPEN_FILTER_SET);
 		}
 		return jMenuItemOpenFilterSet;
 	}
@@ -1520,7 +1532,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		if (jMenuItemSaveFilterSet == null) {
 			jMenuItemSaveFilterSet = new JMenuItem();
 			jMenuItemSaveFilterSet.setText("Сохранить набор фильтров...");
-			registerAction(jMenuItemSaveFilterSet, Actions.saveFilterSet);
+			registerAction(jMenuItemSaveFilterSet, Actions.SAVE_FILTER_SET);
 		}
 		return jMenuItemSaveFilterSet;
 	}
@@ -1535,12 +1547,16 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			jMenuItemClose = new JMenuItem();
 			jMenuItemClose.setText("Закрыть");
 			jMenuItemClose.setEnabled(false);
-			registerAction(jMenuItemClose, Actions.close);
+			registerAction(jMenuItemClose, Actions.CLOSE);
 		}
 		return jMenuItemClose;
 	}
 
 	private JFileChooser fSChooser = null;
+
+	private JMenuItem jMenuItemDefectClasses = null;
+
+	private JMenuItem jMenuItemDefectTypes = null;
 
 	private JFileChooser getfSChooser() {
 		if (fSChooser == null) {
@@ -1574,7 +1590,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			return;
 		}
 
-		if (action == Actions.open) {
+		if (action == Actions.OPEN) {
 			// Open new image
 			try {
 				this.printMessage("Открытие нового годографа");
@@ -1586,10 +1602,10 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			} finally {
 				this.clearMessage();
 			}
-		} else if (action == Actions.close) {
+		} else if (action == Actions.CLOSE) {
 			this.closeProcessing();
 			this.jMenuItemClose.setEnabled(false);
-		} else if (action == Actions.saveFilterSet) {
+		} else if (action == Actions.SAVE_FILTER_SET) {
 			JFileChooser chooser = getfSChooser();
 			int ret = chooser.showSaveDialog(this);
 			if (ret == JFileChooser.APPROVE_OPTION) {
@@ -1608,7 +1624,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 				}
 			}
 
-		} else if (action == Actions.openFilterSet) {
+		} else if (action == Actions.OPEN_FILTER_SET) {
 			JFileChooser chooser = getfSChooser();
 			int ret = chooser.showOpenDialog(this);
 			if (ret == JFileChooser.APPROVE_OPTION) {
@@ -1625,31 +1641,42 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 							+ "'.", e1);
 				}
 			}
-		} else if (action == Actions.settings) {
+		} else if (action == Actions.SETTINGS) {
 			// Edit settings
 			SettingsDialog settings = (SettingsDialog) AppHelper.getInstance().getDialog(SettingsDialog.class);
 			if (settings != null && settings.openDialog()) {
 				this.restartProcessingBySource();
 			}
-		} else if (action == Actions.exit) {
+		} else if (action == Actions.EXIT) {
 			// Do exit
 			this.closeImpl();
 			System.exit(0);
-		} else if (action == Actions.filterList) {
+		} else if (action == Actions.FILTER_LIST) {
 			// View all registered filters
-			LFiltersList filterList = (LFiltersList) AppHelper.getInstance().getDialog(
-					LFiltersList.class);
+			LFiltersList filterList = (LFiltersList) AppHelper.getInstance().getDialog(LFiltersList.class);
 			if (filterList != null) {
 				filterList.showDialogCancelOnly();
 			}
-		} else if (action == Actions.modulesList) {
+		} else if (action == Actions.MODULE_LIST) {
 			// View all registered modules
-			LModulesList modulesList = (LModulesList) AppHelper.getInstance().getDialog(
-					LModulesList.class);
+			LModulesList modulesList = (LModulesList) AppHelper.getInstance().getDialog(LModulesList.class);
 			if (modulesList != null) {
 				modulesList.showDialogCancelOnly();
 			}
-		} else if (action == Actions.help) {
+		} else if (action == Actions.DEFECT_CLASSES) {
+			//
+			DefectClassesTable defectClasses = (DefectClassesTable) AppHelper.getInstance().getDialog(
+					DefectClassesTable.class);
+			if (defectClasses != null) {
+				defectClasses.openDialog();
+			}
+		} else if (action == Actions.DEFECT_TYPES) {
+			//
+			DefectTypesTable defectTypes = (DefectTypesTable) AppHelper.getInstance().getDialog(DefectTypesTable.class);
+			if (defectTypes != null) {
+				defectTypes.openDialog();
+			}
+		} else if (action == Actions.HELP) {
 			// View help
 			try {
 				Desktop.getDesktop().browse(new URI(Const.WEB_HELP_PAGE));
@@ -1658,13 +1685,13 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 				AppHelper.showExceptionDialog("Unexpected eror when opening help link '" + Const.WEB_HELP_PAGE + "'.",
 						e1);
 			}
-		} else if (action == Actions.about) {
+		} else if (action == Actions.ABOUT) {
 			// View about
 			AboutDialog about = (AboutDialog) AppHelper.getInstance().getDialog(AboutDialog.class);
 			if (about != null) {
 				about.showDialog();
 			}
-		} else if (action == Actions.notImplemented) {
+		} else if (action == Actions.NOT_IMPLEMENTED) {
 			// Not implemented yet. Sorry.
 			JOptionPane.showMessageDialog(null, "Not implemented yet.", "Info", JOptionPane.INFORMATION_MESSAGE);
 		} else if (action == Actions.editCurrentFilters) {
@@ -1672,6 +1699,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			FiltersEditor editor = (FiltersEditor) AppHelper.getInstance().getDialog(FiltersEditor.class);
 			if (editor != null
 					&& editor.openDialog("Основные фильтры", MainFrame.this.mainModuleProcessor.getChainsaw())) {
+
 				this.restartProcessingByFilters();
 			}
 		} else if (action == Actions.editCurrentModuleParams) {
@@ -1687,6 +1715,35 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 					JOptionPane.ERROR_MESSAGE);
 		}
 
+	}
+
+	/**
+	 * This method initializes jMenuItemDefectClasses
+	 * 
+	 * @return javax.swing.JMenuItem
+	 */
+	private JMenuItem getJMenuItemDefectClasses() {
+		if (jMenuItemDefectClasses == null) {
+			jMenuItemDefectClasses = new JMenuItem();
+			jMenuItemDefectClasses.setMnemonic(KeyEvent.VK_UNDEFINED);
+			jMenuItemDefectClasses.setText("Классы дефектов");
+			registerAction(jMenuItemDefectClasses, Actions.DEFECT_CLASSES);
+		}
+		return jMenuItemDefectClasses;
+	}
+
+	/**
+	 * This method initializes jMenuItemDefectTypes
+	 * 
+	 * @return javax.swing.JMenuItem
+	 */
+	private JMenuItem getJMenuItemDefectTypes() {
+		if (jMenuItemDefectTypes == null) {
+			jMenuItemDefectTypes = new JMenuItem();
+			jMenuItemDefectTypes.setText("Типы дефектов");
+			registerAction(jMenuItemDefectTypes, Actions.DEFECT_TYPES);
+		}
+		return jMenuItemDefectTypes;
 	}
 
 }

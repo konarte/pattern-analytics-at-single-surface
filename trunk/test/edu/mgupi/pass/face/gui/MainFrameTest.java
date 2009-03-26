@@ -78,13 +78,13 @@ public class MainFrameTest {
 			}
 		});
 
-		JMenuItem open = (JMenuItem) Utils.getChildNamed(frame, "open");
+		JMenuItem open = (JMenuItem) Utils.getChildNamed(frame, MainFrame.Actions.OPEN.name());
 		assertNotNull(open);
 
-		SwingTestHelper.clickOpenDialogButton(frame, "open");
+		SwingTestHelper.clickOpenDialogButton(frame, MainFrame.Actions.OPEN.name());
 		SwingTestHelper.clickFileChooserCancel(frame);
 
-		SwingTestHelper.clickOpenDialogButton(frame, "open");
+		SwingTestHelper.clickOpenDialogButton(frame, MainFrame.Actions.OPEN.name());
 
 		assertFalse(frame.isProcessStarted());
 		SwingTestHelper.clickFileChooserOK(frame, new File("test/suslik.jpg"));
@@ -144,7 +144,7 @@ public class MainFrameTest {
 
 	@Test
 	public void testCloseImage() throws Exception {
-		final JMenuItem close = (JMenuItem) Utils.getChildNamed(frame, "close");
+		final JMenuItem close = (JMenuItem) Utils.getChildNamed(frame, MainFrame.Actions.CLOSE.name());
 		assertNotNull(close);
 
 		assertFalse(frame.isProcessStarted());
@@ -155,7 +155,7 @@ public class MainFrameTest {
 		});
 		assertFalse(frame.isProcessStarted());
 
-		SwingTestHelper.clickOpenDialogButton(frame, "open");
+		SwingTestHelper.clickOpenDialogButton(frame, MainFrame.Actions.OPEN.name());
 		SwingTestHelper.clickFileChooserOK(frame, new File("test/suslik.jpg"));
 
 		// Frame must start!
@@ -166,20 +166,20 @@ public class MainFrameTest {
 				return frame.isProcessStarted() == false;
 			}
 		});
-		
+
 		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 			public void workImpl() throws Exception {
 				close.doClick();
 			}
 		});
-		
+
 		assertFalse(frame.isProcessStarted());
 	}
 
 	@Test
 	public void testSettings() throws Exception {
 
-		SwingTestHelper.clickOpenDialogButton(frame, "settings", SettingsDialog.class);
+		SwingTestHelper.clickOpenDialogButton(frame, MainFrame.Actions.SETTINGS.name(), SettingsDialog.class);
 
 		SwingTestHelper.clickCloseDialogButton((SettingsDialog) AppHelper.getInstance().searchWindow(
 				SettingsDialog.class), "cancel");

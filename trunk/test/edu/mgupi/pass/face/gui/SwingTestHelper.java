@@ -115,10 +115,10 @@ public class SwingTestHelper {
 		if (watchedException == null) {
 			watchedException = new Exception();
 		}
-		while ((timeOK = ((System.currentTimeMillis() - time) < MAX_WAIT_TIME)) && condition.keepWorking()
-				&& watchedException.getCause() == null) {
-			Thread.sleep(100);
-		}
+		do {
+			Thread.sleep(50);
+		} while ((timeOK = ((System.currentTimeMillis() - time) < MAX_WAIT_TIME)) && condition.keepWorking()
+				&& watchedException.getCause() == null);
 		if (!timeOK) {
 			throw new RuntimeException("Error. Wait interrupted after " + (System.currentTimeMillis() - time)
 					+ " msec.");
@@ -188,17 +188,21 @@ public class SwingTestHelper {
 		}
 		return null;
 	}
-
-	public static void clickCloseDialogButton(final Window parent, final String buttonName) throws Exception {
+	
+	public static void clickCloseDialogButton(final Window parent, final String buttonOrActionNameName) throws Exception {
 		assertNotNull(parent);
 		assertTrue(parent.isVisible());
-		final AbstractButton button = (AbstractButton) Utils.getChildNamed(parent, buttonName);
+		AbstractButton button = (AbstractButton) Utils.getChildNamed(parent, buttonOrActionNameName);
+		if (button == null) {
+			button = SwingTestHelper.getButtonByActionCommand(parent, buttonOrActionNameName);
+		}
 		assertNotNull(button);
 
+		final AbstractButton foundButton = button;
 		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
-				button.doClick();
+				foundButton.doClick();
 			}
 		}, new WaitCondition() {
 
@@ -238,13 +242,13 @@ public class SwingTestHelper {
 		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
-				if (expectedInstance != null) {
-					Window window = AppHelper.getInstance().getWindowImpl(expectedInstance, false);
-					window.setVisible(true);
-				} else {
+				if (buttonName != null && parent != null) {
 					AbstractButton button = (AbstractButton) Utils.getChildNamed(parent, buttonName);
 					assertNotNull(button);
 					button.doClick();
+				} else {
+					Window window = AppHelper.getInstance().getWindowImpl(expectedInstance, false);
+					window.setVisible(true);
 				}
 			}
 		}, new WaitCondition() {
@@ -411,8 +415,11 @@ public class SwingTestHelper {
 					: ((Container) parent).getComponents();
 
 			for (int i = 0; i < children.length; ++i) {
-				System.out.println(prefix + " " + children[i].getName() + " = " + children[i]);
-				printChildHierarchy(children[i], level + 1);
+				Component child = children[i];
+				System.out.println(prefix + " " + child.getName()
+						+ (child instanceof AbstractButton ? " " + ((AbstractButton) child).getActionCommand() : "")
+						+ " = " + child);
+				printChildHierarchy(child, level + 1);
 			}
 		}
 	}

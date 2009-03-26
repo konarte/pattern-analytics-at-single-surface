@@ -71,8 +71,8 @@ public class LocusAppliedFilterParams implements Serializable {
 	
 	@Column(name="ID", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D31202DC6ABBE052D1")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31202DC6ABBE052D1", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312044C35CB30191A")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312044C35CB30191A", strategy="native")	
 	private int ID;
 	
 	@Column(name="Name", nullable=false, length=255)	

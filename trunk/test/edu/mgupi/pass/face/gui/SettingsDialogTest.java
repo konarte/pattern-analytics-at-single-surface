@@ -26,6 +26,7 @@ import edu.mgupi.pass.util.WaitCondition;
 import edu.mgupi.pass.util.WorkSet;
 import edu.mgupi.pass.util.Config.DeletionMode;
 import edu.mgupi.pass.util.Config.SourceMode;
+import edu.mgupi.pass.util.Config.TransactionMode;
 
 public class SettingsDialogTest {
 
@@ -187,7 +188,8 @@ public class SettingsDialogTest {
 
 	@Test
 	public void testCommonSettings() throws Exception {
-		Config.getInstance().setFilterDeleteConfirm(DeletionMode.CONFIRM);
+		Config.getInstance().setRowsDeleteMode(DeletionMode.CONFIRM);
+		Config.getInstance().setTransactionMode(TransactionMode.COMMIT_EVERY_ROW);
 		AppHelper.getInstance().updateUI(WindowsLookAndFeel.class.getName());
 
 		dialog.resetControls();
@@ -224,22 +226,41 @@ public class SettingsDialogTest {
 				assertFalse(radio.isSelected());
 			}
 		}
-		JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog, DeletionMode.NO_CONFIRM.name());
-		assertNotNull(radio);
-		radio.setSelected(true);
+		{
+			JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog, DeletionMode.NO_CONFIRM.name());
+			assertNotNull(radio);
+			radio.setSelected(true);
+		}
+
+		for (TransactionMode mode : TransactionMode.values()) {
+			JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog, mode.name());
+			assertNotNull(radio);
+			if (mode == TransactionMode.COMMIT_EVERY_ROW) {
+				assertTrue(radio.isSelected());
+			} else {
+				assertFalse(radio.isSelected());
+			}
+		}
+		{
+			JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog, TransactionMode.COMMIT_BULK.name());
+			assertNotNull(radio);
+			radio.setSelected(true);
+		}
 
 		combo.setSelectedItem(new MotifLookAndFeel().getName());
 
 		SwingTestHelper.clickCloseDialogButton(dialog, "OK");
 
-		assertEquals(DeletionMode.NO_CONFIRM, Config.getInstance().getFilterDeleteMode());
+		assertEquals(DeletionMode.NO_CONFIRM, Config.getInstance().getRowsDeleteMode());
+		assertEquals(TransactionMode.COMMIT_BULK, Config.getInstance().getTransactionMode());
 		assertTrue(MotifLookAndFeel.class == UIManager.getLookAndFeel().getClass());
 		assertFalse(resultButton);
 	}
 
 	@Test
 	public void testCommonSettingsCancel() throws Exception {
-		Config.getInstance().setFilterDeleteConfirm(DeletionMode.CONFIRM);
+		Config.getInstance().setRowsDeleteMode(DeletionMode.CONFIRM);
+		Config.getInstance().setTransactionMode(TransactionMode.COMMIT_EVERY_ROW);
 		AppHelper.getInstance().updateUI(WindowsLookAndFeel.class.getName());
 		dialog.resetControls();
 
@@ -267,11 +288,16 @@ public class SettingsDialogTest {
 		assertNotNull(radio);
 		radio.setSelected(true);
 
+		radio = (JRadioButton) Utils.getChildNamed(dialog, TransactionMode.COMMIT_BULK.name());
+		assertNotNull(radio);
+		radio.setSelected(true);
+
 		combo.setSelectedItem(new MotifLookAndFeel().getName());
 
 		SwingTestHelper.clickCloseDialogButton(dialog, "cancel");
 
-		assertEquals(DeletionMode.CONFIRM, Config.getInstance().getFilterDeleteMode());
+		assertEquals(DeletionMode.CONFIRM, Config.getInstance().getRowsDeleteMode());
+		assertEquals(TransactionMode.COMMIT_EVERY_ROW, Config.getInstance().getTransactionMode());
 		assertTrue(WindowsLookAndFeel.class == UIManager.getLookAndFeel().getClass());
 		assertFalse(resultButton);
 	}

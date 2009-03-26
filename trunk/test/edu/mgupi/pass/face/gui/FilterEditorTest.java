@@ -30,11 +30,7 @@ public class FilterEditorTest {
 	@Test
 	public void commonTest() throws Exception {
 
-		//		ModuleProcessor processor = new ModuleProcessor();
-		//		processor.setModule(TestModule.class);
-
 		FilterChainsaw mySaw = new FilterChainsaw();
-		//		processor.setChainsaw(mySaw);
 
 		for (Class<?> filterClass : ClassesHelper.getAvailableClasses(IFilter.class)) {
 			mySaw.appendFilter((Class<IFilter>) filterClass);
@@ -42,16 +38,6 @@ public class FilterEditorTest {
 
 		dialog.setFilters("Тестовый показ", mySaw);
 		SwingTestHelper.showMeBackground(dialog);
-
-		//		dialog.setVisible(true);
-		//		//SwingTestHelper.waitMe(dialog);
-		////
-		//		dialog.setFilters("Тестовый показ номер два!!!", mySaw);
-		//		dialog.setVisible(true);
-
-		//		SwingTestHelper.showMeBackground(dialog);
-		//
-		//SwingTestHelper.waitMe(dialog);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -63,7 +49,6 @@ public class FilterEditorTest {
 			mySaw.appendFilter((Class<IFilter>) filterClass);
 		}
 
-		dialog.setFilters("Тестовый показ", mySaw);
-		dialog.setVisible(true);
+		dialog.openDialog("Тестовый показ", mySaw);
 	}
 }

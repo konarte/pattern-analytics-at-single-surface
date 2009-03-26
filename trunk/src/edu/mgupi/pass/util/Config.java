@@ -9,12 +9,17 @@ import java.util.Iterator;
 
 import javax.swing.JCheckBox;
 import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.FileConfiguration;
+import org.orm.PersistentException;
+import org.orm.PersistentManager.SessionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import edu.mgupi.pass.face.gui.AppHelper;
 
 /**
  * Config class. Using apache commons-config.
@@ -91,6 +96,7 @@ public class Config {
 
 	private final static String PARAM_LOOK_AND_FEEL = "lookAndFeel";
 	private final static String PARAM_FILTER_DELETE_MODE = "filterDeleteMode";
+	private final static String PARAM_TRANSACTION_MODE = "transactionMode";
 
 	public static enum SourceMode {
 		CENTER("Разместить в центре"), LEFT_TOP("Разместить слева сверху"), SCALE("Отмасштабировать");
@@ -107,12 +113,30 @@ public class Config {
 	};
 
 	public static enum DeletionMode {
-		CONFIRM("Требовать подтверждение удаления каждого фильтра"), NO_CONFIRM("Удалять без подтверждения"), //
-		CONFIRM_USERS_ONLY("Требовать подтверждения только у пользователей");
+		CONFIRM("Требовать подтверждение удаления каждой записи"), //
+		CONFIRM_MULTPLES("Требовать подтверждение только при удалении нескольких строк"), //
+		/*
+		 * CONFIRM_USERS_ONLY("Требовать подтверждения только у пользователей"),
+		 */
+		NO_CONFIRM("Удалять без подтверждения"); //
 
 		private String title;
 
 		private DeletionMode(String title) {
+			this.title = title;
+		}
+
+		public String toString() {
+			return title;
+		}
+	}
+
+	public static enum TransactionMode {
+		COMMIT_EVERY_ROW("'commit' на каждую вставку/удаление"), COMMIT_BULK("'commit' на весь табличный интерфейс");
+
+		private String title;
+
+		private TransactionMode(String title) {
 			this.title = title;
 		}
 
@@ -140,10 +164,24 @@ public class Config {
 		return this.commonConfigInstance.getString(PARAM_LOOK_AND_FEEL, default_);
 	}
 
-	public DeletionMode getFilterDeleteMode() {
+	public DeletionMode getRowsDeleteMode() {
 		final DeletionMode default_ = DeletionMode.CONFIRM;
 		try {
 			return DeletionMode.valueOf(this.commonConfigInstance.getString(PARAM_FILTER_DELETE_MODE, default_.name()));
+		} catch (IllegalArgumentException iae) {
+			return default_;
+		}
+	}
+
+	public TransactionMode getTransactionMode() throws PersistentException {
+		final TransactionMode default_ = TransactionMode.COMMIT_EVERY_ROW;
+		try {
+			TransactionMode mode = TransactionMode.valueOf(this.commonConfigInstance.getString(PARAM_TRANSACTION_MODE,
+					default_.name()));
+
+			AppHelper.getInstance().setDatabaseSessionType(
+					mode == TransactionMode.COMMIT_BULK ? SessionType.APP_BASE : SessionType.THREAD_BASE);
+			return mode;
 		} catch (IllegalArgumentException iae) {
 			return default_;
 		}
@@ -159,12 +197,28 @@ public class Config {
 				.getRGB());
 	}
 
-	public boolean setLookAndFeel(String value) {
-		return this.setCommonParameterImpl(PARAM_LOOK_AND_FEEL, this.getLookAndFeel(), value);
+	public boolean setLookAndFeel(String value) throws ClassNotFoundException, InstantiationException,
+			IllegalAccessException, UnsupportedLookAndFeelException {
+		if (this.setCommonParameterImpl(PARAM_LOOK_AND_FEEL, this.getLookAndFeel(), value)) {
+			AppHelper.getInstance().updateUI(value);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
-	public boolean setFilterDeleteConfirm(DeletionMode value) {
-		return this.setCommonParameterImpl(PARAM_FILTER_DELETE_MODE, this.getFilterDeleteMode().name(), value.name());
+	public boolean setRowsDeleteMode(DeletionMode value) {
+		return this.setCommonParameterImpl(PARAM_FILTER_DELETE_MODE, this.getRowsDeleteMode().name(), value.name());
+	}
+
+	public boolean setTransactionMode(TransactionMode value) throws PersistentException {
+		if (this.setCommonParameterImpl(PARAM_TRANSACTION_MODE, this.getTransactionMode().name(), value.name())) {
+			AppHelper.getInstance().setDatabaseSessionType(
+					value == TransactionMode.COMMIT_BULK ? SessionType.APP_BASE : SessionType.THREAD_BASE);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	private boolean setParameterImpl(Configuration config, String paramName, Object oldValue, Object newValue) {

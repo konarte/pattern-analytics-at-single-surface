@@ -3,57 +3,58 @@ package edu.mgupi.pass.face.gui.template;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 
+import org.orm.PersistentException;
+import org.orm.PersistentTransaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.mgupi.pass.util.Utils;
+import edu.mgupi.pass.db.surfaces.PassPersistentManager;
+import edu.mgupi.pass.face.gui.AppHelper;
+import edu.mgupi.pass.util.Config;
+import edu.mgupi.pass.util.Config.TransactionMode;
 
-public abstract class TableEditorTemplate extends JDialog implements ActionListener {
+public abstract class TableEditorTemplate extends JDialog {
 
-	private final static Logger logger = LoggerFactory.getLogger(TableEditorTemplate.class);
+	private final static Logger logger = LoggerFactory.getLogger(TableEditorTemplate.class); //  @jve:decl-index=0:
 
 	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
-
-	private static enum TableActions {
-		add, remove, save, cancel
-	};
-
-	private void registerAction(AbstractButton button, TableActions action) {
-		button.setName(action.name());
-		button.setActionCommand(action.name());
-		Utils.addCheckedListener(button, this);
-	}
 
 	/**
 	 * @param owner
 	 */
 	public TableEditorTemplate(Frame owner) {
-		super(owner);
+		super(owner, true);
 		initialize();
 	}
-	
-	protected abstract AbstractEditorTableModel getTableModel();
+
+	private AbstractEditorTableModel tableModel = null;
+
+	private AbstractEditorTableModel getTableModel() {
+		if (tableModel == null) {
+			tableModel = this.getTableModelImpl(getJTableData());
+		}
+		return tableModel;
+	}
+
+	protected abstract AbstractEditorTableModel getTableModelImpl(JTable owner);
+
+	protected abstract void tablePostInit(JTable owner);
 
 	/**
 	 * This method initializes this
 	 * 
 	 */
 	private void initialize() {
-		this.setSize(374, 258);
+		this.setSize(587, 348);
 		this.setTitle("Редактирование таблицы");
 		this.setName("editorTemplateDialog");
 		this.setContentPane(getJContentPane());
@@ -70,29 +71,53 @@ public abstract class TableEditorTemplate extends JDialog implements ActionListe
 	private JPanel jPanelAddRemoveButtons = null;
 	private JButton jButtonAdd = null;
 	private JButton jButtonRemove = null;
+	private JButton jButtonEdit = null;
 
 	private AbstractDialogAdapter getDialogAdapter() {
 		if (dialogAdapter != null) {
 			return dialogAdapter;
 		}
 
-		dialogAdapter = new AbstractDialogAdapter(this) {
+		dialogAdapter = new AbstractDialogAdapter(this, getTableModel()) {
 
 			@Override
 			protected void cancelImpl() throws Exception {
-				// TODO Auto-generated method stub
+				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
+					//Transaction transaction = PassPersistentManager.instance().getSession().getTransaction();
+					logger.debug("Rollback MAIN transaction " + persistTransaction);
 
+					//					if (transaction == persistTransaction) {
+					//						System.out.println("IDENTICALLY TRANSACTION.");
+					//					} else {
+					//						System.out.println("NOT IDENTICALLY TRANSACTION.");
+					//					}
+					if (persistTransaction != null) {
+						persistTransaction.rollback();
+						System.out.println("ROLLBACKED = " + persistTransaction.wasRolledBack());
+					}
+				}
 			}
+
+			PersistentTransaction persistTransaction = null;
 
 			@Override
 			protected void openDialogImpl() throws Exception {
-				// TODO Auto-generated method stub
-
+				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
+					persistTransaction = PassPersistentManager.instance().getSession().beginTransaction();
+					logger.debug("Begin MAIN transaction " + persistTransaction);
+				}
 			}
 
 			@Override
 			protected boolean saveImpl() throws Exception {
-				// TODO Auto-generated method stub
+				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
+					//Transaction transaction = PassPersistentManager.instance().getSession().getTransaction();
+					logger.debug("Commit MAIN transaction " + persistTransaction);
+					if (persistTransaction != null) {
+						persistTransaction.commit();
+					}
+					return true;
+				}
 				return false;
 			}
 
@@ -101,39 +126,19 @@ public abstract class TableEditorTemplate extends JDialog implements ActionListe
 		return dialogAdapter;
 	}
 
-	public boolean opendDialog() {
-		return getDialogAdapter().openDialog();
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		String command = e.getActionCommand();
-		if (command == null) {
-			return;
-		}
-
-		TableActions action = null;
+	public boolean openDialog() {
+		TransactionMode mode = null;
 		try {
-			action = TableActions.valueOf(e.getActionCommand());
-		} catch (IllegalArgumentException iae) {
-			logger.debug("Received unknown action: " + e.getActionCommand());
-			return;
+			mode = Config.getInstance().getTransactionMode();
+		} catch (PersistentException pe) {
+			AppHelper.showExceptionDialog("Ошибка при получении текущего режима транзакций", pe);
 		}
-
-		if (action == TableActions.add) {
-
-		} else if (action == TableActions.remove) {
-			
-			//jTableData.removeRowSelectionInterval(index0, index1)
-		} else if (action == TableActions.save) {
-			getDialogAdapter().save();
-		} else if (action == TableActions.cancel) {
-			getDialogAdapter().cancel();
+		if (mode == TransactionMode.COMMIT_BULK) {
+			return getDialogAdapter().openDialog();
 		} else {
-			JOptionPane.showMessageDialog(this, "Internal error. Unknown action: " + action, "Internal error",
-					JOptionPane.ERROR_MESSAGE);
+			getDialogAdapter().showDialogCancelOnly();
+			return false;
 		}
-
 	}
 
 	/**
@@ -201,9 +206,11 @@ public abstract class TableEditorTemplate extends JDialog implements ActionListe
 	 */
 	private JTable getJTableData() {
 		if (jTableData == null) {
-			jTableData = new JTableReadOnly(getTableModel());
+			jTableData = new JTableReadOnly();
+			jTableData.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+			jTableData.setModel(getTableModel());
 			jTableData.setName("data");
-			
+			this.tablePostInit(jTableData);
 		}
 		return jTableData;
 	}
@@ -216,8 +223,8 @@ public abstract class TableEditorTemplate extends JDialog implements ActionListe
 	private JButton getJButtonSave() {
 		if (jButtonSave == null) {
 			jButtonSave = new JButton();
-			jButtonSave.setText("Сохранить");
-			registerAction(jButtonSave, TableActions.save);
+			jButtonSave.setText("OK");
+			getDialogAdapter().registerOKButton(jButtonSave);
 		}
 		return jButtonSave;
 	}
@@ -230,8 +237,8 @@ public abstract class TableEditorTemplate extends JDialog implements ActionListe
 	private JButton getJButtonCancel() {
 		if (jButtonCancel == null) {
 			jButtonCancel = new JButton();
-			jButtonCancel.setText("Отменить");
-			registerAction(jButtonCancel, TableActions.cancel);
+			jButtonCancel.setText("cancel");
+			getDialogAdapter().registerCancelButton(jButtonCancel);
 		}
 		return jButtonCancel;
 	}
@@ -243,15 +250,9 @@ public abstract class TableEditorTemplate extends JDialog implements ActionListe
 	 */
 	private JPanel getJPanelTable() {
 		if (jPanelTable == null) {
-			GridBagConstraints gridBagConstraints = new GridBagConstraints();
-			gridBagConstraints.fill = GridBagConstraints.BOTH;
-			gridBagConstraints.gridy = -1;
-			gridBagConstraints.weightx = 1.0;
-			gridBagConstraints.weighty = 1.0;
-			gridBagConstraints.gridx = -1;
 			jPanelTable = new JPanel();
-			jPanelTable.setLayout(new GridBagLayout());
-			jPanelTable.add(getJScrollPaneData(), gridBagConstraints);
+			jPanelTable.setLayout(new BorderLayout());
+			jPanelTable.add(getJScrollPaneData(), BorderLayout.CENTER);
 		}
 		return jPanelTable;
 	}
@@ -269,6 +270,7 @@ public abstract class TableEditorTemplate extends JDialog implements ActionListe
 			jPanelAddRemoveButtons.setLayout(flowLayout);
 			jPanelAddRemoveButtons.add(getJButtonAdd(), null);
 			jPanelAddRemoveButtons.add(getJButtonRemove(), null);
+			jPanelAddRemoveButtons.add(getJButtonEdit(), null);
 		}
 		return jPanelAddRemoveButtons;
 	}
@@ -281,8 +283,8 @@ public abstract class TableEditorTemplate extends JDialog implements ActionListe
 	private JButton getJButtonAdd() {
 		if (jButtonAdd == null) {
 			jButtonAdd = new JButton();
-			jButtonAdd.setText("+");
-			registerAction(jButtonAdd, TableActions.add);
+			jButtonAdd.setText("Добавить");
+			getTableModel().registerAddRowButton(jButtonAdd);
 		}
 		return jButtonAdd;
 	}
@@ -295,10 +297,24 @@ public abstract class TableEditorTemplate extends JDialog implements ActionListe
 	private JButton getJButtonRemove() {
 		if (jButtonRemove == null) {
 			jButtonRemove = new JButton();
-			jButtonRemove.setText("-");
-			registerAction(jButtonRemove, TableActions.remove);
+			jButtonRemove.setText("Удалить");
+			getTableModel().registerDeleteRowButton(jButtonRemove);
 		}
 		return jButtonRemove;
+	}
+
+	/**
+	 * This method initializes jButtonEdit
+	 * 
+	 * @return javax.swing.JButton
+	 */
+	private JButton getJButtonEdit() {
+		if (jButtonEdit == null) {
+			jButtonEdit = new JButton();
+			jButtonEdit.setText("Редактировать");
+			getTableModel().registerEditRowButton(jButtonEdit);
+		}
+		return jButtonEdit;
 	}
 
 } //  @jve:decl-index=0:visual-constraint="10,10"
