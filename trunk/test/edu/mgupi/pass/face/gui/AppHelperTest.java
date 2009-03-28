@@ -283,8 +283,34 @@ public class AppHelperTest {
 			}
 		}
 
-		//		testFrame.dispose();
-		//		testFrame.setVisible(false);
+	}
+
+	@Test
+	public void testShowErrorDialog() throws Exception {
+		AppHelper.getInstance().updateUI(UIManager.getSystemLookAndFeelClassName());
+
+		//		final MyFrame testFrame = (MyFrame) AppHelper.getInstance().registerAdditionalWindow(MyFrame.class);
+		//		assertNotNull(testFrame);
+
+		try {
+			SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
+				@Override
+				public void workImpl() throws Exception {
+					AppHelper
+							.showErrorDialog("Принцип восприятия непредвзято создает паллиативный интеллект, условно. "
+									+ "Концепция ментально оспособляет закон внешнего мира. "
+									+ "Сомнение раскладывает на элементы неоднозначный структурализм. Wait 5 sec...");
+				}
+			});
+			fail("No exception thrown!");
+		} catch (RuntimeException e) {
+			if (e.getCause() == null) {
+				System.out.println("Received expected exception: " + e);
+				SwingTestHelper.closeAllWindows();
+			} else {
+				throw e;
+			}
+		}
 
 	}
 

@@ -22,18 +22,7 @@ public class SurfaceClassesTable extends TableEditorTemplate {
 	private static final long serialVersionUID = 1L;
 
 	public SurfaceClassesTable(Frame owner) {
-		super(owner);
-		initialize();
-	}
-
-	/**
-	 * This method initializes this
-	 * 
-	 */
-	private void initialize() {
-		this.setName("surfaceClassesTable");
-		this.setTitle("Список классов поверхностей");
-
+		super(owner, "surfaceClassesTable", "Список классов поверхностей");
 	}
 
 	private AbstractEditorTableModel tableModel = null;

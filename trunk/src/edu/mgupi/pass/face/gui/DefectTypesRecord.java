@@ -1,9 +1,7 @@
 package edu.mgupi.pass.face.gui;
 
 import java.awt.Frame;
-import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.util.Map;
 
 import javax.swing.JLabel;
@@ -30,14 +28,8 @@ public class DefectTypesRecord extends RecordEditorTemplate {
 	private static final long serialVersionUID = 1L;
 
 	public DefectTypesRecord(Frame owner) {
-		super(owner);
+		super(owner, "defectTypesRecordDialog", "Типы дефектов");
 		super.setFormPanelData(getFormPanel());
-		this.setName("defectTypesRecordDialog");
-		this.setTitle("Типы дефектов");
-	}
-
-	public void close() {
-		formPanel.getImageControlAdapter().close();
 	}
 
 	@Override
@@ -145,11 +137,9 @@ public class DefectTypesRecord extends RecordEditorTemplate {
 	}
 
 	private JPanel jPanelPlace = null;
-	private JLabel jLabelID = null;
 	private JLabel jLabelName = null;
 	private JLabel jLabelIDValue = null;
 	private JTextField jTextFieldNameValue = null;
-	private JLabel jLabelClass = null;
 	private DefectClassesComboBox jComboBoxClassValue = null;
 
 	private RecordFormWithImageTemplate formPanel = null;
@@ -168,88 +158,20 @@ public class DefectTypesRecord extends RecordEditorTemplate {
 	 */
 	private JPanel getJPanelPlace() {
 		if (jPanelPlace == null) {
-			GridBagConstraints gridBagConstraints9 = new GridBagConstraints();
-			gridBagConstraints9.gridx = -1;
-			gridBagConstraints9.anchor = GridBagConstraints.WEST;
-			gridBagConstraints9.gridy = -1;
-			GridBagConstraints gridBagConstraints5 = new GridBagConstraints();
-			gridBagConstraints5.fill = GridBagConstraints.HORIZONTAL;
-			gridBagConstraints5.gridy = 1;
-			gridBagConstraints5.weightx = 1.0;
-			gridBagConstraints5.insets = new Insets(0, 0, 0, 5);
-			gridBagConstraints5.gridx = 1;
-			GridBagConstraints gridBagConstraints41 = new GridBagConstraints();
-			gridBagConstraints41.gridx = 0;
-			gridBagConstraints41.insets = new Insets(5, 5, 5, 5);
-			gridBagConstraints41.anchor = GridBagConstraints.EAST;
-			gridBagConstraints41.gridy = 1;
-			jLabelClass = new JLabel();
-			jLabelClass.setText("Класс дефекта");
-			GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
-			gridBagConstraints3.fill = GridBagConstraints.HORIZONTAL;
-			gridBagConstraints3.gridy = 2;
-			gridBagConstraints3.weightx = 1.0;
-			gridBagConstraints3.anchor = GridBagConstraints.WEST;
-			gridBagConstraints3.insets = new Insets(0, 0, 0, 5);
-			gridBagConstraints3.gridx = 1;
-			GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
-			gridBagConstraints2.gridx = 1;
-			gridBagConstraints2.anchor = GridBagConstraints.WEST;
-			gridBagConstraints2.insets = new Insets(0, 0, 0, 5);
-			gridBagConstraints2.gridy = 0;
-			jLabelIDValue = new JLabel();
-			jLabelIDValue.setText("0");
-			GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
-			gridBagConstraints1.gridx = 0;
-			gridBagConstraints1.anchor = GridBagConstraints.WEST;
-			gridBagConstraints1.fill = GridBagConstraints.NONE;
-			gridBagConstraints1.insets = new Insets(5, 5, 5, 5);
-			gridBagConstraints1.gridy = 2;
-			jLabelName = new JLabel();
-			jLabelName.setText("Название типа:");
-			GridBagConstraints gridBagConstraints = new GridBagConstraints();
-			gridBagConstraints.gridx = 0;
-			gridBagConstraints.anchor = GridBagConstraints.EAST;
-			gridBagConstraints.fill = GridBagConstraints.NONE;
-			gridBagConstraints.weightx = 0.0D;
-			gridBagConstraints.insets = new Insets(5, 5, 5, 5);
-			gridBagConstraints.gridy = 0;
-			jLabelID = new JLabel();
-			jLabelID.setText("Код:");
+			
 			jPanelPlace = new JPanel();
+			
 			jPanelPlace.setLayout(new GridBagLayout());
-			jPanelPlace.add(jLabelID, gridBagConstraints);
-			jPanelPlace.add(jLabelIDValue, gridBagConstraints2);
-			jPanelPlace.add(jLabelName, gridBagConstraints1);
-			jPanelPlace.add(getJTextFieldNameValue(), gridBagConstraints3);
-			jPanelPlace.add(jLabelClass, gridBagConstraints41);
-			jPanelPlace.add(getJComboBoxClassValue(), gridBagConstraints5);
+
+			jLabelIDValue = new JLabel("0");
+			jTextFieldNameValue = new JTextField();
+			jComboBoxClassValue = new DefectClassesComboBox();
+
+			super.putComponentPair(jPanelPlace, "Код:", jLabelIDValue);
+			super.putComponentPair(jPanelPlace, "Класс дефекта:", jComboBoxClassValue);
+			super.putComponentPair(jPanelPlace, "Название типа:", jTextFieldNameValue);
 		}
 		return jPanelPlace;
-	}
-
-	/**
-	 * This method initializes jTextFieldNameValue
-	 * 
-	 * @return javax.swing.JTextField
-	 */
-	private JTextField getJTextFieldNameValue() {
-		if (jTextFieldNameValue == null) {
-			jTextFieldNameValue = new JTextField();
-		}
-		return jTextFieldNameValue;
-	}
-
-	/**
-	 * This method initializes jComboBoxClassValue
-	 * 
-	 * @return javax.swing.JComboBox
-	 */
-	private DefectClassesComboBox getJComboBoxClassValue() {
-		if (jComboBoxClassValue == null) {
-			jComboBoxClassValue = new DefectClassesComboBox();
-		}
-		return jComboBoxClassValue;
 	}
 
 } //  @jve:decl-index=0:visual-constraint="16,-1"

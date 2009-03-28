@@ -1,11 +1,17 @@
 package edu.mgupi.pass.face.gui.template;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -32,9 +38,13 @@ public abstract class RecordEditorTemplate extends JDialog {
 
 	/**
 	 * @param owner
+	 * @param name
+	 * @param title
 	 */
-	public RecordEditorTemplate(Frame owner) {
+	public RecordEditorTemplate(Frame owner, String name, String title) {
 		super(owner, true);
+		this.setName(name);
+		this.setTitle(title);
 		initialize();
 	}
 
@@ -44,9 +54,13 @@ public abstract class RecordEditorTemplate extends JDialog {
 	 */
 	private void initialize() {
 		this.setSize(400, 250);
-		this.setTitle("Редактор записей");
-		this.setName("recordEditorDialog");
 		this.setContentPane(getJContentPane());
+	}
+
+	public void close() {
+		if (jPanelData != null && jPanelData instanceof RecordFormWithImageTemplate) {
+			((RecordFormWithImageTemplate) jPanelData).getImageControlAdapter().close();
+		}
 	}
 
 	private AbstractDialogAdapter dialogAdapter = null; //  @jve:decl-index=0:
@@ -215,6 +229,9 @@ public abstract class RecordEditorTemplate extends JDialog {
 	protected void setFormPanelData(JPanel panel) {
 		if (jPanelData == null) {
 			jPanelData = panel;
+			jPanelData.setBorder(BorderFactory.createTitledBorder(null, "Редактирование",
+					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
+					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
 			jContentPane.add(panel, BorderLayout.CENTER);
 		}
 	}
@@ -260,6 +277,32 @@ public abstract class RecordEditorTemplate extends JDialog {
 			getDialogAdapter().registerCancelButton(jButtonCancel);
 		}
 		return jButtonCancel;
+	}
+
+	private int gridy = 0;
+
+	protected void putComponentPair(JPanel place, String label, Component component) {
+
+		GridBagConstraints gridBagConstraintsComp = new GridBagConstraints();
+		gridBagConstraintsComp.gridx = 1;
+		gridBagConstraintsComp.anchor = GridBagConstraints.WEST;
+		gridBagConstraintsComp.insets = new Insets(0, 0, 0, 5);
+		gridBagConstraintsComp.gridy = gridy;
+		gridBagConstraintsComp.fill = GridBagConstraints.HORIZONTAL;
+		gridBagConstraintsComp.weightx = 1.0D;
+
+		GridBagConstraints gridBagConstraintsLab = new GridBagConstraints();
+		gridBagConstraintsLab.gridx = 0;
+		gridBagConstraintsLab.anchor = GridBagConstraints.EAST;
+		gridBagConstraintsLab.fill = GridBagConstraints.NONE;
+		gridBagConstraintsLab.weightx = 0.0D;
+		gridBagConstraintsLab.insets = new Insets(5, 5, 5, 5);
+		gridBagConstraintsLab.gridy = gridy;
+
+		place.add(new JLabel(label), gridBagConstraintsLab);
+		place.add(component, gridBagConstraintsComp);
+
+		gridy++;
 	}
 
 } //  @jve:decl-index=0:visual-constraint="10,10"

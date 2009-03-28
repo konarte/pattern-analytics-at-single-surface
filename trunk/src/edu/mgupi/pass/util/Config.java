@@ -145,8 +145,9 @@ public class Config {
 	 * 
 	 */
 	public static enum DeletionCheckMode {
-		ALWAYS_ACQUIRE_PERMISSION("Всегда спрашивать разрешение на удаление."), //
-		CHECK_THEN_ACQUIRE("Сначала проверить возможность удаления, потом спросить.");
+		ACQUIRE_THEN_CHECK("Сначала спросить, потом проверить возможность удаления."), //
+		CHECK_THEN_ACQUIRE("Сначала проверить возможность удаления, потом спросить."), //
+		NO_CHECK("Не проверять возможность удаления (выдавать SQL-исключение при ошибке).");
 
 		private String title;
 
@@ -166,7 +167,8 @@ public class Config {
 	 * 
 	 */
 	public static enum TransactionMode {
-		COMMIT_EVERY_ROW("'commit' на каждую вставку/удаление"), COMMIT_BULK("'commit' на весь табличный интерфейс");
+		COMMIT_EVERY_ROW("'commit' на каждую вставку/удаление"), // 
+		COMMIT_BULK("'commit' на весь табличный интерфейс");
 
 		private String title;
 
@@ -222,7 +224,7 @@ public class Config {
 	}
 
 	public DeletionCheckMode getDeletionCheckMode() {
-		final DeletionCheckMode default_ = DeletionCheckMode.ALWAYS_ACQUIRE_PERMISSION;
+		final DeletionCheckMode default_ = DeletionCheckMode.ACQUIRE_THEN_CHECK;
 		try {
 			return DeletionCheckMode.valueOf(this.commonConfigInstance.getString(PARAM_DATA_DELETION_CHECK, default_
 					.name()));

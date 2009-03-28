@@ -35,6 +35,7 @@ import edu.mgupi.pass.util.Const;
  * Support three type of operation: create database schema, create records for
  * existing filters and modules, finally drop database schema (full drop!).
  * 
+ * 
  * @author raidan
  * 
  */
@@ -70,7 +71,10 @@ public class AutoInit {
 	}
 
 	/**
-	 * Initiation -- create records with filters and modules
+	 * Initiation -- create records with filters and modules.
+	 * 
+	 * We support moving filters for classes, but only if that filter not used
+	 * in actual data.
 	 * 
 	 * @throws Exception
 	 */
