@@ -11,27 +11,17 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 
-import org.hibernate.Transaction;
-import org.orm.PersistentException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import edu.mgupi.pass.db.surfaces.PassPersistentManager;
-import edu.mgupi.pass.face.gui.AppHelper;
-import edu.mgupi.pass.util.Config;
-import edu.mgupi.pass.util.Config.TransactionMode;
-
 public abstract class TableEditorTemplate extends JDialog {
 
-	private final static Logger logger = LoggerFactory.getLogger(TableEditorTemplate.class); //  @jve:decl-index=0:
+	//private final static Logger logger = LoggerFactory.getLogger(TableEditorTemplate.class); //  @jve:decl-index=0:
 
 	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
 
 	/**
 	 * @param owner
-	 * @param name 
-	 * @param title 
+	 * @param name
+	 * @param title
 	 */
 	public TableEditorTemplate(Frame owner, String name, String title) {
 		super(owner, true);
@@ -86,34 +76,36 @@ public abstract class TableEditorTemplate extends JDialog {
 
 			@Override
 			protected void cancelImpl() throws Exception {
-				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
-					Transaction transaction = PassPersistentManager.instance().getSession().getTransaction();
-					if (transaction.isActive()) {
-						logger.trace("Rollback MAIN transaction {}.", transaction);
-						transaction.rollback();
-					}
-				}
+//				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
+//					Transaction transaction = PassPersistentManager.instance().getSession().getTransaction();
+//					if (transaction.isActive()) {
+//						logger.trace("Rollback MAIN transaction {}.", transaction);
+//						transaction.rollback();
+//					}
+//				}
 			}
 
 			@Override
 			protected void openDialogImpl() throws Exception {
-				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
-					PassPersistentManager.instance().getSession().beginTransaction();
-					logger.trace("Begin MAIN transaction {}.", PassPersistentManager.instance().getSession()
-							.getTransaction());
-				}
+//				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
+//					PassPersistentManager.instance().getSession().beginTransaction();
+//					logger.trace("Begin MAIN transaction {}.", PassPersistentManager.instance().getSession()
+//							.getTransaction());
+//				}
 			}
 
 			@Override
 			protected boolean saveImpl() throws Exception {
-				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
-					Transaction transaction = PassPersistentManager.instance().getSession().getTransaction();
-					if (transaction.isActive()) {
-						logger.trace("Commit MAIN transaction {}.", transaction);
-						transaction.commit();
-					}
-					return true;
-				}
+//				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
+//					Transaction transaction = PassPersistentManager.instance().getSession().getTransaction();
+//					if (transaction.isActive()) {
+//						//						PassPersistentManager.instance().getSession().flush();
+//						logger.trace("Commit MAIN transaction {}.", transaction);
+//						transaction.commit();
+//					}
+//					return true;
+//				}
+//				return false;
 				return false;
 			}
 
@@ -123,18 +115,20 @@ public abstract class TableEditorTemplate extends JDialog {
 	}
 
 	public boolean openDialog() {
-		TransactionMode mode = null;
-		try {
-			mode = Config.getInstance().getTransactionMode();
-		} catch (PersistentException pe) {
-			AppHelper.showExceptionDialog("Ошибка при получении текущего режима транзакций", pe);
-		}
-		if (mode == TransactionMode.COMMIT_BULK) {
-			return getDialogAdapter().openDialog();
-		} else {
-			getDialogAdapter().showDialogCancelOnly();
-			return false;
-		}
+//		TransactionMode mode = null;
+//		try {
+//			mode = Config.getInstance().getTransactionMode();
+//		} catch (PersistentException pe) {
+//			AppHelper.showExceptionDialog(this, "Ошибка при получении текущего режима транзакций", pe);
+//		}
+//		if (mode == TransactionMode.COMMIT_BULK) {
+//			return getDialogAdapter().openDialog();
+//		} else {
+//			getDialogAdapter().showDialogCancelOnly();
+//			return false;
+//		}
+		getDialogAdapter().showDialogCancelOnly();
+		return false;
 	}
 
 	/**

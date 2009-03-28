@@ -38,9 +38,9 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		if (owner == null) {
 			throw new IllegalArgumentException("Internal error. 'owner' must be not null.");
 		}
-		
+
 		logger.debug("Initialize editor table model " + this);
-		
+
 		this.owner = owner;
 		this.owner.getSelectionModel().addListSelectionListener(this);
 		this.owner.addMouseListener(new MouseAdapter() {
@@ -175,7 +175,7 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		try {
 			this.rowSelectionImpl(rowIdx);
 		} catch (Exception e1) {
-			AppHelper.showExceptionDialog("Ошибка при смене строки.", e1);
+			AppHelper.showExceptionDialog(this.owner, "Ошибка при смене строки.", e1);
 			return;
 		}
 
@@ -212,7 +212,7 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 				this.owner.setRowSelectionInterval(rowIdx, rowIdx);
 			}
 		} catch (Exception e) {
-			AppHelper.showExceptionDialog("Ошибка при добавлении новой строки.", e);
+			AppHelper.showExceptionDialog(this.owner, "Ошибка при добавлении новой строки.", e);
 			return;
 		}
 	}
@@ -251,7 +251,7 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 
 			}
 		} catch (Exception e) {
-			AppHelper.showExceptionDialog("Ошибка при удалении строки.", e);
+			AppHelper.showExceptionDialog(this.owner, "Ошибка при удалении строки.", e);
 			return;
 		}
 	}
@@ -290,7 +290,7 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 				super.fireTableRowsUpdated(rowIdx, rowIdx);
 			}
 		} catch (Exception e) {
-			AppHelper.showExceptionDialog("Ошибка при редактировании новой строки.", e);
+			AppHelper.showExceptionDialog(this.owner, "Ошибка при редактировании новой строки.", e);
 			return;
 		}
 	}
@@ -333,7 +333,7 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 				this.owner.setRowSelectionInterval(first - 1, last - 1);
 			}
 		} catch (Exception e) {
-			AppHelper.showExceptionDialog("Ошибка при перемещении строки.", e);
+			AppHelper.showExceptionDialog(this.owner, "Ошибка при перемещении строки.", e);
 			return;
 		}
 	}
@@ -375,7 +375,7 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 				this.owner.setRowSelectionInterval(first + 1, last + 1);
 			}
 		} catch (Exception e) {
-			AppHelper.showExceptionDialog("Ошибка при перемещении строки.", e);
+			AppHelper.showExceptionDialog(this.owner, "Ошибка при перемещении строки.", e);
 			return;
 		}
 	}

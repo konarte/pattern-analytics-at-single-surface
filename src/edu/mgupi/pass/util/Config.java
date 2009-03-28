@@ -15,7 +15,6 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.FileConfiguration;
 import org.orm.PersistentException;
-import org.orm.PersistentManager.SessionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -244,9 +243,7 @@ public class Config {
 			currentTransactionMode = TransactionMode.valueOf(this.commonConfigInstance.getString(
 					PARAM_TRANSACTION_MODE, default_.name()));
 
-			AppHelper.getInstance().setDatabaseSessionType(
-					currentTransactionMode == TransactionMode.COMMIT_BULK ? SessionType.APP_BASE
-							: SessionType.THREAD_BASE);
+			AppHelper.setDatabaseTransactionMode(currentTransactionMode);
 			return currentTransactionMode;
 		} catch (IllegalArgumentException iae) {
 			return default_;
@@ -307,8 +304,7 @@ public class Config {
 				.name());
 		this.currentTransactionMode = value;
 		if (res) {
-			AppHelper.getInstance().setDatabaseSessionType(
-					value == TransactionMode.COMMIT_BULK ? SessionType.APP_BASE : SessionType.THREAD_BASE);
+			AppHelper.setDatabaseTransactionMode(value);
 			return true;
 		} else {
 			return false;

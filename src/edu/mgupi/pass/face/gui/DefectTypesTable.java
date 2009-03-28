@@ -30,11 +30,11 @@ public class DefectTypesTable extends TableEditorTemplate {
 	@Override
 	protected AbstractEditorTableModel getTableModelImpl(JTable owner) {
 		if (tableModel == null) {
-			tableModel = new CommonEditorTableModel(owner, DefectTypesRecord.class) {
+			tableModel = new CommonEditorTableModel<DefectTypes>(owner, DefectTypesRecord.class) {
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				protected Object createInstanceImpl() {
+				protected DefectTypes createInstanceImpl() {
 					return DefectTypesFactory.createDefectTypes();
 				}
 
@@ -43,9 +43,8 @@ public class DefectTypesTable extends TableEditorTemplate {
 					return new String[] { "ID", "Класс дефекта", "Тип дефекта", "Доп. опции", "Картинка" };
 				}
 
-				@SuppressWarnings("unchecked")
 				@Override
-				protected List getDataImpl() throws Exception {
+				protected List<DefectTypes> getDataImpl() throws Exception {
 					List<DefectTypes> classes = new ArrayList<DefectTypes>();
 					classes.addAll(Arrays.asList(DefectTypesFactory.listDefectTypesByQuery(null, null)));
 					return classes;
@@ -53,7 +52,7 @@ public class DefectTypesTable extends TableEditorTemplate {
 
 				@Override
 				public Object getValueAt(int rowIndex, int columnIndex) {
-					DefectTypes defect = (DefectTypes) data.get(rowIndex);
+					DefectTypes defect = data.get(rowIndex);
 					switch (columnIndex) {
 					case 0:
 						return defect.getIdDefectType();

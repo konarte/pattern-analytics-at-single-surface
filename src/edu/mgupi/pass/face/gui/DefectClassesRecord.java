@@ -3,23 +3,21 @@ package edu.mgupi.pass.face.gui;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.util.Map;
+import java.util.Collection;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.text.JTextComponent;
+
+import org.hibernate.Criteria;
 
 import edu.mgupi.pass.db.defects.DefectClasses;
 import edu.mgupi.pass.db.defects.DefectClassesCriteria;
-import edu.mgupi.pass.db.defects.DefectClassesFactory;
 import edu.mgupi.pass.db.defects.DefectTypes;
 import edu.mgupi.pass.db.defects.DefectTypesCriteria;
-import edu.mgupi.pass.db.defects.DefectTypesFactory;
 import edu.mgupi.pass.face.gui.template.RecordEditorTemplate;
-import edu.mgupi.pass.util.Utils;
 
-public class DefectClassesRecord extends RecordEditorTemplate {
+public class DefectClassesRecord extends RecordEditorTemplate<DefectClasses> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -29,87 +27,56 @@ public class DefectClassesRecord extends RecordEditorTemplate {
 	}
 
 	@Override
-	protected void setRequiredFields(Map<JTextComponent, JLabel> map) {
-		map.put(jTextFieldNameValue, jLabelName);
+	protected String getDenyDeletionMessage(Object foundObject) {
+		DefectTypes type = (DefectTypes) foundObject;
+		return "Тип дефекта '" + type.getName() + "' использует класс '" + type.getDefectClass().getName() + "'.";
 	}
 
 	@Override
-	public boolean isDeleteAllowed(Object[] objects) throws Exception {
-		for (Object object : objects) {
-			DefectClasses defectObject = ((DefectClasses) object);
-			int id = defectObject.getIdDefectClass();
-
-			if (id == 0) {
-				continue;
-			}
-
-			DefectTypesCriteria criteria = new DefectTypesCriteria();
-			criteria.createDefectClassCriteria().idDefectClass.eq(defectObject.getIdDefectClass());
-
-			DefectTypes foundType = DefectTypesFactory.loadDefectTypesByCriteria(criteria);
-			if (foundType != null) {
-				AppHelper.showErrorDialog("Класс дефекта " + defectObject.getName()
-						+ " удалить нельзя. К нему привязан дефект с типом " + foundType.getName() + ".");
-				return false;
-			}
+	protected Criteria getMultipleDeleteCriteria(Collection<DefectClasses> objects) throws Exception {
+		DefectTypesCriteria criteria = new DefectTypesCriteria();
+		int[] in = new int[objects.size()];
+		int idx = 0;
+		for (DefectClasses def : objects) {
+			in[idx++] = def.getIdDefectClass();
 		}
-
-		return true;
+		criteria.createDefectClassCriteria().idDefectClass.in(in);
+		return criteria;
 	}
 
 	@Override
-	protected boolean isSaveAllowed(Object object) throws Exception {
-		DefectClasses defectObject = ((DefectClasses) object);
-		String className = jTextFieldNameValue.getText();
-
-		if (Utils.equals(className, defectObject.getName())) {
-			return true;
-		}
-
+	protected Criteria getSaveAllowCriteria(DefectClasses object, String newValue) throws Exception {
 		DefectClassesCriteria criteria = new DefectClassesCriteria();
-		criteria.name.eq(className);
-		if (defectObject.getIdDefectClass() != 0) {
-			criteria.idDefectClass.ne(defectObject.getIdDefectClass());
+		criteria.name.eq(newValue);
+		if (object.getIdDefectClass() != 0) {
+			criteria.idDefectClass.ne(object.getIdDefectClass());
 		}
-
-		DefectClasses foundClass = DefectClassesFactory.loadDefectClassesByCriteria(criteria);
-		if (foundClass != null) {
-			AppHelper.showErrorDialog(null, "Класс дефекта с названием " + className + " уже существует.");
-			return false;
-		}
-
-		return true;
+		return criteria;
 	}
 
 	private String defectClass = null;
 
 	@Override
-	protected boolean loadFormFromObject(Object object) throws Exception {
-		DefectClasses defectObject = ((DefectClasses) object);
-		this.defectClass = defectObject.getName();
+	protected boolean loadFormFromObjectImpl(DefectClasses object) throws Exception {
+		this.defectClass = object.getName();
 
-		jLabelIDValue.setText(String.valueOf(defectObject.getIdDefectClass()));
-		jTextFieldNameValue.setText(defectObject.getName());
-
-		jTextFieldNameValue.requestFocusInWindow();
+		jLabelIDValue.setText(String.valueOf(object.getIdDefectClass()));
+		jTextFieldNameValue.setText(object.getName());
 
 		return true;
 	}
 
 	@Override
-	protected void restoreObjectImpl(Object object) throws Exception {
-		DefectClasses defectObject = ((DefectClasses) object);
-		defectObject.setName(defectClass);
+	protected void restoreObjectImpl(DefectClasses object) throws Exception {
+		object.setName(defectClass);
 	}
 
 	@Override
-	protected void saveFormToObjectImpl(Object object) throws Exception {
-		DefectClasses defectObject = ((DefectClasses) object);
-		defectObject.setName(jTextFieldNameValue.getText());
+	protected void saveFormToObjectImpl(DefectClasses object) throws Exception {
+		object.setName(jTextFieldNameValue.getText());
 	}
 
 	private JPanel jPanelPlace = null;
-	private JLabel jLabelName = null;
 	private JLabel jLabelIDValue = null;
 	private JTextField jTextFieldNameValue = null;
 
@@ -139,16 +106,16 @@ public class DefectClassesRecord extends RecordEditorTemplate {
 	 */
 	private JPanel getFormPanelData() {
 		if (jPanelPlace == null) {
-			
+
 			jPanelPlace = new JPanel();
-			
+
 			jPanelPlace.setLayout(new GridBagLayout());
 
 			jLabelIDValue = new JLabel("0");
 			jTextFieldNameValue = new JTextField();
 
-			super.putComponentPair(jPanelPlace, "Код:", jLabelIDValue);
-			super.putComponentPair(jPanelPlace, "Название класса:", jTextFieldNameValue);
+			super.putComponentPair(jPanelPlace, "Код", jLabelIDValue);
+			super.putUniqueComponentPair(jPanelPlace, "Название класса", jTextFieldNameValue);
 		}
 		return jPanelPlace;
 	}

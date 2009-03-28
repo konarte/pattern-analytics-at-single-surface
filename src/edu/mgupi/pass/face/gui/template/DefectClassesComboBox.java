@@ -11,6 +11,7 @@ import org.orm.PersistentException;
 
 import edu.mgupi.pass.db.defects.DefectClasses;
 import edu.mgupi.pass.db.defects.DefectClassesFactory;
+import edu.mgupi.pass.util.IRefreshable;
 
 public class DefectClassesComboBox extends JComboBox {
 	/**
@@ -23,22 +24,19 @@ public class DefectClassesComboBox extends JComboBox {
 		this.setRenderer(new DefectClassesRenderer());
 	}
 
-	public void refreshData() throws PersistentException {
-		((DefectClassesModel) this.getModel()).refreshData();
-	}
-
-	private static class DefectClassesModel extends DefaultComboBoxModel {
+	private static class DefectClassesModel extends DefaultComboBoxModel implements IRefreshable {
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
 
-		public void refreshData() throws PersistentException {
+		public int refresh() throws PersistentException {
 
 			super.removeAllElements();
 			for (DefectClasses defClass : DefectClassesFactory.listDefectClassesByQuery(null, null)) {
 				super.addElement(defClass);
 			}
+			return super.getSize();
 		}
 	}
 

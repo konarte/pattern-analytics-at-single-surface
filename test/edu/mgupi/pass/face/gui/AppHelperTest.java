@@ -263,7 +263,7 @@ public class AppHelperTest {
 			SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 				@Override
 				public void workImpl() throws Exception {
-					AppHelper.showExceptionDialog(
+					AppHelper.showExceptionDialog(null,
 							"Принцип восприятия непредвзято создает паллиативный интеллект, условно. "
 									+ "Концепция ментально оспособляет закон внешнего мира. "
 									+ "Сомнение раскладывает на элементы неоднозначный структурализм. Wait 5 sec...",
@@ -296,8 +296,8 @@ public class AppHelperTest {
 			SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 				@Override
 				public void workImpl() throws Exception {
-					AppHelper
-							.showErrorDialog("Принцип восприятия непредвзято создает паллиативный интеллект, условно. "
+					AppHelper.showErrorDialog(null,
+							"Принцип восприятия непредвзято создает паллиативный интеллект, условно. "
 									+ "Концепция ментально оспособляет закон внешнего мира. "
 									+ "Сомнение раскладывает на элементы неоднозначный структурализм. Wait 5 sec...");
 				}
@@ -353,7 +353,7 @@ public class AppHelperTest {
 			t.start();
 		}
 
-		SwingTestHelper.waitUntil(new WaitCondition() {
+		SwingTestHelper.waitWhile(new WaitCondition() {
 			@Override
 			public boolean keepWorking() {
 				// We must remove all components before done
@@ -394,7 +394,7 @@ public class AppHelperTest {
 			t.start();
 		}
 
-		SwingTestHelper.waitUntil(new WaitCondition() {
+		SwingTestHelper.waitWhile(new WaitCondition() {
 			@Override
 			public boolean keepWorking() {
 				// We must remove all components before done

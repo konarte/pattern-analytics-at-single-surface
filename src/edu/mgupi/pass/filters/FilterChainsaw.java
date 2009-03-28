@@ -219,7 +219,7 @@ public class FilterChainsaw {
 		}
 		return -1;
 	}
-	
+
 	public IFilter searchFilterClass(Class<? extends IFilter> filterClass) {
 		int pos = this.searchFilterClassPos(filterClass);
 		if (pos != -1) {

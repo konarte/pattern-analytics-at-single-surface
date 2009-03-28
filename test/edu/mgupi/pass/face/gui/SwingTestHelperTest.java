@@ -116,7 +116,7 @@ public class SwingTestHelperTest {
 	@Test
 	public void testWaitUntil() throws InterruptedException {
 		final long start = System.currentTimeMillis();
-		SwingTestHelper.waitUntil(new WaitCondition() {
+		SwingTestHelper.waitWhile(new WaitCondition() {
 			@Override
 			public boolean keepWorking() {
 				return (System.currentTimeMillis() - start) < 500;
@@ -125,7 +125,7 @@ public class SwingTestHelperTest {
 		assertTrue(System.currentTimeMillis() - start >= 500);
 
 		try {
-			SwingTestHelper.waitUntil(null);
+			SwingTestHelper.waitWhile(null);
 			fail("No exception thrown!");
 		} catch (AssertionError e) {
 			System.out.println("Received expected exception: " + e);
@@ -399,7 +399,7 @@ public class SwingTestHelperTest {
 		button.setName("OK");
 		myFrame.getRootPane().add(button);
 
-		SwingTestHelper.clickOpenDialogButton(myFrame, "OK", JDialog.class);
+		SwingTestHelper.clickOpenDialogButton(myFrame, null, "OK", JDialog.class);
 
 		tempDialog = (JDialog) AppHelper.getInstance().searchWindow(JDialog.class);
 		assertNotNull(tempDialog);
@@ -408,7 +408,7 @@ public class SwingTestHelperTest {
 		tempDialog.setVisible(false);
 		tempDialog = null;
 
-		SwingTestHelper.clickOpenDialogButton(null, "OK", JDialog.class);
+		SwingTestHelper.clickOpenDialogButton(null, null, "OK", JDialog.class);
 
 		assertNull(tempDialog);
 		tempDialog = (JDialog) AppHelper.getInstance().searchWindow(JDialog.class);
@@ -418,7 +418,7 @@ public class SwingTestHelperTest {
 		tempDialog.setVisible(false);
 		tempDialog = null;
 
-		SwingTestHelper.clickOpenDialogButton(null, null, JDialog.class);
+		SwingTestHelper.clickOpenDialogButton(null, null, null, JDialog.class);
 
 		assertNull(tempDialog);
 		tempDialog = (JDialog) AppHelper.getInstance().searchWindow(JDialog.class);
@@ -429,19 +429,19 @@ public class SwingTestHelperTest {
 		tempDialog = null;
 
 		SwingTestHelper.closeAllWindows();
-		SwingTestHelper.clickOpenDialogButton(myFrame, "OK", null);
+		SwingTestHelper.clickOpenDialogButton(myFrame, null, "OK", null);
 		assertNotNull(tempDialog);
 		assertTrue(tempDialog.isVisible());
 
 		try {
-			SwingTestHelper.clickOpenDialogButton(null, null, null);
+			SwingTestHelper.clickOpenDialogButton(null, null, null, null);
 			fail("No exception thrown!");
 		} catch (AssertionError e) {
 			System.out.println("Received expected exception: " + e);
 		}
 
 		try {
-			SwingTestHelper.clickOpenDialogButton(myFrame, null, null);
+			SwingTestHelper.clickOpenDialogButton(myFrame, null, null, null);
 			fail("No exception thrown!");
 		} catch (AssertionError e) {
 			System.out.println("Received expected exception: " + e);

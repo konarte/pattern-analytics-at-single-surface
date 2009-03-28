@@ -21,16 +21,13 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.SwingUtilities;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.mgupi.pass.util.Utils;
 import edu.mgupi.pass.util.WaitCondition;
 import edu.mgupi.pass.util.WorkSet;
 
 public class SwingTestHelper {
 
-	private final static Logger logger = LoggerFactory.getLogger(SwingTestHelper.class);
+	//private final static Logger logger = LoggerFactory.getLogger(SwingTestHelper.class);
 
 	private static volatile int expectedWorkCount = 0;
 	private static volatile int workCount = 0;
@@ -69,7 +66,7 @@ public class SwingTestHelper {
 	 * @throws Exception
 	 */
 	public static void addWorkAndWaitThis(WorkSet actualWork, WaitCondition waitCondition) throws Exception {
-		waitUntil(waitCondition, addWorkNoWait(actualWork));
+		waitWhile(waitCondition, addWorkNoWait(actualWork));
 	}
 
 	/**
@@ -84,7 +81,7 @@ public class SwingTestHelper {
 	 */
 	public static void addWorkAndWaitForTheEnd(WorkSet actualWork) throws Exception {
 
-		waitUntil(new WaitCondition() {
+		waitWhile(new WaitCondition() {
 			public boolean keepWorking() {
 				return workCount < expectedWorkCount;
 			}
@@ -102,11 +99,11 @@ public class SwingTestHelper {
 	 * @param condition
 	 * @throws InterruptedException
 	 */
-	public static void waitUntil(WaitCondition condition) throws InterruptedException {
-		waitUntil(condition, null);
+	public static void waitWhile(WaitCondition condition) throws InterruptedException {
+		waitWhile(condition, null);
 	}
 
-	private static void waitUntil(WaitCondition condition, Throwable watchedException) throws InterruptedException {
+	private static void waitWhile(WaitCondition condition, Throwable watchedException) throws InterruptedException {
 
 		assertNotNull(condition);
 
@@ -147,7 +144,7 @@ public class SwingTestHelper {
 
 	public static void waitMe(final Window window) throws Exception {
 		assertNotNull(window);
-		waitUntil(new WaitCondition() {
+		waitWhile(new WaitCondition() {
 
 			@Override
 			public boolean keepWorking() {
@@ -188,15 +185,24 @@ public class SwingTestHelper {
 		}
 		return null;
 	}
-	
-	public static void clickCloseDialogButton(final Window parent, final String buttonOrActionNameName) throws Exception {
+
+	public static void clickCloseDialogButton(final Window parent, final String buttonOrActionNameName)
+			throws Exception {
+		clickCloseDialogButton(parent, buttonOrActionNameName, false);
+	}
+
+	public static void clickCloseDialogButton(final Window parent, final String buttonOrActionNameName,
+			final boolean expectErrors) throws Exception {
 		assertNotNull(parent);
 		assertTrue(parent.isVisible());
 		AbstractButton button = (AbstractButton) Utils.getChildNamed(parent, buttonOrActionNameName);
 		if (button == null) {
 			button = SwingTestHelper.getButtonByActionCommand(parent, buttonOrActionNameName);
 		}
-		assertNotNull(button);
+		assertNotNull("Button with name or action '" + buttonOrActionNameName + "' does not exists on form '"
+				+ parent.getName() + "'", button);
+		assertTrue(button.isEnabled());
+		assertTrue(button.isVisible());
 
 		final AbstractButton foundButton = button;
 		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
@@ -208,7 +214,10 @@ public class SwingTestHelper {
 
 			@Override
 			public boolean keepWorking() {
-				return parent.isVisible() == true;
+				/*
+				 * Workaround for errors
+				 */
+				return parent.isVisible() == true && (!expectErrors || allChildrenClosed(parent));
 			}
 		});
 	}
@@ -218,15 +227,22 @@ public class SwingTestHelper {
 		if (mustNull) {
 			assertNull(AppHelper.getInstance().searchWindow(expectedInstance));
 		}
-		return clickOpenDialogButton(null, null, expectedInstance);
+		return clickOpenDialogButton(null, null, null, expectedInstance);
 	}
 
-	public static void clickOpenDialogButton(final Window parent, final String buttonName) throws Exception {
-		clickOpenDialogButton(parent, buttonName, null);
+	public static Window clickOpenDialogButton(final Window parent, final String buttonName) throws Exception {
+		return clickOpenDialogButton(parent, null, buttonName, null);
 	}
 
-	public static Window clickOpenDialogButton(final Window parent, final String buttonName,
-			final Class<? extends Window> expectedInstance) throws Exception {
+	public static Window clickOpenDialogButton(final Window parent, final Window expectedParent, final String buttonName)
+			throws Exception {
+		return clickOpenDialogButton(parent, expectedParent, buttonName, null);
+	}
+
+	public static Window clickOpenDialogButton(final Window parent, final Window expectedParent,
+			final String buttonName, final Class<? extends Window> expectedInstance) throws Exception {
+
+		final Window expectedParentImpl = expectedParent == null ? parent : expectedParent;
 
 		if (expectedInstance != null) {
 			Window expectedWindow = AppHelper.getInstance().searchWindow(expectedInstance);
@@ -236,7 +252,7 @@ public class SwingTestHelper {
 		} else {
 			assertNotNull(parent);
 			assertNotNull(buttonName);
-			assertTrue(allChildrenClosed(parent));
+			assertTrue(allChildrenClosed(expectedParentImpl));
 		}
 
 		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
@@ -258,7 +274,7 @@ public class SwingTestHelper {
 					Window expectedWindow = AppHelper.getInstance().searchWindow(expectedInstance);
 					return expectedWindow == null || !expectedWindow.isVisible();
 				} else {
-					return allChildrenClosed(parent);
+					return allChildrenClosed(expectedParentImpl);
 				}
 
 			}
@@ -270,8 +286,8 @@ public class SwingTestHelper {
 			assertTrue(expectedWindow.isVisible());
 			return expectedWindow;
 		} else {
-			assertFalse(allChildrenClosed(parent));
-			return SwingTestHelper.searchAnyOpenedWindow(parent);
+			assertFalse(allChildrenClosed(expectedParentImpl));
+			return SwingTestHelper.searchAnyOpenedWindow(expectedParentImpl);
 		}
 
 	}
@@ -375,10 +391,10 @@ public class SwingTestHelper {
 			return null;
 		}
 
-		// Debug line
-		if (logger.isTraceEnabled()) {
-			logger.trace("Class: " + parent.getClass() + " Name: " + parent.getName());
-		}
+		//		// Debug line
+		//		if (logger.isTraceEnabled()) {
+		//			logger.trace("Class: " + parent.getClass() + " Name: " + parent.getName());
+		//		}
 
 		if (parent instanceof JButton) {
 			if (actionCommand.equals(((JButton) parent).getActionCommand())) {

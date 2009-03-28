@@ -102,7 +102,7 @@ public class ParamHelper {
 			String value = map.get(param.getName());
 
 			logger.trace("Attempt to set value '{}' for parameter '{}'.", (value == null ? "<null>" : value), param);
-			
+
 			param.setStringValue(value);
 		}
 

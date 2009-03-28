@@ -7,8 +7,11 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
@@ -18,6 +21,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.filters.java.GrayScaleFilter;
 import edu.mgupi.pass.inputs.TestInputImpl;
 import edu.mgupi.pass.modules.TestModule;
 import edu.mgupi.pass.modules.TestModule2;
@@ -26,6 +30,7 @@ import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Utils;
 import edu.mgupi.pass.util.WaitCondition;
 import edu.mgupi.pass.util.WorkSet;
+import edu.mgupi.pass.util.Config.SourceMode;
 
 public class MainFrameTest {
 
@@ -72,11 +77,15 @@ public class MainFrameTest {
 
 	@Test
 	public void testOpenImage() throws Exception {
-		SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
-			public void workImpl() throws Exception {
-				AppHelper.getInstance().updateUI(UIManager.getCrossPlatformLookAndFeelClassName());
-			}
-		});
+
+		Config.getInstance().setCurrentSourceMode(SourceMode.SCALE);
+
+		frame.mainModuleProcessor.getChainsaw().removeAllFilters();
+		frame.mainModuleProcessor.getChainsaw().appendFilter(GrayScaleFilter.class);
+		frame.filtersModel.updateFiltersImpl();
+
+		JComboBox modules = (JComboBox) Utils.getChildNamed(frame, "modules");
+		assertNotNull(modules);
 
 		JMenuItem open = (JMenuItem) Utils.getChildNamed(frame, MainFrame.Actions.OPEN.name());
 		assertNotNull(open);
@@ -91,10 +100,47 @@ public class MainFrameTest {
 
 		// Frame must start!
 		// If not -- check fileChooser
-		SwingTestHelper.waitUntil(new WaitCondition() {
+		SwingTestHelper.waitWhile(new WaitCondition() {
 			@Override
 			public boolean keepWorking() {
 				return frame.isProcessStarted() == false;
+			}
+		});
+
+		final JLabel infoLabel = (JLabel) Utils.getChildNamed(frame, "labelImageInfo");
+		assertNotNull(infoLabel);
+
+		JTabbedPane tabbed = (JTabbedPane) Utils.getChildNamed(frame, "tabbedPaneImages");
+		assertNotNull(tabbed);
+
+		infoLabel.setText("");
+		tabbed.setSelectedIndex(0);
+
+		SwingTestHelper.waitWhile(new WaitCondition() {
+			@Override
+			public boolean keepWorking() {
+				return !infoLabel.getText().equals("425x640 24 bpp");
+			}
+		});
+
+		infoLabel.setText("");
+		tabbed.setSelectedIndex(1);
+		SwingTestHelper.waitWhile(new WaitCondition() {
+			@Override
+			public boolean keepWorking() {
+				return !infoLabel.getText().equals("1024x1024 8 bpp, 1:1.6");
+			}
+		});
+
+		frame.mainModuleProcessor.getChainsaw().removeAllFilters();
+		frame.filtersModel.updateFiltersImpl();
+		frame.restartProcessingBySource();
+
+		tabbed.setSelectedIndex(1);
+		SwingTestHelper.waitWhile(new WaitCondition() {
+			@Override
+			public boolean keepWorking() {
+				return !infoLabel.getText().equals("1024x1024 24 bpp, 1:1.6");
 			}
 		});
 
@@ -160,7 +206,7 @@ public class MainFrameTest {
 
 		// Frame must start!
 		// If not -- check fileChooser
-		SwingTestHelper.waitUntil(new WaitCondition() {
+		SwingTestHelper.waitWhile(new WaitCondition() {
 			@Override
 			public boolean keepWorking() {
 				return frame.isProcessStarted() == false;
@@ -179,7 +225,7 @@ public class MainFrameTest {
 	@Test
 	public void testSettings() throws Exception {
 
-		SwingTestHelper.clickOpenDialogButton(frame, MainFrame.Actions.SETTINGS.name(), SettingsDialog.class);
+		SwingTestHelper.clickOpenDialogButton(frame, null, MainFrame.Actions.SETTINGS.name(), SettingsDialog.class);
 
 		SwingTestHelper.clickCloseDialogButton((SettingsDialog) AppHelper.getInstance().searchWindow(
 				SettingsDialog.class), "cancel");

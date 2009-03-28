@@ -74,8 +74,8 @@ public class LocusModuleData implements Serializable {
 	
 	@Column(name="IdModuleParam", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312044C35C2601917")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312044C35C2601917", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31204C98AC3208FD1")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31204C98AC3208FD1", strategy="native")	
 	private int idModuleParam;
 	
 	@Column(name="ParamName", nullable=false, length=255)	

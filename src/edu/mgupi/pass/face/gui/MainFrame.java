@@ -163,6 +163,9 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		AppHelper.getInstance().getDialogImpl(SurfaceClassesTable.class);
 		AppHelper.getInstance().getDialogImpl(SurfaceClassesRecord.class);
 
+		AppHelper.getInstance().getDialogImpl(SurfaceTypesTable.class);
+		AppHelper.getInstance().getDialogImpl(SurfaceTypesRecord.class);
+
 		this.getfSChooser();
 	}
 
@@ -342,7 +345,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 				try {
 					MainFrame.this.restartProcessingBySourceImpl();
 				} catch (Throwable t) {
-					AppHelper.showExceptionDialog("Error when applying module parameters", t);
+					AppHelper.showExceptionDialog(MainFrame.this, "Error when applying module parameters", t);
 				} finally {
 					MainFrame.this.clearMessage();
 				}
@@ -422,7 +425,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 				try {
 					MainFrame.this.restartProcessingByModuleParamsImpl();
 				} catch (Throwable t) {
-					AppHelper.showExceptionDialog("Error when applying module parameters", t);
+					AppHelper.showExceptionDialog(MainFrame.this, "Error when applying module parameters", t);
 				} finally {
 					MainFrame.this.clearMessage();
 				}
@@ -466,7 +469,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 				try {
 					MainFrame.this.restartProcessingByFiltersImpl();
 				} catch (Throwable t) {
-					AppHelper.showExceptionDialog("Error when applying new filters", t);
+					AppHelper.showExceptionDialog(MainFrame.this, "Error when applying new filters", t);
 				} finally {
 					MainFrame.this.clearMessage();
 				}
@@ -617,6 +620,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			jMenuDatabase.addSeparator();
 
 			jMenuDatabase.add(getJMenuItemSurfaceClasses());
+			jMenuDatabase.add(getJMenuItemSurfaceTypes());
 			jMenuDatabase.addSeparator();
 
 			jMenuDatabase.add(getJMenuItemMaterials());
@@ -726,6 +730,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			gridBagConstraints110.gridy = 0;
 			jLabelImageInfo = new JLabel();
 			jLabelImageInfo.setText("");
+			jLabelImageInfo.setName("labelImageInfo");
 
 			GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
 			gridBagConstraints3.gridx = 1;
@@ -796,7 +801,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 				jPanelImageSource.registerFitButton(jCheckBoxScale);
 				jPanelImageFiltered.registerFitButton(jCheckBoxScale);
 			} else {
-				AppHelper.showErrorDialog("Internal error. Expected panelImage layout not initialized yet.",
+				AppHelper.showErrorDialog(this, "Internal error. Expected panelImage layout not initialized yet.",
 						"Invalid layout programming");
 			}
 			jCheckBoxScale.setText("Масштаб под размеры окна");
@@ -968,7 +973,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		return jPanelFilters;
 	}
 
-	private FiltersModel filtersModel = null;
+	protected FiltersModel filtersModel = null;
 
 	private JMenuItem jMenuItemAvailableFilters = null;
 
@@ -985,6 +990,8 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 	private JMenuItem jMenuItemDefectTypes = null;
 
 	private JMenuItem jMenuItemSurfaceClasses = null;
+
+	private JMenuItem jMenuItemSurfaceTypes = null;
 
 	static class FiltersModel extends AbstractListModel {
 
@@ -1036,6 +1043,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 	private JList getJListFilters() {
 		if (jListFilters == null) {
 			jListFilters = new JList(getFiltersModel());
+			jListFilters.setName("filtersList");
 			jListFilters.setCellRenderer(new DefaultListCellRenderer() {
 
 				/**
@@ -1342,7 +1350,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 	private JComboBox getJComboBoxModules() {
 		if (jComboBoxModules == null) {
 			jComboBoxModules = new JComboBox(AppDataStorage.getInstance().listLModules());
-			jComboBoxModules.setName("module");
+			jComboBoxModules.setName("modules");
 			jComboBoxModules.addActionListener(new ActionListener() {
 
 				@SuppressWarnings("unchecked")
@@ -1353,7 +1361,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 						MainFrame.this.setModule((Class<IModule>) Class.forName(item.getCodename()));
 					} catch (Exception e1) {
 						String name = item.getCodename() + " (" + item.getName() + ")";
-						AppHelper.showExceptionDialog("Ошибка при подключении модуля " + name, e1);
+						AppHelper.showExceptionDialog(MainFrame.this, "Ошибка при подключении модуля " + name, e1);
 					}
 				}
 			});
@@ -1452,6 +1460,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			jTabbedPaneImages.addTab("Исходное", null, getJScrollPaneImageSource(), null);
 			jTabbedPaneImages.addTab("Отфильтрованное", null, getJScrollPaneImageFiltered(), null);
 			jTabbedPaneImages.setSelectedIndex(1);
+			jTabbedPaneImages.setName("tabbedPaneImages");
 			jTabbedPaneImages.addChangeListener(new ChangeListener() {
 
 				@Override
@@ -1654,6 +1663,20 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		return jMenuItemSurfaceClasses;
 	}
 
+	/**
+	 * This method initializes jMenuItemSurfaceTypes
+	 * 
+	 * @return javax.swing.JMenuItem
+	 */
+	private JMenuItem getJMenuItemSurfaceTypes() {
+		if (jMenuItemSurfaceTypes == null) {
+			jMenuItemSurfaceTypes = new JMenuItem();
+			jMenuItemSurfaceTypes.setText("Типы поверхностей");
+			registerAction(jMenuItemSurfaceTypes, Actions.SURFACE_TYPES);
+		}
+		return jMenuItemSurfaceTypes;
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
@@ -1678,7 +1701,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 				this.startProcessingImpl(this.singleFilePicker.getSingleSource());
 				this.jMenuItemClose.setEnabled(true);
 			} catch (Exception e1) {
-				AppHelper.showExceptionDialog("Error when processing image.", e1);
+				AppHelper.showExceptionDialog(this, "Error when processing image.", e1);
 			} finally {
 				this.clearMessage();
 			}
@@ -1698,8 +1721,8 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 						this.mainModuleProcessor.saveSettingsToFile(newFile);
 					}
 				} catch (Exception e1) {
-					AppHelper.showExceptionDialog("Unexpected eror when saving settings file '" + newFile.getName()
-							+ "'.", e1);
+					AppHelper.showExceptionDialog(this, "Unexpected eror when saving settings file '" + newFile.getName()
+									+ "'.", e1);
 				}
 			}
 
@@ -1715,8 +1738,8 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 							this.mainModuleProcessor.getModule()));
 
 				} catch (Exception e1) {
-					AppHelper.showExceptionDialog("Unexpected eror when opening settings file '" + newFile.getName()
-							+ "'.", e1);
+					AppHelper.showExceptionDialog(this, "Unexpected eror when opening settings file '" + newFile.getName()
+									+ "'.", e1);
 				}
 			}
 		} else if (action == Actions.SETTINGS) {
@@ -1763,13 +1786,18 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			}
 		} else if (action == Actions.SURFACE_TYPES) {
 			//
+			SurfaceTypesTable surfaceTypes = (SurfaceTypesTable) AppHelper.getInstance().getDialog(
+					SurfaceTypesTable.class);
+			if (surfaceTypes != null) {
+				surfaceTypes.openDialog();
+			}
 		} else if (action == Actions.HELP) {
 			// View help
 			try {
 				Desktop.getDesktop().browse(new URI(Const.WEB_HELP_PAGE));
 			} catch (Exception e1) {
-				AppHelper.showExceptionDialog("Unexpected eror when opening help link '" + Const.WEB_HELP_PAGE + "'.",
-						e1);
+				AppHelper.showExceptionDialog(this,
+						"Unexpected eror when opening help link '" + Const.WEB_HELP_PAGE + "'.", e1);
 			}
 		} else if (action == Actions.ABOUT) {
 			// View about
@@ -1797,7 +1825,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 
 			}
 		} else {
-			AppHelper.showErrorDialog("Internal error. Unknown action: " + action, "Internal error");
+			AppHelper.showErrorDialog(this, "Internal error. Unknown action: " + action, "Internal error");
 		}
 
 	}

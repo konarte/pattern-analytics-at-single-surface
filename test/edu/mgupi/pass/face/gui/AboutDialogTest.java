@@ -65,7 +65,7 @@ public class AboutDialogTest {
 		//				MouseEvent.BUTTON1, 1, 1, 1, false));
 
 		// OK button must close dialog!
-		
+
 		SwingTestHelper.clickCloseDialogButton(dialog, "cancel");
 
 	}

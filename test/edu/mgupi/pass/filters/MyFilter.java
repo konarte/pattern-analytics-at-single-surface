@@ -8,9 +8,6 @@ import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.mgupi.pass.filters.FilterException;
-import edu.mgupi.pass.filters.IFilter;
-import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.util.IInitiable;
 
 public class MyFilter implements IFilter, IInitiable {

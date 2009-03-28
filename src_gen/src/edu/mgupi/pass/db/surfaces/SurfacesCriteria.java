@@ -42,8 +42,8 @@ public class SurfacesCriteria extends AbstractORMCriteria {
 		this(edu.mgupi.pass.db.surfaces.PassPersistentManager.instance().getSession());
 	}
 	
-	public SurfaceTypesCriteria createSurfaceModeCriteria() {
-		return new SurfaceTypesCriteria(createCriteria("surfaceMode"));
+	public SurfaceTypesCriteria createSurfaceTypeCriteria() {
+		return new SurfaceTypesCriteria(createCriteria("surfaceType"));
 	}
 	
 	public Surfaces uniqueSurfaces() {

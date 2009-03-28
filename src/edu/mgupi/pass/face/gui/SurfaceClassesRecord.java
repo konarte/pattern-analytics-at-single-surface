@@ -2,24 +2,22 @@ package edu.mgupi.pass.face.gui;
 
 import java.awt.Frame;
 import java.awt.GridBagLayout;
-import java.util.Map;
+import java.util.Collection;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.text.JTextComponent;
+
+import org.hibernate.Criteria;
 
 import edu.mgupi.pass.db.surfaces.SurfaceClasses;
 import edu.mgupi.pass.db.surfaces.SurfaceClassesCriteria;
-import edu.mgupi.pass.db.surfaces.SurfaceClassesFactory;
 import edu.mgupi.pass.db.surfaces.SurfaceTypes;
 import edu.mgupi.pass.db.surfaces.SurfaceTypesCriteria;
-import edu.mgupi.pass.db.surfaces.SurfaceTypesFactory;
 import edu.mgupi.pass.face.gui.template.RecordEditorTemplate;
 import edu.mgupi.pass.face.gui.template.RecordFormWithImageTemplate;
-import edu.mgupi.pass.util.Utils;
 
-public class SurfaceClassesRecord extends RecordEditorTemplate {
+public class SurfaceClassesRecord extends RecordEditorTemplate<SurfaceClasses> {
 	/**
 	 * 
 	 */
@@ -33,89 +31,61 @@ public class SurfaceClassesRecord extends RecordEditorTemplate {
 	}
 
 	@Override
-	public boolean isDeleteAllowed(Object[] objects) throws Exception {
-		for (Object object : objects) {
-			SurfaceClasses surfaceClass = ((SurfaceClasses) object);
-			int id = surfaceClass.getIdSurfaceClass();
-
-			if (id == 0) {
-				continue;
-			}
-
-			SurfaceTypesCriteria criteria = new SurfaceTypesCriteria();
-			criteria.createSurfaceClassCriteria().idSurfaceClass.eq(surfaceClass.getIdSurfaceClass());
-
-			SurfaceTypes foundType = SurfaceTypesFactory.loadSurfaceTypesByCriteria(criteria);
-			if (foundType != null) {
-				AppHelper.showErrorDialog("Класс поверхности " + surfaceClass.getName()
-						+ " удалить нельзя. К нему привязана поверхности с типом " + foundType.getName() + ".");
-				return false;
-			}
-		}
-
-		return true;
+	protected String getDenyDeletionMessage(Object foundObject) {
+		SurfaceTypes type = (SurfaceTypes) foundObject;
+		return "Поверхность с типом '" + type.getName() + "' использует класс '" + type.getSurfaceClass().getName()
+				+ "'.";
 	}
 
 	@Override
-	protected boolean isSaveAllowed(Object object) throws Exception {
-		SurfaceClasses defectObject = ((SurfaceClasses) object);
-		String className = jTextFieldNameValue.getText();
+	protected Criteria getMultipleDeleteCriteria(Collection<SurfaceClasses> objects) throws Exception {
 
-		if (Utils.equals(className, defectObject.getName())) {
-			return true;
+		SurfaceTypesCriteria criteria = new SurfaceTypesCriteria();
+		int[] in = new int[objects.size()];
+		int idx = 0;
+		for (SurfaceClasses def : objects) {
+			in[idx++] = def.getIdSurfaceClass();
 		}
+		criteria.createSurfaceClassCriteria().idSurfaceClass.in(in);
+		return criteria;
+	}
 
+	@Override
+	protected Criteria getSaveAllowCriteria(SurfaceClasses object, String newValue) throws Exception {
 		SurfaceClassesCriteria criteria = new SurfaceClassesCriteria();
-		criteria.name.eq(className);
-		if (defectObject.getIdSurfaceClass() != 0) {
-			criteria.idSurfaceClass.ne(defectObject.getIdSurfaceClass());
+		criteria.name.eq(newValue);
+		if (object.getIdSurfaceClass() != 0) {
+			criteria.idSurfaceClass.ne(object.getIdSurfaceClass());
 		}
-
-		SurfaceClasses foundClass = SurfaceClassesFactory.loadSurfaceClassesByCriteria(criteria);
-		if (foundClass != null) {
-			AppHelper.showErrorDialog(null, "Класс поверхности с названием " + className + " уже существует.");
-			return false;
-		}
-
-		return true;
+		return criteria;
 	}
 
 	@Override
-	protected boolean loadFormFromObject(Object object) throws Exception {
-		SurfaceClasses surface = (SurfaceClasses) object;
-		name = surface.getName();
-		data = surface.getSurfaceImage();
+	protected boolean loadFormFromObjectImpl(SurfaceClasses object) throws Exception {
+		name = object.getName();
+		data = object.getSurfaceImage();
 
 		formPanel.setImageRaw(data);
 
-		jLabelIDValue.setText(String.valueOf(surface.getIdSurfaceClass()));
+		jLabelIDValue.setText(String.valueOf(object.getIdSurfaceClass()));
 		jTextFieldNameValue.setText(name);
-
-		jTextFieldNameValue.requestFocusInWindow();
 
 		return true;
 	}
 
 	@Override
-	protected void restoreObjectImpl(Object object) throws Exception {
-		SurfaceClasses surface = (SurfaceClasses) object;
-		surface.setName(name);
-		surface.setSurfaceImage(data);
+	protected void restoreObjectImpl(SurfaceClasses object) throws Exception {
+		object.setName(name);
+		object.setSurfaceImage(data);
 	}
 
 	private String name = null;
 	private byte[] data = null;
 
 	@Override
-	protected void saveFormToObjectImpl(Object object) throws Exception {
-		SurfaceClasses surface = (SurfaceClasses) object;
-		surface.setName(jTextFieldNameValue.getText());
-		surface.setSurfaceImage(formPanel.getRawImage());
-	}
-
-	@Override
-	protected void setRequiredFields(Map<JTextComponent, JLabel> map) {
-		map.put(jTextFieldNameValue, jLabelName);
+	protected void saveFormToObjectImpl(SurfaceClasses object) throws Exception {
+		object.setName(jTextFieldNameValue.getText());
+		object.setSurfaceImage(formPanel.getRawImage());
 	}
 
 	private RecordFormWithImageTemplate formPanel;
@@ -128,7 +98,6 @@ public class SurfaceClassesRecord extends RecordEditorTemplate {
 	}
 
 	private JPanel jPanelPlace = null;
-	private JLabel jLabelName = null;
 	private JLabel jLabelIDValue = null;
 	private JTextField jTextFieldNameValue = null;
 
@@ -137,15 +106,14 @@ public class SurfaceClassesRecord extends RecordEditorTemplate {
 			jPanelPlace = new JPanel();
 
 			jPanelPlace.setLayout(new GridBagLayout());
-			
+
 			jLabelIDValue = new JLabel("0");
 			jTextFieldNameValue = new JTextField();
 
-			super.putComponentPair(jPanelPlace, "Код:", jLabelIDValue);
-			super.putComponentPair(jPanelPlace, "Название класса:", jTextFieldNameValue);
+			super.putComponentPair(jPanelPlace, "Код", jLabelIDValue);
+			super.putRequiredComponentPair(jPanelPlace, "Название класса", jTextFieldNameValue);
 		}
 		return jPanelPlace;
 	}
-
 
 }

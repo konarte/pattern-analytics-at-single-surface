@@ -30,11 +30,11 @@ public class SurfaceClassesTable extends TableEditorTemplate {
 	@Override
 	protected AbstractEditorTableModel getTableModelImpl(JTable owner) {
 		if (tableModel == null) {
-			tableModel = new CommonEditorTableModel(owner, SurfaceClassesRecord.class) {
+			tableModel = new CommonEditorTableModel<SurfaceClasses>(owner, SurfaceClassesRecord.class) {
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				protected Object createInstanceImpl() {
+				protected SurfaceClasses createInstanceImpl() {
 					return SurfaceClassesFactory.createSurfaceClasses();
 				}
 
@@ -43,9 +43,8 @@ public class SurfaceClassesTable extends TableEditorTemplate {
 					return new String[] { "ID", "Класс поверхности", "Картинка" };
 				}
 
-				@SuppressWarnings("unchecked")
 				@Override
-				protected List getDataImpl() throws Exception {
+				protected List<SurfaceClasses> getDataImpl() throws Exception {
 					List<SurfaceClasses> classes = new ArrayList<SurfaceClasses>();
 					classes.addAll(Arrays.asList(SurfaceClassesFactory.listSurfaceClassesByQuery(null, null)));
 					return classes;
@@ -53,7 +52,7 @@ public class SurfaceClassesTable extends TableEditorTemplate {
 
 				@Override
 				public Object getValueAt(int rowIndex, int columnIndex) {
-					SurfaceClasses surface = (SurfaceClasses) data.get(rowIndex);
+					SurfaceClasses surface = data.get(rowIndex);
 					switch (columnIndex) {
 					case 0:
 						return surface.getIdSurfaceClass();

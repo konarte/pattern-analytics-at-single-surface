@@ -58,7 +58,7 @@ public class ImageControlAdapter implements ActionListener, PropertyChangeListen
 				logger.trace("Set up new image {}.", newImage);
 				this.imagePanel.setImage(newImage);
 			} catch (IOException e1) {
-				AppHelper.showExceptionDialog("Ошибка при загрузке изображения", e1);
+				AppHelper.showExceptionDialog(null, "Ошибка при загрузке изображения", e1);
 			}
 		} else if (command.equals("reset")) {
 			this.imagePanel.setImage(null);

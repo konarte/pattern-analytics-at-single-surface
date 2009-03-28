@@ -74,8 +74,8 @@ public class Surfaces implements Serializable {
 	
 	@Column(name="IdSurface", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312044C35DDC0191F")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312044C35DDC0191F", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31204C98ACAF08FD9")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31204C98ACAF08FD9", strategy="native")	
 	private int idSurface;
 	
 	@Column(name="Height", nullable=false)	
@@ -94,7 +94,7 @@ public class Surfaces implements Serializable {
 	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
 	@JoinColumns({ @JoinColumn(name="SurfaceTypesIdSurfaceType") })	
 	@Basic(fetch=FetchType.LAZY)	
-	private edu.mgupi.pass.db.surfaces.SurfaceTypes surfaceMode;
+	private edu.mgupi.pass.db.surfaces.SurfaceTypes surfaceType;
 	
 	private void setIdSurface(int value) {
 		this.idSurface = value;
@@ -164,12 +164,12 @@ public class Surfaces implements Serializable {
 		return multiLayer;
 	}
 	
-	public void setSurfaceMode(edu.mgupi.pass.db.surfaces.SurfaceTypes value) {
-		this.surfaceMode = value;
+	public void setSurfaceType(edu.mgupi.pass.db.surfaces.SurfaceTypes value) {
+		this.surfaceType = value;
 	}
 	
-	public edu.mgupi.pass.db.surfaces.SurfaceTypes getSurfaceMode() {
-		return surfaceMode;
+	public edu.mgupi.pass.db.surfaces.SurfaceTypes getSurfaceType() {
+		return surfaceType;
 	}
 	
 	public String toString() {

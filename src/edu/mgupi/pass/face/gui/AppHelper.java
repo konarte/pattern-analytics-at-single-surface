@@ -40,6 +40,7 @@ import edu.mgupi.pass.face.IProgress;
 import edu.mgupi.pass.face.gui.template.RecordEditorTemplate;
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Utils;
+import edu.mgupi.pass.util.Config.TransactionMode;
 
 /**
  * Class for application support -- make easy change LookAndFeel, set window
@@ -73,12 +74,12 @@ public class AppHelper {
 	/**
 	 * Special method for reset all cached data.
 	 */
-	protected static synchronized void reset() {
+	public static synchronized void reset() {
 		if (instance != null) {
 
 			for (Window window : instance.windowsCollection.values()) {
 				if (window instanceof RecordEditorTemplate) {
-					((RecordEditorTemplate) window).close();
+					((RecordEditorTemplate<?>) window).close();
 				}
 			}
 
@@ -208,7 +209,7 @@ public class AppHelper {
 		try {
 			return this.getWindowImpl(windowType, false);
 		} catch (Exception e) {
-			AppHelper.showExceptionDialog("Unexpected error when creating instance of '" + windowType
+			AppHelper.showExceptionDialog(null, "Unexpected error when creating instance of '" + windowType
 					+ "'. Please, consult with developers.", e);
 			return null;
 		}
@@ -381,14 +382,20 @@ public class AppHelper {
 		}
 	}
 
-	public void setDatabaseSessionType(SessionType sessionType) throws PersistentException {
-		if (PassPersistentManager.instance().getSessionType() != sessionType) {
-
-			logger.debug("Switching persistance type. Disposing persistance manager first...");
-
-			PassPersistentManager.instance().disposePersistentManager();
-			PassPersistentManager.setSessionType(sessionType);
-		}
+	public static void setDatabaseTransactionMode(TransactionMode transactionMode) throws PersistentException {
+		SessionType session = PassPersistentManager.instance().getSessionType();
+		System.out.println("Current session type: "
+				+ (session == SessionType.APP_BASE ? "app based" : (session == SessionType.THREAD_BASE ? "thread base"
+						: "other")));
+		//		SessionType sessionType = transactionMode == TransactionMode.COMMIT_BULK ? SessionType.ADVANCED_APP_BASE
+		//				: SessionType.THREAD_BASE;
+		//		if (PassPersistentManager.instance().getSessionType() != sessionType) {
+		//
+		//			logger.debug("Switching persistance type. Disposing persistance manager first...");
+		//
+		//			PassPersistentManager.instance().disposePersistentManager();
+		//			PassPersistentManager.setSessionType(sessionType);
+		//		}
 	}
 
 	/**
@@ -413,12 +420,14 @@ public class AppHelper {
 	/**
 	 * Show dialog with {@link Throwable} data
 	 * 
+	 * @param parent
+	 *            TODO
 	 * @param message
 	 *            text for display at head of message.
 	 * @param e
 	 *            any {@link Throwable} instance
 	 */
-	public static void showExceptionDialog(String message, Throwable e) {
+	public static void showExceptionDialog(Component parent, String message, Throwable e) {
 
 		logger.error(message, e);
 
@@ -439,7 +448,7 @@ public class AppHelper {
 		pane.setPreferredSize(new Dimension(600, 300));
 		panel.add(pane, BorderLayout.CENTER);
 
-		JOptionPane.showMessageDialog(null, panel, "Ошибка", JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(parent, panel, "Ошибка", JOptionPane.ERROR_MESSAGE);
 
 		try {
 			out.close();
@@ -449,17 +458,18 @@ public class AppHelper {
 		}
 	}
 
-	public static void showErrorDialog(String message, String title) {
-		JOptionPane.showMessageDialog(null, Utils.splitStingBySlices(message, 100, "\n"), title,
+	public static void showErrorDialog(Component parent, String message, String title) {
+		logger.error(message);
+		JOptionPane.showMessageDialog(parent, Utils.splitStingBySlices(message, 100, "\n"), title,
 				JOptionPane.ERROR_MESSAGE);
 	}
 
-	public static void showErrorDialog(String message) {
-		showErrorDialog(message, "Ошибка");
+	public static void showErrorDialog(Component parent, String message) {
+		showErrorDialog(parent, message, "Ошибка");
 	}
 
-	public static void showFieldRequiredDialog(String fieldName) {
-		showErrorDialog("Поле '" + fieldName + "' обязательно для заполнения.", "Ожидание ввода");
+	public static void showFieldRequiredDialog(Component parent, String fieldName) {
+		showErrorDialog(parent, "Поле '" + fieldName + "' обязательно для заполнения.", "Ожидание ввода");
 	}
 
 }

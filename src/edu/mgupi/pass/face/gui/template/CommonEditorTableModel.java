@@ -1,6 +1,7 @@
 package edu.mgupi.pass.face.gui.template;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.JTable;
@@ -12,7 +13,7 @@ import edu.mgupi.pass.face.gui.AppHelper;
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Config.DeletionCheckMode;
 
-public abstract class CommonEditorTableModel extends AbstractEditorTableModel {
+public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel {
 	private final static Logger logger = LoggerFactory.getLogger(CommonEditorTableModel.class);
 
 	/**
@@ -20,9 +21,9 @@ public abstract class CommonEditorTableModel extends AbstractEditorTableModel {
 	 */
 	private static final long serialVersionUID = -4443849886815253825L;
 
-	private Class<? extends RecordEditorTemplate> recordEditorClass = null;
+	private Class<? extends RecordEditorTemplate<T>> recordEditorClass = null;
 
-	public CommonEditorTableModel(JTable owner, Class<? extends RecordEditorTemplate> recordEditorClass) {
+	public CommonEditorTableModel(JTable owner, Class<? extends RecordEditorTemplate<T>> recordEditorClass) {
 		super(owner);
 		if (recordEditorClass == null) {
 			throw new IllegalArgumentException("Internal error. 'editDialog' must be not null.");
@@ -31,10 +32,8 @@ public abstract class CommonEditorTableModel extends AbstractEditorTableModel {
 	}
 
 	protected String[] columns = getColumns();
-	@SuppressWarnings("unchecked")
-	protected List data = null;
+	protected List<T> data = null;
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void openImpl() throws Exception {
 		data = this.getDataImpl();
@@ -42,16 +41,16 @@ public abstract class CommonEditorTableModel extends AbstractEditorTableModel {
 
 			logger.trace("Received null data during open model.");
 
-			data = new ArrayList();
+			data = new ArrayList<T>();
 		} else {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Received data during open model: {}.", data);
 			}
 		}
+		super.fireTableDataChanged();
 	}
 
-	@SuppressWarnings("unchecked")
-	protected abstract List getDataImpl() throws Exception;
+	protected abstract List<T> getDataImpl() throws Exception;
 
 	protected abstract String[] getColumns();
 
@@ -69,8 +68,9 @@ public abstract class CommonEditorTableModel extends AbstractEditorTableModel {
 					"Internal error. Unable to add row, 'data' does not initialized yet. Maybe, you forget to 'openDialog'?");
 		}
 
-		RecordEditorTemplate dialog = (RecordEditorTemplate) AppHelper.getInstance().getDialogImpl(recordEditorClass);
-		Object added = dialog.addRecord(createInstanceImpl());
+		RecordEditorTemplate<T> dialog = (RecordEditorTemplate<T>) AppHelper.getInstance().getDialogImpl(
+				recordEditorClass);
+		T added = dialog.addRecord(createInstanceImpl());
 		if (added != null) {
 
 			logger.trace("Successfully added. Received new object: {}.", added);
@@ -85,8 +85,9 @@ public abstract class CommonEditorTableModel extends AbstractEditorTableModel {
 		}
 	}
 
-	protected abstract Object createInstanceImpl();
+	protected abstract T createInstanceImpl();
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected boolean deleteRowsImpl(int rowIdx[]) throws Exception {
 
@@ -97,10 +98,10 @@ public abstract class CommonEditorTableModel extends AbstractEditorTableModel {
 
 		logger.trace("Try to delete {} rows.", rowIdx.length);
 
-		RecordEditorTemplate dialog = (RecordEditorTemplate) AppHelper.getInstance().getDialogImpl(recordEditorClass);
+		RecordEditorTemplate<T> dialog = (RecordEditorTemplate<T>) AppHelper.getInstance().getDialogImpl(
+				recordEditorClass);
 
-		Object[] rows = data.subList(rowIdx[0], rowIdx[rowIdx.length - 1] + 1).toArray();
-
+		Collection<T> rows = data.subList(rowIdx[0], rowIdx[rowIdx.length - 1] + 1);
 		if (Config.getInstance().getDeletionCheckMode() == DeletionCheckMode.CHECK_THEN_ACQUIRE) {
 			boolean canDelete = dialog.isDeleteAllowed(rows);
 			if (!canDelete) {
@@ -139,6 +140,7 @@ public abstract class CommonEditorTableModel extends AbstractEditorTableModel {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected boolean editRowImpl(int rowIdx) throws Exception {
 
@@ -147,7 +149,8 @@ public abstract class CommonEditorTableModel extends AbstractEditorTableModel {
 					"Internal error. Unable to add row, 'data' does not initialized yet. Maybe, you forget to 'openDialog'?");
 		}
 
-		RecordEditorTemplate dialog = (RecordEditorTemplate) AppHelper.getInstance().getDialogImpl(recordEditorClass);
+		RecordEditorTemplate<T> dialog = (RecordEditorTemplate<T>) AppHelper.getInstance().getDialogImpl(
+				recordEditorClass);
 		boolean edited = dialog.editRecord(data.get(rowIdx));
 		if (edited) {
 			logger.trace("Successfully edited. Edited object: {}.", edited);

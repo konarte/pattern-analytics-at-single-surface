@@ -44,8 +44,8 @@ public class SurfacesDetachedCriteria extends AbstractORMDetachedCriteria {
 		multiLayer = new BooleanExpression("multiLayer", this.getDetachedCriteria());
 	}
 	
-	public SurfaceTypesDetachedCriteria createSurfaceModeCriteria() {
-		return new SurfaceTypesDetachedCriteria(createCriteria("surfaceMode"));
+	public SurfaceTypesDetachedCriteria createSurfaceTypeCriteria() {
+		return new SurfaceTypesDetachedCriteria(createCriteria("surfaceType"));
 	}
 	
 	public Surfaces uniqueSurfaces(PersistentSession session) {

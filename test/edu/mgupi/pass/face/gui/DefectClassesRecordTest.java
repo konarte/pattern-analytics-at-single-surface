@@ -18,10 +18,10 @@ public class DefectClassesRecordTest {
 	@Test
 	public void testStart() throws Exception {
 		//new DefectClassesRecord(null).setVisible(true);
-//		DefectClassesRecord def = new DefectClassesRecord(null);
-//		def.setVisible(true);
-//		def.addRecord(DefectClassesFactory.createDefectClasses());
-		
+		//		DefectClassesRecord def = new DefectClassesRecord(null);
+		//		def.setVisible(true);
+		//		def.addRecord(DefectClassesFactory.createDefectClasses());
+
 		SwingTestHelper.showMeBackground(new DefectClassesRecord(null));
 	}
 
