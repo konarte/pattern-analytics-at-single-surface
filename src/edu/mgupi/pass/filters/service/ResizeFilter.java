@@ -49,6 +49,8 @@ public class ResizeFilter implements IFilter {
 				+ INTERPOLATION_METHOD.getValue() + ")";
 	}
 
+	private double lastThumbRate = 0;
+
 	public BufferedImage convert(BufferedImage source) throws FilterException {
 
 		if (source == null) {
@@ -74,12 +76,20 @@ public class ResizeFilter implements IFilter {
 		//					+ INTERPOLATION_METHOD.getName() + " to 'RenderingHints.KEY_INTERPOLATION'.");
 		//		}
 
-		logger.debug("Resizing image to {}x{}, method {}", new Object[] { thumb.width, thumb.height, myMethod });
-
 		Dimension newSize = calcThumbSize(source, thumb);
+
+		double wRate = newSize.getWidth() / (double) source.getWidth();
+		double hRate = newSize.getHeight() / (double) source.getHeight();
+		lastThumbRate = wRate > hRate ? wRate : hRate;
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Resizing image to {}x{}, method {}. Actual size is {}x{}. ThumbRate = {}.", new Object[] {
+					thumb.width, thumb.height, myMethod, newSize.width, newSize.height, lastThumbRate });
+		}
 
 		// draw original image to thumbnail image object and
 		// scale it to the new size on-the-fly
+
 		BufferedImage dest = new BufferedImage(newSize.width, newSize.height, BufferedImage.TYPE_INT_RGB);
 		Graphics2D graphics2D = dest.createGraphics();
 		graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, myMethod);
@@ -88,6 +98,10 @@ public class ResizeFilter implements IFilter {
 		graphics2D.dispose();
 
 		return dest;
+	}
+
+	public double getLastThumbRate() {
+		return this.lastThumbRate;
 	}
 
 	/**
@@ -112,6 +126,7 @@ public class ResizeFilter implements IFilter {
 		} else {
 			thumb.width = (int) (thumb.height * imageRatio);
 		}
+
 		return thumb;
 	}
 

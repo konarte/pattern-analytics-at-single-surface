@@ -75,6 +75,8 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 		if (instance == null) {
 			throw new IllegalArgumentException("Internal error. 'instance' must be not null.");
 		}
+		
+		logger.debug("Initialize dialog control adapter " + this);
 
 		this.instance = instance;
 		this.saveRequired = saveRequired;

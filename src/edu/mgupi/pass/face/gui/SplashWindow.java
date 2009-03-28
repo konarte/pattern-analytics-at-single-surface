@@ -106,7 +106,7 @@ public class SplashWindow extends JFrame {
 		if (jContentPane == null) {
 			jContentPane = new JPanel(true);
 			jContentPane.setLayout(new BorderLayout());
-			jContentPane.setToolTipText("Splash");
+			jContentPane.setToolTipText("Заставка со слоупоками");
 			jContentPane.setBorder(BorderFactory.createLineBorder(Color.gray, 1));
 			jContentPane.add(getJPanelSplash(), BorderLayout.CENTER);
 		}

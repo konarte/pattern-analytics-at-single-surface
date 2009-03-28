@@ -281,7 +281,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 
 		try {
 
-			this.applySourcePreProcessor();
+			this.applySourcePreProcessor(source.getSourceImage());
 
 			// Main cycle
 
@@ -295,6 +295,13 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 
 			filteredImageInfo = "" + filteredImage.getWidth() + "x" + filteredImage.getHeight() + " "
 					+ filteredImage.getColorModel().getPixelSize() + " bpp";
+
+			ResizeFilter resize = (ResizeFilter) mainModuleProcessor.getPreChainsaw().searchFilterClass(
+					ResizeFilter.class);
+			if (resize != null) {
+				double lastRate = resize.getLastThumbRate();
+				filteredImageInfo += ", 1:" + Math.round(lastRate * 100.0d) / 100.0d;
+			}
 
 			jLabelImageInfo.setText(jTabbedPaneImages.getSelectedIndex() == 0 ? this.originalImageInfo
 					: this.filteredImageInfo);
@@ -348,36 +355,61 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		this.startProcessingImpl(this.currentSource);
 	}
 
-	private void applySourcePreProcessor() throws Exception {
+	private void applySourcePreProcessor(BufferedImage newImage) throws Exception {
 
 		// Скорее всего, наилучшим выходом будет использование автоматического масштабирования,
 		// когда мы приводим изображение к размеру 1024x1024, а потом закрашиваем 
 		//   участки фоновым цветом :)
+
+		if (newImage == null) {
+			return;
+		}
 
 		FilterChainsaw preProcessing = mainModuleProcessor.getPreChainsaw();
 
 		SourceMode sourceScaleMode = Config.getInstance().getCurrentSourceMode();
 		Color background = Config.getInstance().getCurrentBackground();
 
+		String placePosition = sourceScaleMode == SourceMode.CENTER || sourceScaleMode == SourceMode.SCALE_IF_CENTER ? "center"
+				: "topleft";
+
+		boolean actionPlaceMode = false;
 		if (sourceScaleMode == SourceMode.CENTER || sourceScaleMode == SourceMode.LEFT_TOP) {
+			actionPlaceMode = true;
+		} else if (sourceScaleMode == SourceMode.SCALE) {
+			actionPlaceMode = false;
+		} else {
+			if (newImage.getWidth() > Const.MAIN_IMAGE_WIDTH || newImage.getHeight() > Const.MAIN_IMAGE_HEIGHT) {
+				actionPlaceMode = false;
+			} else {
+				actionPlaceMode = true;
+			}
+		}
+
+		if (actionPlaceMode) {
 
 			preProcessing.removeFilter(ResizeFilter.class);
 
-			PlaceImageFilter place = (PlaceImageFilter) preProcessing.appendFilter(PlaceImageFilter.class);
-			place.getWIDTH().setValue(Const.MAIN_IMAGE_WIDTH);
-			place.getHEIGHT().setValue(Const.MAIN_IMAGE_HEIGHT);
+			PlaceImageFilter placeImage = (PlaceImageFilter) preProcessing.appendFilter(PlaceImageFilter.class);
+			placeImage.getWIDTH().setValue(Const.MAIN_IMAGE_WIDTH);
+			placeImage.getHEIGHT().setValue(Const.MAIN_IMAGE_HEIGHT);
 
-			place.getBACKGROUND().setValue(background);
-			place.getPLACE().setValue(sourceScaleMode == SourceMode.CENTER ? "center" : "topleft");
+			placeImage.getBACKGROUND().setValue(background);
+			placeImage.getPLACE().setValue(placePosition);
 
 		} else {
-			preProcessing.removeFilter(PlaceImageFilter.class);
 
 			ResizeFilter resizer = (ResizeFilter) preProcessing.appendFilter(ResizeFilter.class);
 			resizer.getWIDTH().setValue(Const.MAIN_IMAGE_WIDTH);
 			resizer.getHEIGHT().setValue(Const.MAIN_IMAGE_HEIGHT);
 			resizer.getINTERPOLATION_METHOD().setValue("bicubic");
 
+			PlaceImageFilter place = (PlaceImageFilter) preProcessing.appendFilter(PlaceImageFilter.class);
+			place.getWIDTH().setValue(Const.MAIN_IMAGE_WIDTH);
+			place.getHEIGHT().setValue(Const.MAIN_IMAGE_HEIGHT);
+
+			place.getBACKGROUND().setValue(background);
+			place.getPLACE().setValue("center");
 		}
 
 	}
@@ -694,6 +726,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			gridBagConstraints110.gridy = 0;
 			jLabelImageInfo = new JLabel();
 			jLabelImageInfo.setText("");
+
 			GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
 			gridBagConstraints3.gridx = 1;
 			gridBagConstraints3.weightx = 1.0D;

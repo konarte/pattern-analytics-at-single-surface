@@ -100,7 +100,11 @@ public class Config {
 	private final static String PARAM_DATA_DELETION_CHECK = "dataDeletionCheck";
 
 	public static enum SourceMode {
-		CENTER("Разместить в центре"), LEFT_TOP("Разместить слева сверху"), SCALE("Отмасштабировать");
+		LEFT_TOP("Разместить слева сверху"), //
+		CENTER("Разместить в центре"), //
+		SCALE("Отмасштабировать и дополнить"), //
+		SCALE_IF_LEFT_TOP("Масштаб. для большой картинки; иначе разместить слева сверху"), //
+		SCALE_IF_CENTER("Масштаб. для большой картинки; иначе разместить в центре");
 
 		private String title;
 
@@ -181,18 +185,31 @@ public class Config {
 		}
 	}
 
+	private SourceMode currentSourceMode = null;
+
 	public SourceMode getCurrentSourceMode() {
+		if (currentSourceMode != null) {
+			return currentSourceMode;
+		}
 		final SourceMode default_ = SourceMode.LEFT_TOP;
 		try {
-			return SourceMode.valueOf(this.currentConfigInstance.getString(PARAM_CURRENT_SOURCE_MODE, default_.name()));
+			currentSourceMode = SourceMode.valueOf(this.currentConfigInstance.getString(PARAM_CURRENT_SOURCE_MODE,
+					default_.name()));
+			return currentSourceMode;
 		} catch (IllegalArgumentException iae) {
 			return default_;
 		}
 	}
 
+	private Color currentColor = null;
+
 	public Color getCurrentBackground() {
+		if (currentColor != null) {
+			return currentColor;
+		}
 		final Color default_ = Color.WHITE;
-		return new Color(this.currentConfigInstance.getInt(PARAM_CURRENT_BACKGROUND, default_.getRGB()));
+		currentColor = new Color(this.currentConfigInstance.getInt(PARAM_CURRENT_BACKGROUND, default_.getRGB()));
+		return currentColor;
 	}
 
 	public String getLookAndFeel() {
@@ -200,47 +217,71 @@ public class Config {
 		return this.commonConfigInstance.getString(PARAM_LOOK_AND_FEEL, default_);
 	}
 
+	private DeletionMode currentRowsDeletionMode = null;
+
 	public DeletionMode getRowsDeleteMode() {
+		if (currentRowsDeletionMode != null) {
+			return currentRowsDeletionMode;
+		}
 		final DeletionMode default_ = DeletionMode.CONFIRM;
 		try {
-			return DeletionMode.valueOf(this.commonConfigInstance.getString(PARAM_ROWS_DELETE_MODE, default_.name()));
+			currentRowsDeletionMode = DeletionMode.valueOf(this.commonConfigInstance.getString(PARAM_ROWS_DELETE_MODE,
+					default_.name()));
+			return currentRowsDeletionMode;
 		} catch (IllegalArgumentException iae) {
 			return default_;
 		}
 	}
+
+	private TransactionMode currentTransactionMode = null;
 
 	public TransactionMode getTransactionMode() throws PersistentException {
+		if (currentTransactionMode != null) {
+			return currentTransactionMode;
+		}
 		final TransactionMode default_ = TransactionMode.COMMIT_EVERY_ROW;
 		try {
-			TransactionMode mode = TransactionMode.valueOf(this.commonConfigInstance.getString(PARAM_TRANSACTION_MODE,
-					default_.name()));
+			currentTransactionMode = TransactionMode.valueOf(this.commonConfigInstance.getString(
+					PARAM_TRANSACTION_MODE, default_.name()));
 
 			AppHelper.getInstance().setDatabaseSessionType(
-					mode == TransactionMode.COMMIT_BULK ? SessionType.APP_BASE : SessionType.THREAD_BASE);
-			return mode;
+					currentTransactionMode == TransactionMode.COMMIT_BULK ? SessionType.APP_BASE
+							: SessionType.THREAD_BASE);
+			return currentTransactionMode;
 		} catch (IllegalArgumentException iae) {
 			return default_;
 		}
 	}
 
+	private DeletionCheckMode currentDeletionCheckMode = null;
+
 	public DeletionCheckMode getDeletionCheckMode() {
+		if (currentDeletionCheckMode != null) {
+			return currentDeletionCheckMode;
+		}
 		final DeletionCheckMode default_ = DeletionCheckMode.ACQUIRE_THEN_CHECK;
 		try {
-			return DeletionCheckMode.valueOf(this.commonConfigInstance.getString(PARAM_DATA_DELETION_CHECK, default_
-					.name()));
+			currentDeletionCheckMode = DeletionCheckMode.valueOf(this.commonConfigInstance.getString(
+					PARAM_DATA_DELETION_CHECK, default_.name()));
+			return currentDeletionCheckMode;
 		} catch (IllegalArgumentException iae) {
 			return default_;
 		}
 	}
 
 	public boolean setCurrentSourceMode(SourceMode value) {
-		return this
-				.setCurrentParameterImpl(PARAM_CURRENT_SOURCE_MODE, this.getCurrentSourceMode().name(), value.name());
+
+		boolean res = this.setCurrentParameterImpl(PARAM_CURRENT_SOURCE_MODE, this.getCurrentSourceMode().name(), value
+				.name());
+		this.currentSourceMode = value;
+		return res;
 	}
 
 	public boolean setCurrentBackground(Color value) {
-		return this.setCurrentParameterImpl(PARAM_CURRENT_BACKGROUND, this.getCurrentBackground().getRGB(), value
-				.getRGB());
+		boolean res = this.setCurrentParameterImpl(PARAM_CURRENT_BACKGROUND, this.getCurrentBackground().getRGB(),
+				value.getRGB());
+		this.currentColor = value;
+		return res;
 	}
 
 	public boolean setLookAndFeel(String value) throws ClassNotFoundException, InstantiationException,
@@ -254,11 +295,18 @@ public class Config {
 	}
 
 	public boolean setRowsDeleteMode(DeletionMode value) {
-		return this.setCommonParameterImpl(PARAM_ROWS_DELETE_MODE, this.getRowsDeleteMode().name(), value.name());
+
+		boolean res = this
+				.setCommonParameterImpl(PARAM_ROWS_DELETE_MODE, this.getRowsDeleteMode().name(), value.name());
+		this.currentRowsDeletionMode = value;
+		return res;
 	}
 
 	public boolean setTransactionMode(TransactionMode value) throws PersistentException {
-		if (this.setCommonParameterImpl(PARAM_TRANSACTION_MODE, this.getTransactionMode().name(), value.name())) {
+		boolean res = this.setCommonParameterImpl(PARAM_TRANSACTION_MODE, this.getTransactionMode().name(), value
+				.name());
+		this.currentTransactionMode = value;
+		if (res) {
 			AppHelper.getInstance().setDatabaseSessionType(
 					value == TransactionMode.COMMIT_BULK ? SessionType.APP_BASE : SessionType.THREAD_BASE);
 			return true;
@@ -268,7 +316,11 @@ public class Config {
 	}
 
 	public boolean setDeletionCheckModeMode(DeletionCheckMode value) {
-		return this.setCommonParameterImpl(PARAM_DATA_DELETION_CHECK, this.getDeletionCheckMode().name(), value.name());
+
+		boolean res = this.setCommonParameterImpl(PARAM_DATA_DELETION_CHECK, this.getDeletionCheckMode().name(), value
+				.name());
+		this.currentDeletionCheckMode = value;
+		return res;
 	}
 
 	//

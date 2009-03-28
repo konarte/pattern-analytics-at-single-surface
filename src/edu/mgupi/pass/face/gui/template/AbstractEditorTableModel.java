@@ -38,6 +38,9 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		if (owner == null) {
 			throw new IllegalArgumentException("Internal error. 'owner' must be not null.");
 		}
+		
+		logger.debug("Initialize editor table model " + this);
+		
 		this.owner = owner;
 		this.owner.getSelectionModel().addListSelectionListener(this);
 		this.owner.addMouseListener(new MouseAdapter() {

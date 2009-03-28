@@ -28,7 +28,7 @@ public class ImageControlAdapter implements ActionListener, PropertyChangeListen
 
 		this.imagePanel.addPropertyChangeListener(ImagePanel.RPOPERTY_NAME, this);
 
-		logger.debug("Initialize image control adapter " + this);
+		logger.trace("Initialize image control adapter " + this);
 
 		singleFilePick = new SingleFilePick();
 		singleFilePick.init();
@@ -36,7 +36,7 @@ public class ImageControlAdapter implements ActionListener, PropertyChangeListen
 
 	public void close() {
 
-		logger.debug("Closing image control adapter " + this);
+		logger.trace("Closing image control adapter " + this);
 
 		if (singleFilePick != null) {
 			singleFilePick.close();
@@ -51,11 +51,11 @@ public class ImageControlAdapter implements ActionListener, PropertyChangeListen
 		}
 
 		if (command.equals("load")) {
-			logger.debug("Execute load image...");
+			logger.trace("Execute load image...");
 			try {
 				BufferedImage newImage = singleFilePick.getImage();
 
-				logger.debug("Set up new image {}.", newImage);
+				logger.trace("Set up new image {}.", newImage);
 				this.imagePanel.setImage(newImage);
 			} catch (IOException e1) {
 				AppHelper.showExceptionDialog("Ошибка при загрузке изображения", e1);

@@ -110,13 +110,24 @@ public class FilterChainsaw {
 
 		logger.debug("Appending filter as class {}", filterClass);
 
-		IFilter instance = this.cacheInstance.getInstance(filterClass);
-		AppDataStorage.getInstance().checkUsingFilter(instance);
+		IFilter instance = null;
+		int actualIndex = index;
+		if (singleInstanceCaching) {
+			int idx = this.searchFilterClassPos(filterClass);
+			if (idx != -1) {
+				instance = filterList.get(idx);
+				filterList.remove(idx);
+				actualIndex = filterList.size();
+			}
+		}
+
+		if (instance == null) {
+			instance = this.cacheInstance.getInstance(filterClass);
+			AppDataStorage.getInstance().checkUsingFilter(instance);
+		}
 
 		// If we using single caching -- we don't add additional instance to filter list
-		if (!singleInstanceCaching || this.searchFilterClass(filterClass) == -1) {
-			filterList.add(index, instance);
-		}
+		filterList.add(actualIndex, instance);
 
 		if (this.sourceImage != null && instance instanceof IFilterAttachable) {
 			((IFilterAttachable) instance).onAttachToImage(sourceImage);
@@ -192,10 +203,10 @@ public class FilterChainsaw {
 			throw new IllegalStateException(
 					"Removing filters by class allow only if constructor parameter 'singleInstanceCaching' is true.");
 		}
-		this.removeFilter(this.searchFilterClass(filterClass));
+		this.removeFilter(this.searchFilterClassPos(filterClass));
 	}
 
-	private int searchFilterClass(Class<? extends IFilter> filterClass) {
+	private int searchFilterClassPos(Class<? extends IFilter> filterClass) {
 		if (!this.singleInstanceCaching) {
 			throw new IllegalStateException(
 					"Removing filters by class allow only if constructor parameter 'singleInstanceCaching' is true.");
@@ -207,6 +218,15 @@ public class FilterChainsaw {
 			}
 		}
 		return -1;
+	}
+	
+	public IFilter searchFilterClass(Class<? extends IFilter> filterClass) {
+		int pos = this.searchFilterClassPos(filterClass);
+		if (pos != -1) {
+			return this.filterList.get(pos);
+		} else {
+			return null;
+		}
 	}
 
 	/**
