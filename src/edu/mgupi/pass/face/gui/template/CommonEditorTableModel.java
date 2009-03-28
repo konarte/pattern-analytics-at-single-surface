@@ -113,7 +113,7 @@ public abstract class CommonEditorTableModel extends AbstractEditorTableModel {
 		}
 
 		boolean deleted = dialog.deleteRecords(
-				Config.getInstance().getDeletionCheckMode() == DeletionCheckMode.ALWAYS_ACQUIRE_PERMISSION, rows);
+				Config.getInstance().getDeletionCheckMode() == DeletionCheckMode.ACQUIRE_THEN_CHECK, rows);
 		if (deleted) {
 
 			logger.trace("Successfully deleted. Removing rows.");
@@ -131,7 +131,8 @@ public abstract class CommonEditorTableModel extends AbstractEditorTableModel {
 	}
 
 	protected boolean checkDeleteRows(boolean multiple) throws Exception {
-		if (Config.getInstance().getDeletionCheckMode() == DeletionCheckMode.ALWAYS_ACQUIRE_PERMISSION) {
+		if (Config.getInstance().getDeletionCheckMode() == DeletionCheckMode.ACQUIRE_THEN_CHECK
+				|| Config.getInstance().getDeletionCheckMode() == DeletionCheckMode.NO_CHECK) {
 			return super.checkDeleteRows(multiple);
 		} else {
 			return true;

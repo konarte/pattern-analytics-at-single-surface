@@ -1,19 +1,13 @@
 package edu.mgupi.pass.face.gui;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.util.Map;
 
-import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
 
 import edu.mgupi.pass.db.defects.DefectClasses;
@@ -30,10 +24,8 @@ public class DefectClassesRecord extends RecordEditorTemplate {
 	private static final long serialVersionUID = 1L;
 
 	public DefectClassesRecord(Frame owner) {
-		super(owner);
+		super(owner, "defectClassesRecordDialog", "Классы дефектов");
 		super.setFormPanelData(getFormPanel());
-		this.setName("defectClassesRecordDialog");
-		this.setTitle("Классы дефектов");
 	}
 
 	@Override
@@ -117,7 +109,6 @@ public class DefectClassesRecord extends RecordEditorTemplate {
 	}
 
 	private JPanel jPanelPlace = null;
-	private JLabel jLabelID = null;
 	private JLabel jLabelName = null;
 	private JLabel jLabelIDValue = null;
 	private JTextField jTextFieldNameValue = null;
@@ -136,10 +127,6 @@ public class DefectClassesRecord extends RecordEditorTemplate {
 			gridBagConstraints4.gridy = 0;
 			formPanel.setSize(300, 200);
 			formPanel.setLayout(new GridBagLayout());
-
-			formPanel.setBorder(BorderFactory.createTitledBorder(null, "Редактирование класса",
-					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
-					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
 			formPanel.add(getFormPanelData(), gridBagConstraints4);
 		}
 		return formPanel;
@@ -152,58 +139,18 @@ public class DefectClassesRecord extends RecordEditorTemplate {
 	 */
 	private JPanel getFormPanelData() {
 		if (jPanelPlace == null) {
-			GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
-			gridBagConstraints3.fill = GridBagConstraints.HORIZONTAL;
-			gridBagConstraints3.gridy = 1;
-			gridBagConstraints3.weightx = 1.0;
-			gridBagConstraints3.anchor = GridBagConstraints.WEST;
-			gridBagConstraints3.insets = new Insets(0, 0, 0, 5);
-			gridBagConstraints3.gridx = 1;
-			GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
-			gridBagConstraints2.gridx = 1;
-			gridBagConstraints2.anchor = GridBagConstraints.WEST;
-			gridBagConstraints2.insets = new Insets(0, 0, 0, 5);
-			gridBagConstraints2.gridy = 0;
-			jLabelIDValue = new JLabel();
-			jLabelIDValue.setText("0");
-			GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
-			gridBagConstraints1.gridx = 0;
-			gridBagConstraints1.anchor = GridBagConstraints.WEST;
-			gridBagConstraints1.fill = GridBagConstraints.NONE;
-			gridBagConstraints1.insets = new Insets(5, 5, 5, 5);
-			gridBagConstraints1.gridy = 1;
-			jLabelName = new JLabel();
-			jLabelName.setText("Название класса:");
-			GridBagConstraints gridBagConstraints = new GridBagConstraints();
-			gridBagConstraints.gridx = 0;
-			gridBagConstraints.anchor = GridBagConstraints.EAST;
-			gridBagConstraints.fill = GridBagConstraints.NONE;
-			gridBagConstraints.weightx = 0.0D;
-			gridBagConstraints.insets = new Insets(5, 5, 5, 5);
-			gridBagConstraints.gridy = 0;
-			jLabelID = new JLabel();
-			jLabelID.setText("Код:");
+			
 			jPanelPlace = new JPanel();
+			
 			jPanelPlace.setLayout(new GridBagLayout());
-			jPanelPlace.add(jLabelID, gridBagConstraints);
-			jPanelPlace.add(jLabelIDValue, gridBagConstraints2);
-			jPanelPlace.add(jLabelName, gridBagConstraints1);
-			jPanelPlace.add(getJTextFieldNameValue(), gridBagConstraints3);
 
-			jPanelPlace.setMinimumSize(new Dimension(300, 200));
+			jLabelIDValue = new JLabel("0");
+			jTextFieldNameValue = new JTextField();
+
+			super.putComponentPair(jPanelPlace, "Код:", jLabelIDValue);
+			super.putComponentPair(jPanelPlace, "Название класса:", jTextFieldNameValue);
 		}
 		return jPanelPlace;
 	}
 
-	/**
-	 * This method initializes jTextFieldNameValue
-	 * 
-	 * @return javax.swing.JTextField
-	 */
-	private JTextField getJTextFieldNameValue() {
-		if (jTextFieldNameValue == null) {
-			jTextFieldNameValue = new JTextField();
-		}
-		return jTextFieldNameValue;
-	}
 }

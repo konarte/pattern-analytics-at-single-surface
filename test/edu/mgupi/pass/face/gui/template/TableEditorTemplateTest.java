@@ -501,7 +501,7 @@ public class TableEditorTemplateTest {
 	public static class TableEditorTemplateImpl extends TableEditorTemplate {
 
 		public TableEditorTemplateImpl(Frame owner) {
-			super(owner);
+			super(owner, "test", "Тест");
 			inited = false;
 		}
 
@@ -588,7 +588,7 @@ public class TableEditorTemplateTest {
 		private static final long serialVersionUID = 1L;
 
 		public RecordEditorTemplateImpl(Frame owner) {
-			super(owner);
+			super(owner, "tst", "Тест");
 			super.setFormPanelData(getJPanel());
 		}
 

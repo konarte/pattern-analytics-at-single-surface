@@ -221,11 +221,6 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			this.fSChooser.removeAll();
 			this.fSChooser = null;
 		}
-		DefectTypesRecord dialog = (DefectTypesRecord) AppHelper.getInstance().searchWindow(DefectTypesRecord.class);
-		if (dialog != null) {
-			dialog.close();
-
-		}
 
 		this.closeProcessing();
 
@@ -1625,7 +1620,6 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		}
 		return jMenuItemSurfaceClasses;
 	}
-
 
 	@Override
 	public void actionPerformed(ActionEvent e) {

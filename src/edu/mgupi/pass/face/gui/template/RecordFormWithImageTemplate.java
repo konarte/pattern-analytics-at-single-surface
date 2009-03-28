@@ -1,22 +1,18 @@
 package edu.mgupi.pass.face.gui.template;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.SoftBevelBorder;
-import javax.swing.border.TitledBorder;
 
 import edu.mgupi.pass.modules.ModuleHelper;
 import edu.mgupi.pass.util.Const;
@@ -55,9 +51,6 @@ public class RecordFormWithImageTemplate extends JPanel {
 	 */
 	private void initialize() {
 		this.setLayout(new BorderLayout());
-		this.setBorder(BorderFactory.createTitledBorder(null, "Редактирование записи",
-				TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.BOLD, 12),
-				new Color(51, 51, 51)));
 		this.add(getJPanelForm(), BorderLayout.CENTER);
 		this.add(getJPanelImagePlace(), BorderLayout.EAST);
 	}

@@ -192,7 +192,7 @@ public class SettingsDialogTest {
 		Config.getInstance().setLookAndFeel(WindowsLookAndFeel.class.getName());
 		Config.getInstance().setRowsDeleteMode(DeletionMode.CONFIRM);
 		Config.getInstance().setTransactionMode(TransactionMode.COMMIT_EVERY_ROW);
-		Config.getInstance().setDeletionCheckModeMode(DeletionCheckMode.ALWAYS_ACQUIRE_PERMISSION);
+		Config.getInstance().setDeletionCheckModeMode(DeletionCheckMode.ACQUIRE_THEN_CHECK);
 
 		dialog.resetControls();
 
@@ -252,7 +252,7 @@ public class SettingsDialogTest {
 		for (DeletionCheckMode mode : DeletionCheckMode.values()) {
 			JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog, mode.name());
 			assertNotNull(radio);
-			if (mode == DeletionCheckMode.ALWAYS_ACQUIRE_PERMISSION) {
+			if (mode == DeletionCheckMode.ACQUIRE_THEN_CHECK) {
 				assertTrue(radio.isSelected());
 			} else {
 				assertFalse(radio.isSelected());
@@ -283,7 +283,7 @@ public class SettingsDialogTest {
 		Config.getInstance().setLookAndFeel(WindowsLookAndFeel.class.getName());
 		Config.getInstance().setRowsDeleteMode(DeletionMode.CONFIRM);
 		Config.getInstance().setTransactionMode(TransactionMode.COMMIT_EVERY_ROW);
-		Config.getInstance().setDeletionCheckModeMode(DeletionCheckMode.ALWAYS_ACQUIRE_PERMISSION);
+		Config.getInstance().setDeletionCheckModeMode(DeletionCheckMode.ACQUIRE_THEN_CHECK);
 
 		dialog.resetControls();
 
@@ -327,7 +327,7 @@ public class SettingsDialogTest {
 
 		assertEquals(DeletionMode.CONFIRM, Config.getInstance().getRowsDeleteMode());
 		assertEquals(TransactionMode.COMMIT_EVERY_ROW, Config.getInstance().getTransactionMode());
-		assertEquals(DeletionCheckMode.ALWAYS_ACQUIRE_PERMISSION, Config.getInstance().getDeletionCheckMode());
+		assertEquals(DeletionCheckMode.ACQUIRE_THEN_CHECK, Config.getInstance().getDeletionCheckMode());
 
 		assertFalse(resultButton);
 	}

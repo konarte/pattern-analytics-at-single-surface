@@ -30,9 +30,13 @@ public abstract class TableEditorTemplate extends JDialog {
 
 	/**
 	 * @param owner
+	 * @param name 
+	 * @param title 
 	 */
-	public TableEditorTemplate(Frame owner) {
+	public TableEditorTemplate(Frame owner, String name, String title) {
 		super(owner, true);
+		setName(name);
+		setTitle(title);
 		initialize();
 	}
 

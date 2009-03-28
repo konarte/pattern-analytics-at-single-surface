@@ -22,18 +22,7 @@ public class DefectClassesTable extends TableEditorTemplate {
 	private static final long serialVersionUID = 1L;
 
 	public DefectClassesTable(Frame owner) {
-		super(owner);
-		initialize();
-	}
-
-	/**
-	 * This method initializes this
-	 * 
-	 */
-	private void initialize() {
-		this.setName("defectClassesTable");
-		this.setTitle("Классы дефектов");
-
+		super(owner, "defectClassesTable", "Классы дефектов");
 	}
 
 	private AbstractEditorTableModel tableModel = null;

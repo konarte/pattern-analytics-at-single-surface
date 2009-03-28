@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.db.surfaces.PassPersistentManager;
 import edu.mgupi.pass.face.IProgress;
+import edu.mgupi.pass.face.gui.template.RecordEditorTemplate;
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Utils;
 
@@ -74,6 +75,13 @@ public class AppHelper {
 	 */
 	protected static synchronized void reset() {
 		if (instance != null) {
+
+			for (Window window : instance.windowsCollection.values()) {
+				if (window instanceof RecordEditorTemplate) {
+					((RecordEditorTemplate) window).close();
+				}
+			}
+
 			instance.windowsCollection.clear();
 			instance.additionalWindows.clear();
 			instance.components.clear();
@@ -411,7 +419,7 @@ public class AppHelper {
 	 *            any {@link Throwable} instance
 	 */
 	public static void showExceptionDialog(String message, Throwable e) {
-		
+
 		logger.error(message, e);
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -442,7 +450,8 @@ public class AppHelper {
 	}
 
 	public static void showErrorDialog(String message, String title) {
-		JOptionPane.showMessageDialog(null, message, title, JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(null, Utils.splitStingBySlices(message, 100, "\n"), title,
+				JOptionPane.ERROR_MESSAGE);
 	}
 
 	public static void showErrorDialog(String message) {

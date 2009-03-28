@@ -1,10 +1,7 @@
 package edu.mgupi.pass.face.gui;
 
-import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.util.Map;
 
 import javax.swing.JLabel;
@@ -31,7 +28,7 @@ public class SurfaceClassesRecord extends RecordEditorTemplate {
 	//private final static Logger logger = LoggerFactory.getLogger(SurfaceClassesRecord.class);
 
 	public SurfaceClassesRecord(Frame owner) {
-		super(owner);
+		super(owner, "surfaceClassesRecordDialog", "Классы дефектов");
 		super.setFormPanelData(getFormPanel());
 	}
 
@@ -90,10 +87,10 @@ public class SurfaceClassesRecord extends RecordEditorTemplate {
 		data = surface.getSurfaceImage();
 
 		formPanel.setImageRaw(data);
-		
+
 		jLabelIDValue.setText(String.valueOf(surface.getIdSurfaceClass()));
 		jTextFieldNameValue.setText(name);
-		
+
 		jTextFieldNameValue.requestFocusInWindow();
 
 		return true;
@@ -131,7 +128,6 @@ public class SurfaceClassesRecord extends RecordEditorTemplate {
 	}
 
 	private JPanel jPanelPlace = null;
-	private JLabel jLabelID = null;
 	private JLabel jLabelName = null;
 	private JLabel jLabelIDValue = null;
 	private JTextField jTextFieldNameValue = null;
@@ -140,59 +136,16 @@ public class SurfaceClassesRecord extends RecordEditorTemplate {
 		if (jPanelPlace == null) {
 			jPanelPlace = new JPanel();
 
-			GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
-			gridBagConstraints3.fill = GridBagConstraints.HORIZONTAL;
-			gridBagConstraints3.gridy = 1;
-			gridBagConstraints3.weightx = 1.0;
-			gridBagConstraints3.anchor = GridBagConstraints.WEST;
-			gridBagConstraints3.insets = new Insets(0, 0, 0, 5);
-			gridBagConstraints3.gridx = 1;
-			GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
-			gridBagConstraints2.gridx = 1;
-			gridBagConstraints2.anchor = GridBagConstraints.WEST;
-			gridBagConstraints2.insets = new Insets(0, 0, 0, 5);
-			gridBagConstraints2.gridy = 0;
-			jLabelIDValue = new JLabel();
-			jLabelIDValue.setText("0");
-			GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
-			gridBagConstraints1.gridx = 0;
-			gridBagConstraints1.anchor = GridBagConstraints.WEST;
-			gridBagConstraints1.fill = GridBagConstraints.NONE;
-			gridBagConstraints1.insets = new Insets(5, 5, 5, 5);
-			gridBagConstraints1.gridy = 1;
-			jLabelName = new JLabel();
-			jLabelName.setText("Название класса:");
-			GridBagConstraints gridBagConstraints = new GridBagConstraints();
-			gridBagConstraints.gridx = 0;
-			gridBagConstraints.anchor = GridBagConstraints.EAST;
-			gridBagConstraints.fill = GridBagConstraints.NONE;
-			gridBagConstraints.weightx = 0.0D;
-			gridBagConstraints.insets = new Insets(5, 5, 5, 5);
-			gridBagConstraints.gridy = 0;
-			jLabelID = new JLabel();
-			jLabelID.setText("Код:");
-			jPanelPlace = new JPanel();
 			jPanelPlace.setLayout(new GridBagLayout());
-			jPanelPlace.add(jLabelID, gridBagConstraints);
-			jPanelPlace.add(jLabelIDValue, gridBagConstraints2);
-			jPanelPlace.add(jLabelName, gridBagConstraints1);
-			jPanelPlace.add(getJTextFieldNameValue(), gridBagConstraints3);
+			
+			jLabelIDValue = new JLabel("0");
+			jTextFieldNameValue = new JTextField();
 
-			jPanelPlace.setMinimumSize(new Dimension(300, 200));
+			super.putComponentPair(jPanelPlace, "Код:", jLabelIDValue);
+			super.putComponentPair(jPanelPlace, "Название класса:", jTextFieldNameValue);
 		}
 		return jPanelPlace;
 	}
 
-	/**
-	 * This method initializes jTextFieldNameValue
-	 * 
-	 * @return javax.swing.JTextField
-	 */
-	private JTextField getJTextFieldNameValue() {
-		if (jTextFieldNameValue == null) {
-			jTextFieldNameValue = new JTextField();
-		}
-		return jTextFieldNameValue;
-	}
 
 }

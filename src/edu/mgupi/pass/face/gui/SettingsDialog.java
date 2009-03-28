@@ -152,7 +152,7 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 				}
 
 				if (Config.getInstance().setDeletionCheckModeMode(
-						(DeletionCheckMode) getValue(DeletionCheckMode.ALWAYS_ACQUIRE_PERMISSION))) {
+						(DeletionCheckMode) getValue(DeletionCheckMode.ACQUIRE_THEN_CHECK))) {
 					logger.debug("Deletion check mode changed. Save common.");
 					needSaveCommon = true;
 				}
