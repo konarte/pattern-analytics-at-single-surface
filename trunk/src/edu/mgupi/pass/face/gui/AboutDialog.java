@@ -25,9 +25,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.mgupi.pass.face.gui.template.AbstractDialogAdapter;
 import edu.mgupi.pass.face.gui.template.JTableReadOnly;
 import edu.mgupi.pass.util.Config;
@@ -41,7 +38,6 @@ import edu.mgupi.pass.util.Const;
  */
 public class AboutDialog extends JDialog {
 
-	private final static Logger logger = LoggerFactory.getLogger(AboutDialog.class);
 
 	/**
 	 * 
@@ -183,7 +179,6 @@ public class AboutDialog extends JDialog {
 					try {
 						Desktop.getDesktop().browse(new URI(Const.WEB_PROJECT_PAGE));
 					} catch (Exception e1) {
-						logger.debug("Error when opening link", e1);
 						AppHelper.showExceptionDialog("Unexpected eror when opening project link '"
 								+ Const.WEB_PROJECT_PAGE + "'.", e1);
 					}

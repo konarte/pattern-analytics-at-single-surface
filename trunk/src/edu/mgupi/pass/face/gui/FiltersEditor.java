@@ -29,9 +29,9 @@ import edu.mgupi.pass.face.gui.template.AbstractEditorTableModel;
 import edu.mgupi.pass.face.gui.template.JTableReadOnly;
 import edu.mgupi.pass.face.gui.template.ParametersEditorPanel;
 import edu.mgupi.pass.filters.FilterChainsaw;
-import edu.mgupi.pass.filters.FilterChainsawTransaction;
+import edu.mgupi.pass.filters.FilterChainsawTransactional;
 import edu.mgupi.pass.filters.IFilter;
-import edu.mgupi.pass.filters.FilterChainsawTransaction.FilterStore;
+import edu.mgupi.pass.filters.FilterChainsawTransactional.FilterStore;
 
 public class FiltersEditor extends JDialog /* implements ActionListener */{
 	private final static Logger logger = LoggerFactory.getLogger(FiltersEditor.class); //  @jve:decl-index=0:
@@ -111,7 +111,6 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 		try {
 			this.setFilters(title, filters);
 		} catch (Exception e) {
-			logger.error("Error when setting filters", e);
 			AppHelper.showExceptionDialog("Ошибка при установке фильтров.", e);
 			return false;
 		}
@@ -418,14 +417,14 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 			this.parent = parent;
 		}
 
-		private FilterChainsawTransaction transactionalSaw = null;
+		private FilterChainsawTransactional transactionalSaw = null;
 
 		protected void setChainsaw(FilterChainsaw chainsaw) {
-			this.transactionalSaw = new FilterChainsawTransaction(chainsaw);
+			this.transactionalSaw = new FilterChainsawTransactional(chainsaw);
 			super.fireTableDataChanged();
 		}
 
-		protected FilterChainsawTransaction getChainsaw() {
+		protected FilterChainsawTransactional getChainsaw() {
 			if (transactionalSaw == null) {
 				throw new IllegalStateException("Internal error. Chainsaw is diappeared.");
 			}

@@ -19,6 +19,8 @@ import javax.swing.ScrollPaneConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.filters.FilterException;
+import edu.mgupi.pass.filters.IllegalParameterValueException;
 import edu.mgupi.pass.filters.service.ResizeFilter;
 import edu.mgupi.pass.util.Const;
 import edu.mgupi.pass.util.Secundomer;
@@ -40,8 +42,28 @@ public class ImagePanel extends JPanel implements ActionListener {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private boolean square = false;
+	public ImagePanel() {
+		super();
+	}
+
+	private ResizeFilter resizeFilter;
+
+	public ImagePanel(int width, int height) {
+		super();
+		resizeFilter = new ResizeFilter();
+
+		try {
+			resizeFilter.getWIDTH().setValue(width);
+			resizeFilter.getHEIGHT().setValue(height);
+			resizeFilter.getINTERPOLATION_METHOD().setValue("bicubic");
+		} catch (IllegalParameterValueException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	private BufferedImage myImage;
+
+	public final static String RPOPERTY_NAME = "image";
 
 	/**
 	 * Setting image to display.
@@ -49,26 +71,28 @@ public class ImagePanel extends JPanel implements ActionListener {
 	 * @param image
 	 *            default image for display. If null -- no image shown on this
 	 *            panel.
-	 * @param square
-	 *            true if panel MUST be a square size
 	 */
-	public void setImage(BufferedImage image, boolean square) {
-		this.myImage = image;
-		this.square = square;
+	public void setImage(BufferedImage image) {
+
+		BufferedImage currentImage = this.myImage;
+
+		if (resizeFilter != null && image != null) {
+			try {
+				this.myImage = resizeFilter.convert(image);
+			} catch (FilterException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			this.myImage = image;
+		}
+
+		super.firePropertyChange(RPOPERTY_NAME, currentImage, this.myImage);
+
 		this.refreshFit();
 	}
 
-	/**
-	 * Setting image to display.
-	 * 
-	 * @param image
-	 *            default image for display. If null -- no image shown on this
-	 *            panel.
-	 * 
-	 * @see #setImage(BufferedImage, boolean)
-	 */
-	public void setImage(BufferedImage image) {
-		this.setImage(image, false);
+	public BufferedImage getImage() {
+		return this.myImage;
 	}
 
 	/**
@@ -141,6 +165,7 @@ public class ImagePanel extends JPanel implements ActionListener {
 			Container parentContainer = this.getParent();
 			if (parentContainer == null || !((parentContainer = parentContainer.getParent()) instanceof JScrollPane)) {
 				// otherwise, we don't care
+				this.repaint();
 				return;
 			}
 
@@ -154,13 +179,13 @@ public class ImagePanel extends JPanel implements ActionListener {
 			int width = parent.getWidth();
 			int height = parent.getHeight();
 
-			if (this.square) {
-				if (width > height) {
-					height = width;
-				} else if (width < height) {
-					width = height;
-				}
-			}
+//			if (this.square) {
+//				if (width > height) {
+//					height = width;
+//				} else if (width < height) {
+//					width = height;
+//				}
+//			}
 
 			this.setSize(width, height);
 			this.setLocation(0, 0);
@@ -175,13 +200,13 @@ public class ImagePanel extends JPanel implements ActionListener {
 			width = Const.MAIN_IMAGE_WIDTH > width ? width : Const.MAIN_IMAGE_WIDTH;
 			height = Const.MAIN_IMAGE_HEIGHT > height ? height : Const.MAIN_IMAGE_HEIGHT;
 
-			if (this.square) {
-				if (width > height) {
-					height = width;
-				} else if (width < height) {
-					width = height;
-				}
-			}
+//			if (this.square) {
+//				if (width > height) {
+//					height = width;
+//				} else if (width < height) {
+//					width = height;
+//				}
+//			}
 
 			this.setPreferredSize(new Dimension(width, height));
 			this.setBounds(0, 0, width, height);

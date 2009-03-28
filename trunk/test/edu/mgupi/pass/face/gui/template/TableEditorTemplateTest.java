@@ -19,7 +19,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -30,7 +29,6 @@ import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -591,14 +589,14 @@ public class TableEditorTemplateTest {
 
 		public RecordEditorTemplateImpl(Frame owner) {
 			super(owner);
+			super.setFormPanelData(getJPanel());
 		}
 
 		private JPanel rootPanel = null;
 		private JTextField field = null;
 		private JLabel text = null;
 
-		@Override
-		protected JPanel getPanelImpl() {
+		protected JPanel getJPanel() {
 			if (rootPanel == null) {
 
 				rootPanel = new JPanel();
@@ -619,24 +617,22 @@ public class TableEditorTemplateTest {
 			return rootPanel;
 		}
 
-		protected Map<JTextComponent, JLabel> getRequiredFields() {
-			Map<JTextComponent, JLabel> map = new HashMap<JTextComponent, JLabel>();
+		protected void setRequiredFields(Map<JTextComponent, JLabel> map) {
 			map.put(field, text);
-			return map;
 		}
 
 		@Override
-		protected void deleteObjectsImpl(Object objects[]) throws Exception {
+		protected void deleteObjects(Object objects[]) throws Exception {
 
 			assertNotNull(objects);
 			assertFalse(objects.length == 0);
 			System.out.println("Received for delete: " + objects.length);
 
-			super.deleteObjectsImpl(objects);
+			super.deleteObjects(objects);
 		}
 
 		@Override
-		protected boolean isDeleteAllowed(Object objects[]) throws Exception {
+		public boolean isDeleteAllowed(Object objects[]) throws Exception {
 
 			assertNotNull(objects);
 			assertFalse(objects.length == 0);
@@ -655,7 +651,7 @@ public class TableEditorTemplateTest {
 
 				DefectTypes foundType = DefectTypesFactory.loadDefectTypesByCriteria(criteria);
 				if (foundType != null) {
-					JOptionPane.showMessageDialog(null, "Класс дефекта " + defectObject.getName()
+					AppHelper.showErrorDialog("Класс дефекта " + defectObject.getName()
 							+ " удалить нельзя. К нему привязан дефект с типом " + foundType.getName() + ".");
 					return false;
 				}
@@ -685,7 +681,7 @@ public class TableEditorTemplateTest {
 
 			DefectClasses foundClass = DefectClassesFactory.loadDefectClassesByCriteria(criteria);
 			if (foundClass != null) {
-				JOptionPane.showMessageDialog(null, "Класс дефекта с названием " + name + " уже существует.");
+				AppHelper.showErrorDialog("Класс дефекта с названием " + name + " уже существует.");
 				return false;
 			}
 
@@ -695,21 +691,23 @@ public class TableEditorTemplateTest {
 		private String lastName = null;
 
 		@Override
-		protected void loadObject(Object object) throws Exception {
+		protected boolean loadFormFromObject(Object object) throws Exception {
 			assertNotNull(object);
 			assertNotNull(field);
-			
+
 			DefectClasses defectObject = ((DefectClasses) object);
 			System.out.println("Opening " + defectObject.getIdDefectClass() + " (" + defectObject.getName() + ")");
 			field.setText(((DefectClasses) object).getName());
 			lastName = field.getText();
+
+			return true;
 		}
 
 		@Override
-		protected void saveObjectImpl(Object object) throws Exception {
+		protected void saveFormToObjectImpl(Object object) throws Exception {
 			assertNotNull(object);
 			assertNotNull(field);
-			
+
 			DefectClasses defectObject = ((DefectClasses) object);
 			defectObject.setName(field.getText());
 			System.out.println("Saving " + defectObject.getIdDefectClass() + " (" + defectObject.getName() + ")");
@@ -718,9 +716,9 @@ public class TableEditorTemplateTest {
 
 		@Override
 		protected void restoreObjectImpl(Object object) throws Exception {
-			
+
 			assertNotNull(object);
-			
+
 			DefectClasses defectObject = ((DefectClasses) object);
 			defectObject.setName(lastName);
 		}

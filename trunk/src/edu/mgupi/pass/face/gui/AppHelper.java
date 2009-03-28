@@ -200,7 +200,6 @@ public class AppHelper {
 		try {
 			return this.getWindowImpl(windowType, false);
 		} catch (Exception e) {
-			logger.error("Error when creating window instance", e);
 			AppHelper.showExceptionDialog("Unexpected error when creating instance of '" + windowType
 					+ "'. Please, consult with developers.", e);
 			return null;
@@ -272,10 +271,13 @@ public class AppHelper {
 			}
 			if (additionalWindow) {
 				// Register in special collection
-				logger.debug("Return force new instance of " + windowType + " :: " + window);
+				logger.trace("Return force new instance of {} :: {}.", windowType, window);
 				additionalWindows.add(window);
 			} else {
 				// Register in cache
+
+				logger.trace("Cache instance of {} :: {}.", windowType, window);
+
 				windowsCollection.put(windowType, window);
 				Config.getInstance().loadWindowPosition(window);
 			}
@@ -373,7 +375,9 @@ public class AppHelper {
 
 	public void setDatabaseSessionType(SessionType sessionType) throws PersistentException {
 		if (PassPersistentManager.instance().getSessionType() != sessionType) {
+
 			logger.debug("Switching persistance type. Disposing persistance manager first...");
+
 			PassPersistentManager.instance().disposePersistentManager();
 			PassPersistentManager.setSessionType(sessionType);
 		}
@@ -407,6 +411,8 @@ public class AppHelper {
 	 *            any {@link Throwable} instance
 	 */
 	public static void showExceptionDialog(String message, Throwable e) {
+		
+		logger.error(message, e);
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		e.printStackTrace(new PrintStream(out));
@@ -425,7 +431,7 @@ public class AppHelper {
 		pane.setPreferredSize(new Dimension(600, 300));
 		panel.add(pane, BorderLayout.CENTER);
 
-		JOptionPane.showMessageDialog(null, panel, "Error", JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(null, panel, "Ошибка", JOptionPane.ERROR_MESSAGE);
 
 		try {
 			out.close();
@@ -435,9 +441,16 @@ public class AppHelper {
 		}
 	}
 
+	public static void showErrorDialog(String message, String title) {
+		JOptionPane.showMessageDialog(null, message, title, JOptionPane.ERROR_MESSAGE);
+	}
+
+	public static void showErrorDialog(String message) {
+		showErrorDialog(message, "Ошибка");
+	}
+
 	public static void showFieldRequiredDialog(String fieldName) {
-		JOptionPane.showMessageDialog(null, "Поле '" + fieldName + "' обязательно для заполнения.", "Ожидание ввода",
-				JOptionPane.ERROR_MESSAGE);
+		showErrorDialog("Поле '" + fieldName + "' обязательно для заполнения.", "Ожидание ввода");
 	}
 
 }

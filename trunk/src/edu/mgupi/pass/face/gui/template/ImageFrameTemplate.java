@@ -13,10 +13,11 @@ import java.awt.image.BufferedImage;
 import javax.swing.AbstractAction;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.WindowConstants;
+
+import edu.mgupi.pass.face.gui.AppHelper;
 
 /**
  * Special Frame for showing images (hisogram and module images).
@@ -201,8 +202,7 @@ public class ImageFrameTemplate extends JDialog {
 			if (jPanelImage != null) {
 				jPanelImage.registerFitButton(jCheckBoxScaleBox);
 			} else {
-				JOptionPane.showMessageDialog(null, "Internal error. Expected panelImage layout not initialized yet.",
-						"Invalid layout programming", JOptionPane.ERROR_MESSAGE);
+				AppHelper.showErrorDialog("Internal error. Expected panelImage layout not initialized yet.");
 			}
 			jCheckBoxScaleBox.setText("Масштаб под размеры окна");
 			jCheckBoxScaleBox.setName("scaleButton");

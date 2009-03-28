@@ -6,8 +6,12 @@ import java.util.Map;
 
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ParamHelper {
+
+	private final static Logger logger = LoggerFactory.getLogger(ParamHelper.class);
 
 	public static Param getParameter(String name, Collection<Param> params) throws NoSuchParamException {
 		return searchParameter(name, params, true);
@@ -96,8 +100,9 @@ public class ParamHelper {
 
 		for (Param param : paramList) {
 			String value = map.get(param.getName());
-			System.out.println("Attempt to set value '" + (value == null ? "<null>" : value) + "' for parameter '"
-					+ param.getName());
+
+			logger.trace("Attempt to set value '{}' for parameter '{}'.", (value == null ? "<null>" : value), param);
+			
 			param.setStringValue(value);
 		}
 

@@ -8,7 +8,6 @@ import java.nio.channels.FileLock;
 import java.util.Locale;
 
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -95,14 +94,14 @@ public class Application {
 					e.printStackTrace();
 				}
 				new File(LOCK_FILE).delete();
-				
+
 				try {
 					PassPersistentManager.instance().disposePersistentManager();
 				} catch (PersistentException e) {
 					e.printStackTrace();
 				}
-				
-				logger.debug("Shutdown " + Const.PROGRAM_NAME_FULL);
+
+				logger.info("Shutdown " + Const.PROGRAM_NAME_FULL);
 			}
 		}));
 
@@ -131,14 +130,15 @@ public class Application {
 			try {
 				this.changeLookAndFeel(newLookAndFeel);
 			} catch (Exception e) {
-				AppHelper.showExceptionDialog("Unexpected error when applying LookAndFeel. Try to run "
-						+ "application with '-nolaf' key.", e);
+				AppHelper.showExceptionDialog("Ошибка при попытке применить стиль " + newLookAndFeel + ".", e);
 			}
 
 			// We want to make good impression, isn't it?
 			if (lock == null) {
-				JOptionPane.showMessageDialog(null, "Another instance of PASS already runned. Please, "
-						+ "close other application.", "Unable to start", JOptionPane.ERROR_MESSAGE);
+				logger.error("Attempt to open second instance.");
+				AppHelper.showErrorDialog(
+						"Экземпляр приложения уже запущен. Пожалуйста, закройте предыдущий экземпляр.",
+						"Ошибка при запуске");
 				System.exit(0);
 
 			}
@@ -146,7 +146,7 @@ public class Application {
 			// Hibernating...
 			splash.setSplashText("Подключение и инициализация БД...");
 
-			logger.debug("Initializing Hibernate...");
+			logger.info("Initializing Hibernate...");
 			PassPersistentManager.instance();
 
 			splash.setSplashText("Загрузка приложения...");
@@ -173,7 +173,7 @@ public class Application {
 			applicationRun.stop();
 		}
 
-		logger.debug("Application ready...");
+		logger.info("Application ready...");
 
 	}
 
@@ -184,7 +184,7 @@ public class Application {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		logger.debug("Starting " + Const.PROGRAM_NAME_FULL);
+		logger.info("Starting " + Const.PROGRAM_NAME_FULL);
 		new Application().run();
 	}
 }

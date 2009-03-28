@@ -155,7 +155,7 @@ public class ModuleHelper {
 	public static byte[] convertImageToRaw(BufferedImage image) throws IOException {
 		ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
 		try {
-			ImageIO.write(image, "PNG", byteStream);
+			ImageIO.write(image, "JPG", byteStream);
 			return byteStream.toByteArray();
 		} finally {
 			byteStream.close();
@@ -179,7 +179,7 @@ public class ModuleHelper {
 		}
 	}
 
-	private static BufferedImage covertRawToImage(byte[] data) throws IOException {
+	public static BufferedImage covertRawToImage(byte[] data) throws IOException {
 		return ImageIO.read(new ByteArrayInputStream(data));
 	}
 

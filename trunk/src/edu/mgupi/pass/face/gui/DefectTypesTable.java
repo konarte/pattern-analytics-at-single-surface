@@ -13,7 +13,6 @@ import edu.mgupi.pass.db.defects.DefectTypesFactory;
 import edu.mgupi.pass.face.gui.template.AbstractEditorTableModel;
 import edu.mgupi.pass.face.gui.template.CommonEditorTableModel;
 import edu.mgupi.pass.face.gui.template.TableEditorTemplate;
-import edu.mgupi.pass.face.gui.template.TableEditorTemplateTest.RecordEditorTemplateImpl;
 
 public class DefectTypesTable extends TableEditorTemplate {
 
@@ -43,7 +42,7 @@ public class DefectTypesTable extends TableEditorTemplate {
 	@Override
 	protected AbstractEditorTableModel getTableModelImpl(JTable owner) {
 		if (tableModel == null) {
-			tableModel = new CommonEditorTableModel(owner, RecordEditorTemplateImpl.class) {
+			tableModel = new CommonEditorTableModel(owner, DefectTypesRecord.class) {
 				private static final long serialVersionUID = 1L;
 
 				@Override
@@ -69,7 +68,7 @@ public class DefectTypesTable extends TableEditorTemplate {
 					DefectTypes defect = (DefectTypes) data.get(rowIndex);
 					switch (columnIndex) {
 					case 0:
-						return String.valueOf(defect.getIdDefectType());
+						return defect.getIdDefectType();
 					case 1:
 						return defect.getDefectClass().getName();
 					case 2:
@@ -79,7 +78,7 @@ public class DefectTypesTable extends TableEditorTemplate {
 					case 4:
 						return defect.getDefectImage() == null ? "Нет" : "Да";
 					default:
-						return String.valueOf(columnIndex);
+						return columnIndex;
 					}
 				}
 			};

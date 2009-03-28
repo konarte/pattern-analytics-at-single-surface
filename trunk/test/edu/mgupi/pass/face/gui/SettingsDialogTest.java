@@ -24,6 +24,7 @@ import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Utils;
 import edu.mgupi.pass.util.WaitCondition;
 import edu.mgupi.pass.util.WorkSet;
+import edu.mgupi.pass.util.Config.DeletionCheckMode;
 import edu.mgupi.pass.util.Config.DeletionMode;
 import edu.mgupi.pass.util.Config.SourceMode;
 import edu.mgupi.pass.util.Config.TransactionMode;
@@ -188,9 +189,10 @@ public class SettingsDialogTest {
 
 	@Test
 	public void testCommonSettings() throws Exception {
+		Config.getInstance().setLookAndFeel(WindowsLookAndFeel.class.getName());
 		Config.getInstance().setRowsDeleteMode(DeletionMode.CONFIRM);
 		Config.getInstance().setTransactionMode(TransactionMode.COMMIT_EVERY_ROW);
-		AppHelper.getInstance().updateUI(WindowsLookAndFeel.class.getName());
+		Config.getInstance().setDeletionCheckModeMode(DeletionCheckMode.ALWAYS_ACQUIRE_PERMISSION);
 
 		dialog.resetControls();
 
@@ -247,21 +249,42 @@ public class SettingsDialogTest {
 			radio.setSelected(true);
 		}
 
+		for (DeletionCheckMode mode : DeletionCheckMode.values()) {
+			JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog, mode.name());
+			assertNotNull(radio);
+			if (mode == DeletionCheckMode.ALWAYS_ACQUIRE_PERMISSION) {
+				assertTrue(radio.isSelected());
+			} else {
+				assertFalse(radio.isSelected());
+			}
+		}
+		{
+			JRadioButton radio = (JRadioButton) Utils
+					.getChildNamed(dialog, DeletionCheckMode.CHECK_THEN_ACQUIRE.name());
+			assertNotNull(radio);
+			radio.setSelected(true);
+		}
+
 		combo.setSelectedItem(new MotifLookAndFeel().getName());
 
 		SwingTestHelper.clickCloseDialogButton(dialog, "OK");
 
+		assertTrue(MotifLookAndFeel.class == UIManager.getLookAndFeel().getClass());
+
 		assertEquals(DeletionMode.NO_CONFIRM, Config.getInstance().getRowsDeleteMode());
 		assertEquals(TransactionMode.COMMIT_BULK, Config.getInstance().getTransactionMode());
-		assertTrue(MotifLookAndFeel.class == UIManager.getLookAndFeel().getClass());
+		assertEquals(DeletionCheckMode.CHECK_THEN_ACQUIRE, Config.getInstance().getDeletionCheckMode());
+
 		assertFalse(resultButton);
 	}
 
 	@Test
 	public void testCommonSettingsCancel() throws Exception {
+		Config.getInstance().setLookAndFeel(WindowsLookAndFeel.class.getName());
 		Config.getInstance().setRowsDeleteMode(DeletionMode.CONFIRM);
 		Config.getInstance().setTransactionMode(TransactionMode.COMMIT_EVERY_ROW);
-		AppHelper.getInstance().updateUI(WindowsLookAndFeel.class.getName());
+		Config.getInstance().setDeletionCheckModeMode(DeletionCheckMode.ALWAYS_ACQUIRE_PERMISSION);
+
 		dialog.resetControls();
 
 		JTabbedPane tabbed = (JTabbedPane) Utils.getChildNamed(dialog, "settingsPane");
@@ -292,13 +315,20 @@ public class SettingsDialogTest {
 		assertNotNull(radio);
 		radio.setSelected(true);
 
+		radio = (JRadioButton) Utils.getChildNamed(dialog, DeletionCheckMode.CHECK_THEN_ACQUIRE.name());
+		assertNotNull(radio);
+		radio.setSelected(true);
+
 		combo.setSelectedItem(new MotifLookAndFeel().getName());
 
 		SwingTestHelper.clickCloseDialogButton(dialog, "cancel");
 
+		assertTrue(WindowsLookAndFeel.class == UIManager.getLookAndFeel().getClass());
+
 		assertEquals(DeletionMode.CONFIRM, Config.getInstance().getRowsDeleteMode());
 		assertEquals(TransactionMode.COMMIT_EVERY_ROW, Config.getInstance().getTransactionMode());
-		assertTrue(WindowsLookAndFeel.class == UIManager.getLookAndFeel().getClass());
+		assertEquals(DeletionCheckMode.ALWAYS_ACQUIRE_PERMISSION, Config.getInstance().getDeletionCheckMode());
+
 		assertFalse(resultButton);
 	}
 

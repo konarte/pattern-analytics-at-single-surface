@@ -8,20 +8,20 @@ import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 
-import edu.mgupi.pass.db.defects.DefectClasses;
-import edu.mgupi.pass.db.defects.DefectClassesFactory;
+import edu.mgupi.pass.db.surfaces.SurfaceClasses;
+import edu.mgupi.pass.db.surfaces.SurfaceClassesFactory;
 import edu.mgupi.pass.face.gui.template.AbstractEditorTableModel;
 import edu.mgupi.pass.face.gui.template.CommonEditorTableModel;
 import edu.mgupi.pass.face.gui.template.TableEditorTemplate;
 
-public class DefectClassesTable extends TableEditorTemplate {
+public class SurfaceClassesTable extends TableEditorTemplate {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public DefectClassesTable(Frame owner) {
+	public SurfaceClassesTable(Frame owner) {
 		super(owner);
 		initialize();
 	}
@@ -31,8 +31,8 @@ public class DefectClassesTable extends TableEditorTemplate {
 	 * 
 	 */
 	private void initialize() {
-		this.setName("defectClassesTable");
-		this.setTitle("Классы дефектов");
+		this.setName("surfaceClassesTable");
+		this.setTitle("Список классов поверхностей");
 
 	}
 
@@ -41,31 +41,40 @@ public class DefectClassesTable extends TableEditorTemplate {
 	@Override
 	protected AbstractEditorTableModel getTableModelImpl(JTable owner) {
 		if (tableModel == null) {
-			tableModel = new CommonEditorTableModel(owner, DefectClassesRecord.class) {
+			tableModel = new CommonEditorTableModel(owner, SurfaceClassesRecord.class) {
 				private static final long serialVersionUID = 1L;
 
 				@Override
 				protected Object createInstanceImpl() {
-					return DefectClassesFactory.createDefectClasses();
+					return SurfaceClassesFactory.createSurfaceClasses();
 				}
 
 				@Override
 				protected String[] getColumns() {
-					return new String[] { "ID", "Класс дефекта" };
+					return new String[] { "ID", "Класс поверхности", "Картинка" };
 				}
 
 				@SuppressWarnings("unchecked")
 				@Override
 				protected List getDataImpl() throws Exception {
-					List<DefectClasses> classes = new ArrayList<DefectClasses>();
-					classes.addAll(Arrays.asList(DefectClassesFactory.listDefectClassesByQuery(null, null)));
+					List<SurfaceClasses> classes = new ArrayList<SurfaceClasses>();
+					classes.addAll(Arrays.asList(SurfaceClassesFactory.listSurfaceClassesByQuery(null, null)));
 					return classes;
 				}
 
 				@Override
 				public Object getValueAt(int rowIndex, int columnIndex) {
-					DefectClasses defect = (DefectClasses) data.get(rowIndex);
-					return columnIndex == 0 ? defect.getIdDefectClass() : defect.getName();
+					SurfaceClasses surface = (SurfaceClasses) data.get(rowIndex);
+					switch (columnIndex) {
+					case 0:
+						return surface.getIdSurfaceClass();
+					case 1:
+						return surface.getName();
+					case 2:
+						return surface.getSurfaceImage() == null ? "Нет" : "Да";
+					default:
+						return columnIndex;
+					}
 				}
 			};
 		}
@@ -76,7 +85,8 @@ public class DefectClassesTable extends TableEditorTemplate {
 	protected void tablePostInit(JTable owner) {
 		AbstractEditorTableModel model = (AbstractEditorTableModel) owner.getModel();
 		model.setHorizontalAlignMode(0, JLabel.CENTER);
-		model.setColumnWidth(1, 200);
+		model.setHorizontalAlignMode(2, JLabel.CENTER);
+		model.setColumnWidth(1, 200, 1);
 	}
 
-} //  @jve:decl-index=0:visual-constraint="10,10"
+}

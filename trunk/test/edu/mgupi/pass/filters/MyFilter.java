@@ -1,4 +1,4 @@
-package edu.mgupi.pass.util;
+package edu.mgupi.pass.filters;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.Param;
-import edu.mgupi.pass.filters.ParamTest;
+import edu.mgupi.pass.util.IInitiable;
 
 public class MyFilter implements IFilter, IInitiable {
 
@@ -40,13 +40,13 @@ public class MyFilter implements IFilter, IInitiable {
 			throw new IllegalStateException("Internal error. Called convert without init.");
 		}
 
-		if (!done) {
+		if (done) {
 			throw new IllegalStateException("Internal error. Called convert after done.");
 		}
 
 		logger.debug(this + " CONVERT");
 
-		ParamTest.compareInClonedCollections(model, parameters, true);
+		ParamTest.compareInCollections(model, parameters, true);
 
 		return source;
 	}

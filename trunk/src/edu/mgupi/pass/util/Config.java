@@ -95,8 +95,9 @@ public class Config {
 	private final static String PARAM_CURRENT_BACKGROUND = "imageBackground";
 
 	private final static String PARAM_LOOK_AND_FEEL = "lookAndFeel";
-	private final static String PARAM_FILTER_DELETE_MODE = "filterDeleteMode";
+	private final static String PARAM_ROWS_DELETE_MODE = "rowsDeleteMode";
 	private final static String PARAM_TRANSACTION_MODE = "transactionMode";
+	private final static String PARAM_DATA_DELETION_CHECK = "dataDeletionCheck";
 
 	public static enum SourceMode {
 		CENTER("Разместить в центре"), LEFT_TOP("Разместить слева сверху"), SCALE("Отмасштабировать");
@@ -112,6 +113,13 @@ public class Config {
 		}
 	};
 
+	/**
+	 * Enumeration for deletion modes. You can easily add new options --
+	 * settings will be tuned up automatically.
+	 * 
+	 * @author raidan
+	 * 
+	 */
 	public static enum DeletionMode {
 		CONFIRM("Требовать подтверждение удаления каждой записи"), //
 		CONFIRM_MULTPLES("Требовать подтверждение только при удалении нескольких строк"), //
@@ -131,6 +139,32 @@ public class Config {
 		}
 	}
 
+	/**
+	 * 
+	 * @author raidan
+	 * 
+	 */
+	public static enum DeletionCheckMode {
+		ALWAYS_ACQUIRE_PERMISSION("Всегда спрашивать разрешение на удаление."), //
+		CHECK_THEN_ACQUIRE("Сначала проверить возможность удаления, потом спросить.");
+
+		private String title;
+
+		private DeletionCheckMode(String title) {
+			this.title = title;
+		}
+
+		public String toString() {
+			return title;
+		}
+	}
+
+	/**
+	 * Enumeration for transaction(session) modes.
+	 * 
+	 * @author raidan
+	 * 
+	 */
 	public static enum TransactionMode {
 		COMMIT_EVERY_ROW("'commit' на каждую вставку/удаление"), COMMIT_BULK("'commit' на весь табличный интерфейс");
 
@@ -167,7 +201,7 @@ public class Config {
 	public DeletionMode getRowsDeleteMode() {
 		final DeletionMode default_ = DeletionMode.CONFIRM;
 		try {
-			return DeletionMode.valueOf(this.commonConfigInstance.getString(PARAM_FILTER_DELETE_MODE, default_.name()));
+			return DeletionMode.valueOf(this.commonConfigInstance.getString(PARAM_ROWS_DELETE_MODE, default_.name()));
 		} catch (IllegalArgumentException iae) {
 			return default_;
 		}
@@ -182,6 +216,16 @@ public class Config {
 			AppHelper.getInstance().setDatabaseSessionType(
 					mode == TransactionMode.COMMIT_BULK ? SessionType.APP_BASE : SessionType.THREAD_BASE);
 			return mode;
+		} catch (IllegalArgumentException iae) {
+			return default_;
+		}
+	}
+
+	public DeletionCheckMode getDeletionCheckMode() {
+		final DeletionCheckMode default_ = DeletionCheckMode.ALWAYS_ACQUIRE_PERMISSION;
+		try {
+			return DeletionCheckMode.valueOf(this.commonConfigInstance.getString(PARAM_DATA_DELETION_CHECK, default_
+					.name()));
 		} catch (IllegalArgumentException iae) {
 			return default_;
 		}
@@ -208,7 +252,7 @@ public class Config {
 	}
 
 	public boolean setRowsDeleteMode(DeletionMode value) {
-		return this.setCommonParameterImpl(PARAM_FILTER_DELETE_MODE, this.getRowsDeleteMode().name(), value.name());
+		return this.setCommonParameterImpl(PARAM_ROWS_DELETE_MODE, this.getRowsDeleteMode().name(), value.name());
 	}
 
 	public boolean setTransactionMode(TransactionMode value) throws PersistentException {
@@ -220,6 +264,12 @@ public class Config {
 			return false;
 		}
 	}
+
+	public boolean setDeletionCheckModeMode(DeletionCheckMode value) {
+		return this.setCommonParameterImpl(PARAM_DATA_DELETION_CHECK, this.getDeletionCheckMode().name(), value.name());
+	}
+
+	//
 
 	private boolean setParameterImpl(Configuration config, String paramName, Object oldValue, Object newValue) {
 		//		if (readOnly) {

@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Arrays;
 
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
@@ -136,19 +137,19 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		}
 
 		if (command.equals("add")) {
-			logger.debug("Execution 'addRow' command.");
+			logger.trace("Execution 'addRow' command.");
 			this.addRow();
 		} else if (command.equals("delete")) {
-			logger.debug("Execution 'deleteRow' command.");
+			logger.trace("Execution 'deleteRow' command.");
 			this.deleteRow();
 		} else if (command.equals("up")) {
-			logger.debug("Execution 'upRow' command.");
+			logger.trace("Execution 'upRow' command.");
 			this.upRow();
 		} else if (command.equals("down")) {
-			logger.debug("Execution 'downRow' command.");
+			logger.trace("Execution 'downRow' command.");
 			this.downRow();
 		} else if (command.equals("edit")) {
-			logger.debug("Execution 'editRow' command.");
+			logger.trace("Execution 'editRow' command.");
 			this.editRow();
 		}
 	}
@@ -164,12 +165,13 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 			lastRowSelected = rowIdx;
 		}
 
-		logger.debug("Selecting row " + rowIdx + " of " + e);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Selecting row {} for {}.", rowIdx, e);
+		}
 
 		try {
 			this.rowSelectionImpl(rowIdx);
 		} catch (Exception e1) {
-			logger.error("Error when selecting row", e);
 			AppHelper.showExceptionDialog("Ошибка при смене строки.", e1);
 			return;
 		}
@@ -195,19 +197,18 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 	public void addRow() {
 		int rowIdx = this.owner.getRowCount();
 
-		logger.debug("Adding row " + rowIdx);
+		logger.trace("Adding row {}. ", rowIdx);
 
 		try {
 			if (this.addRowImpl(rowIdx)) {
 
-				logger.debug("OK, success added");
+				logger.trace("OK, successfully added");
 
 				super.fireTableRowsInserted(rowIdx, rowIdx);
 
 				this.owner.setRowSelectionInterval(rowIdx, rowIdx);
 			}
 		} catch (Exception e) {
-			logger.error("Error when adding row", e);
 			AppHelper.showExceptionDialog("Ошибка при добавлении новой строки.", e);
 			return;
 		}
@@ -217,7 +218,7 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 
 		int rowIdx = this.owner.getSelectedRow();
 
-		logger.debug("Removing row " + rowIdx);
+		logger.trace("Removing row {}.", rowIdx);
 
 		if (rowIdx < 0) {
 			return;
@@ -228,7 +229,7 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 
 				if (this.deleteRowsImpl(selectedRows)) {
 
-					logger.debug("OK, success delete");
+					logger.trace("OK, successfully delete");
 
 					super.fireTableRowsDeleted(selectedRows[0], selectedRows[selectedRows.length - 1]);
 
@@ -247,7 +248,6 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 
 			}
 		} catch (Exception e) {
-			logger.error("Error when removing row", e);
 			AppHelper.showExceptionDialog("Ошибка при удалении строки.", e);
 			return;
 		}
@@ -277,41 +277,46 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		}
 		int rowIdx = this.owner.getSelectedRow();
 
-		logger.debug("Editing row " + rowIdx);
+		logger.trace("Editing row {}.", rowIdx);
 
 		try {
 			if (this.editRowImpl(rowIdx)) {
 
-				logger.debug("OK, success edit");
+				logger.trace("OK, successfully edit");
 
 				super.fireTableRowsUpdated(rowIdx, rowIdx);
 			}
 		} catch (Exception e) {
-			logger.error("Error when editing row", e);
 			AppHelper.showExceptionDialog("Ошибка при редактировании новой строки.", e);
 			return;
 		}
 	}
 
 	public void upRow() {
-		int rowIdx = this.owner.getSelectedRow();
+		int[] selectedRows = this.owner.getSelectedRows();
 
-		if (rowIdx < 0) {
+		if (selectedRows == null || selectedRows.length == 0) {
+			logger.trace("Unable to move row up. selected rows are empty.");
 			return;
 		}
 
-		logger.debug("Moving row " + rowIdx + " up");
+		int len = selectedRows.length;
+		int first = selectedRows[0];
+		int last = selectedRows[len - 1];
 
-		int[] selectedRows = this.owner.getSelectedRows();
+		if (first <= 0) {
+			logger.trace("Unable to move row up. First row is {}.", first);
+			return;
+		}
+
+		if (logger.isTraceEnabled()) {
+			logger.trace("Moving rows {} up.", Arrays.toString(selectedRows));
+		}
 
 		try {
 			if (this.moveUpImpl(selectedRows)) {
 
-				int len = selectedRows.length;
-				int first = selectedRows[0];
-				int last = selectedRows[len - 1];
-
-				logger.debug("OK, success up");
+				logger.trace("OK, successfully moved up.");
 
 				super.fireTableRowsUpdated(first - 1, last);
 
@@ -325,30 +330,35 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 				this.owner.setRowSelectionInterval(first - 1, last - 1);
 			}
 		} catch (Exception e) {
-			logger.error("Error when upping row", e);
 			AppHelper.showExceptionDialog("Ошибка при перемещении строки.", e);
 			return;
 		}
 	}
 
 	public void downRow() {
-		int rowIdx = this.owner.getSelectedRow();
+		int[] selectedRows = this.owner.getSelectedRows();
 
-		if (rowIdx < 0) {
+		if (selectedRows == null || selectedRows.length == 0) {
+			logger.trace("Unable to move row down. selected rows are empty.");
 			return;
 		}
 
-		logger.debug("Moving row " + rowIdx + " down");
+		int len = selectedRows.length;
+		int first = selectedRows[0];
+		int last = selectedRows[len - 1];
 
-		int[] selectedRows = this.owner.getSelectedRows();
+		if (last <= 0) {
+			logger.trace("Unable to move row down. Last row is {} of {}.", last, len);
+			return;
+		}
+
+		if (logger.isTraceEnabled()) {
+			logger.trace("Moving rows {} down.", Arrays.toString(selectedRows));
+		}
 		try {
 			if (this.moveDownImpl(selectedRows)) {
 
-				int len = selectedRows.length;
-				int first = selectedRows[0];
-				int last = selectedRows[len - 1];
-
-				logger.debug("OK, success down");
+				logger.trace("OK, success down");
 
 				super.fireTableRowsUpdated(first, last + 1);
 
@@ -362,7 +372,6 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 				this.owner.setRowSelectionInterval(first + 1, last + 1);
 			}
 		} catch (Exception e) {
-			logger.error("Error when downing row", e);
 			AppHelper.showExceptionDialog("Ошибка при перемещении строки.", e);
 			return;
 		}
@@ -380,7 +389,7 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 			lastRowSelected = 0;
 		}
 
-		logger.debug("Using lastRowSelected " + lastRowSelected + "/" + rowCount);
+		logger.trace("Opening model. Using lastRowSelected {} of {}.", lastRowSelected, rowCount);
 
 		if (lastRowSelected >= 0 && lastRowSelected < rowCount) {
 			owner.setRowSelectionInterval(lastRowSelected, lastRowSelected);

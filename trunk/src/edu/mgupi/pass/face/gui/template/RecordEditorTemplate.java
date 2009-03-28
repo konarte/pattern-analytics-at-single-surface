@@ -3,12 +3,14 @@ package edu.mgupi.pass.face.gui.template;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
 
 import org.slf4j.Logger;
@@ -41,8 +43,8 @@ public abstract class RecordEditorTemplate extends JDialog {
 	 * 
 	 */
 	private void initialize() {
-		this.setSize(500, 300);
-		this.setTitle("Редактирование записи");
+		this.setSize(400, 250);
+		this.setTitle("Редактор записей");
 		this.setName("recordEditorDialog");
 		this.setContentPane(getJContentPane());
 	}
@@ -60,9 +62,10 @@ public abstract class RecordEditorTemplate extends JDialog {
 
 				@Override
 				protected void openDialogImpl() throws Exception {
-					logger.debug("Do load for " + workObject);
-					loadObject(workObject);
+					// Do nothing
 				}
+
+				private Map<JTextComponent, JLabel> requiredMap = null;
 
 				@Override
 				protected boolean saveImpl() throws Exception {
@@ -71,14 +74,15 @@ public abstract class RecordEditorTemplate extends JDialog {
 
 					logger.debug("Checking for required fields...");
 
-					Map<JTextComponent, JLabel> required = getRequiredFields();
-					if (required != null) {
-						for (Map.Entry<JTextComponent, JLabel> comp : required.entrySet()) {
-							String text = comp.getKey().getText();
-							if (text == null || text.isEmpty()) {
-								AppHelper.showFieldRequiredDialog(comp.getValue().getText());
-								return false;
-							}
+					if (requiredMap == null) {
+						requiredMap = new HashMap<JTextComponent, JLabel>();
+						setRequiredFields(requiredMap);
+					}
+					for (Map.Entry<JTextComponent, JLabel> comp : requiredMap.entrySet()) {
+						String text = comp.getKey().getText();
+						if (text == null || text.isEmpty()) {
+							AppHelper.showFieldRequiredDialog(comp.getValue().getText());
+							return false;
 						}
 					}
 
@@ -90,8 +94,9 @@ public abstract class RecordEditorTemplate extends JDialog {
 					// We do not need to commit\rollback
 					logger.debug("Saving in transaction "
 							+ PassPersistentManager.instance().getSession().getTransaction());
+					saveFormToObjectImpl(workObject);
 					try {
-						saveObjectImpl(workObject);
+						saveObject(workObject);
 					} catch (Exception e) {
 						restoreObjectImpl(workObject);
 						throw e;
@@ -107,21 +112,51 @@ public abstract class RecordEditorTemplate extends JDialog {
 
 	private Object workObject = null; //  @jve:decl-index=0:
 
-	public Object editRecord(Object source) throws Exception {
+	public Object addRecord(Object source) throws Exception {
 		if (source == null) {
 			throw new IllegalArgumentException("Internal error. Source must be not null.");
 		}
+
+		if (jPanelData.getBorder() != null && jPanelData.getBorder() instanceof TitledBorder) {
+			((TitledBorder) jPanelData.getBorder()).setTitle("Создание новой записи");
+		}
+
 		this.workObject = source;
-		logger.debug("Edit record " + this.workObject);
-		boolean ok = getDialogAdapter().openDialog();
-		if (ok) {
+		logger.debug("Add record " + this.workObject);
+
+		boolean retOK = false;
+		if (loadFormFromObject(workObject)) {
+			retOK = getDialogAdapter().openDialog();
+		}
+
+		if (retOK) {
 			return this.workObject;
 		} else {
 			return null;
 		}
 	}
 
-	public boolean deleteRecords(Object source[]) throws Exception {
+	public boolean editRecord(Object source) throws Exception {
+		if (source == null) {
+			throw new IllegalArgumentException("Internal error. Source must be not null.");
+		}
+
+		if (jPanelData.getBorder() != null && jPanelData.getBorder() instanceof TitledBorder) {
+			((TitledBorder) jPanelData.getBorder()).setTitle("Редактирование записи");
+		}
+
+		this.workObject = source;
+		logger.debug("Edit record " + this.workObject);
+
+		logger.debug("Do load for " + workObject);
+		if (loadFormFromObject(workObject)) {
+			return getDialogAdapter().openDialog();
+		} else {
+			return false;
+		}
+	}
+
+	public boolean deleteRecords(boolean checkForDeleteAllowed, Object source[]) throws Exception {
 		if (source == null) {
 			throw new IllegalArgumentException("Internal error. Source must be not null.");
 		}
@@ -130,34 +165,38 @@ public abstract class RecordEditorTemplate extends JDialog {
 		if (source.length == 0) {
 			return false;
 		}
-		if (isDeleteAllowed(source)) {
+		if (!checkForDeleteAllowed || isDeleteAllowed(source)) {
 			logger.debug("Deleting in transaction " + PassPersistentManager.instance().getSession().getTransaction());
-			deleteObjectsImpl(source);
+			deleteObjects(source);
 			return true;
 
 		}
 		return false;
 	}
 
-	protected abstract Map<JTextComponent, JLabel> getRequiredFields();
+	protected void saveObject(Object object) throws Exception {
+		PassPersistentManager.instance().saveObject(object);
+	}
 
-	protected abstract void loadObject(Object object) throws Exception;
-
-	protected abstract boolean isSaveAllowed(Object object) throws Exception;
-
-	protected abstract void saveObjectImpl(Object object) throws Exception;
-
-	protected abstract boolean isDeleteAllowed(Object objects[]) throws Exception;
-
-	protected void deleteObjectsImpl(Object objects[]) throws Exception {
+	protected void deleteObjects(Object objects[]) throws Exception {
 		for (Object object : objects) {
 			PassPersistentManager.instance().deleteObject(object);
 		}
 	}
 
+	protected abstract boolean isSaveAllowed(Object object) throws Exception;
+
+	public abstract boolean isDeleteAllowed(Object objects[]) throws Exception;
+
+	protected abstract boolean loadFormFromObject(Object object) throws Exception;
+
+	protected abstract void saveFormToObjectImpl(Object object) throws Exception;
+
 	protected abstract void restoreObjectImpl(Object object) throws Exception;
 
-	protected abstract JPanel getPanelImpl();
+	protected abstract void setRequiredFields(Map<JTextComponent, JLabel> map);
+
+	//	protected abstract JPanel getFormPanelImpl();
 
 	/**
 	 * This method initializes jContentPane
@@ -168,24 +207,16 @@ public abstract class RecordEditorTemplate extends JDialog {
 		if (jContentPane == null) {
 			jContentPane = new JPanel();
 			jContentPane.setLayout(new BorderLayout());
-			jContentPane.add(getJPanelData(), BorderLayout.CENTER);
 			jContentPane.add(getJPanelButtons(), BorderLayout.SOUTH);
 		}
 		return jContentPane;
 	}
 
-	/**
-	 * This method initializes jPanelData
-	 * 
-	 * @return javax.swing.JPanel
-	 */
-	private JPanel getJPanelData() {
+	protected void setFormPanelData(JPanel panel) {
 		if (jPanelData == null) {
-			jPanelData = new JPanel();
-			jPanelData.setLayout(new BorderLayout());
-			jPanelData.add(getPanelImpl(), BorderLayout.CENTER);
+			jPanelData = panel;
+			jContentPane.add(panel, BorderLayout.CENTER);
 		}
-		return jPanelData;
 	}
 
 	/**

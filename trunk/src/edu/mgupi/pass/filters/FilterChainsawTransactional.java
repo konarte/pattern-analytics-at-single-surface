@@ -8,14 +8,14 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FilterChainsawTransaction extends FilterChainsaw {
+public class FilterChainsawTransactional extends FilterChainsaw {
 
-	private final static Logger logger = LoggerFactory.getLogger(FilterChainsawTransaction.class);
+	private final static Logger logger = LoggerFactory.getLogger(FilterChainsawTransactional.class);
 
 	private FilterChainsaw source;
 	private Map<IFilter, FilterStore> stores = new HashMap<IFilter, FilterStore>();
 
-	public FilterChainsawTransaction(FilterChainsaw source) {
+	public FilterChainsawTransactional(FilterChainsaw source) {
 		super(source.singleInstanceCaching);
 
 		if (source == null) {
