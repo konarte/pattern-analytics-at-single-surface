@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 
 import javax.swing.JButton;
@@ -87,7 +88,7 @@ public class UtilsTest {
 				//			
 			}
 		};
-		
+
 		ActionListener listener2 = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -97,7 +98,7 @@ public class UtilsTest {
 
 		Utils.addCheckedListener(button, listener);
 		Utils.addCheckedListener(button, listener2);
-		
+
 		Utils.addCheckedListener(button2, listener);
 		Utils.addCheckedListener(button2, listener2);
 
@@ -107,21 +108,21 @@ public class UtilsTest {
 		} catch (IllegalArgumentException e) {
 			System.out.println("Received expected exception: " + e);
 		}
-		
+
 		try {
 			Utils.addCheckedListener(null, null);
 			fail("No exception thrown!");
 		} catch (IllegalArgumentException e) {
 			System.out.println("Received expected exception: " + e);
 		}
-		
+
 		try {
 			Utils.addCheckedListener(button, null);
 			fail("No exception thrown!");
 		} catch (IllegalArgumentException e) {
 			System.out.println("Received expected exception: " + e);
 		}
-		
+
 		try {
 			Utils.addCheckedListener(null, listener);
 			fail("No exception thrown!");
@@ -129,13 +130,20 @@ public class UtilsTest {
 			System.out.println("Received expected exception: " + e);
 		}
 	}
-		 
+
 	@Test
 	public void testLoadFromResource() throws IOException {
 		File file = new File("test/resources/splash/scout.gif");
 		FileInputStream input = new FileInputStream(file);
-		
+
 		byte[] data = Utils.loadFromResource("resources/splash/scout.gif");
 		assertEquals(input.getChannel().size(), data.length);
 	}
+
+	@Test
+	public void testDecodeGarbagedCodepage() throws UnsupportedEncodingException {
+		String mess = "Duplicate entry 'Ð¢ÐµÑ�Ñ‚Ð¾Ð²Ñ‹Ð¹ Ñ„Ð¸Ð»ÑŒÑ‚Ñ€' for key 'Name'";
+		System.out.println(new String(mess.getBytes("Windows-1252"), "UTF-8"));
+	}
+
 }

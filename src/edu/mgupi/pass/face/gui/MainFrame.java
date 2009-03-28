@@ -10,7 +10,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -102,6 +101,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		OPEN, CLOSE, OPEN_MASS, OPEN_FILTER_SET, SAVE_FILTER_SET, SETTINGS, EXIT, //
 		FILTER_LIST, MODULE_LIST, //
 		DEFECT_CLASSES, DEFECT_TYPES, //
+		SURFACE_CLASSES, SURFACE_TYPES, //
 		HELP, ABOUT, //
 
 		// buttons
@@ -155,8 +155,13 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		AppHelper.getInstance().getDialogImpl(LModulesList.class);
 
 		AppHelper.getInstance().getDialogImpl(DefectClassesTable.class);
+		AppHelper.getInstance().getDialogImpl(DefectClassesRecord.class);
+
 		AppHelper.getInstance().getDialogImpl(DefectTypesTable.class);
-		//AppHelper.getInstance().getDialogImpl(DefectClassesRecord0.class);
+		AppHelper.getInstance().getDialogImpl(DefectTypesRecord.class);
+
+		AppHelper.getInstance().getDialogImpl(SurfaceClassesTable.class);
+		AppHelper.getInstance().getDialogImpl(SurfaceClassesRecord.class);
 
 		this.getfSChooser();
 	}
@@ -215,6 +220,11 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		if (fSChooser != null) {
 			this.fSChooser.removeAll();
 			this.fSChooser = null;
+		}
+		DefectTypesRecord dialog = (DefectTypesRecord) AppHelper.getInstance().searchWindow(DefectTypesRecord.class);
+		if (dialog != null) {
+			dialog.close();
+
 		}
 
 		this.closeProcessing();
@@ -296,7 +306,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 
 			// Locuses locus = mainModuleProcessor.startProcessing(source);
 			// REQUIRED SQUARE BASE!
-			this.jPanelImageFiltered.setImage(filteredImage, true);
+			this.jPanelImageFiltered.setImage(filteredImage/* , true */);
 			this.jPanelImageSource.setImage(sourceImage);
 			this.histogramFrame.setImage(mainModuleProcessor.getLastHistogramImage());
 
@@ -330,7 +340,6 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 				try {
 					MainFrame.this.restartProcessingBySourceImpl();
 				} catch (Throwable t) {
-					logger.error("Error when applying module parameter", t);
 					AppHelper.showExceptionDialog("Error when applying module parameters", t);
 				} finally {
 					MainFrame.this.clearMessage();
@@ -372,7 +381,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			ResizeFilter resizer = (ResizeFilter) preProcessing.appendFilter(ResizeFilter.class);
 			resizer.getWIDTH().setValue(Const.MAIN_IMAGE_WIDTH);
 			resizer.getHEIGHT().setValue(Const.MAIN_IMAGE_HEIGHT);
-			resizer.getINTERPOLATION_METHOD().setValue(RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+			resizer.getINTERPOLATION_METHOD().setValue("bicubic");
 
 		}
 
@@ -386,7 +395,6 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 				try {
 					MainFrame.this.restartProcessingByModuleParamsImpl();
 				} catch (Throwable t) {
-					logger.error("Error when applying module parameter", t);
 					AppHelper.showExceptionDialog("Error when applying module parameters", t);
 				} finally {
 					MainFrame.this.clearMessage();
@@ -431,7 +439,6 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 				try {
 					MainFrame.this.restartProcessingByFiltersImpl();
 				} catch (Throwable t) {
-					logger.error("Error when applying new filters", t);
 					AppHelper.showExceptionDialog("Error when applying new filters", t);
 				} finally {
 					MainFrame.this.clearMessage();
@@ -580,6 +587,9 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 
 			jMenuDatabase.add(getJMenuItemDefectClasses());
 			jMenuDatabase.add(getJMenuItemDefectTypes());
+			jMenuDatabase.addSeparator();
+
+			jMenuDatabase.add(getJMenuItemSurfaceClasses());
 			jMenuDatabase.addSeparator();
 
 			jMenuDatabase.add(getJMenuItemMaterials());
@@ -758,8 +768,8 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 				jPanelImageSource.registerFitButton(jCheckBoxScale);
 				jPanelImageFiltered.registerFitButton(jCheckBoxScale);
 			} else {
-				JOptionPane.showMessageDialog(null, "Internal error. Expected panelImage layout not initialized yet.",
-						"Invalid layout programming", JOptionPane.ERROR_MESSAGE);
+				AppHelper.showErrorDialog("Internal error. Expected panelImage layout not initialized yet.",
+						"Invalid layout programming");
 			}
 			jCheckBoxScale.setText("Масштаб под размеры окна");
 			jCheckBoxScale.setHorizontalAlignment(SwingConstants.LEADING);
@@ -941,6 +951,12 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 	private JMenuItem jMenuItemSaveFilterSet = null;
 
 	private JMenuItem jMenuItemClose = null;
+
+	private JMenuItem jMenuItemDefectClasses = null;
+
+	private JMenuItem jMenuItemDefectTypes = null;
+
+	private JMenuItem jMenuItemSurfaceClasses = null;
 
 	static class FiltersModel extends AbstractListModel {
 
@@ -1309,9 +1325,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 						MainFrame.this.setModule((Class<IModule>) Class.forName(item.getCodename()));
 					} catch (Exception e1) {
 						String name = item.getCodename() + " (" + item.getName() + ")";
-						logger.error("Error when select module " + name, e1);
-						JOptionPane.showMessageDialog(null, "Ошибка при подключении модуля " + name + ": " + e1,
-								"Error", JOptionPane.ERROR_MESSAGE);
+						AppHelper.showExceptionDialog("Ошибка при подключении модуля " + name, e1);
 					}
 				}
 			});
@@ -1554,10 +1568,6 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 
 	private JFileChooser fSChooser = null;
 
-	private JMenuItem jMenuItemDefectClasses = null;
-
-	private JMenuItem jMenuItemDefectTypes = null;
-
 	private JFileChooser getfSChooser() {
 		if (fSChooser == null) {
 			fSChooser = new JFileChooser();
@@ -1572,6 +1582,50 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		fSChooser.repaint();
 		return fSChooser;
 	}
+
+	/**
+	 * This method initializes jMenuItemDefectClasses
+	 * 
+	 * @return javax.swing.JMenuItem
+	 */
+	private JMenuItem getJMenuItemDefectClasses() {
+		if (jMenuItemDefectClasses == null) {
+			jMenuItemDefectClasses = new JMenuItem();
+			jMenuItemDefectClasses.setMnemonic(KeyEvent.VK_UNDEFINED);
+			jMenuItemDefectClasses.setText("Классы дефектов");
+			registerAction(jMenuItemDefectClasses, Actions.DEFECT_CLASSES);
+		}
+		return jMenuItemDefectClasses;
+	}
+
+	/**
+	 * This method initializes jMenuItemDefectTypes
+	 * 
+	 * @return javax.swing.JMenuItem
+	 */
+	private JMenuItem getJMenuItemDefectTypes() {
+		if (jMenuItemDefectTypes == null) {
+			jMenuItemDefectTypes = new JMenuItem();
+			jMenuItemDefectTypes.setText("Типы дефектов");
+			registerAction(jMenuItemDefectTypes, Actions.DEFECT_TYPES);
+		}
+		return jMenuItemDefectTypes;
+	}
+
+	/**
+	 * This method initializes jMenuItemSurfaceClasses
+	 * 
+	 * @return javax.swing.JMenuItem
+	 */
+	private JMenuItem getJMenuItemSurfaceClasses() {
+		if (jMenuItemSurfaceClasses == null) {
+			jMenuItemSurfaceClasses = new JMenuItem();
+			jMenuItemSurfaceClasses.setText("Классы поверхностей");
+			registerAction(jMenuItemSurfaceClasses, Actions.SURFACE_CLASSES);
+		}
+		return jMenuItemSurfaceClasses;
+	}
+
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -1597,7 +1651,6 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 				this.startProcessingImpl(this.singleFilePicker.getSingleSource());
 				this.jMenuItemClose.setEnabled(true);
 			} catch (Exception e1) {
-				logger.error("Error when picking new image for processing", e1);
 				AppHelper.showExceptionDialog("Error when processing image.", e1);
 			} finally {
 				this.clearMessage();
@@ -1618,7 +1671,6 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 						this.mainModuleProcessor.saveSettingsToFile(newFile);
 					}
 				} catch (Exception e1) {
-					logger.debug("Error when save filter settings", e1);
 					AppHelper.showExceptionDialog("Unexpected eror when saving settings file '" + newFile.getName()
 							+ "'.", e1);
 				}
@@ -1636,7 +1688,6 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 							this.mainModuleProcessor.getModule()));
 
 				} catch (Exception e1) {
-					logger.debug("Error when open filter settings", e1);
 					AppHelper.showExceptionDialog("Unexpected eror when opening settings file '" + newFile.getName()
 							+ "'.", e1);
 				}
@@ -1676,12 +1727,20 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			if (defectTypes != null) {
 				defectTypes.openDialog();
 			}
+		} else if (action == Actions.SURFACE_CLASSES) {
+			//
+			SurfaceClassesTable surfaceClasses = (SurfaceClassesTable) AppHelper.getInstance().getDialog(
+					SurfaceClassesTable.class);
+			if (surfaceClasses != null) {
+				surfaceClasses.openDialog();
+			}
+		} else if (action == Actions.SURFACE_TYPES) {
+			//
 		} else if (action == Actions.HELP) {
 			// View help
 			try {
 				Desktop.getDesktop().browse(new URI(Const.WEB_HELP_PAGE));
 			} catch (Exception e1) {
-				logger.debug("Error when opening link", e1);
 				AppHelper.showExceptionDialog("Unexpected eror when opening help link '" + Const.WEB_HELP_PAGE + "'.",
 						e1);
 			}
@@ -1711,39 +1770,9 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 
 			}
 		} else {
-			JOptionPane.showMessageDialog(null, "Internal error. Unknown action: " + action, "Internal error",
-					JOptionPane.ERROR_MESSAGE);
+			AppHelper.showErrorDialog("Internal error. Unknown action: " + action, "Internal error");
 		}
 
-	}
-
-	/**
-	 * This method initializes jMenuItemDefectClasses
-	 * 
-	 * @return javax.swing.JMenuItem
-	 */
-	private JMenuItem getJMenuItemDefectClasses() {
-		if (jMenuItemDefectClasses == null) {
-			jMenuItemDefectClasses = new JMenuItem();
-			jMenuItemDefectClasses.setMnemonic(KeyEvent.VK_UNDEFINED);
-			jMenuItemDefectClasses.setText("Классы дефектов");
-			registerAction(jMenuItemDefectClasses, Actions.DEFECT_CLASSES);
-		}
-		return jMenuItemDefectClasses;
-	}
-
-	/**
-	 * This method initializes jMenuItemDefectTypes
-	 * 
-	 * @return javax.swing.JMenuItem
-	 */
-	private JMenuItem getJMenuItemDefectTypes() {
-		if (jMenuItemDefectTypes == null) {
-			jMenuItemDefectTypes = new JMenuItem();
-			jMenuItemDefectTypes.setText("Типы дефектов");
-			registerAction(jMenuItemDefectTypes, Actions.DEFECT_TYPES);
-		}
-		return jMenuItemDefectTypes;
 	}
 
 }

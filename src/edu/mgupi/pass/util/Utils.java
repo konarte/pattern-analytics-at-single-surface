@@ -55,7 +55,6 @@ public class Utils {
 		do {
 			String slice = source.substring(0, maximumCols);
 
-			//			System.out.println("Found slice: " + slice);
 			int lastSpace = -1;
 			for (int i = slice.length() - 1; i > 0; i--) {
 				if (slice.charAt(i) == ' ') {
@@ -65,13 +64,11 @@ public class Utils {
 			}
 
 			if (lastSpace != -1) {
-				//				System.out.println("Cut before " + lastSpace);
 
 				dest.append(slice.substring(0, lastSpace));
 				source.delete(0, lastSpace + 1);
 			} else {
 
-				//				System.out.println("Cut before " + maximumCols);
 				dest.append(slice);
 				source.delete(0, maximumCols);
 			}
@@ -330,4 +327,5 @@ public class Utils {
 
 		return null;
 	}
+	
 }

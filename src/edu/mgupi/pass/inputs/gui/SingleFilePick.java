@@ -2,6 +2,7 @@ package edu.mgupi.pass.inputs.gui;
 
 import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -84,6 +85,15 @@ public class SingleFilePick implements IInput {
 	}
 
 	public InputStore getSingleSource() throws IOException {
+		return this.getSingleSourceImpl(true);
+	}
+
+	public BufferedImage getImage() throws IOException {
+		InputStore input = this.getSingleSourceImpl(false);
+		return input == null ? null : input.getSourceImage();
+	}
+
+	private InputStore getSingleSourceImpl(boolean loadFileData) throws IOException {
 		// Do not forget about that!
 		// We can change LaF!
 		chooser.repaint();
@@ -93,15 +103,19 @@ public class SingleFilePick implements IInput {
 		if (result == JFileChooser.APPROVE_OPTION && chooser.getSelectedFile() != null) {
 			String imagePath = chooser.getSelectedFile().getPath();
 
-			// Lake an TestSourceImpl
+			// Like an TestSourceImpl
 			File file = new File(imagePath);
 
-			FileInputStream input = new FileInputStream(file);
-			byte buffer[] = new byte[(int) input.getChannel().size()];
-			try {
-				input.read(buffer);
-			} finally {
-				input.close();
+			byte buffer[] = null;
+			if (loadFileData) {
+
+				FileInputStream input = new FileInputStream(file);
+				buffer = new byte[(int) input.getChannel().size()];
+				try {
+					input.read(buffer);
+				} finally {
+					input.close();
+				}
 			}
 
 			return new InputStore(file.getName(), ImageIO.read(file), buffer);

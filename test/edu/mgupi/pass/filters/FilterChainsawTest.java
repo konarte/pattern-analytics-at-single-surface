@@ -69,10 +69,16 @@ public class FilterChainsawTest {
 		TestFilter filter = (TestFilter) chainsaw.appendFilter(TestFilter.class);
 
 		assertTrue(filter == chainsaw.getFilter(0));
+		assertTrue(filter.isInit());
+		assertFalse(filter.isDone());
 
 		TestFilter filter2 = (TestFilter) chainsaw.appendFilter(TestFilter.class);
 		assertTrue(filter == chainsaw.getFilter(0));
 		assertTrue(filter2 == chainsaw.getFilter(1));
+
+		MyFilter my = (MyFilter) chainsaw.appendFilter(MyFilter.class);
+		assertTrue(my.isInit());
+		assertFalse(my.isDone());
 
 		try {
 			chainsaw.appendFilter(null);
@@ -81,7 +87,20 @@ public class FilterChainsawTest {
 			System.out.println("Received expected exception: " + iae);
 		}
 
+		TestInputImpl source = new TestInputImpl();
+		source.init();
+		try {
+			BufferedImage image = source.getSingleSource().getSourceImage();
+			chainsaw.attachImage(image);
+			chainsaw.filterSaw();
+			chainsaw.detachImage();
+		} finally {
+			source.close();
+		}
+
 		chainsaw.reset();
+		assertTrue(filter.isInit());
+		assertFalse(filter.isDone());
 
 		chainsaw.appendFilter(TestFilter.class);
 		chainsaw.appendFilter(ColorSpaceFilter.class);

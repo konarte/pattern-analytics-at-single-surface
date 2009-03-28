@@ -11,8 +11,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 
+import org.hibernate.Transaction;
 import org.orm.PersistentException;
-import org.orm.PersistentTransaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,38 +83,30 @@ public abstract class TableEditorTemplate extends JDialog {
 			@Override
 			protected void cancelImpl() throws Exception {
 				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
-					//Transaction transaction = PassPersistentManager.instance().getSession().getTransaction();
-					logger.debug("Rollback MAIN transaction " + persistTransaction);
-
-					//					if (transaction == persistTransaction) {
-					//						System.out.println("IDENTICALLY TRANSACTION.");
-					//					} else {
-					//						System.out.println("NOT IDENTICALLY TRANSACTION.");
-					//					}
-					if (persistTransaction != null) {
-						persistTransaction.rollback();
-						System.out.println("ROLLBACKED = " + persistTransaction.wasRolledBack());
+					Transaction transaction = PassPersistentManager.instance().getSession().getTransaction();
+					if (transaction.isActive()) {
+						logger.trace("Rollback MAIN transaction {}.", transaction);
+						transaction.rollback();
 					}
 				}
 			}
 
-			PersistentTransaction persistTransaction = null;
-
 			@Override
 			protected void openDialogImpl() throws Exception {
 				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
-					persistTransaction = PassPersistentManager.instance().getSession().beginTransaction();
-					logger.debug("Begin MAIN transaction " + persistTransaction);
+					PassPersistentManager.instance().getSession().beginTransaction();
+					logger.trace("Begin MAIN transaction {}.", PassPersistentManager.instance().getSession()
+							.getTransaction());
 				}
 			}
 
 			@Override
 			protected boolean saveImpl() throws Exception {
 				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
-					//Transaction transaction = PassPersistentManager.instance().getSession().getTransaction();
-					logger.debug("Commit MAIN transaction " + persistTransaction);
-					if (persistTransaction != null) {
-						persistTransaction.commit();
+					Transaction transaction = PassPersistentManager.instance().getSession().getTransaction();
+					if (transaction.isActive()) {
+						logger.trace("Commit MAIN transaction {}.", transaction);
+						transaction.commit();
 					}
 					return true;
 				}

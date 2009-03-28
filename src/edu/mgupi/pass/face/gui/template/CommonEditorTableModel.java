@@ -5,9 +5,15 @@ import java.util.List;
 
 import javax.swing.JTable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.mgupi.pass.face.gui.AppHelper;
+import edu.mgupi.pass.util.Config;
+import edu.mgupi.pass.util.Config.DeletionCheckMode;
 
 public abstract class CommonEditorTableModel extends AbstractEditorTableModel {
+	private final static Logger logger = LoggerFactory.getLogger(CommonEditorTableModel.class);
 
 	/**
 	 * 
@@ -33,7 +39,14 @@ public abstract class CommonEditorTableModel extends AbstractEditorTableModel {
 	protected void openImpl() throws Exception {
 		data = this.getDataImpl();
 		if (data == null) {
+
+			logger.trace("Received null data during open model.");
+
 			data = new ArrayList();
+		} else {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Received data during open model: {}.", data);
+			}
 		}
 	}
 
@@ -57,12 +70,19 @@ public abstract class CommonEditorTableModel extends AbstractEditorTableModel {
 		}
 
 		RecordEditorTemplate dialog = (RecordEditorTemplate) AppHelper.getInstance().getDialogImpl(recordEditorClass);
-		Object saved = dialog.editRecord(createInstanceImpl());
-		if (saved != null) {
-			data.add(rowIdx, saved);
+		Object added = dialog.addRecord(createInstanceImpl());
+		if (added != null) {
+
+			logger.trace("Successfully added. Received new object: {}.", added);
+
+			data.add(rowIdx, added);
 			return true;
+		} else {
+
+			logger.trace("Does not added. Return false.");
+
+			return false;
 		}
-		return false;
 	}
 
 	protected abstract Object createInstanceImpl();
@@ -75,18 +95,47 @@ public abstract class CommonEditorTableModel extends AbstractEditorTableModel {
 					"Internal error. Unable to add row, 'data' does not initialized yet. Maybe, you forget to 'openDialog'?");
 		}
 
+		logger.trace("Try to delete {} rows.", rowIdx.length);
+
 		RecordEditorTemplate dialog = (RecordEditorTemplate) AppHelper.getInstance().getDialogImpl(recordEditorClass);
-		System.out.println("Try to delete " + rowIdx.length);
-		boolean deleted = dialog.deleteRecords(data.subList(rowIdx[0], rowIdx[rowIdx.length - 1] + 1).toArray());
+
+		Object[] rows = data.subList(rowIdx[0], rowIdx[rowIdx.length - 1] + 1).toArray();
+
+		if (Config.getInstance().getDeletionCheckMode() == DeletionCheckMode.CHECK_THEN_ACQUIRE) {
+			boolean canDelete = dialog.isDeleteAllowed(rows);
+			if (!canDelete) {
+				return false;
+			} else {
+				if (!super.checkDeleteRows(rowIdx.length > 1)) {
+					return false;
+				}
+			}
+		}
+
+		boolean deleted = dialog.deleteRecords(
+				Config.getInstance().getDeletionCheckMode() == DeletionCheckMode.ALWAYS_ACQUIRE_PERMISSION, rows);
 		if (deleted) {
+
+			logger.trace("Successfully deleted. Removing rows.");
 
 			for (@SuppressWarnings("unused")
 			int idx : rowIdx) {
 				data.remove(rowIdx[0]);
 			}
 			return true;
+		} else {
+			logger.trace("Does not deleted. Return false.");
+			return false;
 		}
-		return false;
+
+	}
+
+	protected boolean checkDeleteRows(boolean multiple) throws Exception {
+		if (Config.getInstance().getDeletionCheckMode() == DeletionCheckMode.ALWAYS_ACQUIRE_PERMISSION) {
+			return super.checkDeleteRows(multiple);
+		} else {
+			return true;
+		}
 	}
 
 	@Override
@@ -98,11 +147,16 @@ public abstract class CommonEditorTableModel extends AbstractEditorTableModel {
 		}
 
 		RecordEditorTemplate dialog = (RecordEditorTemplate) AppHelper.getInstance().getDialogImpl(recordEditorClass);
-		Object edited = dialog.editRecord(data.get(rowIdx));
-		if (edited != null) {
+		boolean edited = dialog.editRecord(data.get(rowIdx));
+		if (edited) {
+			logger.trace("Successfully edited. Edited object: {}.", edited);
+
 			return true;
+		} else {
+			logger.trace("Does not edited. Return false.");
+			return false;
 		}
-		return false;
+
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package edu.mgupi.pass.face;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.commons.cli.CommandLine;
@@ -78,11 +79,11 @@ public class AutoInit {
 		try {
 
 			PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
-
 			try {
 
 				// Filters first
 				Collection<Class<?>> filterClasses = ClassesHelper.getAvailableClasses(IFilter.class);
+				Collection<LFilters> detachedFilters = new ArrayList<LFilters>();
 
 				System.out.println("Registering filters (" + filterClasses.size() + " expected)...");
 
@@ -91,6 +92,10 @@ public class AutoInit {
 					IFilter filter = (IFilter) clazz.newInstance();
 					String name = filter.getName();
 					String codename = filter.getClass().getName();
+
+					//					if (codename.equals("edu.mgupi.pass.filters.TestFilter")) {
+					//						codename = "edu.mgupi.pass.filters.tst.TestFilter";
+					//					}
 
 					System.out.print("Checking filter class " + codename + " (" + filter.getName() + ")...");
 
@@ -102,7 +107,7 @@ public class AutoInit {
 						dbFilter = LFiltersFactory.createLFilters();
 						dbFilter.setName(filter.getName());
 						dbFilter.setCodename(codename);
-						dbFilter.save();
+						detachedFilters.add(dbFilter);
 					} else {
 						if (!dbFilter.getName().equals(name)) {
 							dbFilter.setName(name);
@@ -136,11 +141,9 @@ public class AutoInit {
 						checkFilter.delete();
 					}
 				}
-				//				}
-
 				// Processing modules, the same way
 				Collection<Class<?>> moduleClasses = ClassesHelper.getAvailableClasses(IModule.class);
-
+				Collection<LModules> detachedModules = new ArrayList<LModules>();
 				System.out.println("Registering modules (" + moduleClasses.size() + " expected)...");
 
 				LModulesCriteria mNICriteria = new LModulesCriteria();
@@ -160,7 +163,7 @@ public class AutoInit {
 						dbModule = LModulesFactory.createLModules();
 						dbModule.setName(module.getName());
 						dbModule.setCodename(codename);
-						dbModule.save();
+						detachedModules.add(dbModule);
 					} else {
 						if (!dbModule.getName().equals(name)) {
 							dbModule.setName(name);
@@ -192,7 +195,18 @@ public class AutoInit {
 						checkModule.delete();
 					}
 				}
-				//				}
+
+				// Do not forget about flushing.
+				// Otherwise 'delete' does not affected!
+				PassPersistentManager.instance().getSession().flush();
+
+				for (LFilters filter : detachedFilters) {
+					filter.save();
+				}
+
+				for (LModules module : detachedModules) {
+					module.save();
+				}
 
 				transaction.commit();
 
@@ -214,7 +228,7 @@ public class AutoInit {
 		Options options = new Options();
 		options
 				.addOption(
-						"cmd",
+						"mode",
 						true,
 						"[create|drop|init|full-recreate] -- allowed operations; 'create' will create new database installation, "
 								+ "'drop' will totally clear this database  and 'init' scans applied filters and modules and will register "
@@ -223,7 +237,7 @@ public class AutoInit {
 		CommandLineParser parser = new PosixParser();
 		CommandLine cmd = parser.parse(options, args);
 
-		String command = cmd.getOptionValue("cmd");
+		String command = cmd.getOptionValue("mode");
 
 		AutoInit init = new AutoInit();
 		if ("create".equals(command)) {

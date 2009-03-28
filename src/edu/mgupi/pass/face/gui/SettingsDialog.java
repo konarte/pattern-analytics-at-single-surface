@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.swing.AbstractAction;
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -38,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.face.gui.template.AbstractDialogAdapter;
 import edu.mgupi.pass.util.Config;
+import edu.mgupi.pass.util.Config.DeletionCheckMode;
 import edu.mgupi.pass.util.Config.DeletionMode;
 import edu.mgupi.pass.util.Config.SourceMode;
 import edu.mgupi.pass.util.Config.TransactionMode;
@@ -45,10 +47,14 @@ import edu.mgupi.pass.util.Config.TransactionMode;
 /**
  * Settings dialog. Current (for loaded images) and common settings.
  * 
+ * in the common page has one main idea. You must set up
+ * <code>weighty = 1</code> to the bottom jPanel... and set
+ * <code>weighty = 0</code> to all other.
+ * 
  * @author raidan
  * 
  */
-public class SettingsDialog extends JDialog {
+public class SettingsDialog extends JDialog implements ChangeListener {
 
 	private final static Logger logger = LoggerFactory.getLogger(SettingsDialog.class); // @jve:decl-index=0:
 
@@ -77,8 +83,8 @@ public class SettingsDialog extends JDialog {
 	 * 
 	 */
 	private void initialize() {
-		this.setSize(500, 400);
-		this.setMinimumSize(new Dimension(500,400));
+		this.setSize(500, 450);
+		this.setMinimumSize(new Dimension(500, 450));
 		this.setName("settingsDialog");
 		this.setModal(true);
 		this.setTitle("Настройки");
@@ -133,13 +139,21 @@ public class SettingsDialog extends JDialog {
 					needSaveCommon = true;
 				}
 
-				if (Config.getInstance().setRowsDeleteMode(currentDeletionMode)) {
+				// Do not be scare :)
+				// I use class-map for enums 
+				if (Config.getInstance().setRowsDeleteMode((DeletionMode) getValue(DeletionMode.CONFIRM))) {
 					logger.debug("Deletion mode changed. Save common.");
 					needSaveCommon = true;
 				}
 
-				if (Config.getInstance().setTransactionMode(currentTransactionMode)) {
+				if (Config.getInstance().setTransactionMode((TransactionMode) getValue(TransactionMode.COMMIT_BULK))) {
 					logger.debug("Transaction mode changed. Save common.");
+					needSaveCommon = true;
+				}
+
+				if (Config.getInstance().setDeletionCheckModeMode(
+						(DeletionCheckMode) getValue(DeletionCheckMode.ALWAYS_ACQUIRE_PERMISSION))) {
+					logger.debug("Deletion check mode changed. Save common.");
 					needSaveCommon = true;
 				}
 
@@ -166,8 +180,6 @@ public class SettingsDialog extends JDialog {
 	}
 
 	private Color newBackground = null; // @jve:decl-index=0:
-	private DeletionMode currentDeletionMode = null; //  @jve:decl-index=0:
-	private TransactionMode currentTransactionMode = null;
 
 	/**
 	 * Reset current control by its values in {@link Config}
@@ -183,12 +195,9 @@ public class SettingsDialog extends JDialog {
 		newBackground = currentBackground;
 		jLabelBackgroundShow.setBackground(currentBackground);
 
-		currentDeletionMode = Config.getInstance().getRowsDeleteMode();
-		this.cachedButtonsF.get(currentDeletionMode).setSelected(true);
-
-		currentTransactionMode = Config.getInstance().getTransactionMode();
-		this.cachedButtonsT.get(currentTransactionMode).setSelected(true);
-
+		this.setValue(Config.getInstance().getRowsDeleteMode());
+		this.setValue(Config.getInstance().getTransactionMode());
+		this.setValue(Config.getInstance().getDeletionCheckMode());
 	}
 
 	/**
@@ -449,12 +458,22 @@ public class SettingsDialog extends JDialog {
 	 */
 	private JPanel getJPanelSettingsCommon() {
 		if (jPanelSettingsCommon == null) {
+			GridBagConstraints gridBagConstraints18 = new GridBagConstraints();
+			gridBagConstraints18.gridx = -1;
+			gridBagConstraints18.gridy = -1;
+			GridBagConstraints gridBagConstraints17 = new GridBagConstraints();
+			gridBagConstraints17.gridx = 0;
+			gridBagConstraints17.weighty = 1.0D;
+			gridBagConstraints17.weightx = 1.0D;
+			gridBagConstraints17.fill = GridBagConstraints.HORIZONTAL;
+			gridBagConstraints17.anchor = GridBagConstraints.NORTH;
+			gridBagConstraints17.gridy = 3;
 			GridBagConstraints gridBagConstraints15 = new GridBagConstraints();
 			gridBagConstraints15.gridx = 0;
 			gridBagConstraints15.anchor = GridBagConstraints.NORTH;
 			gridBagConstraints15.fill = GridBagConstraints.HORIZONTAL;
 			gridBagConstraints15.weightx = 1.0D;
-			gridBagConstraints15.weighty = 1.0D;
+			gridBagConstraints15.weighty = 0.0D;
 			gridBagConstraints15.gridy = 2;
 			GridBagConstraints gridBagConstraints12 = new GridBagConstraints();
 			gridBagConstraints12.weightx = 1.0D;
@@ -476,6 +495,7 @@ public class SettingsDialog extends JDialog {
 			jPanelSettingsCommon.add(getJPanelLaF(), gridBagConstraints4);
 			jPanelSettingsCommon.add(getJPanelFilterEdit(), gridBagConstraints12);
 			jPanelSettingsCommon.add(getJPanelTransactionMode(), gridBagConstraints15);
+			jPanelSettingsCommon.add(getJPanelDeletionCheckMode(), gridBagConstraints17);
 		}
 		return jPanelSettingsCommon;
 	}
@@ -551,20 +571,95 @@ public class SettingsDialog extends JDialog {
 			gridBagConstraints13.gridy = 0;
 			jPanelFilterEdit = new JPanel();
 			jPanelFilterEdit.setLayout(new GridBagLayout());
-			jPanelFilterEdit.setBorder(BorderFactory.createTitledBorder(null, "Редактирование данных", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			jPanelFilterEdit.setBorder(BorderFactory.createTitledBorder(null, "Редактирование данных",
+					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
+					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
 			jPanelFilterEdit.add(getJPanelFilterEditPlace(), gridBagConstraints13);
 
 		}
 		return jPanelFilterEdit;
 	}
 
-	private Map<DeletionMode, JRadioButton> cachedButtonsF = new HashMap<DeletionMode, JRadioButton>(); //  @jve:decl-index=0:
-
 	private JPanel jPanelSourceMode = null;
 
 	private JPanel jPanelTransactionMode = null;
 
 	private JPanel jPanelTransactionModePlace = null;
+
+	private Map<JLabel, JRadioButton> cachedLinks = new HashMap<JLabel, JRadioButton>(); //  @jve:decl-index=0:
+	private Map<JRadioButton, Enum<?>> cachedEnums = new HashMap<JRadioButton, Enum<?>>(); //  @jve:decl-index=0:
+	private Map<Enum<?>, JRadioButton> cachedButtons = new HashMap<Enum<?>, JRadioButton>(); //  @jve:decl-index=0:
+	@SuppressWarnings("unchecked")
+	private Map<Class<? extends Enum>, Enum<?>> selectedValues = new HashMap<Class<? extends Enum>, Enum<?>>(); //  @jve:decl-index=0:
+
+	private JPanel jPanelDeletionCheckMode = null;
+
+	private JPanel jPanelDeletionCheckModePlace = null;
+
+	private void setValue(Enum<?> value) {
+		selectedValues.put(value.getClass(), value);
+		cachedButtons.get(value).setSelected(true);
+	}
+
+	private Enum<?> getValue(Enum<?> value) {
+		return selectedValues.get(value.getClass());
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		Enum<?> enum_ = this.cachedEnums.get(e.getSource());
+		if (enum_ != null) {
+			selectedValues.put(enum_.getClass(), enum_);
+		}
+	}
+
+	private MouseAdapter myAdapter = new MouseAdapter() {
+		public void mouseClicked(MouseEvent e) {
+			AbstractButton button = cachedLinks.get(e.getSource());
+			if (button != null) {
+				button.setSelected(true);
+			}
+		}
+	};
+
+	// Be care!!!
+	// Use this method only for unique enums classes!!!
+	private void setUpRadioButtons(Enum<?> enumValues[], JPanel placePanel) {
+		ButtonGroup group = new ButtonGroup();
+		int index = 0;
+		for (final Enum<?> mode : enumValues) {
+			GridBagConstraints gridBagConstraints = new GridBagConstraints();
+			gridBagConstraints.gridx = 0;
+			gridBagConstraints.gridy = index;
+			final JRadioButton button = new JRadioButton();
+			cachedEnums.put(button, mode);
+
+			button.setName(mode.name());
+			button.setActionCommand(mode.getClass().getName());
+			button.addChangeListener(this);
+
+			placePanel.add(button, gridBagConstraints);
+
+			gridBagConstraints = new GridBagConstraints();
+			gridBagConstraints.gridx = 1;
+			gridBagConstraints.gridy = index;
+			gridBagConstraints.anchor = GridBagConstraints.WEST;
+
+			JLabel label = new JLabel();
+			cachedLinks.put(label, button);
+
+			label.setText(mode.toString());
+			label.addMouseListener(this.myAdapter);
+
+			placePanel.add(label, gridBagConstraints);
+
+			group.add(button);
+			cachedButtons.put(mode, button);
+
+			index++;
+		}
+
+	}
 
 	/**
 	 * This method initializes jPanelFilterEditPlace
@@ -575,44 +670,7 @@ public class SettingsDialog extends JDialog {
 		if (jPanelFilterEditPlace == null) {
 			jPanelFilterEditPlace = new JPanel();
 			jPanelFilterEditPlace.setLayout(new GridBagLayout());
-
-			ButtonGroup group = new ButtonGroup();
-			int index = 0;
-			for (final DeletionMode mode : DeletionMode.values()) {
-				GridBagConstraints gridBagConstraints = new GridBagConstraints();
-				gridBagConstraints.gridx = 0;
-				gridBagConstraints.gridy = index;
-				final JRadioButton button = new JRadioButton();
-				button.setName(mode.name());
-				button.addChangeListener(new ChangeListener() {
-					@Override
-					public void stateChanged(ChangeEvent e) {
-						currentDeletionMode = mode;
-					}
-				});
-				jPanelFilterEditPlace.add(button, gridBagConstraints);
-
-				gridBagConstraints = new GridBagConstraints();
-				gridBagConstraints.gridx = 1;
-				gridBagConstraints.gridy = index;
-				gridBagConstraints.anchor = GridBagConstraints.WEST;
-				JLabel label = new JLabel();
-				label.setText(mode.toString());
-				label.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent e) {
-						button.setSelected(true);
-					}
-				});
-
-				jPanelFilterEditPlace.add(label, gridBagConstraints);
-
-				group.add(button);
-				cachedButtonsF.put(mode, button);
-
-				index++;
-			}
-
+			setUpRadioButtons(DeletionMode.values(), jPanelFilterEditPlace);
 		}
 		return jPanelFilterEditPlace;
 	}
@@ -654,13 +712,13 @@ public class SettingsDialog extends JDialog {
 			gridBagConstraints16.gridx = 0;
 			jPanelTransactionMode = new JPanel();
 			jPanelTransactionMode.setLayout(new GridBagLayout());
-			jPanelTransactionMode.setBorder(BorderFactory.createTitledBorder(null, "Транзакционная модель", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			jPanelTransactionMode.setBorder(BorderFactory.createTitledBorder(null, "Транзакционная модель",
+					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
+					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
 			jPanelTransactionMode.add(getJPanelTransactionModePlace(), gridBagConstraints16);
 		}
 		return jPanelTransactionMode;
 	}
-
-	private Map<TransactionMode, JRadioButton> cachedButtonsT = new HashMap<TransactionMode, JRadioButton>(); //  @jve:decl-index=0:
 
 	/**
 	 * This method initializes jPanelTransactionModePlace
@@ -671,44 +729,45 @@ public class SettingsDialog extends JDialog {
 		if (jPanelTransactionModePlace == null) {
 			jPanelTransactionModePlace = new JPanel();
 			jPanelTransactionModePlace.setLayout(new GridBagLayout());
-
-			ButtonGroup group = new ButtonGroup();
-			int index = 0;
-			for (final TransactionMode mode : TransactionMode.values()) {
-				GridBagConstraints gridBagConstraints = new GridBagConstraints();
-				gridBagConstraints.gridx = 0;
-				gridBagConstraints.gridy = index;
-				final JRadioButton button = new JRadioButton();
-				button.setName(mode.name());
-				button.addChangeListener(new ChangeListener() {
-					@Override
-					public void stateChanged(ChangeEvent e) {
-						currentTransactionMode = mode;
-					}
-				});
-				jPanelTransactionModePlace.add(button, gridBagConstraints);
-
-				gridBagConstraints = new GridBagConstraints();
-				gridBagConstraints.gridx = 1;
-				gridBagConstraints.gridy = index;
-				gridBagConstraints.anchor = GridBagConstraints.WEST;
-				JLabel label = new JLabel();
-				label.setText(mode.toString());
-				label.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent e) {
-						button.setSelected(true);
-					}
-				});
-
-				jPanelTransactionModePlace.add(label, gridBagConstraints);
-
-				group.add(button);
-				cachedButtonsT.put(mode, button);
-
-				index++;
-			}
+			setUpRadioButtons(TransactionMode.values(), jPanelTransactionModePlace);
 		}
 		return jPanelTransactionModePlace;
 	}
+
+	/**
+	 * This method initializes jPanelDeletionCheckMode
+	 * 
+	 * @return javax.swing.JPanel
+	 */
+	private JPanel getJPanelDeletionCheckMode() {
+		if (jPanelDeletionCheckMode == null) {
+			GridBagConstraints gridBagConstraints19 = new GridBagConstraints();
+			gridBagConstraints19.gridx = 0;
+			gridBagConstraints19.anchor = GridBagConstraints.NORTHWEST;
+			gridBagConstraints19.weightx = 1.0D;
+			gridBagConstraints19.gridy = 0;
+			jPanelDeletionCheckMode = new JPanel();
+			jPanelDeletionCheckMode.setLayout(new GridBagLayout());
+			jPanelDeletionCheckMode.setBorder(BorderFactory.createTitledBorder(null, "При удалении строки из БД",
+					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
+					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			jPanelDeletionCheckMode.add(getJPanelDeletionCheckModePlace(), gridBagConstraints19);
+		}
+		return jPanelDeletionCheckMode;
+	}
+
+	/**
+	 * This method initializes jPanelDeletionCheckModePlace
+	 * 
+	 * @return javax.swing.JPanel
+	 */
+	private JPanel getJPanelDeletionCheckModePlace() {
+		if (jPanelDeletionCheckModePlace == null) {
+			jPanelDeletionCheckModePlace = new JPanel();
+			jPanelDeletionCheckModePlace.setLayout(new GridBagLayout());
+			setUpRadioButtons(DeletionCheckMode.values(), jPanelDeletionCheckModePlace);
+		}
+		return jPanelDeletionCheckModePlace;
+	}
+
 } // @jve:decl-index=0:visual-constraint="10,10"

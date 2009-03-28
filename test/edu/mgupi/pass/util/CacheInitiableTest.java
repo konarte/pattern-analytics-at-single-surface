@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.filters.MyFilter;
 import edu.mgupi.pass.filters.TestFilter;
 import edu.mgupi.pass.util.CacheInitiable.MODE;
 

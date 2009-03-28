@@ -92,6 +92,9 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 		this.instance.getRootPane().registerKeyboardAction(this, "escape",
 				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
+		this.instance.getRootPane().registerKeyboardAction(this, "accept",
+				KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -100,12 +103,10 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 		if (command == null) {
 			return;
 		}
-		if (cancelButton != null && command.equals(cancelButton.getActionCommand())) {
+		if (command.equals("escape") || command.equals("cancel")) {
 			this.cancel();
-		} else if (okButton != null && command.equals(okButton.getActionCommand())) {
+		} else if (command.equals("accept") || command.equals("OK")) {
 			this.save();
-		} else if (command.equals("escape")) {
-			this.cancel();
 		}
 
 	}
@@ -144,7 +145,8 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	private JButton cancelButton;
 
 	/**
-	 * Register 'cance' button. Clicking this button will provide 'cancel' event
+	 * Register 'cancel' button. Clicking this button will provide 'cancel'
+	 * event
 	 * 
 	 * @param button
 	 *            instance of button, required
@@ -184,7 +186,7 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	 */
 	public boolean openDialog() {
 
-		logger.debug("Dialog " + instance.getTitle() + " about to open.");
+		logger.debug("Dialog '{}' about to open.", instance.getTitle());
 
 		setOK = false;
 		cancelledAlready = false;
@@ -201,12 +203,11 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 			}
 			this.openDialogImpl();
 			this.instance.setVisible(true);
-			logger.debug("Dialog " + instance.getTitle() + " finished. Return " + setOK);
+			logger.debug("Dialog '' finished. Return {}.", instance.getTitle(), setOK);
 
 			return setOK;
 
 		} catch (Exception e) {
-			logger.error("Error when opening window", e);
 			AppHelper.showExceptionDialog("Ошибка при открытии окна '" + this.instance.getTitle() + "'", e);
 			return false;
 		}
@@ -235,7 +236,7 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 			return;
 		}
 
-		logger.debug("Dialog " + instance.getTitle() + " about to open in ReadOnly.");
+		logger.debug("Dialog '{}' about to open in ReadOnly.", instance.getTitle());
 
 		setOK = false;
 		cancelledAlready = false;
@@ -256,12 +257,11 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 				public void run() {
 					instance.setVisible(true);
 
-					logger.debug("Dialog " + instance.getTitle() + " finished.");
+					logger.debug("Dialog '{}' finished.", instance.getTitle());
 				}
 			});
 
 		} catch (Exception e) {
-			logger.error("Error when opening window", e);
 			AppHelper.showExceptionDialog("Ошибка при открытии окна '" + this.instance.getTitle() + "'", e);
 		}
 	}
@@ -278,28 +278,27 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 		// This is potentially strange situation, at least during tests
 		// Do not forget, that dialogs int 'cancelOnly' mode can't do 'save' action
 		if (cancelOnly) {
-			logger.debug("Dialog " + instance.getTitle() + " skipped saving. ReadOnly mode.");
+			logger.debug("Dialog '{}' skipped saving. ReadOnly mode.", instance.getTitle());
 			return;
 		}
 
-		logger.debug("Dialog " + instance.getTitle() + " about to save.");
+		logger.debug("Dialog '{}' about to save.", instance.getTitle());
 
 		setOK = false;
 		try {
-			
+
 			setOK = this.saveImpl();
 			if (editorMode != null) {
 				editorMode.close();
 			}
 
 			if (setOK || !saveRequired) {
-				logger.debug("Dialog " + instance.getTitle() + " done job. After save is " + setOK);
+				logger.debug("Dialog '{}' done job. After save is {}.", instance.getTitle(), setOK);
 
 				this.instance.setVisible(false);
 			}
 
 		} catch (Exception e) {
-			logger.error("Error when applying settings", e);
 			AppHelper.showExceptionDialog("Ошибка при выполнении сохранения.", e);
 		}
 	}
@@ -314,22 +313,21 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	public void cancel() {
 
 		if (cancelledAlready) {
-			logger.debug("Dialog " + instance.getTitle() + " already cancelled.");
+			logger.debug("Dialog '{}' already cancelled.", instance.getTitle());
 			return;
 		}
 
-		logger.debug("Dialog " + instance.getTitle() + " about to cancel.");
+		logger.debug("Dialog '{}' about to cancel.", instance.getTitle());
 
 		setOK = false;
 		try {
-			
-			
+
 			this.cancelImpl();
 			if (editorMode != null) {
 				editorMode.close();
 			}
 
-			logger.debug("Dialog " + instance.getTitle() + " done job. After cancel is " + setOK);
+			logger.debug("Dialog '{}' done job. After cancel is {}.", instance.getTitle(), setOK);
 		} catch (Exception e) {
 			logger.error("Error when applying settings", e);
 			AppHelper.showExceptionDialog("Ошибка при выполнении отмены.", e);

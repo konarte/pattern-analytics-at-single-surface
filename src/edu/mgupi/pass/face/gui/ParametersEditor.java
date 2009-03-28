@@ -96,7 +96,6 @@ public class ParametersEditor extends JDialog implements ActionListener {
 		try {
 			this.setParametersImpl(name, parameters);
 		} catch (Exception e) {
-			logger.error("Error when setting params", e);
 			AppHelper.showExceptionDialog("Ошибка при установке параметров.", e);
 			return false;
 		}
@@ -206,7 +205,6 @@ public class ParametersEditor extends JDialog implements ActionListener {
 				try {
 					jPanelParams.restoreDefaults();
 				} catch (Throwable t) {
-					logger.error("Error when restoring defaults for module parameters", t);
 					AppHelper.showExceptionDialog("Unexpected error when restoring defaults for module parameters.", t);
 				}
 			}
