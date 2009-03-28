@@ -111,7 +111,7 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 		try {
 			this.setFilters(title, filters);
 		} catch (Exception e) {
-			AppHelper.showExceptionDialog("Ошибка при установке фильтров.", e);
+			AppHelper.showExceptionDialog(this, "Ошибка при установке фильтров.", e);
 			return false;
 		}
 		return getDialogAdapter().openDialog();

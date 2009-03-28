@@ -711,6 +711,7 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 			gridBagConstraints16.weightx = 1.0D;
 			gridBagConstraints16.gridx = 0;
 			jPanelTransactionMode = new JPanel();
+			jPanelTransactionMode.setVisible(false);
 			jPanelTransactionMode.setLayout(new GridBagLayout());
 			jPanelTransactionMode.setBorder(BorderFactory.createTitledBorder(null, "Транзакционная модель",
 					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,

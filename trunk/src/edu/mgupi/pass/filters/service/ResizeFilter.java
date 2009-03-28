@@ -83,8 +83,9 @@ public class ResizeFilter implements IFilter {
 		lastThumbRate = wRate > hRate ? wRate : hRate;
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Resizing image to {}x{}, method {}. Actual size is {}x{}. ThumbRate = {}.", new Object[] {
-					thumb.width, thumb.height, myMethod, newSize.width, newSize.height, lastThumbRate });
+			logger.debug("Resizing image from {}x{} to {}x{}, method {}. Actual size is {}x{}. ThumbRate = {}.",
+					new Object[] { source.getWidth(), source.getHeight(), thumb.width, thumb.height, myMethod,
+							newSize.width, newSize.height, lastThumbRate });
 		}
 
 		// draw original image to thumbnail image object and

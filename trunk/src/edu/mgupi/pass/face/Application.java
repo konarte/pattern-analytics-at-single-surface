@@ -117,7 +117,7 @@ public class Application {
 				splash.setVisible(true);
 			} catch (Exception e) {
 				applicationRun.stop();
-				AppHelper.showExceptionDialog("Ошибка при инициализации приложения.", e);
+				AppHelper.showExceptionDialog(null, "Ошибка при инициализации приложения.", e);
 				logger.error("Application error", e);
 				throw e;
 			}
@@ -130,13 +130,13 @@ public class Application {
 			try {
 				this.changeLookAndFeel(newLookAndFeel);
 			} catch (Exception e) {
-				AppHelper.showExceptionDialog("Ошибка при попытке применить стиль " + newLookAndFeel + ".", e);
+				AppHelper.showExceptionDialog(null, "Ошибка при попытке применить стиль " + newLookAndFeel + ".", e);
 			}
 
 			// We want to make good impression, isn't it?
 			if (lock == null) {
 				logger.error("Attempt to open second instance.");
-				AppHelper.showErrorDialog(
+				AppHelper.showErrorDialog(null,
 						"Экземпляр приложения уже запущен. Пожалуйста, закройте предыдущий экземпляр.",
 						"Ошибка при запуске");
 				System.exit(0);
@@ -161,7 +161,7 @@ public class Application {
 				frame.setVisible(true);
 			} catch (Exception e) {
 				applicationRun.stop();
-				AppHelper.showExceptionDialog("Ошибка при загрузке приложения.", e);
+				AppHelper.showExceptionDialog(null, "Ошибка при загрузке приложения.", e);
 				logger.error("Application error", e);
 				throw e;
 			}

@@ -29,29 +29,29 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 	private final static Logger logger = LoggerFactory.getLogger(AbstractDialogAdapter.class);
 
-	private JDialog instance;
+	private JDialog owner;
 	private boolean saveRequired = false;
 	private AbstractEditorTableModel editorMode = null;
 
 	/**
 	 * Common constructor.
 	 * 
-	 * @param instance
+	 * @param owner
 	 *            reference to dialog we adapting, required
 	 */
-	public AbstractDialogAdapter(JDialog instance) {
-		this(instance, null, false);
+	public AbstractDialogAdapter(JDialog owner) {
+		this(owner, null, false);
 	}
 
 	/**
 	 * Common constructor.
 	 * 
-	 * @param instance
+	 * @param owner
 	 *            reference to dialog we adapting, required
 	 * @param editorModel
 	 */
-	public AbstractDialogAdapter(JDialog instance, AbstractEditorTableModel editorModel) {
-		this(instance, editorModel, false);
+	public AbstractDialogAdapter(JDialog owner, AbstractEditorTableModel editorModel) {
+		this(owner, editorModel, false);
 	}
 
 	public AbstractDialogAdapter(JDialog instance, boolean saveRequired) {
@@ -60,7 +60,7 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 	/**
 	 * 
-	 * @param instance
+	 * @param owner
 	 *            is required parameter, contains reference to dialog we
 	 *            adapting
 	 * @param editorModel
@@ -70,20 +70,20 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	 *            closing dialog; if false -- this method can return true or
 	 *            false
 	 */
-	public AbstractDialogAdapter(JDialog instance, final AbstractEditorTableModel editorModel, boolean saveRequired) {
+	public AbstractDialogAdapter(JDialog owner, final AbstractEditorTableModel editorModel, boolean saveRequired) {
 
-		if (instance == null) {
+		if (owner == null) {
 			throw new IllegalArgumentException("Internal error. 'instance' must be not null.");
 		}
-		
+
 		logger.debug("Initialize dialog control adapter " + this);
 
-		this.instance = instance;
+		this.owner = owner;
 		this.saveRequired = saveRequired;
 		this.editorMode = editorModel;
 
 		// Do not forget about listeners
-		this.instance.addWindowListener(new WindowAdapter() {
+		this.owner.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				AbstractDialogAdapter.this.cancel();
 			}
@@ -91,11 +91,11 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 		// Provide support for pressing 'Esc' key on keyboard
 		// If 'Esc' will be pressing -- this method do 'Cancel' 
-		this.instance.getRootPane().registerKeyboardAction(this, "escape",
-				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+		this.owner.getRootPane().registerKeyboardAction(this, "escape", KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+				JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-		this.instance.getRootPane().registerKeyboardAction(this, "accept",
-				KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+		this.owner.getRootPane().registerKeyboardAction(this, "accept", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+				JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 	}
 
@@ -188,7 +188,7 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	 */
 	public boolean openDialog() {
 
-		logger.debug("Dialog '{}' about to open.", instance.getTitle());
+		logger.debug("Dialog '{}' about to open.", owner.getTitle());
 
 		setOK = false;
 		cancelledAlready = false;
@@ -204,13 +204,13 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 				editorMode.open();
 			}
 			this.openDialogImpl();
-			this.instance.setVisible(true);
-			logger.debug("Dialog '' finished. Return {}.", instance.getTitle(), setOK);
+			this.owner.setVisible(true);
+			logger.debug("Dialog '' finished. Return {}.", owner.getTitle(), setOK);
 
 			return setOK;
 
 		} catch (Exception e) {
-			AppHelper.showExceptionDialog("Ошибка при открытии окна '" + this.instance.getTitle() + "'", e);
+			AppHelper.showExceptionDialog(this.owner, "Ошибка при открытии окна '" + this.owner.getTitle() + "'", e);
 			return false;
 		}
 	}
@@ -230,15 +230,15 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 		if (this.cancelButton == null) {
 			JOptionPane
 					.showMessageDialog(
-							this.instance,
+							this.owner,
 							"Ошибка при открытии окна '"
-									+ this.instance.getTitle()
+									+ this.owner.getTitle()
 									+ "'. Данное окно не может работать в режиме 'Только отмена'. Кнопка 'cancel' не зарегестрирована.",
 							"Неверный режим работы", JOptionPane.OK_OPTION);
 			return;
 		}
 
-		logger.debug("Dialog '{}' about to open in ReadOnly.", instance.getTitle());
+		logger.debug("Dialog '{}' about to open in ReadOnly.", owner.getTitle());
 
 		setOK = false;
 		cancelledAlready = false;
@@ -257,14 +257,14 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-					instance.setVisible(true);
+					owner.setVisible(true);
 
-					logger.debug("Dialog '{}' finished.", instance.getTitle());
+					logger.debug("Dialog '{}' finished.", owner.getTitle());
 				}
 			});
 
 		} catch (Exception e) {
-			AppHelper.showExceptionDialog("Ошибка при открытии окна '" + this.instance.getTitle() + "'", e);
+			AppHelper.showExceptionDialog(this.owner, "Ошибка при открытии окна '" + this.owner.getTitle() + "'", e);
 		}
 	}
 
@@ -280,11 +280,11 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 		// This is potentially strange situation, at least during tests
 		// Do not forget, that dialogs int 'cancelOnly' mode can't do 'save' action
 		if (cancelOnly) {
-			logger.debug("Dialog '{}' skipped saving. ReadOnly mode.", instance.getTitle());
+			logger.debug("Dialog '{}' skipped saving. ReadOnly mode.", owner.getTitle());
 			return;
 		}
 
-		logger.debug("Dialog '{}' about to save.", instance.getTitle());
+		logger.debug("Dialog '{}' about to save.", owner.getTitle());
 
 		setOK = false;
 		try {
@@ -295,13 +295,13 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 			}
 
 			if (setOK || !saveRequired) {
-				logger.debug("Dialog '{}' done job. After save is {}.", instance.getTitle(), setOK);
+				logger.debug("Dialog '{}' done job. After save is {}.", owner.getTitle(), setOK);
 
-				this.instance.setVisible(false);
+				this.owner.setVisible(false);
 			}
 
 		} catch (Exception e) {
-			AppHelper.showExceptionDialog("Ошибка при выполнении сохранения.", e);
+			AppHelper.showExceptionDialog(this.owner, "Ошибка при выполнении сохранения.", e);
 		}
 	}
 
@@ -315,11 +315,11 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	public void cancel() {
 
 		if (cancelledAlready) {
-			logger.debug("Dialog '{}' already cancelled.", instance.getTitle());
+			logger.debug("Dialog '{}' already cancelled.", owner.getTitle());
 			return;
 		}
 
-		logger.debug("Dialog '{}' about to cancel.", instance.getTitle());
+		logger.debug("Dialog '{}' about to cancel.", owner.getTitle());
 
 		setOK = false;
 		try {
@@ -329,13 +329,12 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 				editorMode.close();
 			}
 
-			logger.debug("Dialog '{}' done job. After cancel is {}.", instance.getTitle(), setOK);
+			logger.debug("Dialog '{}' done job. After cancel is {}.", owner.getTitle(), setOK);
 		} catch (Exception e) {
-			logger.error("Error when applying settings", e);
-			AppHelper.showExceptionDialog("Ошибка при выполнении отмены.", e);
+			AppHelper.showExceptionDialog(this.owner, "Ошибка при выполнении отмены.", e);
 		} finally {
 			cancelledAlready = true;
-			this.instance.setVisible(false);
+			this.owner.setVisible(false);
 		}
 	}
 

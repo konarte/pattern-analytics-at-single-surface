@@ -202,7 +202,7 @@ public class ImageFrameTemplate extends JDialog {
 			if (jPanelImage != null) {
 				jPanelImage.registerFitButton(jCheckBoxScaleBox);
 			} else {
-				AppHelper.showErrorDialog("Internal error. Expected panelImage layout not initialized yet.");
+				AppHelper.showErrorDialog(this, "Internal error. Expected panelImage layout not initialized yet.");
 			}
 			jCheckBoxScaleBox.setText("Масштаб под размеры окна");
 			jCheckBoxScaleBox.setName("scaleButton");

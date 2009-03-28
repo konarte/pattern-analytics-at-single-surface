@@ -87,7 +87,7 @@ public class AppDataStorage {
 		try {
 			return this.listLModulesImpl();
 		} catch (Throwable t) {
-			AppHelper.showExceptionDialog("Error wgeb loading modules list", t);
+			AppHelper.showExceptionDialog(null, "Error wgeb loading modules list", t);
 			return null;
 		}
 	}
@@ -132,7 +132,7 @@ public class AppDataStorage {
 		try {
 			return this.listLFiltersImpl();
 		} catch (Throwable t) {
-			AppHelper.showExceptionDialog("Error wgeb loading filters list", t);
+			AppHelper.showExceptionDialog(null, "Error wgeb loading filters list", t);
 			return null;
 		}
 	}

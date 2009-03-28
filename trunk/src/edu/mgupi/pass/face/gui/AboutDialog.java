@@ -38,7 +38,6 @@ import edu.mgupi.pass.util.Const;
  */
 public class AboutDialog extends JDialog {
 
-
 	/**
 	 * 
 	 */
@@ -179,7 +178,7 @@ public class AboutDialog extends JDialog {
 					try {
 						Desktop.getDesktop().browse(new URI(Const.WEB_PROJECT_PAGE));
 					} catch (Exception e1) {
-						AppHelper.showExceptionDialog("Unexpected eror when opening project link '"
+						AppHelper.showExceptionDialog(AboutDialog.this, "Unexpected eror when opening project link '"
 								+ Const.WEB_PROJECT_PAGE + "'.", e1);
 					}
 				}

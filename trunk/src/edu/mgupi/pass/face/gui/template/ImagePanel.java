@@ -179,13 +179,13 @@ public class ImagePanel extends JPanel implements ActionListener {
 			int width = parent.getWidth();
 			int height = parent.getHeight();
 
-//			if (this.square) {
-//				if (width > height) {
-//					height = width;
-//				} else if (width < height) {
-//					width = height;
-//				}
-//			}
+			//			if (this.square) {
+			//				if (width > height) {
+			//					height = width;
+			//				} else if (width < height) {
+			//					width = height;
+			//				}
+			//			}
 
 			this.setSize(width, height);
 			this.setLocation(0, 0);
@@ -200,13 +200,13 @@ public class ImagePanel extends JPanel implements ActionListener {
 			width = Const.MAIN_IMAGE_WIDTH > width ? width : Const.MAIN_IMAGE_WIDTH;
 			height = Const.MAIN_IMAGE_HEIGHT > height ? height : Const.MAIN_IMAGE_HEIGHT;
 
-//			if (this.square) {
-//				if (width > height) {
-//					height = width;
-//				} else if (width < height) {
-//					width = height;
-//				}
-//			}
+			//			if (this.square) {
+			//				if (width > height) {
+			//					height = width;
+			//				} else if (width < height) {
+			//					width = height;
+			//				}
+			//			}
 
 			this.setPreferredSize(new Dimension(width, height));
 			this.setBounds(0, 0, width, height);

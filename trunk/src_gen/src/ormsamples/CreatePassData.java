@@ -61,10 +61,10 @@ public class CreatePassData {
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : name
 			ledumgupipassdbsurfacesSurfaceClasses.save();
 			edu.mgupi.pass.db.surfaces.Surfaces ledumgupipassdbsurfacesSurfaces = edu.mgupi.pass.db.surfaces.SurfacesFactory.createSurfaces();
-			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : surfaceMode, multiLayer, length, width, height
+			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : surfaceType, multiLayer, length, width, height
 			ledumgupipassdbsurfacesSurfaces.save();
 			edu.mgupi.pass.db.surfaces.SurfaceTypes ledumgupipassdbsurfacesSurfaceTypes = edu.mgupi.pass.db.surfaces.SurfaceTypesFactory.createSurfaceTypes();
-			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : surfaceMaterial, surfaceClass, name
+			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : surfaceClass, name
 			ledumgupipassdbsurfacesSurfaceTypes.save();
 			edu.mgupi.pass.db.surfaces.Materials ledumgupipassdbsurfacesMaterials = edu.mgupi.pass.db.surfaces.MaterialsFactory.createMaterials();
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : magneticConductivity, electricalConduction, name

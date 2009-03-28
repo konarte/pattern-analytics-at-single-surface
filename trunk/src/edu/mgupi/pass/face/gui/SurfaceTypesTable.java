@@ -25,28 +25,26 @@ public class SurfaceTypesTable extends TableEditorTemplate {
 		super(owner, "surfaceTypesTable", "Список типов поверхностей");
 	}
 
-
 	private AbstractEditorTableModel tableModel = null;
 
 	@Override
 	protected AbstractEditorTableModel getTableModelImpl(JTable owner) {
 		if (tableModel == null) {
-			tableModel = new CommonEditorTableModel(owner, SurfaceClassesRecord.class) {
+			tableModel = new CommonEditorTableModel<SurfaceTypes>(owner, SurfaceTypesRecord.class) {
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				protected Object createInstanceImpl() {
+				protected SurfaceTypes createInstanceImpl() {
 					return SurfaceTypesFactory.createSurfaceTypes();
 				}
 
 				@Override
 				protected String[] getColumns() {
-					return new String[] { "ID", "Тип поверхности", "Материал" };
+					return new String[] { "ID", "Класс", "Название", "Материал" };
 				}
 
-				@SuppressWarnings("unchecked")
 				@Override
-				protected List getDataImpl() throws Exception {
+				protected List<SurfaceTypes> getDataImpl() throws Exception {
 					List<SurfaceTypes> types = new ArrayList<SurfaceTypes>();
 					types.addAll(Arrays.asList(SurfaceTypesFactory.listSurfaceTypesByQuery(null, null)));
 					return types;
@@ -54,13 +52,15 @@ public class SurfaceTypesTable extends TableEditorTemplate {
 
 				@Override
 				public Object getValueAt(int rowIndex, int columnIndex) {
-					SurfaceTypes surface = (SurfaceTypes) data.get(rowIndex);
+					SurfaceTypes surface = data.get(rowIndex);
 					switch (columnIndex) {
 					case 0:
 						return surface.getIdSurfaceType();
 					case 1:
-						return surface.getName();
+						return surface.getSurfaceClass().getName();
 					case 2:
+						return surface.getName();
+					case 3:
 						return "-";
 					default:
 						return columnIndex;
@@ -75,8 +75,8 @@ public class SurfaceTypesTable extends TableEditorTemplate {
 	protected void tablePostInit(JTable owner) {
 		AbstractEditorTableModel model = (AbstractEditorTableModel) owner.getModel();
 		model.setHorizontalAlignMode(0, JLabel.CENTER);
-		model.setHorizontalAlignMode(2, JLabel.CENTER);
-		model.setColumnWidth(1, 200, 1);
+		model.setHorizontalAlignMode(3, JLabel.CENTER);
+		model.setColumnWidth(1, 200, 200, 1);
 	}
 
 }

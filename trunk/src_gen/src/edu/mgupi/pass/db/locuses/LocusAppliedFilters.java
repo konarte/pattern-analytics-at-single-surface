@@ -74,8 +74,8 @@ public class LocusAppliedFilters implements Serializable {
 	
 	@Column(name="IdLocusFilter", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D312044C35BD801916")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312044C35BD801916", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31204C98AC1308FD0")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31204C98AC1308FD0", strategy="native")	
 	private int idLocusFilter;
 	
 	@OneToOne(targetEntity=edu.mgupi.pass.db.locuses.LFilters.class)	

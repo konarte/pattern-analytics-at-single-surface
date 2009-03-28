@@ -18,9 +18,6 @@ import java.util.zip.ZipFile;
 import javax.swing.AbstractButton;
 import javax.swing.JMenu;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Common utils class. In common, this class is not required to test.
  * 
@@ -263,7 +260,7 @@ public class Utils {
 		return buffer;
 	}
 
-	private final static Logger logger = LoggerFactory.getLogger(Utils.class);
+	//	private final static Logger logger = LoggerFactory.getLogger(Utils.class);
 
 	public static void addCheckedListener(AbstractButton button, ActionListener listener) {
 
@@ -304,10 +301,10 @@ public class Utils {
 			return null;
 		}
 
-		// Debug line
-		if (logger.isTraceEnabled()) {
-			logger.trace("Search: " + name + " Class: " + parent.getClass() + " Name: " + parent.getName());
-		}
+		//		// Debug line
+		//		if (logger.isTraceEnabled()) {
+		//			logger.trace("Search: " + name + " Class: " + parent.getClass() + " Name: " + parent.getName());
+		//		}
 
 		if (name.equals(parent.getName())) {
 			return parent;
@@ -327,5 +324,5 @@ public class Utils {
 
 		return null;
 	}
-	
+
 }
