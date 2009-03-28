@@ -19,11 +19,14 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
 
+import org.orm.PersistentTransaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.db.surfaces.PassPersistentManager;
 import edu.mgupi.pass.face.gui.AppHelper;
+import edu.mgupi.pass.util.Config;
+import edu.mgupi.pass.util.Config.TransactionMode;
 
 public abstract class RecordEditorTemplate extends JDialog {
 
@@ -71,7 +74,7 @@ public abstract class RecordEditorTemplate extends JDialog {
 
 				@Override
 				protected void cancelImpl() throws Exception {
-					logger.debug("Do cancel for " + workObject);
+					logger.trace("Do cancel for {}.", workObject);
 				}
 
 				@Override
@@ -84,14 +87,13 @@ public abstract class RecordEditorTemplate extends JDialog {
 				@Override
 				protected boolean saveImpl() throws Exception {
 
-					logger.debug("Do save for " + workObject);
-
-					logger.debug("Checking for required fields...");
+					logger.trace("Do save for {}.", workObject);
 
 					if (requiredMap == null) {
 						requiredMap = new HashMap<JTextComponent, JLabel>();
 						setRequiredFields(requiredMap);
 					}
+					logger.trace("Checking for required fields...");
 					for (Map.Entry<JTextComponent, JLabel> comp : requiredMap.entrySet()) {
 						String text = comp.getKey().getText();
 						if (text == null || text.isEmpty()) {
@@ -100,19 +102,30 @@ public abstract class RecordEditorTemplate extends JDialog {
 						}
 					}
 
-					logger.debug("Checking for allowedImpl...");
+					logger.trace("Checking for allowedImpl...");
 					if (!isSaveAllowed(workObject)) {
 						return false;
 					}
 
 					// We do not need to commit\rollback
-					logger.debug("Saving in transaction "
-							+ PassPersistentManager.instance().getSession().getTransaction());
+					logger.trace("Saving in transaction {}.", PassPersistentManager.instance().getSession()
+							.getTransaction());
 					saveFormToObjectImpl(workObject);
+
+					PersistentTransaction transaction = null;
+					if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_EVERY_ROW) {
+						transaction = PassPersistentManager.instance().getSession().beginTransaction();
+					}
 					try {
 						saveObject(workObject);
+						if (transaction != null) {
+							transaction.commit();
+						}
 					} catch (Exception e) {
 						restoreObjectImpl(workObject);
+						if (transaction != null) {
+							transaction.rollback();
+						}
 						throw e;
 					}
 
@@ -136,7 +149,7 @@ public abstract class RecordEditorTemplate extends JDialog {
 		}
 
 		this.workObject = source;
-		logger.debug("Add record " + this.workObject);
+		logger.trace("Add record {}.", this.workObject);
 
 		boolean retOK = false;
 		if (loadFormFromObject(workObject)) {
@@ -160,9 +173,8 @@ public abstract class RecordEditorTemplate extends JDialog {
 		}
 
 		this.workObject = source;
-		logger.debug("Edit record " + this.workObject);
+		logger.trace("Edit record " + this.workObject);
 
-		logger.debug("Do load for " + workObject);
 		if (loadFormFromObject(workObject)) {
 			return getDialogAdapter().openDialog();
 		} else {
@@ -175,13 +187,33 @@ public abstract class RecordEditorTemplate extends JDialog {
 			throw new IllegalArgumentException("Internal error. Source must be not null.");
 		}
 
-		logger.debug("Received " + source.length + " rows for delete...");
+		logger.trace("Received " + source.length + " rows for delete...");
 		if (source.length == 0) {
 			return false;
 		}
 		if (!checkForDeleteAllowed || isDeleteAllowed(source)) {
-			logger.debug("Deleting in transaction " + PassPersistentManager.instance().getSession().getTransaction());
-			deleteObjects(source);
+			logger.trace("Deleting in transaction " + PassPersistentManager.instance().getSession().getTransaction());
+
+			PersistentTransaction transaction = null;
+			if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_EVERY_ROW) {
+				transaction = PassPersistentManager.instance().getSession().beginTransaction();
+			}
+
+			try {
+
+				deleteObjects(source);
+				PassPersistentManager.instance().getSession().flush();
+
+				if (transaction != null) {
+					transaction.commit();
+				}
+
+			} catch (Exception e) {
+				if (transaction != null) {
+					transaction.rollback();
+				}
+				throw e;
+			}
 			return true;
 
 		}

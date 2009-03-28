@@ -66,8 +66,7 @@ public class PlaceImageFilter implements IFilter {
 		int width = source.getWidth();
 		int height = source.getHeight();
 
-		BufferedImage dest = new BufferedImage(width >= newWidth ? width : newWidth, height >= newHeight ? height
-				: newHeight, BufferedImage.TYPE_INT_RGB);
+		BufferedImage dest = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
 
 		int newX = 0;
 		int newY = 0;
