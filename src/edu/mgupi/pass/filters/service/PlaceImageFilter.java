@@ -19,12 +19,18 @@ public class PlaceImageFilter implements IFilter {
 
 	private final static Logger logger = LoggerFactory.getLogger(PlaceImageFilter.class);
 
+	public final static String PLACE_CENTER = "center";
+	public final static String PLACE_TOP_LEFT = "topleft";
+	public final static String PLACE_TOP_RIGHT = "topright";
+	public final static String PLACE_BOTTOM_LEFT = "bottomleft";
+	public final static String PLACE_BOTTOM_RIGHT = "bottomright";
+
 	private Collection<Param> params;
 	private Param WIDTH = new Param("Width", "Ширина", ParamType.INT, 0);
 	private Param HEIGHT = new Param("Height", "Высота", ParamType.INT, 0);
-	private Param PLACE = new Param("Place", "Размещение", ParamType.STRING, "center", new Object[] { "center",
-			"topleft", "topright", "bottomleft", "bottomright" }, new String[] { "По центру", "Слева сверху",
-			"Справа сверху", "Слева снизу", "Справа снизу" });
+	private Param PLACE = new Param("Place", "Размещение", ParamType.STRING, PLACE_CENTER, new Object[] { PLACE_CENTER,
+			PLACE_TOP_LEFT, PLACE_TOP_RIGHT, PLACE_BOTTOM_LEFT, PLACE_BOTTOM_RIGHT }, new String[] { "По центру",
+			"Слева сверху", "Справа сверху", "Слева снизу", "Справа снизу" });
 	private Param BACKGROUND = new Param("Background", "Цвет фона", ParamType.COLOR, Color.WHITE);
 
 	public PlaceImageFilter() {
@@ -61,7 +67,7 @@ public class PlaceImageFilter implements IFilter {
 		String newPlace = (String) PLACE.getValue();
 		Color backGround = (Color) BACKGROUND.getValue();
 
-		logger.debug("Сдвиг изображения {}x{}, " + newPlace + " as " + backGround, newWidth, newHeight);
+		logger.debug("Сдвиг изображения {}x{}, {} as {}.", new Object[] { newWidth, newHeight, newPlace, backGround });
 
 		int width = source.getWidth();
 		int height = source.getHeight();
@@ -90,7 +96,9 @@ public class PlaceImageFilter implements IFilter {
 		}
 
 		Graphics gc = dest.getGraphics();
-		gc.setColor(backGround);
+		if (backGround != null) {
+			gc.setColor(backGround);
+		}
 		gc.fillRect(0, 0, dest.getWidth(), dest.getHeight());
 		gc.drawImage(source, newX, newY, width, height, null);
 

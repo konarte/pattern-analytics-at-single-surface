@@ -46,13 +46,13 @@ public class FilterChainsawTransactionTest {
 		assertTrue(filter == chainsaw.getFilter(0));
 		assertTrue(filter2 == chainsaw.getFilter(1));
 
-		MyFilter filter3 = (MyFilter) chainsaw.appendFilter(MyFilter.class);
+		TestMyFilter filter3 = (TestMyFilter) chainsaw.appendFilter(TestMyFilter.class);
 		assertTrue(filter3 == chainsaw.getFilter(2));
 
 		chainsawTrans = new FilterChainsawTransactional(chainsaw);
 
 		assertFalse(chainsaw.filterList == chainsawTrans.filterList);
-		assertTrue(chainsaw.singleInstanceCaching == chainsawTrans.singleInstanceCaching);
+		assertTrue(chainsaw.getCurrentMode() == chainsawTrans.getCurrentMode());
 
 		Iterator<IFilter> c = chainsaw.filterList.iterator();
 		Iterator<IFilter> t = chainsawTrans.filterList.iterator();
@@ -107,7 +107,7 @@ public class FilterChainsawTransactionTest {
 		IFilter filter2 = (TestFilter) chainsaw.appendFilter(TestFilter.class);
 		assertTrue(filter2 == chainsaw.getFilter(1));
 
-		IFilter filter3 = (MyFilter) chainsaw.appendFilter(MyFilter.class);
+		IFilter filter3 = (TestMyFilter) chainsaw.appendFilter(TestMyFilter.class);
 		assertTrue(filter3 == chainsaw.getFilter(2));
 
 		chainsawTrans = new FilterChainsawTransactional(chainsaw);
@@ -144,7 +144,7 @@ public class FilterChainsawTransactionTest {
 
 		chainsawTrans.commitChanges();
 		filter = (TestFilter) chainsaw.getFilter(0);
-		filter2 = (MyFilter) chainsaw.getFilter(1);
+		filter2 = (TestMyFilter) chainsaw.getFilter(1);
 		filter3 = (TestFilter) chainsaw.getFilter(2);
 
 		assertEquals(filter.getName(), store.name);
@@ -160,12 +160,12 @@ public class FilterChainsawTransactionTest {
 		IFilter filter2 = (TestFilter) chainsaw.appendFilter(TestFilter.class);
 		assertTrue(filter2 == chainsaw.getFilter(1));
 
-		IFilter filter3 = (MyFilter) chainsaw.appendFilter(MyFilter.class);
+		IFilter filter3 = (TestMyFilter) chainsaw.appendFilter(TestMyFilter.class);
 		assertTrue(filter3 == chainsaw.getFilter(2));
 
 		chainsawTrans = new FilterChainsawTransactional(chainsaw);
 
-		chainsawTrans.appendFilter(MyFilter.class);
+		chainsawTrans.appendFilter(TestMyFilter.class);
 
 		FilterStore store = chainsawTrans.getFilterStore(0);
 		FilterStore store2 = chainsawTrans.getFilterStore(1);

@@ -25,6 +25,7 @@ import edu.mgupi.pass.db.locuses.LocusAppliedModuleCriteria;
 import edu.mgupi.pass.db.locuses.LocusAppliedModuleFactory;
 import edu.mgupi.pass.db.surfaces.PassPersistentManager;
 import edu.mgupi.pass.filters.IFilter;
+import edu.mgupi.pass.filters.service.HistogramFilter;
 import edu.mgupi.pass.modules.IModule;
 import edu.mgupi.pass.util.ClassesHelper;
 import edu.mgupi.pass.util.Const;
@@ -76,6 +77,10 @@ public class AutoInit {
 	 * We support moving filters for classes, but only if that filter not used
 	 * in actual data.
 	 * 
+	 * We do not register any filters with prefix 'Test'.
+	 * 
+	 * We do not register any 'service' filter.
+	 * 
 	 * @throws Exception
 	 */
 	private void initRows() throws Exception {
@@ -93,6 +98,14 @@ public class AutoInit {
 
 				LFiltersCriteria fNICriteria = new LFiltersCriteria();
 				for (Class<?> clazz : filterClasses) {
+
+					if (clazz.getSimpleName().startsWith("Test")) {
+						continue; //
+					}
+					if (clazz.getPackage() == HistogramFilter.class.getPackage()) {
+						continue; //
+					}
+
 					IFilter filter = (IFilter) clazz.newInstance();
 					String name = filter.getName();
 					String codename = filter.getClass().getName();

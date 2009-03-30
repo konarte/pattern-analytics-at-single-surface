@@ -21,7 +21,6 @@ public class ClassesHelper {
 	private final static Logger logger = LoggerFactory.getLogger(ClassesHelper.class);
 
 	private final static String CLASSES_PLACE = ".bin.";
-
 	private static Collection<Class<?>> availableClasses = null;
 
 	/**
@@ -41,7 +40,7 @@ public class ClassesHelper {
 
 			URL source = ClassesHelper.class.getProtectionDomain().getCodeSource().getLocation();
 
-			logger.debug("ClassesHelper.getAvailableClasses processing from location " + source);
+			logger.debug("ClassesHelper.getAvailableClasses processing from location {}.", source);
 
 			try {
 				ZipFile zipFile = null;
@@ -107,7 +106,7 @@ public class ClassesHelper {
 	 * @return список классов, которые наследуют/имплементируют переданный
 	 *         <code>instanceOf</code>
 	 */
-	public static synchronized Collection<Class<?>> getAvailableClasses(Class<?> instanceOf) {
+	public static Collection<Class<?>> getAvailableClasses(Class<?> instanceOf) {
 		return getAvailableClasses(null, instanceOf);
 	}
 
@@ -123,7 +122,7 @@ public class ClassesHelper {
 	 *            начиная с какого пакеты выбираем классы
 	 * @return список классов, которые находятся в указанном пакете
 	 */
-	public static synchronized Collection<Class<?>> getAvailableClasses(String packageFrom) {
+	public static Collection<Class<?>> getAvailableClasses(String packageFrom) {
 		return getAvailableClasses(packageFrom, null);
 	}
 
@@ -142,7 +141,7 @@ public class ClassesHelper {
 	 * @return список классов, которые наследуют/имплементируют переданный
 	 *         <code>instanceOf</code> и находятся в указанном пакете
 	 */
-	public static synchronized Collection<Class<?>> getAvailableClasses(String packageFrom, Class<?> instanceOf) {
+	public static Collection<Class<?>> getAvailableClasses(String packageFrom, Class<?> instanceOf) {
 
 		Collection<Class<?>> result = new ArrayList<Class<?>>();
 

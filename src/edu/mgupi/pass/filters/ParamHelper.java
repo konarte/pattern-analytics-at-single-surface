@@ -1,5 +1,6 @@
 package edu.mgupi.pass.filters;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -142,4 +143,21 @@ public class ParamHelper {
 		updateFromMap(params, (Map<String, String>) JSONValue.parseWithException(value));
 	}
 
+	public static Collection<Param> cloneParameters(Collection<Param> sourceParameters)
+			throws CloneNotSupportedException {
+		Collection<Param> cloned = new ArrayList<Param>(sourceParameters.size());
+		for (Param param : sourceParameters) {
+			cloned.add((Param) param.clone());
+		}
+		return cloned;
+	}
+
+	public static void restoreParameterValues(Collection<Param> oldParameters, Collection<Param> newParameters)
+			throws NoSuchParamException, IllegalParameterValueException {
+		for (Param param : oldParameters) {
+			Param storeParam = ParamHelper.getParameter(param.getName(), newParameters);
+			logger.debug(param.getName() + " " + storeParam.getValue() + " -> " + param.getValue());
+			param.setValue(storeParam.getValue());
+		}
+	}
 }

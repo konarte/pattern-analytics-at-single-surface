@@ -56,8 +56,6 @@ public class SplashWindow extends JFrame {
 		initialize(imagePath);
 	}
 
-	private final static String RESOURCE_PATH = "resources/splash/";
-
 	/**
 	 * This method initializes this
 	 * 
@@ -74,7 +72,7 @@ public class SplashWindow extends JFrame {
 		this.setUndecorated(true);
 
 		if (defaultPath == null) {
-			String images[] = Utils.listFilesFromJAR(RESOURCE_PATH, null);
+			String images[] = Utils.listFilesFromJAR(Const.SPLASH_IMAGE_PLACE_DIR, null);
 			if (images != null && images.length > 0) {
 				defaultPath = images[new Random().nextInt(images.length)];
 				logger.debug("Using random image: " + defaultPath);

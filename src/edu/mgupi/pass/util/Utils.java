@@ -94,8 +94,18 @@ public class Utils {
 	 * @throws IOException
 	 */
 	public static String[] listFilesFromJAR(String path, String extension) throws IOException {
+
+		if (path == null) {
+			return null;
+		}
+
 		URL url = Utils.class.getProtectionDomain().getCodeSource().getLocation();
 		if (url != null && url.getPath().endsWith(".jar")) {
+
+			path = Utils.replaceAll(path, "\\", "/");
+			if (!path.endsWith("/")) {
+				path = path + "/";
+			}
 
 			ZipFile file = new ZipFile(url.getPath());
 			ZipEntry entry = file.getEntry(path);
@@ -130,7 +140,7 @@ public class Utils {
 			File files[] = dir.listFiles();
 			Collection<String> fileNames = new ArrayList<String>();
 			for (File file : files) {
-				String fullPath = file.getCanonicalPath().replaceAll("\\\\", "/");
+				String fullPath = Utils.replaceAll(file.getCanonicalPath(), "\\", "/");
 				if (extension == null || fullPath.endsWith(extension)) {
 					fileNames.add(fullPath.substring(fullPath.lastIndexOf(path)));
 				}

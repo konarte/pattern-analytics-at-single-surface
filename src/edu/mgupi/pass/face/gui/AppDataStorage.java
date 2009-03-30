@@ -17,7 +17,9 @@ import edu.mgupi.pass.modules.ModuleException;
 import edu.mgupi.pass.modules.ModuleNotFoundException;
 
 /**
- * Class for store data, using in application
+ * Class for store data, using in application.
+ * 
+ * Main idea -- is checking to add only registered in database module/filter.
  * 
  * @author raidan
  * 
@@ -25,11 +27,16 @@ import edu.mgupi.pass.modules.ModuleNotFoundException;
 public class AppDataStorage {
 
 	private AppDataStorage() {
-		//
+		// singleton
 	}
 
 	private static AppDataStorage instance;
 
+	/**
+	 * Get instance of storage.
+	 * 
+	 * @return {@link AppDataStorage}
+	 */
 	public static synchronized AppDataStorage getInstance() {
 		if (instance == null) {
 			instance = new AppDataStorage();
@@ -37,44 +44,58 @@ public class AppDataStorage {
 		return instance;
 	}
 
-	protected static synchronized void reset() {
-		instance = null;
+	/**
+	 * Special reset method.
+	 */
+	protected static void reset() {
+		if (instance != null) {
+			instance.moduleList = null;
+			instance.filterList = null;
+			instance = null;
+		}
 	}
 
 	private LModules[] moduleList = null;
 	private LFilters[] filterList = null;
 
-	public void checkUsingModule(IModule moduleInstance) throws PersistentException, ModuleException {
-		if (this.searchModuleByInstance(moduleInstance) == null) {
-			throw new ModuleNotFoundException("Module '" + moduleInstance.getClass().getName() + "' ('"
-					+ moduleInstance.getName() + "') is not registered. Unable to use.");
+	/**
+	 * Check using module for use in application. Method will ensure that this
+	 * module is registered in database.
+	 * 
+	 * @param moduleClass
+	 *            class of checking module
+	 * @throws PersistentException
+	 * @throws ModuleException
+	 */
+	public void checkUsingModule(Class<? extends IModule> moduleClass) throws PersistentException, ModuleException {
+		if (this.searchModuleByClass(moduleClass) == null) {
+			throw new ModuleNotFoundException("Module '" + moduleClass.getName()
+					+ "' is not registered. Unable to use.");
 		}
 	}
 
-	public void checkUsingFilter(IFilter filterInstance) throws PersistentException, FilterException {
-		if (this.searchFilterByInstance(filterInstance) == null) {
-			throw new FilterNotFoundException("Filter '" + filterInstance.getClass().getName() + "' ('"
-					+ filterInstance.getName() + "') is not registered. Unable to use.");
+	public void checkUsingFilter(Class<? extends IFilter> filterClass) throws PersistentException, FilterException {
+		if (this.searchFilterByClass(filterClass) == null) {
+			throw new FilterNotFoundException("Filter '" + filterClass.getName()
+					+ "' is not registered. Unable to use.");
 		}
 	}
 
-	public LModules getModuleByInstance(IModule moduleInstance) throws PersistentException, ModuleException {
-		LModules module = this.searchModuleByInstance(moduleInstance);
+	public LModules getModuleByClass(Class<? extends IModule> moduleClass) throws PersistentException, ModuleException {
+		LModules module = this.searchModuleByClass(moduleClass);
 		if (module == null) {
-
-			throw new ModuleNotFoundException("Unable to find registered module '"
-					+ moduleInstance.getClass().getName() + "' ('" + moduleInstance.getName() + "').");
+			throw new ModuleNotFoundException("Unable to find registered module '" + moduleClass.getName() + "'.");
 		}
 		return module;
 	}
 
-	public LModules searchModuleByInstance(IModule moduleInstance) throws PersistentException {
+	public LModules searchModuleByClass(Class<? extends IModule> moduleClass) throws PersistentException {
 
-		if (moduleInstance == null) {
-			throw new IllegalArgumentException("Internal error. 'moduleInstance' must be not null.");
+		if (moduleClass == null) {
+			throw new IllegalArgumentException("Internal error. 'moduleClass' must be not null.");
 		}
 
-		String className = moduleInstance.getClass().getName();
+		String className = moduleClass.getName();
 		for (LModules module : this.listLModulesImpl()) {
 			if (module.getCodename().equals(className)) {
 				return module;
@@ -87,7 +108,7 @@ public class AppDataStorage {
 		try {
 			return this.listLModulesImpl();
 		} catch (Throwable t) {
-			AppHelper.showExceptionDialog(null, "Error wgeb loading modules list", t);
+			AppHelper.showExceptionDialog(null, "Error when loading modules list", t);
 			return null;
 		}
 	}
@@ -113,13 +134,13 @@ public class AppDataStorage {
 		return this.moduleList;
 	}
 
-	public LFilters searchFilterByInstance(IFilter filterInstance) throws PersistentException {
+	public LFilters searchFilterByClass(Class<? extends IFilter> filterClass) throws PersistentException {
 
-		if (filterInstance == null) {
-			throw new IllegalArgumentException("Internal error. 'filterInstance' must be not null.");
+		if (filterClass == null) {
+			throw new IllegalArgumentException("Internal error. 'filterClass' must be not null.");
 		}
 
-		String className = filterInstance.getClass().getName();
+		String className = filterClass.getName();
 		for (LFilters module : this.listLFiltersImpl()) {
 			if (module.getCodename().equals(className)) {
 				return module;
@@ -132,7 +153,7 @@ public class AppDataStorage {
 		try {
 			return this.listLFiltersImpl();
 		} catch (Throwable t) {
-			AppHelper.showExceptionDialog(null, "Error wgeb loading filters list", t);
+			AppHelper.showExceptionDialog(null, "Error when loading filters list", t);
 			return null;
 		}
 	}

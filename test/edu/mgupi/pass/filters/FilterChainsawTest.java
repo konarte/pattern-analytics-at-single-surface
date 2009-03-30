@@ -17,6 +17,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.mgupi.pass.filters.FilterChainsaw.SawMode;
 import edu.mgupi.pass.filters.java.ColorSpaceFilter;
 import edu.mgupi.pass.filters.java.RescaleFilter;
 import edu.mgupi.pass.inputs.TestInputImpl;
@@ -76,7 +77,7 @@ public class FilterChainsawTest {
 		assertTrue(filter == chainsaw.getFilter(0));
 		assertTrue(filter2 == chainsaw.getFilter(1));
 
-		MyFilter my = (MyFilter) chainsaw.appendFilter(MyFilter.class);
+		TestMyFilter my = (TestMyFilter) chainsaw.appendFilter(TestMyFilter.class);
 		assertTrue(my.isInit());
 		assertFalse(my.isDone());
 
@@ -86,6 +87,9 @@ public class FilterChainsawTest {
 		} catch (IllegalArgumentException iae) {
 			System.out.println("Received expected exception: " + iae);
 		}
+
+		// This is OK, just if is not registered in database
+		chainsaw.appendFilter(TestMyFilter.class);
 
 		TestInputImpl source = new TestInputImpl();
 		source.init();
@@ -113,6 +117,15 @@ public class FilterChainsawTest {
 			fail("No IllegalArgumentException!");
 		} catch (IllegalArgumentException iae) {
 			System.out.println("Received expected exception: " + iae);
+		}
+
+		chainsaw.close();
+		chainsaw = new FilterChainsaw(SawMode.USER_EDIT_CHAINSAW);
+		try {
+			chainsaw.appendFilter(TestMyFilter.class);
+			fail("No FilterNotFoundException thrown!");
+		} catch (FilterNotFoundException fne) {
+			System.out.println("Received expected exception: " + fne);
 		}
 	}
 
@@ -323,7 +336,7 @@ public class FilterChainsawTest {
 	@Test
 	public void testFilterSourceCaching() throws Exception {
 		chainsaw.close();
-		chainsaw = new FilterChainsaw(true);
+		chainsaw = new FilterChainsaw(SawMode.SINGLE_INSTANCE);
 
 		TestFilter filter = (TestFilter) chainsaw.appendFilter(TestFilter.class);
 		TestFilter filter2 = (TestFilter) chainsaw.appendFilter(TestFilter.class);

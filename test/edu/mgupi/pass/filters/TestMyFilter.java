@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.util.IInitiable;
 
-public class MyFilter implements IFilter, IInitiable {
+public class TestMyFilter implements IFilter, IInitiable {
 
-	private final static Logger logger = LoggerFactory.getLogger(MyFilter.class);
+	private final static Logger logger = LoggerFactory.getLogger(TestMyFilter.class);
 
 	protected void finalize() throws Throwable {
 		if (!done) {
@@ -24,7 +24,7 @@ public class MyFilter implements IFilter, IInitiable {
 
 	private Collection<Param> parameters = null;
 
-	public MyFilter() {
+	public TestMyFilter() {
 		parameters = new ArrayList<Param>();
 		ParamTest.fillParameters(parameters);
 		Collections.unmodifiableCollection(parameters);

@@ -16,8 +16,8 @@ public class TestInputImpl implements IInput {
 	private boolean init = false;
 
 	protected void finalize() throws Throwable {
-		if (!done) {
-			logger.error("Close not called. Terminating application immediately.");
+		if (init && !done) {
+			new Exception("WARNING!!! Close not called. Terminating application immediately.").printStackTrace();
 			System.exit(1);
 		}
 	}

@@ -10,15 +10,14 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.mgupi.pass.filters.MyFilter;
 import edu.mgupi.pass.filters.TestFilter;
-import edu.mgupi.pass.util.CacheInitiable.MODE;
+import edu.mgupi.pass.filters.TestMyFilter;
 
 public class CacheInitiableTest {
 
 	private final static Logger logger = LoggerFactory.getLogger(CacheInitiableTest.class);
 
-	private CacheInitiable<IInitiable> cache;
+	private AbstractCacheInitiable<IInitiable> cache;
 
 	@Before
 	public void setUp() throws Exception {
@@ -36,10 +35,10 @@ public class CacheInitiableTest {
 
 	@Test
 	public void testGetInstanceSingle() throws Exception {
-		cache = new CacheInitiable<IInitiable>(MODE.SINGLE_INSTANCE);
+		cache = new CacheSingleInstance<IInitiable>();
 		logger.debug("--------------------");
 
-		MyFilter filter = (MyFilter) cache.getInstance(MyFilter.class);
+		TestMyFilter filter = (TestMyFilter) cache.getInstance(TestMyFilter.class);
 		assertNotNull(filter);
 		assertTrue(filter.isInit());
 
@@ -51,7 +50,7 @@ public class CacheInitiableTest {
 		assertNotNull(test2);
 		assertTrue(test == test2);
 
-		MyFilter filter2 = (MyFilter) cache.getInstance(MyFilter.class);
+		TestMyFilter filter2 = (TestMyFilter) cache.getInstance(TestMyFilter.class);
 		assertNotNull(filter2);
 
 		assertTrue(filter == filter2);
@@ -64,18 +63,18 @@ public class CacheInitiableTest {
 
 	@Test
 	public void testGetInstanceMultiple() throws Exception {
-		cache = new CacheInitiable<IInitiable>(MODE.FREE_LISTS);
+		cache = new CacheFreeLists<IInitiable>();
 		logger.debug("--------------------");
 
-		MyFilter filter = (MyFilter) cache.getInstance(MyFilter.class);
+		TestMyFilter filter = (TestMyFilter) cache.getInstance(TestMyFilter.class);
 		assertNotNull(filter);
 		assertTrue(filter.isInit());
 
-		MyFilter filter2 = (MyFilter) cache.getInstance(MyFilter.class);
+		TestMyFilter filter2 = (TestMyFilter) cache.getInstance(TestMyFilter.class);
 		assertNotNull(filter2);
 		assertTrue(filter2.isInit());
 
-		MyFilter filter3 = (MyFilter) cache.getInstance(MyFilter.class);
+		TestMyFilter filter3 = (TestMyFilter) cache.getInstance(TestMyFilter.class);
 		assertNotNull(filter3);
 		assertTrue(filter3.isInit());
 
@@ -92,22 +91,22 @@ public class CacheInitiableTest {
 
 	@Test
 	public void testPutDeletedSingle() throws Exception {
-		cache = new CacheInitiable<IInitiable>(MODE.SINGLE_INSTANCE);
+		cache = new CacheSingleInstance<IInitiable>();
 		logger.debug("--------------------");
 
-		MyFilter filter = (MyFilter) cache.getInstance(MyFilter.class);
+		TestMyFilter filter = (TestMyFilter) cache.getInstance(TestMyFilter.class);
 		assertNotNull(filter);
 		assertTrue(filter.isInit());
 
-		MyFilter filter2 = (MyFilter) cache.getInstance(MyFilter.class);
+		TestMyFilter filter2 = (TestMyFilter) cache.getInstance(TestMyFilter.class);
 		assertNotNull(filter2);
 
 		assertTrue(filter == filter2);
 
-		cache.putDeleted(filter);
+		cache.releaseInstance(filter);
 		assertFalse(filter.isDone());
 
-		MyFilter filter3 = (MyFilter) cache.getInstance(MyFilter.class);
+		TestMyFilter filter3 = (TestMyFilter) cache.getInstance(TestMyFilter.class);
 		assertNotNull(filter3);
 		assertTrue(filter == filter2);
 		assertTrue(filter == filter3);
@@ -119,18 +118,18 @@ public class CacheInitiableTest {
 
 	@Test
 	public void testPutDeletedMultiple() throws Exception {
-		cache = new CacheInitiable<IInitiable>(MODE.FREE_LISTS);
+		cache = new CacheFreeLists<IInitiable>();
 		logger.debug("--------------------");
 
-		MyFilter filter = (MyFilter) cache.getInstance(MyFilter.class);
+		TestMyFilter filter = (TestMyFilter) cache.getInstance(TestMyFilter.class);
 		assertNotNull(filter);
 		assertTrue(filter.isInit());
 
-		MyFilter filter2 = (MyFilter) cache.getInstance(MyFilter.class);
+		TestMyFilter filter2 = (TestMyFilter) cache.getInstance(TestMyFilter.class);
 		assertNotNull(filter2);
 		assertTrue(filter2.isInit());
 
-		MyFilter filter3 = (MyFilter) cache.getInstance(MyFilter.class);
+		TestMyFilter filter3 = (TestMyFilter) cache.getInstance(TestMyFilter.class);
 		assertNotNull(filter3);
 		assertTrue(filter3.isInit());
 
@@ -138,35 +137,35 @@ public class CacheInitiableTest {
 		assertFalse(filter == filter3);
 		assertFalse(filter2 == filter3);
 
-		cache.putDeleted(filter);
-		MyFilter filter11 = (MyFilter) cache.getInstance(MyFilter.class);
+		cache.releaseInstance(filter);
+		TestMyFilter filter11 = (TestMyFilter) cache.getInstance(TestMyFilter.class);
 		assertNotNull(filter11);
 		assertTrue(filter11.isInit());
 
 		assertTrue(filter == filter11);
 
-		cache.putDeleted(filter);
-		cache.putDeleted(filter);
-		cache.putDeleted(filter2);
+		cache.releaseInstance(filter);
+		cache.releaseInstance(filter);
+		cache.releaseInstance(filter2);
 
-		MyFilter filter12 = (MyFilter) cache.getInstance(MyFilter.class);
+		TestMyFilter filter12 = (TestMyFilter) cache.getInstance(TestMyFilter.class);
 		assertNotNull(filter12);
 		assertTrue(filter == filter12);
 		assertTrue(filter12.isInit());
 
-		MyFilter filter21 = (MyFilter) cache.getInstance(MyFilter.class);
+		TestMyFilter filter21 = (TestMyFilter) cache.getInstance(TestMyFilter.class);
 		assertNotNull(filter21);
 		assertTrue(filter2 == filter21);
 		assertTrue(filter21.isInit());
 
-		MyFilter filter6 = (MyFilter) cache.getInstance(MyFilter.class);
+		TestMyFilter filter6 = (TestMyFilter) cache.getInstance(TestMyFilter.class);
 		assertNotNull(filter6);
 		assertFalse(filter2 == filter6);
 		assertTrue(filter6.isInit());
 
-		cache.putDeleted(filter21);
+		cache.releaseInstance(filter21);
 
-		MyFilter filter22 = (MyFilter) cache.getInstance(MyFilter.class);
+		TestMyFilter filter22 = (TestMyFilter) cache.getInstance(TestMyFilter.class);
 		assertNotNull(filter22);
 		assertTrue(filter2 == filter22);
 		assertTrue(filter21 == filter22);

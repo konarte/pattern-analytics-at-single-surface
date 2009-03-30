@@ -5,8 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.util.Locale;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -24,6 +24,7 @@ import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Const;
 import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
+import edu.mgupi.pass.util.Utils;
 
 /**
  * Entry class for application. We set up file-lock (to prevent multiple
@@ -53,8 +54,11 @@ public class Application {
 
 			UIManager.setLookAndFeel(newLookAndFeel);
 		} catch (Exception e) {
-			// If not found -- we don't care ^_^
-			// OK, choose cross-platform LaF
+			/*
+			 * If not found -- we don't care ^_^.
+			 * 
+			 * OK, choose cross-platform LaF.
+			 */
 			logger.debug("Applying stardard look and feel by exception ({})", UIManager
 					.getCrossPlatformLookAndFeelClassName());
 
@@ -66,7 +70,10 @@ public class Application {
 	// Name for file-lock
 	private final static String LOCK_FILE = "app.lock";
 
-	private void run() throws Exception {
+	private FileChannel channel;
+	private FileLock lock;
+
+	private void run() {
 
 		Secundomer applicationRun = SecundomerList.registerSecundomer("Application run");
 		final Secundomer applicationTotal = SecundomerList.registerSecundomer("Application total work");
@@ -75,30 +82,43 @@ public class Application {
 		applicationTotal.start();
 
 		// Attempt to lock file
-		final FileChannel channel = new FileOutputStream(LOCK_FILE, false).getChannel();
-		final FileLock lock = channel.tryLock();
+		try {
+			channel = new FileOutputStream(LOCK_FILE, false).getChannel();
+			lock = channel.tryLock();
+		} catch (Exception e) {
+			logger.error("Error when try to lock file. At this point we continue work.", e);
+		}
 
-		// Shutdown hook will automatically close locked channel (if it was locked)
-		// Then display some additional debug info
+		/*
+		 * Shutdown hook will automatically close locked channel (if it was
+		 * locked).
+		 * 
+		 * Then display some additional debug info.
+		 */
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 			public void run() {
 				applicationTotal.stop();
-				SecundomerList.printToOutput(System.out);
+				SecundomerList.printToDebugLogger(logger);
+
 				CacheIFactory.close();
 				try {
 					if (lock != null) {
 						lock.release();
+						lock = null;
 					}
-					channel.close();
+					if (channel != null) {
+						channel.close();
+						channel = null;
+					}
+					new File(LOCK_FILE).delete();
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.error("Error when releasing file lock.", e);
 				}
-				new File(LOCK_FILE).delete();
 
 				try {
 					PassPersistentManager.instance().disposePersistentManager();
 				} catch (PersistentException e) {
-					e.printStackTrace();
+					logger.error("Error when closing Hibernate.", e);
 				}
 
 				logger.info("Shutdown " + Const.PROGRAM_NAME_FULL);
@@ -106,25 +126,36 @@ public class Application {
 		}));
 
 		SplashWindow splash = null;
-		MainFrame frame = null;
 		try {
 
-			// Open splash
-			// Splash is not a toy -- loading took at list 2 seconds!
+			byte[] iconData = null;
 			try {
-				splash = new SplashWindow();
+				iconData = Utils.loadFromResource(Const.FORM_ICON_IMAGE_PATH);
+				ImageIcon icon = new ImageIcon(iconData);
+				AppHelper.getInstance().setWindowsIcon(icon.getImage());
+			} catch (IOException io) {
+				logger.error("Error when setting image icon.", io);
+			}
+
+			/*
+			 * Open splash window.
+			 * 
+			 * Splash is not a toy -- loading took's at list 2-3 seconds!
+			 * 
+			 * Big time is initializing Hibernate, but loading and filling data
+			 * by all caches took some time too.
+			 */
+			try {
+				splash = new SplashWindow(Const.SPLASH_IMAGE_PATH);
 				splash.setSplashText("Загрузка...");
 				splash.setVisible(true);
 			} catch (Exception e) {
 				applicationRun.stop();
 				AppHelper.showExceptionDialog(null, "Ошибка при инициализации приложения.", e);
-				logger.error("Application error", e);
-				throw e;
+				return; //
 			}
 
-			// Set locale by default to English
-			Locale.setDefault(Locale.ENGLISH);
-
+			// We do not change local
 			String newLookAndFeel = Config.getInstance().getLookAndFeel();
 
 			try {
@@ -134,36 +165,33 @@ public class Application {
 			}
 
 			// We want to make good impression, isn't it?
-			if (lock == null) {
-				logger.error("Attempt to open second instance.");
+			if (channel != null && lock == null) {
 				AppHelper.showErrorDialog(null,
 						"Экземпляр приложения уже запущен. Пожалуйста, закройте предыдущий экземпляр.",
 						"Ошибка при запуске");
 				System.exit(0);
-
 			}
 
 			// Hibernating...
 			splash.setSplashText("Подключение и инициализация БД...");
 
-			logger.info("Initializing Hibernate...");
-			PassPersistentManager.instance();
-
-			splash.setSplashText("Загрузка приложения...");
 			try {
+				logger.info("Initializing Hibernate...");
+				PassPersistentManager.instance();
+
+				splash.setSplashText("Загрузка приложения...");
 
 				// Well, initialization
-				frame = (MainFrame) AppHelper.getInstance().getFrameImpl(MainFrame.class);
+				MainFrame frame = (MainFrame) AppHelper.getInstance().getFrameImpl(MainFrame.class);
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 				// Caching all using windows -- this is good and fast (about 200-300 msec diff)
 				frame.preCache();
 				frame.setVisible(true);
-			} catch (Exception e) {
+			} catch (Throwable t) {
 				applicationRun.stop();
-				AppHelper.showExceptionDialog(null, "Ошибка при загрузке приложения.", e);
-				logger.error("Application error", e);
-				throw e;
+				AppHelper.showExceptionDialog(null, "Ошибка при загрузке приложения.", t);
+				return; //
 			}
 		} finally {
 			if (splash != null) {
@@ -181,10 +209,13 @@ public class Application {
 	 * Entry point.
 	 * 
 	 * @param args
-	 * @throws Exception
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 		logger.info("Starting " + Const.PROGRAM_NAME_FULL);
-		new Application().run();
+		try {
+			new Application().run();
+		} catch (Throwable t) {
+			AppHelper.showExceptionDialog(null, "Критическая ошибка при запуске приложения.", t);
+		}
 	}
 }

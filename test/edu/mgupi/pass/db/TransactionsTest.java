@@ -51,6 +51,27 @@ public class TransactionsTest {
 		PassPersistentManager.instance().disposePersistentManager();
 	}
 
+	//	@Test
+	//	public void testConnection() throws Exception {
+	//		DriverManager.registerDriver(new Driver());
+	//
+	//		DriverManager.registerDriver(new com.mysql.jdbc.Driver());
+	//		Properties properties = new Properties();
+	//		properties.put("user", "pass");
+	//		properties.put("password", "adesroot");
+	//
+	//		Connection conn = (Connection) DriverManager.getConnection(
+	//				"jdbc:mysql://localhost:3301/pass_db", properties);
+	//		
+	//		System.out.println("Connection acquired: " + conn);
+	//		
+	//		assertNotNull(conn);
+	//		assertFalse(conn.isClosed());
+	//
+	//		conn.close();
+	//
+	//	}
+	//
 	@Test
 	public void testSampleTwoTransactions() throws Exception {
 		System.out.println("Begin first transaction");
@@ -142,9 +163,9 @@ public class TransactionsTest {
 			System.out.println("Commit types...");
 			transaction.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
 			//transaction2.rollback();
 			transaction.rollback();
+			throw e;
 			//		} finally {
 			//
 			//			//session.close();

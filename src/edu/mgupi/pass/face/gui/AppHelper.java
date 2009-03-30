@@ -6,6 +6,7 @@ import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
+import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -30,17 +31,14 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import org.orm.PersistentException;
-import org.orm.PersistentManager.SessionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.mgupi.pass.db.surfaces.PassPersistentManager;
 import edu.mgupi.pass.face.IProgress;
-import edu.mgupi.pass.face.gui.template.RecordEditorTemplate;
 import edu.mgupi.pass.util.Config;
+import edu.mgupi.pass.util.IInitiable;
+import edu.mgupi.pass.util.IRefreshable;
 import edu.mgupi.pass.util.Utils;
-import edu.mgupi.pass.util.Config.TransactionMode;
 
 /**
  * Class for application support -- make easy change LookAndFeel, set window
@@ -54,7 +52,7 @@ public class AppHelper {
 	private final static Logger logger = LoggerFactory.getLogger(AppHelper.class);
 
 	private AppHelper() {
-		//
+		// singleton
 	}
 
 	private static AppHelper instance;
@@ -74,12 +72,12 @@ public class AppHelper {
 	/**
 	 * Special method for reset all cached data.
 	 */
-	public static synchronized void reset() {
+	public static void reset() {
 		if (instance != null) {
 
 			for (Window window : instance.windowsCollection.values()) {
-				if (window instanceof RecordEditorTemplate) {
-					((RecordEditorTemplate<?>) window).close();
+				if (window instanceof IInitiable) {
+					((IInitiable) window).close();
 				}
 			}
 
@@ -89,6 +87,35 @@ public class AppHelper {
 			instance = null;
 		}
 		AppDataStorage.reset();
+	}
+
+	public static void printCache() {
+		if (instance != null) {
+			try {
+				instance.cachedLock.lock();
+				instance.componentsLock.lock();
+
+				for (Map.Entry<Class<? extends Window>, Window> entry : instance.windowsCollection.entrySet()) {
+					logger.debug("-- Cached window instance of " + entry.getKey() + " = " + entry.getValue().getName()
+							+ " (" + entry.getValue() + ")");
+				}
+				for (Window window : instance.additionalWindows) {
+					logger.debug("-- Additional window instance " + window.getName() + " (" + window + ")");
+				}
+				for (Component comp : instance.components) {
+					logger.debug("-- Additional component " + comp.getName() + " (" + comp + ")");
+				}
+			} finally {
+				instance.cachedLock.unlock();
+				instance.componentsLock.unlock();
+			}
+		}
+	}
+
+	private Image windowsIcon;
+
+	public void setWindowsIcon(Image windowsIcon) {
+		this.windowsIcon = windowsIcon;
 	}
 
 	private IProgress progressInterface;
@@ -171,6 +198,8 @@ public class AppHelper {
 	 * Register additional window (no caching and no return same instance after
 	 * that)
 	 * 
+	 * @param parent
+	 * 
 	 * @param windowType
 	 *            class of window
 	 * 
@@ -178,8 +207,29 @@ public class AppHelper {
 	 * @throws Exception
 	 *             on any error
 	 */
-	public Window registerAdditionalWindow(Class<? extends Window> windowType) throws Exception {
-		return this.getWindowImpl(windowType, true);
+	public Window registerAdditionalWindow(Frame parent, Class<? extends Window> windowType) throws Exception {
+		return this.getWindowImpl(parent, windowType, true);
+	}
+
+	/**
+	 * Unregister additional window (remove from cache and dispose).
+	 * 
+	 * @param windowInstance
+	 * @return true if windows was successfully unregistered and disposed
+	 */
+	public boolean unregisterAdditionalWindow(Window windowInstance) {
+		cachedLock.lock();
+		try {
+			if (additionalWindows.remove(windowInstance)) {
+				logger.trace("Removing instance of additional window {}.", windowInstance);
+				windowInstance.setVisible(false);
+				windowInstance.dispose();
+				return true;
+			}
+			return false;
+		} finally {
+			cachedLock.unlock();
+		}
 	}
 
 	/**
@@ -192,6 +242,8 @@ public class AppHelper {
 	 *         same windowType)
 	 * @throws Exception
 	 *             on any error
+	 * 
+	 * @see #getWindowImpl(Class, boolean)
 	 */
 	public Window getFrameImpl(Class<? extends Frame> windowType) throws Exception {
 		return this.getWindowImpl(windowType, false);
@@ -199,11 +251,14 @@ public class AppHelper {
 
 	/**
 	 * Create new instance or return cached. If {@link Exception} was thrown --
-	 * it will be shown in messagebox, but not throwing.
+	 * it will be shown in message box, but not throwing upper.
 	 * 
 	 * @param windowType
+	 *            class of window
 	 * @return instance of {@link Window} (the same as on previous call with
 	 *         same windowType)
+	 * 
+	 * @see #getWindowImpl(Class, boolean)
 	 */
 	public Window getDialog(Class<? extends Dialog> windowType) {
 		try {
@@ -225,6 +280,7 @@ public class AppHelper {
 	 *         same windowType)
 	 * @throws Exception
 	 *             on any error
+	 * @see #getWindowImpl(Class, boolean)
 	 */
 	public Window getDialogImpl(Class<? extends Dialog> windowType) throws Exception {
 		return this.getWindowImpl(windowType, false);
@@ -235,16 +291,43 @@ public class AppHelper {
 	private volatile Collection<Window> additionalWindows = new ArrayList<Window>();
 
 	/**
-	 * Implementation
+	 * Implementation of get-o-create-window, create without parent.
 	 * 
 	 * @param windowType
+	 *            class of creating window
 	 * @param additionalWindow
-	 * @return
+	 *            true if instance must be registered as additional window (with
+	 *            with flag application will be always create new instance of
+	 *            given class)
+	 * @return instance of {@link Window} (the same as on previous call with
+	 *         same windowType)
 	 * @throws Exception
 	 *             on any error
+	 * @see #getWindowImpl(Frame, Class, boolean)
 	 */
 	protected synchronized Window getWindowImpl(Class<? extends Window> windowType, boolean additionalWindow)
 			throws Exception {
+		return getWindowImpl(null, windowType, additionalWindow);
+	}
+
+	/**
+	 * Implementation of get-o-create window.
+	 * 
+	 * @param parent
+	 *            window, primary owner of this creating window
+	 * @param windowType
+	 *            class of creating window
+	 * @param additionalWindow
+	 *            true if instance must be registered as additional window (with
+	 *            with flag application will be always create new instance of
+	 *            given class)
+	 * @return instance of {@link Window} (the same as on previous call with
+	 *         same windowType)
+	 * @throws Exception
+	 *             on any error
+	 */
+	protected synchronized Window getWindowImpl(Frame parent, Class<? extends Window> windowType,
+			boolean additionalWindow) throws Exception {
 
 		cachedLock.lock();
 		try {
@@ -265,7 +348,7 @@ public class AppHelper {
 
 				// Using constructor with Frame, but give them shit :) 
 				constructor = windowType.getConstructor(Frame.class);
-				window = constructor.newInstance((Frame) null);
+				window = constructor.newInstance((Frame) parent);
 
 				final Window myWindow = window;
 				window.addWindowListener(new WindowAdapter() {
@@ -278,13 +361,16 @@ public class AppHelper {
 				window.setLocationRelativeTo(window.getOwner());
 
 			}
+
+			if (this.windowsIcon != null) {
+				window.setIconImage(windowsIcon);
+			}
 			if (additionalWindow) {
 				// Register in special collection
 				logger.trace("Return force new instance of {} :: {}.", windowType, window);
 				additionalWindows.add(window);
 			} else {
 				// Register in cache
-
 				logger.trace("Cache instance of {} :: {}.", windowType, window);
 
 				windowsCollection.put(windowType, window);
@@ -299,7 +385,7 @@ public class AppHelper {
 
 	/**
 	 * Return count of windows registered by
-	 * {@link #registerAdditionalWindow(Class)} or
+	 * {@link #registerAdditionalWindow(Frame, Class)} or
 	 * {@link #getWindowImpl(Class, boolean)} with true flag
 	 * 
 	 * @return count of additional windows
@@ -368,6 +454,11 @@ public class AppHelper {
 			// Updating all opened components
 			UIManager.setLookAndFeel(className);
 			for (Window window : windowsCollection.values()) {
+
+				if (window instanceof IRefreshable) {
+					((IRefreshable) window).refresh();
+				}
+
 				SwingUtilities.updateComponentTreeUI(window);
 			}
 			for (Window window : additionalWindows) {
@@ -382,29 +473,34 @@ public class AppHelper {
 		}
 	}
 
-	public static void setDatabaseTransactionMode(TransactionMode transactionMode) throws PersistentException {
-		SessionType session = PassPersistentManager.instance().getSessionType();
-		System.out.println("Current session type: "
-				+ (session == SessionType.APP_BASE ? "app based" : (session == SessionType.THREAD_BASE ? "thread base"
-						: "other")));
-		//		SessionType sessionType = transactionMode == TransactionMode.COMMIT_BULK ? SessionType.ADVANCED_APP_BASE
-		//				: SessionType.THREAD_BASE;
-		//		if (PassPersistentManager.instance().getSessionType() != sessionType) {
-		//
-		//			logger.debug("Switching persistance type. Disposing persistance manager first...");
-		//
-		//			PassPersistentManager.instance().disposePersistentManager();
-		//			PassPersistentManager.setSessionType(sessionType);
-		//		}
-	}
+	// do not use!
+	//	protected static void setDatabaseTransactionMode(TransactionMode transactionMode) throws PersistentException {
+	//		SessionType session = PassPersistentManager.instance().getSessionType();
+	//		System.out.println("Warning. Skip settings session type. Current session type: "
+	//				+ (session == SessionType.APP_BASE ? "app based" : (session == SessionType.THREAD_BASE ? "thread base"
+	//						: "other")));
+	//		//		SessionType sessionType = transactionMode == TransactionMode.COMMIT_BULK ? SessionType.ADVANCED_APP_BASE
+	//		//				: SessionType.THREAD_BASE;
+	//		//		if (PassPersistentManager.instance().getSessionType() != sessionType) {
+	//		//
+	//		//			logger.debug("Switching persistance type. Disposing persistance manager first...");
+	//		//
+	//		//			PassPersistentManager.instance().disposePersistentManager();
+	//		//			PassPersistentManager.setSessionType(sessionType);
+	//		//		}
+	//	}
 
 	/**
-	 * 
+	 * Saving positions for all registered windows. Usually called when
+	 * application done.
 	 */
 	public void saveWindowPositions() {
 		componentsLock.lock();
 		cachedLock.lock();
 		try {
+
+			logger.debug("Saving all registered windows position into config.");
+
 			for (Window window : windowsCollection.values()) {
 				Config.getInstance().storeWindowPosition(window);
 			}
@@ -418,10 +514,11 @@ public class AppHelper {
 	}
 
 	/**
-	 * Show dialog with {@link Throwable} data
+	 * Show dialog with {@link Throwable} data. Automatically printing stack
+	 * trace of error.
 	 * 
 	 * @param parent
-	 *            TODO
+	 *            window, where exception was thrown
 	 * @param message
 	 *            text for display at head of message.
 	 * @param e
@@ -458,16 +555,46 @@ public class AppHelper {
 		}
 	}
 
+	/**
+	 * 
+	 * Show error dialog to user. Automatically print error message.
+	 * 
+	 * @param parent
+	 *            window, where error was occurs
+	 * @param message
+	 *            error message
+	 * @param title
+	 *            title for message
+	 */
 	public static void showErrorDialog(Component parent, String message, String title) {
 		logger.error(message);
 		JOptionPane.showMessageDialog(parent, Utils.splitStingBySlices(message, 100, "\n"), title,
 				JOptionPane.ERROR_MESSAGE);
 	}
 
+	/**
+	 * Show error dialog to user. Use default title for message box.
+	 * 
+	 * @param parent
+	 *            window, where error was occurs
+	 * @param message
+	 *            error message
+	 * 
+	 * @see #showErrorDialog(Component, String, String)
+	 */
 	public static void showErrorDialog(Component parent, String message) {
 		showErrorDialog(parent, message, "Ошибка");
 	}
 
+	/**
+	 * Show information about required field.
+	 * 
+	 * @param parent
+	 *            window, where error was occurs
+	 * @param fieldName
+	 *            visual name of field, required to fill
+	 * @see #showErrorDialog(Component, String, String)
+	 */
 	public static void showFieldRequiredDialog(Component parent, String fieldName) {
 		showErrorDialog(parent, "Поле '" + fieldName + "' обязательно для заполнения.", "Ожидание ввода");
 	}

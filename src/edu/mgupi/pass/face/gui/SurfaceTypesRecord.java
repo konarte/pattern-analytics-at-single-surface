@@ -1,7 +1,6 @@
 package edu.mgupi.pass.face.gui;
 
 import java.awt.Frame;
-import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.Collection;
 
@@ -51,7 +50,7 @@ public class SurfaceTypesRecord extends RecordEditorTemplate<SurfaceTypes> {
 	}
 
 	@Override
-	protected Criteria getSaveAllowCriteria(SurfaceTypes object, String newValue) throws Exception {
+	protected Criteria getUniqueCheckCriteria(SurfaceTypes object, String newValue) throws Exception {
 		SurfaceTypesCriteria criteria = new SurfaceTypesCriteria();
 		criteria.name.eq(newValue);
 		if (object.getIdSurfaceType() != 0) {
@@ -102,17 +101,7 @@ public class SurfaceTypesRecord extends RecordEditorTemplate<SurfaceTypes> {
 
 	protected JPanel getFormPanel() {
 		if (formPanel == null) {
-			formPanel = new JPanel();
-			GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
-			gridBagConstraints4.gridx = 0;
-			gridBagConstraints4.anchor = GridBagConstraints.NORTHWEST;
-			gridBagConstraints4.weightx = 1.0D;
-			gridBagConstraints4.weighty = 1.0D;
-			gridBagConstraints4.fill = GridBagConstraints.HORIZONTAL;
-			gridBagConstraints4.gridy = 0;
-			formPanel.setSize(300, 200);
-			formPanel.setLayout(new GridBagLayout());
-			formPanel.add(getFormPanelData(), gridBagConstraints4);
+			formPanel = super.createDefaultFormPanel(getJPanelPlace());
 		}
 		return formPanel;
 	}
@@ -122,7 +111,7 @@ public class SurfaceTypesRecord extends RecordEditorTemplate<SurfaceTypes> {
 	 * 
 	 * @return javax.swing.JPanel
 	 */
-	private JPanel getFormPanelData() {
+	private JPanel getJPanelPlace() {
 		if (jPanelPlace == null) {
 
 			jPanelPlace = new JPanel();

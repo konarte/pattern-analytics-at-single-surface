@@ -23,16 +23,16 @@ public class CacheIFactoryTest {
 
 	@Test
 	public void testInstances() throws Exception {
-		CacheInitiable<IFilter> data = CacheIFactory.getFreeListFilters();
+		AbstractCacheInitiable<IFilter> data = CacheIFactory.getFreeListFilters();
 		assertNotNull(data);
 		assertTrue(data == CacheIFactory.getFreeListFilters());
 
-		CacheInitiable<IFilter> data2 = CacheIFactory.getSingleInstanceFilters();
+		AbstractCacheInitiable<IFilter> data2 = CacheIFactory.getSingleInstanceFilters();
 		assertNotNull(data2);
 		assertFalse(data == data2);
 		assertTrue(data2 == CacheIFactory.getSingleInstanceFilters());
 
-		CacheInitiable<IModule> data3 = CacheIFactory.getSingleInstanceModules();
+		AbstractCacheInitiable<IModule> data3 = CacheIFactory.getSingleInstanceModules();
 		assertNotNull(data3);
 		assertTrue(data3 == CacheIFactory.getSingleInstanceModules());
 

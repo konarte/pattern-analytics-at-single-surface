@@ -41,7 +41,7 @@ public class MainFrameTest {
 
 	@Before
 	public void setUp() throws Exception {
-		Config.setDebugInstance();
+		Config.getInstance().setDebugInstance();
 
 		frame = (MainFrame) AppHelper.getInstance().getFrameImpl(MainFrame.class);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -119,32 +119,37 @@ public class MainFrameTest {
 		SwingTestHelper.waitWhile(new WaitCondition() {
 			@Override
 			public boolean keepWorking() {
-				return !infoLabel.getText().equals("425x640 24 bpp");
+				return !infoLabel.getText().equals("");
 			}
 		});
+
+		final String oldLabel = infoLabel.getText();
 
 		infoLabel.setText("");
 		tabbed.setSelectedIndex(1);
 		SwingTestHelper.waitWhile(new WaitCondition() {
 			@Override
 			public boolean keepWorking() {
-				return !infoLabel.getText().equals("1024x1024 8 bpp, 1:1.6");
+				return !infoLabel.getText().equals(oldLabel);
 			}
 		});
+		
+		final String oldLabel2 = infoLabel.getText();
 
 		frame.mainModuleProcessor.getChainsaw().removeAllFilters();
 		frame.filtersModel.updateFiltersImpl();
 		frame.restartProcessingBySource();
 
+		infoLabel.setText("");
 		tabbed.setSelectedIndex(1);
 		SwingTestHelper.waitWhile(new WaitCondition() {
 			@Override
 			public boolean keepWorking() {
-				return !infoLabel.getText().equals("1024x1024 24 bpp, 1:1.6");
+				return !infoLabel.getText().equals(oldLabel2);
 			}
 		});
 
-		final JCheckBox scaleButton = (JCheckBox) Utils.getChildNamed(frame, "scaleButton");
+		final JCheckBox scaleButton = (JCheckBox) Utils.getChildNamed(frame, Config.DEFAULT_SCALE_BUTTON_NAME);
 		assertNotNull(scaleButton);
 		assertFalse(scaleButton.isSelected());
 

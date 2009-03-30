@@ -8,6 +8,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -32,7 +33,7 @@ public class SingleFilePick implements IInput {
 
 	public void init() {
 		//
-		logger.debug("Init single file pick.");
+		logger.debug("{}. Init single file pick.", this);
 
 		chooser = new JFileChooser();
 		AppHelper.getInstance().registerAdditionalComponent(chooser);
@@ -40,8 +41,9 @@ public class SingleFilePick implements IInput {
 		chooser.setCurrentDirectory(new File("."));
 		chooser.setMultiSelectionEnabled(false);
 
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("All suppored image types", ImageIO
-				.getReaderFormatNames()));
+		String formatNames[] = ImageIO.getReaderFileSuffixes();
+		chooser.addChoosableFileFilter(new FileNameExtensionFilter("Все поддерживаемые изображения "
+				+ Arrays.toString(formatNames), formatNames));
 		chooser.setAccessory(new ImagePreviewer(chooser));
 
 	}
@@ -77,7 +79,7 @@ public class SingleFilePick implements IInput {
 
 	public void close() {
 		if (chooser != null) {
-			logger.debug("Closing single file pick.");
+			logger.debug("{}. Close single file pick.", this);
 			chooser.removeAll();
 			AppHelper.getInstance().unregisterAdditionalComponent(chooser);
 			chooser = null;

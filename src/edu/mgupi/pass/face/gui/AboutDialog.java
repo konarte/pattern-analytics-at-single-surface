@@ -3,6 +3,7 @@ package edu.mgupi.pass.face.gui;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Desktop;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
@@ -27,7 +28,6 @@ import javax.swing.WindowConstants;
 
 import edu.mgupi.pass.face.gui.template.AbstractDialogAdapter;
 import edu.mgupi.pass.face.gui.template.JTableReadOnly;
-import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Const;
 
 /**
@@ -66,12 +66,12 @@ public class AboutDialog extends JDialog {
 	 * 
 	 */
 	private void initialize() {
-		this.setSize(462, 526);
+		this.setSize(500, 550);
+		this.setMinimumSize(new Dimension(500, 550));
 		this.setName("aboutDialog");
 		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		this.setTitle("О программе...");
 		this.setContentPane(getJContentPane());
-		Config.getInstance().loadWindowPosition(this);
 	}
 
 	/**

@@ -10,8 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.face.gui.AppDataStorage;
+import edu.mgupi.pass.util.AbstractCacheInitiable;
 import edu.mgupi.pass.util.CacheIFactory;
-import edu.mgupi.pass.util.CacheInitiable;
 import edu.mgupi.pass.util.IInitiable;
 
 /**
@@ -29,21 +29,36 @@ public class FilterChainsaw {
 
 	protected List<IFilter> filterList = new ArrayList<IFilter>();
 
-	private CacheInitiable<IFilter> cacheInstance = null;
-	protected boolean singleInstanceCaching = false;
+	private AbstractCacheInitiable<IFilter> cacheInstance = null;
+
+	public static enum SawMode {
+		NORMAL, SINGLE_INSTANCE, USER_EDIT_CHAINSAW
+	};
+
+	private SawMode currentMode;
+
+	//private boolean singleInstanceCaching = false;
 	//	protected boolean doNotCleanCacheInstance = false;
 
 	private BufferedImage sourceImage = null;
 	private BufferedImage lastFilteredImage;
 
 	public FilterChainsaw() {
-		this(false);
+		this(SawMode.NORMAL);
 	}
 
-	public FilterChainsaw(boolean singleInstanceCaching) {
-		this.singleInstanceCaching = singleInstanceCaching;
-		this.cacheInstance = singleInstanceCaching ? CacheIFactory.getSingleInstanceFilters() : CacheIFactory
+	public FilterChainsaw(SawMode mode) {
+		//		this.singleInstanceCaching = singleInstanceCaching;
+		//		this.cacheInstance = singleInstanceCaching ? CacheIFactory.getSingleInstanceFilters() : CacheIFactory
+		//				.getFreeListFilters();
+		this.currentMode = mode;
+		this.cacheInstance = mode == SawMode.SINGLE_INSTANCE ? CacheIFactory.getSingleInstanceFilters() : CacheIFactory
 				.getFreeListFilters();
+
+	}
+
+	protected SawMode getCurrentMode() {
+		return this.currentMode;
 	}
 
 	/**
@@ -89,31 +104,34 @@ public class FilterChainsaw {
 	 * @param filterClass
 	 *            {@link IFilter} class for instantiate. Must be not null.
 	 * @return created instance
-	 * @throws InstantiationException
-	 *             standard exception for {@link Class#newInstance()} method.
-	 * @throws IllegalAccessException
-	 *             standard exception for {@link Class#newInstance()} method.
-	 * @throws FilterException
 	 * @throws PersistentException
+	 * @throws FilterException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * 
 	 * 
 	 */
-	public IFilter appendFilter(Class<? extends IFilter> filterClass) throws InstantiationException,
-			IllegalAccessException, FilterException, PersistentException {
+	public IFilter appendFilter(Class<? extends IFilter> filterClass) throws PersistentException, FilterException,
+			InstantiationException, IllegalAccessException {
 		return this.appendFilter(this.filterList.size(), filterClass);
 	}
 
-	public IFilter appendFilter(int index, Class<? extends IFilter> filterClass) throws InstantiationException,
-			IllegalAccessException, FilterException, PersistentException {
+	public IFilter appendFilter(int pos, Class<? extends IFilter> filterClass) throws PersistentException,
+			FilterException, InstantiationException, IllegalAccessException {
 		if (filterClass == null) {
 			throw new IllegalArgumentException("Internal error. filterClass must be not null.");
 		}
 
-		logger.debug("Appending filter as class {}", filterClass);
+		logger.debug("Appending filter as class {} to {}.", filterClass, pos);
 
 		IFilter instance = null;
-		int actualIndex = index;
-		if (singleInstanceCaching) {
+		int actualIndex = pos;
+		if (currentMode == SawMode.SINGLE_INSTANCE) {
 			int idx = this.searchFilterClassPos(filterClass);
+			/*
+			 * IF we found existed instance of filter -- move it to the top of
+			 * filter set. Just as we create ;)
+			 */
 			if (idx != -1) {
 				instance = filterList.get(idx);
 				filterList.remove(idx);
@@ -122,8 +140,17 @@ public class FilterChainsaw {
 		}
 
 		if (instance == null) {
+
+			// We check only user's chainsaw. All internal saws are not checked. 
+			if (currentMode == SawMode.USER_EDIT_CHAINSAW) {
+				/*
+				 * Check, if this filter is registered in database.
+				 */
+				AppDataStorage.getInstance().checkUsingFilter(filterClass);
+			}
+
+			//
 			instance = this.cacheInstance.getInstance(filterClass);
-			AppDataStorage.getInstance().checkUsingFilter(instance);
 		}
 
 		// If we using single caching -- we don't add additional instance to filter list
@@ -178,13 +205,14 @@ public class FilterChainsaw {
 
 		if (pos >= 0 && pos < filterList.size()) {
 			IFilter filter = filterList.get(pos);
-			logger.debug("Removing filter {}", filter);
+
+			logger.debug("Removing filter {} from {}.", filter, pos);
 
 			if (this.sourceImage != null && filter instanceof IFilterAttachable) {
 				((IFilterAttachable) filter).onDetachFromImage(sourceImage);
 			}
 
-			this.cacheInstance.putDeleted(filter);
+			this.cacheInstance.releaseInstance(filter);
 			filterList.remove(pos);
 			return true;
 		} else {
@@ -199,17 +227,15 @@ public class FilterChainsaw {
 	}
 
 	public void removeFilter(Class<? extends IFilter> filterClass) {
-		if (!this.singleInstanceCaching) {
-			throw new IllegalStateException(
-					"Removing filters by class allow only if constructor parameter 'singleInstanceCaching' is true.");
+		if (currentMode != SawMode.SINGLE_INSTANCE) {
+			throw new IllegalStateException("Removing filters by class allowed only for 'SINGLE_INSTANCE' mode.");
 		}
 		this.removeFilter(this.searchFilterClassPos(filterClass));
 	}
 
 	private int searchFilterClassPos(Class<? extends IFilter> filterClass) {
-		if (!this.singleInstanceCaching) {
-			throw new IllegalStateException(
-					"Removing filters by class allow only if constructor parameter 'singleInstanceCaching' is true.");
+		if (currentMode != SawMode.SINGLE_INSTANCE) {
+			throw new IllegalStateException("Removing filters by class allowed only for 'SINGLE_INSTANCE' mode.");
 		}
 		for (int pos = 0; pos < filterList.size(); pos++) {
 			IFilter filter = filterList.get(pos);
@@ -240,11 +266,15 @@ public class FilterChainsaw {
 	public IFilter getFilter(int pos) {
 		if (pos >= 0 && pos < filterList.size()) {
 
-			logger.trace("Return filter at index {}", pos);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Return filter at index {}", pos);
+			}
 
 			return filterList.get(pos);
 		} else {
-			logger.trace("Requsted position {} is not in range", pos);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Requsted position {} is not in range", pos);
+			}
 
 			return null;
 		}
@@ -273,7 +303,7 @@ public class FilterChainsaw {
 	 */
 	public boolean moveUp(int pos) {
 		if (pos > 0 && pos < filterList.size()) {
-			logger.trace("Moving index {} up", pos);
+			logger.trace("Moving index {} up.", pos);
 
 			IFilter old = filterList.get(pos - 1);
 			filterList.set(pos - 1, filterList.get(pos));
@@ -281,7 +311,7 @@ public class FilterChainsaw {
 
 			return true;
 		} else {
-			logger.trace("Can't move up, position {} is not in range", pos);
+			logger.trace("Can't move up, position {} is not in range.", pos);
 			return false;
 		}
 	}
@@ -295,7 +325,7 @@ public class FilterChainsaw {
 	 */
 	public boolean moveDown(int pos) {
 		if (pos >= 0 && pos < filterList.size() - 1) {
-			logger.trace("Moving index {} down", pos);
+			logger.trace("Moving index {} down.", pos);
 
 			IFilter old = filterList.get(pos + 1);
 			filterList.set(pos + 1, filterList.get(pos));
@@ -303,7 +333,7 @@ public class FilterChainsaw {
 
 			return true;
 		} else {
-			logger.trace("Can't move down, position {} is not in range", pos);
+			logger.trace("Can't move down, position {} is not in range.", pos);
 			return false;
 		}
 	}
@@ -319,7 +349,7 @@ public class FilterChainsaw {
 			throw new IllegalStateException("Internal error. Please, detach previous image.");
 		}
 
-		logger.debug("Attaching image {}", image);
+		logger.debug("Attaching image {}.", image);
 
 		this.sourceImage = image;
 		for (IFilter filter : this.filterList) {
@@ -339,7 +369,7 @@ public class FilterChainsaw {
 	 */
 	public void detachImage() {
 		if (sourceImage != null) {
-			logger.debug("Deataching image {}", sourceImage);
+			logger.debug("Deataching image {}.", sourceImage);
 
 			for (IFilter filter : this.filterList) {
 				if (filter instanceof IFilterAttachable) {
@@ -365,7 +395,7 @@ public class FilterChainsaw {
 			throw new IllegalStateException("Internal error. Please, call attachImage first.");
 		}
 
-		logger.debug("Actual filtering");
+		logger.debug("Actual filtering.");
 
 		lastFilteredImage = sourceImage;
 		BufferedImage dest = null;

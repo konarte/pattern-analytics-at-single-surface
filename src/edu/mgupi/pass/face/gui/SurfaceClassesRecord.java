@@ -51,7 +51,7 @@ public class SurfaceClassesRecord extends RecordEditorTemplate<SurfaceClasses> {
 	}
 
 	@Override
-	protected Criteria getSaveAllowCriteria(SurfaceClasses object, String newValue) throws Exception {
+	protected Criteria getUniqueCheckCriteria(SurfaceClasses object, String newValue) throws Exception {
 		SurfaceClassesCriteria criteria = new SurfaceClassesCriteria();
 		criteria.name.eq(newValue);
 		if (object.getIdSurfaceClass() != 0) {
@@ -65,10 +65,10 @@ public class SurfaceClassesRecord extends RecordEditorTemplate<SurfaceClasses> {
 		name = object.getName();
 		data = object.getSurfaceImage();
 
-		formPanel.setImageRaw(data);
-
 		jLabelIDValue.setText(String.valueOf(object.getIdSurfaceClass()));
 		jTextFieldNameValue.setText(name);
+
+		formPanel.setImageRaw(data);
 
 		return true;
 	}
@@ -92,7 +92,7 @@ public class SurfaceClassesRecord extends RecordEditorTemplate<SurfaceClasses> {
 
 	private RecordFormWithImageTemplate getFormPanel() {
 		if (formPanel == null) {
-			formPanel = new RecordFormWithImageTemplate(this, getJPanelPlace());
+			formPanel = new RecordFormWithImageTemplate(getJPanelPlace());
 		}
 		return formPanel;
 	}
@@ -111,7 +111,7 @@ public class SurfaceClassesRecord extends RecordEditorTemplate<SurfaceClasses> {
 			jTextFieldNameValue = new JTextField();
 
 			super.putComponentPair(jPanelPlace, "Код", jLabelIDValue);
-			super.putRequiredComponentPair(jPanelPlace, "Название класса", jTextFieldNameValue);
+			super.putUniqueComponentPair(jPanelPlace, "Название класса", jTextFieldNameValue);
 		}
 		return jPanelPlace;
 	}

@@ -5,9 +5,11 @@ import java.awt.Component;
 import java.awt.Window;
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.Iterator;
 
 import javax.swing.JCheckBox;
+import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -19,12 +21,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.face.gui.AppHelper;
+import edu.mgupi.pass.face.gui.MainFrame;
+import edu.mgupi.pass.face.gui.template.ImagePanel;
+import edu.mgupi.pass.modules.ModuleProcessor;
 
 /**
- * Config class. Using apache commons-config.
+ * Configuration class. Using <a
+ * href="http://commons.apache.org/configuration/">Apache commons
+ * configuration</a>. <br>
+ * 
+ * Current configuration separates on two part -- current and common.
+ * 
+ * <ul>
+ * <li>Current configuration stores special pre-processing settings for
+ * {@link ModuleProcessor#getPreChainsaw()}, sets up by {@link MainFrame}.
+ * 
+ * <li>Common configuration stores other options (Look and Feel, type of check
+ * when we delete rows in tables, etc.).
+ * </ul>
  * 
  * INIConfiguration mark as deprecated, but it works fine. I can't force to work
- * hierarchy configurators.
+ * hierarchy configurators. <br>
  * 
  * @author raidan
  * 
@@ -34,76 +51,21 @@ public class Config {
 
 	private final static Logger logger = LoggerFactory.getLogger(Config.class);
 
-	private Config() {
-		// singleton
-	}
-
-	private static Config instance;
-
 	/**
-	 * Singleton ^_^
+	 * Enumeration for source pre-processing. This options tuned up
+	 * {@link ModuleProcessor#getPreChainsaw()} by {@link MainFrame}.
 	 * 
-	 * @return instance of config class
+	 * @author raidan
+	 * 
 	 */
-	public static synchronized Config getInstance() {
-		if (instance == null) {
-			instance = new Config();
-			instance.prepareConfig();
-		}
-		return instance;
-	}
-
-	public static synchronized void setDebugInstance() {
-		getInstance().readOnly = true;
-	}
-
-	private boolean readOnly = false;
-
-	private final static String DEFAULT_COMMON_CONFIG_NAME = "config.ini";
-
-	private Configuration currentConfigInstance;
-	private Configuration commonConfigInstance;
-	private FileConfiguration configInstance;
-
-	@SuppressWarnings("deprecation")
-	protected void prepareConfig() {
-		try {
-			logger.trace("Loading config from file {}.", DEFAULT_COMMON_CONFIG_NAME);
-
-			File file = new File(DEFAULT_COMMON_CONFIG_NAME);
-			if (!file.exists()) {
-				try {
-					file.createNewFile();
-				} catch (IOException io) {
-					throw new RuntimeException(io);
-				}
-			}
-
-			configInstance = new org.apache.commons.configuration.INIConfiguration(DEFAULT_COMMON_CONFIG_NAME);
-			configInstance.setEncoding("UTF-8");
-
-			currentConfigInstance = configInstance.subset("current");
-			commonConfigInstance = configInstance.subset("common");
-
-		} catch (ConfigurationException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	private final static String PARAM_CURRENT_SOURCE_MODE = "sourceMode";
-	private final static String PARAM_CURRENT_BACKGROUND = "imageBackground";
-
-	private final static String PARAM_LOOK_AND_FEEL = "lookAndFeel";
-	private final static String PARAM_ROWS_DELETE_MODE = "rowsDeleteMode";
-	private final static String PARAM_TRANSACTION_MODE = "transactionMode";
-	private final static String PARAM_DATA_DELETION_CHECK = "dataDeletionCheck";
-
 	public static enum SourceMode {
 		LEFT_TOP("Разместить слева сверху"), //
 		CENTER("Разместить в центре"), //
 		SCALE("Отмасштабировать и дополнить"), //
-		SCALE_IF_LEFT_TOP("Масштаб. для большой картинки; иначе разместить слева сверху"), //
-		SCALE_IF_CENTER("Масштаб. для большой картинки; иначе разместить в центре");
+		SCALE_IF_LEFT_TOP(MessageFormat.format("Больше {0}x{1} -- масштабировать, меньше -- разместить слева сверху",
+				Const.MAIN_IMAGE_WIDTH, Const.MAIN_IMAGE_HEIGHT)), //
+		SCALE_IF_CENTER(MessageFormat.format("Больше {0}x{1} -- масштабировать, меньше -- разместить в центре",
+				Const.MAIN_IMAGE_WIDTH, Const.MAIN_IMAGE_HEIGHT));
 
 		private String title;
 
@@ -143,6 +105,7 @@ public class Config {
 	}
 
 	/**
+	 * Type of checks before delete data (from tables).
 	 * 
 	 * @author raidan
 	 * 
@@ -150,7 +113,7 @@ public class Config {
 	public static enum DeletionCheckMode {
 		ACQUIRE_THEN_CHECK("Сначала спросить, потом проверить возможность удаления."), //
 		CHECK_THEN_ACQUIRE("Сначала проверить возможность удаления, потом спросить."), //
-		NO_CHECK("Не проверять возможность удаления (выдавать SQL-исключение при ошибке).");
+		NO_CHECK("DEBUG. Не проверять возможность удаления (выдавать SQL-исключение при ошибке).");
 
 		private String title;
 
@@ -166,16 +129,17 @@ public class Config {
 	/**
 	 * Enumeration for transaction(session) modes.
 	 * 
-	 * @author raidan
+	 * WARNING! DO NOT USE THIS OPTION.
 	 * 
+	 * @author raidan
 	 */
-	public static enum TransactionMode {
+	public static enum TestTransactionMode {
 		COMMIT_EVERY_ROW("'commit' на каждую вставку/удаление"), // 
 		COMMIT_BULK("'commit' на весь табличный интерфейс");
 
 		private String title;
 
-		private TransactionMode(String title) {
+		private TestTransactionMode(String title) {
 			this.title = title;
 		}
 
@@ -184,8 +148,83 @@ public class Config {
 		}
 	}
 
+	private Config() {
+		// singleton
+	}
+
+	private static Config instance;
+
+	/**
+	 * Return instance of class (new on first call).
+	 * 
+	 * @return instance
+	 */
+	public static synchronized Config getInstance() {
+		if (instance == null) {
+			instance = new Config();
+			instance.prepareConfig();
+		}
+		return instance;
+	}
+
+	/**
+	 * Special method for set up current instance as debug. <br>
+	 * 
+	 * Debug means, that we don't load properties from file and do not save it.
+	 * All changed values will be store in memory and disappear after program
+	 * end. <br>
+	 * 
+	 * Method must use by tests.
+	 */
+	public void setDebugInstance() {
+		this.readOnly = true;
+	}
+
+	private boolean readOnly = false;
+	private final static String DEFAULT_COMMON_CONFIG_NAME = "config.ini";
+	private Configuration currentConfigInstance;
+	private Configuration commonConfigInstance;
+	private FileConfiguration configInstance;
+
+	@SuppressWarnings("deprecation")
+	private void prepareConfig() {
+		try {
+			logger.trace("Loading config from file {}.", DEFAULT_COMMON_CONFIG_NAME);
+
+			File file = new File(DEFAULT_COMMON_CONFIG_NAME);
+			if (!file.exists()) {
+				try {
+					file.createNewFile();
+				} catch (IOException io) {
+					throw new RuntimeException(io);
+				}
+			}
+
+			configInstance = new org.apache.commons.configuration.INIConfiguration(DEFAULT_COMMON_CONFIG_NAME);
+			configInstance.setEncoding("UTF-8");
+
+			currentConfigInstance = configInstance.subset("current");
+			commonConfigInstance = configInstance.subset("common");
+
+		} catch (ConfigurationException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private final static String PARAM_CURRENT_SOURCE_MODE = "sourceMode";
+	private final static String PARAM_CURRENT_BACKGROUND = "imageBackground";
+	private final static String PARAM_LOOK_AND_FEEL = "lookAndFeel";
+	private final static String PARAM_ROWS_DELETE_MODE = "rowsDeleteMode";
+	private final static String PARAM_TRANSACTION_MODE = "transactionMode";
+	private final static String PARAM_DATA_DELETION_CHECK = "dataDeletionCheck";
+
 	private SourceMode currentSourceMode = null;
 
+	/**
+	 * Return current mode of source.
+	 * 
+	 * @return current {@link SourceMode}
+	 */
 	public SourceMode getCurrentSourceMode() {
 		if (currentSourceMode != null) {
 			return currentSourceMode;
@@ -202,6 +241,11 @@ public class Config {
 
 	private Color currentColor = null;
 
+	/**
+	 * Return color of background for preprocessing.
+	 * 
+	 * @return current {@link Color}
+	 */
 	public Color getCurrentBackground() {
 		if (currentColor != null) {
 			return currentColor;
@@ -211,6 +255,11 @@ public class Config {
 		return currentColor;
 	}
 
+	/**
+	 * Return Look and Feel.
+	 * 
+	 * @return current {@link LookAndFeel} classname.
+	 */
 	public String getLookAndFeel() {
 		final String default_ = UIManager.getSystemLookAndFeelClassName();
 		return this.commonConfigInstance.getString(PARAM_LOOK_AND_FEEL, default_);
@@ -218,6 +267,11 @@ public class Config {
 
 	private DeletionMode currentRowsDeletionMode = null;
 
+	/**
+	 * Return current mode of rows deletion.
+	 * 
+	 * @return current {@link DeletionMode}
+	 */
 	public DeletionMode getRowsDeleteMode() {
 		if (currentRowsDeletionMode != null) {
 			return currentRowsDeletionMode;
@@ -232,18 +286,27 @@ public class Config {
 		}
 	}
 
-	private TransactionMode currentTransactionMode = null;
+	private TestTransactionMode currentTransactionMode = null;
 
-	public TransactionMode getTransactionMode() throws PersistentException {
+	/**
+	 * Return current transaction mode. <br>
+	 * 
+	 * <b>Do not use except tests! Hibernate does not provide work after
+	 * exception!. </b>
+	 * 
+	 * @return current {@link TestTransactionMode}.
+	 * @throws PersistentException
+	 */
+	public TestTransactionMode getTransactionMode() throws PersistentException {
 		if (currentTransactionMode != null) {
 			return currentTransactionMode;
 		}
-		final TransactionMode default_ = TransactionMode.COMMIT_EVERY_ROW;
+		final TestTransactionMode default_ = TestTransactionMode.COMMIT_EVERY_ROW;
 		try {
-			currentTransactionMode = TransactionMode.valueOf(this.commonConfigInstance.getString(
+			currentTransactionMode = TestTransactionMode.valueOf(this.commonConfigInstance.getString(
 					PARAM_TRANSACTION_MODE, default_.name()));
 
-			AppHelper.setDatabaseTransactionMode(currentTransactionMode);
+			//AppHelper.setDatabaseTransactionMode(currentTransactionMode);
 			return currentTransactionMode;
 		} catch (IllegalArgumentException iae) {
 			return default_;
@@ -252,6 +315,11 @@ public class Config {
 
 	private DeletionCheckMode currentDeletionCheckMode = null;
 
+	/**
+	 * Return current type of check when user delete row.
+	 * 
+	 * @return current {@link DeletionCheckMode}
+	 */
 	public DeletionCheckMode getDeletionCheckMode() {
 		if (currentDeletionCheckMode != null) {
 			return currentDeletionCheckMode;
@@ -266,6 +334,13 @@ public class Config {
 		}
 	}
 
+	/**
+	 * Set new source mode.
+	 * 
+	 * @param value
+	 *            new {@link SourceMode}
+	 * @return true if values changed, false if this is equals to previous
+	 */
 	public boolean setCurrentSourceMode(SourceMode value) {
 
 		boolean res = this.setCurrentParameterImpl(PARAM_CURRENT_SOURCE_MODE, this.getCurrentSourceMode().name(), value
@@ -274,6 +349,13 @@ public class Config {
 		return res;
 	}
 
+	/**
+	 * Set new background color.
+	 * 
+	 * @param value
+	 *            new {@link Color}
+	 * @return true if values changed, false if this is equals to previous
+	 */
 	public boolean setCurrentBackground(Color value) {
 		boolean res = this.setCurrentParameterImpl(PARAM_CURRENT_BACKGROUND, this.getCurrentBackground().getRGB(),
 				value.getRGB());
@@ -281,6 +363,18 @@ public class Config {
 		return res;
 	}
 
+	/**
+	 * Set new Look and Feel.
+	 * 
+	 * @param value
+	 *            new {@link LookAndFeel} classname
+	 * @return true if values changed, false if this is equals to previous
+	 * 
+	 * @throws ClassNotFoundException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws UnsupportedLookAndFeelException
+	 */
 	public boolean setLookAndFeel(String value) throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException, UnsupportedLookAndFeelException {
 		if (this.setCommonParameterImpl(PARAM_LOOK_AND_FEEL, this.getLookAndFeel(), value)) {
@@ -291,26 +385,49 @@ public class Config {
 		}
 	}
 
+	/**
+	 * Set new rows deletion mode.
+	 * 
+	 * @param value
+	 *            new {@link DeletionMode}
+	 * @return true if values changed, false if this is equals to previous
+	 */
 	public boolean setRowsDeleteMode(DeletionMode value) {
-
 		boolean res = this
 				.setCommonParameterImpl(PARAM_ROWS_DELETE_MODE, this.getRowsDeleteMode().name(), value.name());
 		this.currentRowsDeletionMode = value;
 		return res;
 	}
 
-	public boolean setTransactionMode(TransactionMode value) throws PersistentException {
+	/**
+	 * Set new test transaction mode. <br>
+	 * 
+	 * <b>Warning! This method does not affects no more!</b>
+	 * 
+	 * @param value
+	 *            new {@link TestTransactionMode}
+	 * @return true if values changed, false if this is equals to previous
+	 * @throws PersistentException
+	 */
+	public boolean setTransactionMode(TestTransactionMode value) throws PersistentException {
 		boolean res = this.setCommonParameterImpl(PARAM_TRANSACTION_MODE, this.getTransactionMode().name(), value
 				.name());
 		this.currentTransactionMode = value;
 		if (res) {
-			AppHelper.setDatabaseTransactionMode(value);
+			//AppHelper.setDatabaseTransactionMode(value);
 			return true;
 		} else {
 			return false;
 		}
 	}
 
+	/**
+	 * Set new check mode for rows deletions.
+	 * 
+	 * @param value
+	 *            new {@link DeletionCheckMode}
+	 * @return true if values changed, false if this is equals to previous
+	 */
 	public boolean setDeletionCheckModeMode(DeletionCheckMode value) {
 
 		boolean res = this.setCommonParameterImpl(PARAM_DATA_DELETION_CHECK, this.getDeletionCheckMode().name(), value
@@ -319,13 +436,7 @@ public class Config {
 		return res;
 	}
 
-	//
-
 	private boolean setParameterImpl(Configuration config, String paramName, Object oldValue, Object newValue) {
-		//		if (readOnly) {
-		//			return false;
-		//		}
-		//		logger.debug("OLD : " + oldValue.getClass() + ", NEW: " + newValue.getClass());
 		if (Utils.equals(newValue, oldValue)) {
 			return false;
 		} else {
@@ -342,6 +453,25 @@ public class Config {
 		return this.setParameterImpl(this.commonConfigInstance, paramName, oldValue, newValue);
 	}
 
+	/**
+	 * Default name for scale-button. That check-box controls window fit.
+	 * 
+	 * @see ImagePanel
+	 */
+	public final static String DEFAULT_SCALE_BUTTON_NAME = "scaleButton";
+
+	/**
+	 * Save position and size of given window to the config. <br>
+	 * 
+	 * If this window contains special check-box with name
+	 * {@value #DEFAULT_SCALE_BUTTON_NAME} -- we store its
+	 * {@link JCheckBox#isSelected()} state. <br>
+	 * 
+	 * Window defines by it's {@link Window#getName()}.
+	 * 
+	 * @param window
+	 *            instance of saving window
+	 */
 	public void storeWindowPosition(Window window) {
 		if (readOnly) {
 			return;
@@ -352,7 +482,7 @@ public class Config {
 			return;
 		}
 
-		logger.debug("Saving window position for window " + window.getName());
+		logger.trace("Saving window position for window {}.", window.getName());
 
 		Configuration config = this.configInstance.subset("window-" + window.getName());
 		config.setProperty("x", window.getX());
@@ -360,29 +490,55 @@ public class Config {
 		config.setProperty("width", window.getWidth());
 		config.setProperty("height", window.getHeight());
 
-		Component component = Utils.getChildNamed(window, "scaleButton");
+		Component component = Utils.getChildNamed(window, DEFAULT_SCALE_BUTTON_NAME);
 		if (component != null && component instanceof JCheckBox) {
-			config.setProperty("scaleButton", ((JCheckBox) component).isSelected());
+			JCheckBox box = (JCheckBox) component;
+
+			logger.trace("Save additional checkBox {}.", box.getName());
+			config.setProperty(DEFAULT_SCALE_BUTTON_NAME, box.isSelected());
 		}
 	}
 
+	/**
+	 * Save {@link JCheckBox#isSelected()} states of all given check-boxes for
+	 * this window. <br>
+	 * 
+	 * Window defines by it's {@link Window#getName()}.
+	 * 
+	 * @param window
+	 *            instance of window that contains given check-boxes
+	 * @param checkBoxes
+	 */
 	public void storeWindowCheckBoxes(Window window, JCheckBox... checkBoxes) {
 		if (readOnly) {
 			return;
 		}
 
 		if (window == null) {
-			logger.error("Attemp to set empty window.");
+			logger.error("Attemp to save empty window.");
 			return;
 		}
 
 		Configuration config = this.configInstance.subset("window-" + window.getName() + "-checks");
 		for (JCheckBox box : checkBoxes) {
+
+			logger.trace("Save scale checkBox {}.", box.getName());
 			config.setProperty(box.getName(), box.isSelected());
 		}
 
 	}
 
+	/**
+	 * Load and immediately set position and size of this window. <br>
+	 * 
+	 * If this window contains special check-box with name
+	 * {@value #DEFAULT_SCALE_BUTTON_NAME} -- we load its state and call
+	 * {@link JCheckBox#doClick()} if state differ than existing button have. <br>
+	 * 
+	 * Window defines by it's {@link Window#getName()}.
+	 * 
+	 * @param window
+	 */
 	public void loadWindowPosition(Window window) {
 
 		if (readOnly) {
@@ -390,28 +546,40 @@ public class Config {
 		}
 
 		if (window == null) {
-			logger.error("Attemp to get empty window.");
+			logger.error("Attemp load get empty window.");
 			return;
 		}
 
-		logger.debug("Loading window position for window " + window.getName());
+		logger.trace("Loading window position for window {}.", window.getName());
 
 		Configuration config = this.configInstance.subset("window-" + window.getName());
 		window.setBounds(config.getInt("x", window.getX()), config.getInt("y", window.getY()), config.getInt("width",
 				window.getWidth()), config.getInt("height", window.getHeight()));
 
-		Component component = Utils.getChildNamed(window, "scaleButton");
+		Component component = Utils.getChildNamed(window, DEFAULT_SCALE_BUTTON_NAME);
 		if (component != null && component instanceof JCheckBox) {
-			boolean selected = config.getBoolean("scaleButton", false);
+			boolean selected = config.getBoolean(DEFAULT_SCALE_BUTTON_NAME, false);
 			JCheckBox box = (JCheckBox) component;
 			if (selected != box.isSelected()) {
 
-				logger.debug("Click on checkBox " + box.getName());
+				logger.trace("Click on scale checkBox {}.", box.getName());
 				box.doClick();
 			}
 		}
 	}
 
+	/**
+	 * Load {@link JCheckBox#isSelected()} states of all found check-boxes for
+	 * this window. <br>
+	 * 
+	 * If state if load check-box does not equals to found in config -- we call
+	 * {@link JCheckBox#doClick()}. <br>
+	 * 
+	 * Window defines by it's {@link Window#getName()}.
+	 * 
+	 * @param window
+	 *            instance of window that contains check-boxes we can set
+	 */
 	@SuppressWarnings("unchecked")
 	public void loadWindowCheckBoxes(Window window) {
 		if (readOnly) {
@@ -419,7 +587,7 @@ public class Config {
 		}
 
 		if (window == null) {
-			logger.error("Attemp to set empty window.");
+			logger.error("Attemp to load empty window.");
 			return;
 		}
 
@@ -433,7 +601,7 @@ public class Config {
 				JCheckBox box = (JCheckBox) component;
 				if (selected != box.isSelected()) {
 
-					logger.debug("Click on additional checkBox " + box.getName());
+					logger.trace("Click on additional checkBox {}.", box.getName());
 					box.doClick();
 				}
 			}
@@ -441,16 +609,34 @@ public class Config {
 
 	}
 
+	/**
+	 * Actual saving common configuration. If you don't call this method -- you
+	 * loose all changed properties.
+	 * 
+	 * @throws ConfigurationException
+	 */
 	public void saveCommonConfig() throws ConfigurationException {
 		if (readOnly) {
 			return;
 		}
+
+		logger.debug("Saving common configuration.");
+
 		if (this.configInstance != null) {
 			this.configInstance.save();
 		}
 	}
 
+	/**
+	 * Actual saving current configuration. If you don't call this method -- you
+	 * loose all changed properties.
+	 * 
+	 * @throws ConfigurationException
+	 */
 	public void saveCurrentConfig() throws ConfigurationException {
+
+		logger.debug("Saving current configuration.");
+
 		this.saveCommonConfig();
 	}
 

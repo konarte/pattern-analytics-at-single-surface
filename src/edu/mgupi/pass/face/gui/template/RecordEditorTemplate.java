@@ -1,12 +1,12 @@
 package edu.mgupi.pass.face.gui.template;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,10 +30,13 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.db.surfaces.PassPersistentManager;
 import edu.mgupi.pass.face.gui.AppHelper;
+import edu.mgupi.pass.util.IInitiable;
 import edu.mgupi.pass.util.IRefreshable;
+import edu.mgupi.pass.util.Secundomer;
+import edu.mgupi.pass.util.SecundomerList;
 import edu.mgupi.pass.util.Utils;
 
-public abstract class RecordEditorTemplate<T> extends JDialog {
+public abstract class RecordEditorTemplate<T> extends JDialog implements IInitiable, IRefreshable {
 
 	private final static Logger logger = LoggerFactory.getLogger(RecordEditorTemplate.class); //  @jve:decl-index=0:
 
@@ -45,6 +48,8 @@ public abstract class RecordEditorTemplate<T> extends JDialog {
 	private JButton jButtonCancel = null;
 
 	/**
+	 * Default constructor
+	 * 
 	 * @param owner
 	 * @param name
 	 * @param title
@@ -57,25 +62,56 @@ public abstract class RecordEditorTemplate<T> extends JDialog {
 	}
 
 	/**
-	 * This method initializes this
-	 * 
+	 * @see IInitiable#init()
 	 */
-	private void initialize() {
-		this.setSize(400, 250);
-		this.setContentPane(getJContentPane());
+	public void init() {
+		// do nothing
 	}
 
+	/**
+	 * @see IInitiable#close()
+	 */
 	public void close() {
 		if (jPanelData != null && jPanelData instanceof RecordFormWithImageTemplate) {
 			((RecordFormWithImageTemplate) jPanelData).getImageControlAdapter().close();
 		}
 	}
 
+	/**
+	 * This method initializes this
+	 * 
+	 */
+	private void initialize() {
+		this.setSize(400, 250);
+		this.setMinimumSize(new Dimension(400, 250));
+		this.setContentPane(getJContentPane());
+	}
+
 	private Map<JTextComponent, String> requiredMap = new HashMap<JTextComponent, String>();
 	private AbstractDialogAdapter dialogAdapter = null; //  @jve:decl-index=0:
 
+	private Secundomer secundomerLoad = null;
+	private Secundomer secundomerSave = null;
+	private Secundomer secundomerCheckSave = null;
+	private Secundomer secundomerRollback = null;
+	private Secundomer secundomerDelete = null;
+	private Secundomer secundomerCheckDelete = null;
+
 	private AbstractDialogAdapter getDialogAdapter() {
 		if (dialogAdapter == null) {
+			this.secundomerLoad = SecundomerList.registerSecundomer("" + this.hashCode() + " Loading object time for "
+					+ this.getTitle());
+			this.secundomerSave = SecundomerList.registerSecundomer("" + this.hashCode() + " Saving object time for "
+					+ this.getTitle());
+			this.secundomerCheckSave = SecundomerList.registerSecundomer("" + this.hashCode()
+					+ " Check allow save for " + this.getTitle());
+			this.secundomerRollback = SecundomerList.registerSecundomer("" + this.hashCode() + " Rollback time for "
+					+ this.getTitle());
+			this.secundomerDelete = SecundomerList.registerSecundomer("" + this.hashCode() + " Deleting object for "
+					+ this.getTitle());
+			this.secundomerCheckDelete = SecundomerList.registerSecundomer("" + this.hashCode()
+					+ " Check allow delete for " + this.getTitle());
+
 			dialogAdapter = new AbstractDialogAdapter(this, true) {
 
 				@Override
@@ -116,21 +152,30 @@ public abstract class RecordEditorTemplate<T> extends JDialog {
 					//					if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_EVERY_ROW) {
 					//						transaction = PassPersistentManager.instance().getSession().beginTransaction();
 					//					}
-					PersistentTransaction transaction = PassPersistentManager.instance().getSession()
-							.beginTransaction();
+					secundomerSave.start();
 					try {
-						saveObject(workObject);
-						if (transaction != null) {
-							transaction.commit();
+						PersistentTransaction transaction = PassPersistentManager.instance().getSession()
+								.beginTransaction();
+						try {
+
+							saveObject(workObject);
+
+							if (transaction != null) {
+								transaction.commit();
+							}
+							PassPersistentManager.instance().getSession().flush();
+						} catch (Exception e) {
+							secundomerSave.stop();
+							secundomerRollback.start();
+							restoreObjectImpl(workObject);
+							if (transaction != null) {
+								transaction.rollback();
+							}
+							throw e;
 						}
-						PassPersistentManager.instance().getSession().flush();
-					} catch (Exception e) {
-						restoreObjectImpl(workObject);
-						if (transaction != null) {
-							transaction.rollback();
-						}
-						throw e;
 					} finally {
+						secundomerSave.stop();
+						secundomerRollback.stop();
 						PassPersistentManager.instance().getSession().close();
 					}
 
@@ -143,20 +188,27 @@ public abstract class RecordEditorTemplate<T> extends JDialog {
 	}
 
 	private T workObject = null; //  @jve:decl-index=0:
-	private boolean isAdd = false;
 
 	public T addRecord(T source) throws Exception {
+		return this.openRecordImpl(source, true);
+
+	}
+
+	public boolean editRecord(T source) throws Exception {
+		return this.openRecordImpl(source, false) != null;
+	}
+
+	private T openRecordImpl(T source, boolean isAdd) throws Exception {
 		if (source == null) {
 			throw new IllegalArgumentException("Internal error. Source must be not null.");
 		}
 
 		if (jPanelData.getBorder() != null && jPanelData.getBorder() instanceof TitledBorder) {
-			((TitledBorder) jPanelData.getBorder()).setTitle("Создание новой записи");
+			((TitledBorder) jPanelData.getBorder()).setTitle(isAdd ? "Создание новой записи" : "Редактирование записи");
 		}
 
-		isAdd = true;
 		this.workObject = source;
-		logger.trace("Add record {}.", this.workObject);
+		logger.trace(isAdd ? "Add record {}." : "Edit record {}.", this.workObject);
 
 		boolean retOK = false;
 		if (loadFromObject(workObject)) {
@@ -167,26 +219,6 @@ public abstract class RecordEditorTemplate<T> extends JDialog {
 			return this.workObject;
 		} else {
 			return null;
-		}
-	}
-
-	public boolean editRecord(T source) throws Exception {
-		if (source == null) {
-			throw new IllegalArgumentException("Internal error. Source must be not null.");
-		}
-
-		if (jPanelData.getBorder() != null && jPanelData.getBorder() instanceof TitledBorder) {
-			((TitledBorder) jPanelData.getBorder()).setTitle("Редактирование записи");
-		}
-
-		isAdd = false;
-		this.workObject = source;
-		logger.trace("Edit record " + this.workObject);
-
-		if (loadFromObject(workObject)) {
-			return getDialogAdapter().openDialog();
-		} else {
-			return false;
 		}
 	}
 
@@ -208,21 +240,27 @@ public abstract class RecordEditorTemplate<T> extends JDialog {
 			//			if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_EVERY_ROW) {
 			//				transaction = PassPersistentManager.instance().getSession().beginTransaction();
 			//			}
-			PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
-
+			secundomerDelete.start();
 			try {
+				PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
+				try {
 
-				deleteObjects(source);
-				if (transaction != null) {
-					transaction.commit();
+					deleteObjects(source);
+					if (transaction != null) {
+						transaction.commit();
+					}
+					PassPersistentManager.instance().getSession().flush();
+				} catch (Exception e) {
+					secundomerDelete.stop();
+					secundomerRollback.start();
+					if (transaction != null) {
+						transaction.rollback();
+					}
+					throw e;
 				}
-				PassPersistentManager.instance().getSession().flush();
-			} catch (Exception e) {
-				if (transaction != null) {
-					transaction.rollback();
-				}
-				throw e;
 			} finally {
+				secundomerDelete.stop();
+				secundomerRollback.stop();
 				PassPersistentManager.instance().getSession().close();
 			}
 			return true;
@@ -232,79 +270,78 @@ public abstract class RecordEditorTemplate<T> extends JDialog {
 	}
 
 	private void saveObject(T object) throws Exception {
-		//PassPersistentManager.instance().getSession().saveOrUpdate(object);
-		if (isAdd) {
-			PassPersistentManager.instance().getSession().save(object);
-		} else {
-			PassPersistentManager.instance().getSession().update(object);
-		}
+		PassPersistentManager.instance().getSession().saveOrUpdate(object);
 	}
 
 	private void deleteObjects(Collection<T> objects) throws Exception {
-		//		try {
 		for (T object : objects) {
 			PassPersistentManager.instance().getSession().delete(object);
 		}
-		//		} catch (Exception e) {
-		//			for (T object : objects) {
-		//				PassPersistentManager.instance().getSession().refresh(object);
-		//			}
-		//			throw e;
-		//		}
 	}
 
 	private Map<IRefreshable, String> refresheableMap = new HashMap<IRefreshable, String>();
 	private JTextComponent uniqueComponent = null;
 	private String uniqueComponentValue = null;
 
-	//private Map<JTextComponent, String> cachedValues = new HashMap<JTextComponent, String>();
-
 	private boolean loadFromObject(T object) throws Exception {
 
-		for (Map.Entry<IRefreshable, String> key : this.refresheableMap.entrySet()) {
-			if (key.getKey().refresh() == 0) {
-				AppHelper.showErrorDialog(this, "Зписок значений в поле '" + key.getValue()
-						+ "' пуст. Необходимо заполнить данные в родительской таблице.");
-				return false;
+		secundomerLoad.start();
+		try {
+			for (Map.Entry<IRefreshable, String> key : this.refresheableMap.entrySet()) {
+				if (key.getKey().refresh() == 0) {
+					secundomerLoad.stop();
+					AppHelper.showErrorDialog(this, "Зписок значений в поле '" + key.getValue()
+							+ "' пуст. Необходимо заполнить данные в родительской таблице.");
+					return false;
+				}
 			}
+
+			boolean ret = this.loadFormFromObjectImpl(object);
+
+			uniqueComponentValue = null;
+			if (uniqueComponent != null) {
+				uniqueComponentValue = uniqueComponent.getText();
+				uniqueComponent.requestFocusInWindow();
+			}
+
+			return ret;
+		} finally {
+			secundomerLoad.stop();
 		}
-
-		boolean ret = this.loadFormFromObjectImpl(object);
-
-		uniqueComponentValue = null;
-		if (uniqueComponent != null) {
-			uniqueComponentValue = uniqueComponent.getText();
-			uniqueComponent.requestFocusInWindow();
-		}
-
-		return ret;
 	}
 
 	private boolean isSaveAllowed(T object) throws Exception {
 		if (uniqueComponent != null) {
-			logger.trace("Checking saving allowed for {}.", uniqueComponent.getText());
+			secundomerCheckSave.start();
+			try {
+				logger.trace("Checking saving allowed for {}.", uniqueComponent.getText());
 
-			if (Utils.equals(uniqueComponent.getText(), uniqueComponentValue)) {
+				if (Utils.equals(uniqueComponent.getText(), uniqueComponentValue)) {
 
-				logger.trace("There are equals. Return true.");
+					logger.trace("There are equals. Return true.");
 
-				return true;
-			}
+					return true;
+				}
 
-			String newValue = uniqueComponent.getText();
+				String newValue = uniqueComponent.getText();
 
-			Criteria criteria = this.getSaveAllowCriteria(object, newValue);
+				Criteria criteria = this.getUniqueCheckCriteria(object, newValue);
 
-			if (criteria == null) {
-				return true;
-			}
+				if (criteria == null) {
+					return true;
+				}
 
-			Object foundObject = criteria.uniqueResult();
-			if (foundObject != null) {
-				logger.trace("Found existing value in database.");
-				AppHelper.showErrorDialog(this, "Значение '" + newValue + "' для поля '"
-						+ this.requiredMap.get(uniqueComponent) + "' уже существует в базе данных.");
-				return false;
+				Object foundObject = criteria.uniqueResult();
+				if (foundObject != null) {
+					secundomerCheckSave.stop();
+					logger.trace("Found existing value in database.");
+					AppHelper.showErrorDialog(this, "Значение '" + newValue + "' для поля '"
+							+ this.requiredMap.get(uniqueComponent) + "' уже существует в базе данных.");
+					return false;
+				}
+			} finally {
+				secundomerCheckSave.stop();
+
 			}
 
 		} else {
@@ -314,48 +351,57 @@ public abstract class RecordEditorTemplate<T> extends JDialog {
 		return true;
 	}
 
-	protected abstract Criteria getSaveAllowCriteria(T object, String newValue) throws Exception;
+	protected abstract Criteria getUniqueCheckCriteria(T object, String newValue) throws Exception;
 
 	public boolean isDeleteAllowed(Collection<T> objects) throws Exception {
+
 		Criteria criteria = this.getMultipleDeleteCriteria(objects);
 
 		if (criteria == null) {
 			return true;
 		}
+		secundomerCheckDelete.start();
 
-		criteria.setMaxResults(10);
+		try {
 
-		logger.trace("Checking allow deletions for {}.", objects);
-		logger.trace("Received criteria: {}.", criteria);
+			criteria.setMaxResults(10);
 
-		List<?> foundObjects = criteria.list();
-		if (foundObjects.size() == 0) {
-			logger.trace("No rows found.");
-			return true;
-		}
+			logger.trace("Checking allow deletions for {}.", objects);
+			logger.trace("Received criteria: {}.", criteria);
 
-		logger.trace("Found {}.", foundObjects);
-		if (foundObjects.size() == 1) {
-			AppHelper.showErrorDialog(this, "Удаление строки запрещено: "
-					+ this.getDenyDeletionMessage(foundObjects.get(0)));
-		} else {
-			StringBuilder buffer = new StringBuilder("<html>При удалении строк");
-			buffer.append(objects.size() == 1 ? "и" : "");
-			buffer.append(" возникли следующие ошибки");
-			if (foundObjects.size() > 10) {
-				buffer.append(" (первые десять)");
+			List<?> foundObjects = criteria.list();
+			if (foundObjects.size() == 0) {
+				logger.trace("No rows found.");
+				return true;
 			}
-			buffer.append(":<ul>");
-			for (Object obj : foundObjects) {
-				buffer.append("<li>").append(getDenyDeletionMessage(obj));
+
+			logger.trace("Found {}.", foundObjects);
+			if (foundObjects.size() == 1) {
+				secundomerCheckDelete.stop();
+				AppHelper.showErrorDialog(this, "Удаление строки запрещено: "
+						+ this.getDenyDeletionMessage(foundObjects.get(0)));
+			} else {
+				StringBuilder buffer = new StringBuilder("<html>При удалении строк");
+				buffer.append(objects.size() == 1 ? "и" : "");
+				buffer.append(" возникли следующие ошибки");
+				if (foundObjects.size() > 10) {
+					buffer.append(" (первые десять)");
+				}
+				buffer.append(":<ul>");
+				for (Object obj : foundObjects) {
+					buffer.append("<li>").append(getDenyDeletionMessage(obj));
+				}
+				buffer.append("</ul></html>");
+
+				secundomerCheckDelete.stop();
+				logger.error(buffer.toString());
+				JOptionPane.showMessageDialog(this, buffer.toString(), "Ошибка", JOptionPane.ERROR_MESSAGE);
 			}
-			buffer.append("</ul></html>");
 
-			logger.error(buffer.toString());
-			JOptionPane.showMessageDialog(this, buffer.toString(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+			return false;
+		} finally {
+			secundomerCheckDelete.stop();
 		}
-
-		return false;
 	}
 
 	protected abstract Criteria getMultipleDeleteCriteria(Collection<T> objects) throws Exception;
@@ -385,11 +431,38 @@ public abstract class RecordEditorTemplate<T> extends JDialog {
 	protected void setFormPanelData(JPanel panel) {
 		if (jPanelData == null) {
 			jPanelData = panel;
-			jPanelData.setBorder(BorderFactory.createTitledBorder(null, "Редактирование",
-					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
-					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			jPanelData.setBorder(BorderFactory.createTitledBorder("Редактирование"));
 			jContentPane.add(panel, BorderLayout.CENTER);
+
+			this.refresh();
 		}
+	}
+
+	/**
+	 * @see IRefreshable#refresh()
+	 */
+	public int refresh() {
+
+		this.pack();
+		this.setMinimumSize(new Dimension(this.getWidth(), this.getHeight()));
+
+		return 0;
+	}
+
+	protected JPanel createDefaultFormPanel(JPanel panelPlace) {
+		JPanel formPanel = new JPanel();
+		GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
+		gridBagConstraints4.gridx = 0;
+		gridBagConstraints4.anchor = GridBagConstraints.NORTHWEST;
+		gridBagConstraints4.weightx = 1.0D;
+		gridBagConstraints4.weighty = 1.0D;
+		gridBagConstraints4.fill = GridBagConstraints.HORIZONTAL;
+		gridBagConstraints4.gridy = 0;
+		formPanel.setSize(300, 200);
+		formPanel.setLayout(new GridBagLayout());
+		formPanel.add(panelPlace, gridBagConstraints4);
+
+		return formPanel;
 	}
 
 	/**

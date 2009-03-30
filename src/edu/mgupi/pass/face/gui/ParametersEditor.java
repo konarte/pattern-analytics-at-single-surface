@@ -59,26 +59,25 @@ public class ParametersEditor extends JDialog implements ActionListener {
 	private AbstractDialogAdapter myDialogAdapter = null; //  @jve:decl-index=0:
 
 	private AbstractDialogAdapter getDialogAdapter() {
-		if (myDialogAdapter != null) {
-			return myDialogAdapter;
+		if (myDialogAdapter == null) {
+			myDialogAdapter = new AbstractDialogAdapter(this) {
+
+				@Override
+				protected void cancelImpl() throws Exception {
+					jPanelParams.resetParameterValues();
+				}
+
+				@Override
+				protected void openDialogImpl() throws Exception {
+				}
+
+				@Override
+				protected boolean saveImpl() throws Exception {
+					jPanelParams.saveModelData();
+					return true;
+				}
+			};
 		}
-		myDialogAdapter = new AbstractDialogAdapter(this) {
-
-			@Override
-			protected void cancelImpl() throws Exception {
-				jPanelParams.resetParameterValues();
-			}
-
-			@Override
-			protected void openDialogImpl() throws Exception {
-			}
-
-			@Override
-			protected boolean saveImpl() throws Exception {
-				jPanelParams.saveModelData();
-				return true;
-			}
-		};
 		return myDialogAdapter;
 	}
 
@@ -95,8 +94,8 @@ public class ParametersEditor extends JDialog implements ActionListener {
 	public boolean openDialog(String name, Collection<Param> parameters) {
 		try {
 			this.setParametersImpl(name, parameters);
-		} catch (Exception e) {
-			AppHelper.showExceptionDialog(this, "Ошибка при установке параметров.", e);
+		} catch (Throwable t) {
+			AppHelper.showExceptionDialog(this, "Ошибка при установке параметров.", t);
 			return false;
 		}
 
@@ -205,7 +204,8 @@ public class ParametersEditor extends JDialog implements ActionListener {
 				try {
 					jPanelParams.restoreDefaults();
 				} catch (Throwable t) {
-					AppHelper.showExceptionDialog(this, "Unexpected error when restoring defaults for module parameters.", t);
+					AppHelper.showExceptionDialog(this,
+							"Unexpected error when restoring defaults for module parameters.", t);
 				}
 			}
 

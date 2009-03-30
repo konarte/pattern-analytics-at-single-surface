@@ -4,6 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -166,6 +167,15 @@ public class SwingTestHelper {
 		});
 	}
 
+	public static boolean allWindowsClosed() {
+		for (Window window : Window.getWindows()) {
+			if (window.isVisible()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public static boolean allChildrenClosed(Window parent) {
 		assertNotNull(parent);
 		for (Window window : parent.getOwnedWindows()) {
@@ -195,12 +205,27 @@ public class SwingTestHelper {
 			final boolean expectErrors) throws Exception {
 		assertNotNull(parent);
 		assertTrue(parent.isVisible());
-		AbstractButton button = (AbstractButton) Utils.getChildNamed(parent, buttonOrActionNameName);
-		if (button == null) {
-			button = SwingTestHelper.getButtonByActionCommand(parent, buttonOrActionNameName);
+		assertNotNull(buttonOrActionNameName);
+
+		AbstractButton button = null;
+		String variants[] = buttonOrActionNameName.split("\\|");
+		for (String var : variants) {
+			System.out.println("CHECK VARIANT : " + var);
+			button = (AbstractButton) Utils.getChildNamed(parent, var);
+			if (button == null) {
+				button = (AbstractButton) SwingTestHelper.getButtonByActionCommand(parent, var);
+			}
+			if (button != null) {
+				break;
+			}
 		}
-		assertNotNull("Button with name or action '" + buttonOrActionNameName + "' does not exists on form '"
-				+ parent.getName() + "'", button);
+		if (button == null) {
+			SwingTestHelper.printChildHierarchy(parent);
+			Thread.sleep(1000);
+			fail("Button with name or action '" + buttonOrActionNameName + "' does not exists on form '"
+					+ parent.getName() + "'");
+		}
+
 		assertTrue(button.isEnabled());
 		assertTrue(button.isVisible());
 
@@ -433,7 +458,7 @@ public class SwingTestHelper {
 			for (int i = 0; i < children.length; ++i) {
 				Component child = children[i];
 				System.out.println(prefix + " " + child.getName()
-						+ (child instanceof AbstractButton ? " " + ((AbstractButton) child).getActionCommand() : "")
+						+ (child instanceof AbstractButton ? " A:" + ((AbstractButton) child).getActionCommand() : "")
 						+ " = " + child);
 				printChildHierarchy(child, level + 1);
 			}

@@ -1,10 +1,8 @@
 package edu.mgupi.pass.face.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -17,7 +15,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
 import javax.swing.WindowConstants;
 import javax.swing.border.TitledBorder;
 
@@ -110,8 +107,8 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 	public boolean openDialog(String title, FilterChainsaw filters) {
 		try {
 			this.setFilters(title, filters);
-		} catch (Exception e) {
-			AppHelper.showExceptionDialog(this, "Ошибка при установке фильтров.", e);
+		} catch (Throwable t) {
+			AppHelper.showExceptionDialog(this, "Ошибка при установке фильтров.", t);
 			return false;
 		}
 		return getDialogAdapter().openDialog();
@@ -191,9 +188,7 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 			gridBagConstraints5.gridy = 1;
 			jPanelSelectFilters = new JPanel();
 			jPanelSelectFilters.setLayout(new GridBagLayout());
-			jPanelSelectFilters.setBorder(BorderFactory.createTitledBorder(null, "Выбранные фильтры",
-					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
-					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			jPanelSelectFilters.setBorder(BorderFactory.createTitledBorder("Выбранные фильтры"));
 			jPanelSelectFilters.add(getJPanelFilters(), gridBagConstraints6);
 			jPanelSelectFilters.add(getJPanelControlButtons(), gridBagConstraints5);
 		}
@@ -216,9 +211,7 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 			gridBagConstraints3.gridy = 0;
 			jPanelEditParameters = new JPanel();
 			jPanelEditParameters.setLayout(new GridBagLayout());
-			jPanelEditParameters.setBorder(BorderFactory.createTitledBorder(null, "Редактирование значений фильтра",
-					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
-					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			jPanelEditParameters.setBorder(BorderFactory.createTitledBorder("Редактирование значений фильтра"));
 			jPanelEditParameters.add(getJPanelParameters(), gridBagConstraints3);
 		}
 		return jPanelEditParameters;
@@ -333,7 +326,7 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 		if (jButtonUp == null) {
 			jButtonUp = new JButton();
 			jButtonUp.setText("Up");
-			getTableModel().registerUpRowButton(jButtonUp);
+			getTableModel().registerMoveRowsUpButton(jButtonUp);
 		}
 		return jButtonUp;
 	}
@@ -347,7 +340,7 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 		if (jButtonDown == null) {
 			jButtonDown = new JButton();
 			jButtonDown.setText("Down");
-			getTableModel().registerDownRowButton(jButtonDown);
+			getTableModel().registerMoveRowsDownButton(jButtonDown);
 		}
 		return jButtonDown;
 	}
@@ -398,7 +391,6 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 		if (jTableData == null) {
 			jTableData = new JTableReadOnly();
 			jTableData.setModel(getTableModel());
-			jTableData.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 
 			getTableModel().setHorizontalAlignMode(0, JLabel.CENTER);
 			getTableModel().setColumnWidth(1, 200);
@@ -431,11 +423,11 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 			return transactionalSaw;
 		}
 
-		protected void openImpl() throws Exception {
+		protected void onOpenImpl() throws Exception {
 			//
 		}
 
-		protected void closeImpl() throws Exception {
+		protected void onCloseImpl() throws Exception {
 			if (this.transactionalSaw != null) {
 				this.transactionalSaw.close();
 				this.transactionalSaw = null;
@@ -465,11 +457,11 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 
 		@Override
 		protected boolean editRowImpl(int rowIdx) throws Exception {
-			throw new IllegalStateException("Internal error. This method is prohibited.");
+			return false;
 		}
 
 		@Override
-		protected boolean moveDownImpl(int[] rowIdx) throws Exception {
+		protected boolean moveRowsDownImpl(int[] rowIdx) throws Exception {
 			for (int i = rowIdx.length - 1; i >= 0; i--) {
 				this.getChainsaw().moveDown(rowIdx[i]);
 			}
@@ -477,7 +469,7 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 		}
 
 		@Override
-		protected boolean moveUpImpl(int[] rowIdx) throws Exception {
+		protected boolean moveRowsUpImpl(int[] rowIdx) throws Exception {
 			for (int i = 0; i < rowIdx.length; i++) {
 				this.getChainsaw().moveUp(rowIdx[i]);
 			}
@@ -485,7 +477,7 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 		}
 
 		@Override
-		protected void rowSelectionImpl(int rowIdx) throws Exception {
+		protected void onRowSelectionImpl(int rowIdx) throws Exception {
 
 			if (rowIdx != -1) {
 				FilterStore filter = (FilterStore) this.getChainsaw().getFilterStore(rowIdx);

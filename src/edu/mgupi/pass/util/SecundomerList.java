@@ -4,6 +4,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.slf4j.Logger;
+
 /**
  * Register new Secundomer, print all registered to output stream.
  * 
@@ -38,6 +40,21 @@ public class SecundomerList {
 		stream.println(" == RESULT == ");
 		for (Secundomer sec : registredList) {
 			stream.println(sec.toString());
+		}
+	}
+
+	/**
+	 * Printing counters or all registered secundomers to logger.
+	 * 
+	 * @param logger
+	 *            instance of logger, debug must be enabled
+	 */
+	public static void printToDebugLogger(Logger logger) {
+		if (logger.isDebugEnabled()) {
+			logger.debug(" == RESULT == ");
+			for (Secundomer sec : registredList) {
+				logger.debug(sec.toString());
+			}
 		}
 	}
 

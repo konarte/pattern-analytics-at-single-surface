@@ -1,18 +1,15 @@
 package edu.mgupi.pass.face.gui.template;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Window;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.SoftBevelBorder;
 
 import edu.mgupi.pass.modules.ModuleHelper;
 import edu.mgupi.pass.util.Const;
@@ -33,16 +30,12 @@ public class RecordFormWithImageTemplate extends JPanel {
 	/**
 	 * This is the default constructor
 	 * 
-	 * @param top
 	 * @param jPanelFormData
 	 */
-	public RecordFormWithImageTemplate(Window top, JPanel jPanelFormData) {
+	public RecordFormWithImageTemplate(JPanel jPanelFormData) {
 		super();
 		this.jPanelFormData = jPanelFormData;
 		initialize();
-		if (top != null) {
-			top.setMinimumSize(new Dimension(Const.THUMB_WIDTH + 300 + 50, Const.THUMB_HEIGHT + 100));
-		}
 	}
 
 	/**
@@ -73,6 +66,8 @@ public class RecordFormWithImageTemplate extends JPanel {
 		} else {
 			imagePanel.setImage(null);
 		}
+		// Force repainting
+		imagePanel.paintComponent(imagePanel.getGraphics());
 	}
 
 	public byte[] getRawImage() throws IOException {
@@ -100,6 +95,7 @@ public class RecordFormWithImageTemplate extends JPanel {
 			gridBagConstraints1.fill = GridBagConstraints.HORIZONTAL;
 			gridBagConstraints1.anchor = GridBagConstraints.NORTH;
 			gridBagConstraints1.weightx = 1.0D;
+			
 			GridBagConstraints gridBagConstraints = new GridBagConstraints();
 			gridBagConstraints.gridy = 0;
 			gridBagConstraints.anchor = GridBagConstraints.NORTH;
@@ -137,14 +133,7 @@ public class RecordFormWithImageTemplate extends JPanel {
 	 */
 	public ImagePanel getImagePanel() {
 		if (imagePanel == null) {
-			imagePanel = new ImagePanel(Const.THUMB_WIDTH, Const.THUMB_WIDTH);
-			imagePanel.setLayout(new GridBagLayout());
-			imagePanel.setBorder(new SoftBevelBorder(SoftBevelBorder.RAISED));
-
-			Dimension dim = new Dimension(Const.THUMB_WIDTH, Const.THUMB_WIDTH);
-			imagePanel.setMinimumSize(dim);
-			imagePanel.setPreferredSize(dim);
-			imagePanel.setMaximumSize(dim);
+			imagePanel = new ImagePanel(Const.THUMB_WIDTH, Const.THUMB_WIDTH, true, "Изображение");
 		}
 		return imagePanel;
 	}
@@ -156,19 +145,21 @@ public class RecordFormWithImageTemplate extends JPanel {
 	 */
 	private JPanel getJPanelFormImageControl() {
 		if (jPanelFormImageControl == null) {
-			GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
-			gridBagConstraints3.gridx = 1;
-			gridBagConstraints3.gridy = 0;
-			GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
-			gridBagConstraints2.gridx = 0;
-			gridBagConstraints2.anchor = GridBagConstraints.WEST;
-			gridBagConstraints2.gridy = 0;
+			GridBagConstraints gridBagConstraintsButtons = new GridBagConstraints();
+			gridBagConstraintsButtons.gridx = 1;
+			gridBagConstraintsButtons.gridy = 0;
+			gridBagConstraintsButtons.weightx = 0;
+			GridBagConstraints gridBagConstraintsLabel = new GridBagConstraints();
+			gridBagConstraintsLabel.gridx = 0;
+			gridBagConstraintsLabel.anchor = GridBagConstraints.EAST;
+			gridBagConstraintsLabel.gridy = 0;
+			gridBagConstraintsLabel.weightx = 1;
 			jLabelImage = new JLabel();
 			jLabelImage.setText("Изображение:");
 			jPanelFormImageControl = new JPanel();
 			jPanelFormImageControl.setLayout(new GridBagLayout());
-			jPanelFormImageControl.add(jLabelImage, gridBagConstraints2);
-			jPanelFormImageControl.add(getJPanelImageButtons(), gridBagConstraints3);
+			jPanelFormImageControl.add(jLabelImage, gridBagConstraintsLabel);
+			jPanelFormImageControl.add(getJPanelImageButtons(), gridBagConstraintsButtons);
 		}
 		return jPanelFormImageControl;
 	}

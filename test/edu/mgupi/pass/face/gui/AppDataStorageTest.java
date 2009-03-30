@@ -61,12 +61,12 @@ public class AppDataStorageTest {
 	}
 
 	@Test
-	public void testSearchModuleByInstance() throws Exception {
-		LModules module = AppDataStorage.getInstance().searchModuleByInstance(new SimpleMatrixModule());
+	public void testSearchModuleByClass() throws Exception {
+		LModules module = AppDataStorage.getInstance().searchModuleByClass(SimpleMatrixModule.class);
 		assertNotNull(module);
 		assertEquals(SimpleMatrixModule.class.getName(), module.getCodename());
 
-		assertNull(AppDataStorage.getInstance().searchModuleByInstance(new IModule() {
+		assertNull(AppDataStorage.getInstance().searchModuleByClass(new IModule() {
 
 			@Override
 			public void analyze(BufferedImage filteredImage, Locuses store) throws IOException, ModuleException {
@@ -88,10 +88,10 @@ public class AppDataStorageTest {
 			public Collection<Param> getParams() {
 				return null;
 			}
-		}));
+		}.getClass()));
 
 		try {
-			AppDataStorage.getInstance().searchModuleByInstance(null);
+			AppDataStorage.getInstance().searchModuleByClass(null);
 			fail("No exception throws!");
 		} catch (IllegalArgumentException e) {
 			System.out.println("Received expected exception: " + e);
@@ -99,13 +99,13 @@ public class AppDataStorageTest {
 	}
 
 	@Test
-	public void testGetModuleByInstance() throws Exception {
-		LModules module = AppDataStorage.getInstance().getModuleByInstance(new SimpleMatrixModule());
+	public void testGetModuleByClass() throws Exception {
+		LModules module = AppDataStorage.getInstance().getModuleByClass(SimpleMatrixModule.class);
 		assertNotNull(module);
 		assertEquals(SimpleMatrixModule.class.getName(), module.getCodename());
 
 		try {
-			assertNull(AppDataStorage.getInstance().getModuleByInstance(new IModule() {
+			assertNull(AppDataStorage.getInstance().getModuleByClass(new IModule() {
 
 				@Override
 				public void analyze(BufferedImage filteredImage, Locuses store) throws IOException, ModuleException {
@@ -127,7 +127,7 @@ public class AppDataStorageTest {
 				public Collection<Param> getParams() {
 					return null;
 				}
-			}));
+			}.getClass()));
 
 			fail("No exception thrown!");
 		} catch (ModuleNotFoundException e) {
@@ -135,7 +135,7 @@ public class AppDataStorageTest {
 		}
 
 		try {
-			AppDataStorage.getInstance().getModuleByInstance(null);
+			AppDataStorage.getInstance().getModuleByClass(null);
 			fail("No exception thrown!");
 		} catch (IllegalArgumentException e) {
 			System.out.println("Received expected exception: " + e);

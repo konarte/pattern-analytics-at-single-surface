@@ -35,7 +35,7 @@ public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel
 	protected List<T> data = null;
 
 	@Override
-	protected void openImpl() throws Exception {
+	protected void onOpenImpl() throws Exception {
 		data = this.getDataImpl();
 		if (data == null) {
 
@@ -44,7 +44,7 @@ public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel
 			data = new ArrayList<T>();
 		} else {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Received data during open model: {}.", data);
+				logger.trace("Received data during open model: {} rows.", data.size());
 			}
 		}
 		super.fireTableDataChanged();
@@ -55,7 +55,10 @@ public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel
 	protected abstract String[] getColumns();
 
 	@Override
-	protected void closeImpl() throws Exception {
+	protected void onCloseImpl() throws Exception {
+		if (data != null) {
+			data.clear();
+		}
 		data = null;
 	}
 
@@ -102,27 +105,17 @@ public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel
 				recordEditorClass);
 
 		Collection<T> rows = data.subList(rowIdx[0], rowIdx[rowIdx.length - 1] + 1);
-		if (Config.getInstance().getDeletionCheckMode() == DeletionCheckMode.CHECK_THEN_ACQUIRE) {
-			boolean canDelete = dialog.isDeleteAllowed(rows);
-			if (!canDelete) {
-				return false;
-			} else {
-				if (!super.checkDeleteRows(rowIdx.length > 1)) {
-					return false;
-				}
-			}
-		}
-
 		boolean deleted = dialog.deleteRecords(
 				Config.getInstance().getDeletionCheckMode() == DeletionCheckMode.ACQUIRE_THEN_CHECK, rows);
 		if (deleted) {
 
-			logger.trace("Successfully deleted. Removing rows.");
-
-			for (@SuppressWarnings("unused")
-			int idx : rowIdx) {
+			logger.trace("Successfully deleted. Removing rows from model.");
+			for (int i = 0; i < rowIdx.length; i++) {
 				data.remove(rowIdx[0]);
 			}
+			// Unexpected situation on 'removeAll(rows)' :(
+			// ConcurrentModification thrown
+			//data.removeAll(rows);
 			return true;
 		} else {
 			logger.trace("Does not deleted. Return false.");
@@ -131,13 +124,27 @@ public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel
 
 	}
 
-	protected boolean checkDeleteRows(boolean multiple) throws Exception {
+	@SuppressWarnings("unchecked")
+	protected boolean allowDeleteRows(int rows[]) throws Exception {
+		boolean allow = true;
 		if (Config.getInstance().getDeletionCheckMode() == DeletionCheckMode.ACQUIRE_THEN_CHECK
 				|| Config.getInstance().getDeletionCheckMode() == DeletionCheckMode.NO_CHECK) {
-			return super.checkDeleteRows(multiple);
-		} else {
-			return true;
+			allow = super.allowDeleteRows(rows);
 		}
+
+		if (allow && Config.getInstance().getDeletionCheckMode() != DeletionCheckMode.NO_CHECK) {
+			Collection<T> rowList = data.subList(rows[0], rows[rows.length - 1] + 1);
+			RecordEditorTemplate<T> dialog = (RecordEditorTemplate<T>) AppHelper.getInstance().getDialogImpl(
+					recordEditorClass);
+
+			allow = dialog.isDeleteAllowed(rowList);
+
+			if (allow && Config.getInstance().getDeletionCheckMode() == DeletionCheckMode.CHECK_THEN_ACQUIRE) {
+				allow = super.allowDeleteRows(rows);
+			}
+		}
+		return allow;
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -169,17 +176,17 @@ public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel
 	}
 
 	@Override
-	protected boolean moveDownImpl(int[] rowIdx) throws Exception {
+	protected boolean moveRowsDownImpl(int[] rowIdx) throws Exception {
 		return false;
 	}
 
 	@Override
-	protected boolean moveUpImpl(int[] rowIdx) throws Exception {
+	protected boolean moveRowsUpImpl(int[] rowIdx) throws Exception {
 		return false;
 	}
 
 	@Override
-	protected void rowSelectionImpl(int rowIdx) throws Exception {
+	protected void onRowSelectionImpl(int rowIdx) throws Exception {
 	}
 
 	@Override
