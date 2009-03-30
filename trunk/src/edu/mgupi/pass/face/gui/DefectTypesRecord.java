@@ -49,7 +49,7 @@ public class DefectTypesRecord extends RecordEditorTemplate<DefectTypes> {
 	}
 
 	@Override
-	protected Criteria getSaveAllowCriteria(DefectTypes object, String newValue) throws Exception {
+	protected Criteria getUniqueCheckCriteria(DefectTypes object, String newValue) throws Exception {
 		DefectTypesCriteria criteria = new DefectTypesCriteria();
 		criteria.name.eq(newValue);
 		if (object.getIdDefectType() != 0) {
@@ -105,7 +105,7 @@ public class DefectTypesRecord extends RecordEditorTemplate<DefectTypes> {
 
 	protected RecordFormWithImageTemplate getFormPanel() {
 		if (formPanel == null) {
-			formPanel = new RecordFormWithImageTemplate(this, getJPanelPlace());
+			formPanel = new RecordFormWithImageTemplate(getJPanelPlace());
 		}
 		return formPanel;
 	}

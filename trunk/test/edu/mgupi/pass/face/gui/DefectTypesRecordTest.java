@@ -1,13 +1,20 @@
 package edu.mgupi.pass.face.gui;
 
+import java.io.File;
+
+import javax.imageio.ImageIO;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import edu.mgupi.pass.util.Config;
 
 public class DefectTypesRecordTest {
 
 	@Before
 	public void setUp() throws Exception {
+		Config.getInstance().setDebugInstance();
 	}
 
 	@After
@@ -17,7 +24,15 @@ public class DefectTypesRecordTest {
 
 	@Test
 	public void testOpen() throws Exception {
-		//new DefectTypesRecord(null).setVisible(true);
+
+		DefectTypesRecord dtf = (DefectTypesRecord) AppHelper.getInstance().getDialogImpl(DefectTypesRecord.class);
+		AppHelper.getInstance().updateUI(javax.swing.UIManager.getSystemLookAndFeelClassName());
+//		AppHelper.getInstance().updateUI(com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel.class.getName());
+//		AppHelper.getInstance().updateUI(com.sun.java.swing.plaf.motif.MotifLookAndFeel.class.getName());
+
+		dtf.getFormPanel().getImagePanel().setImage(ImageIO.read(new File("test/suslik_list.jpg")));
+//		dtf.setVisible(true);
+
 		SwingTestHelper.showMeBackground(new DefectTypesRecord(null));
 		//DefectTypesRecord.addRecord(DefectTypesFactory.createDefectTypes());
 		//assertTrue(rec == rec.rec);

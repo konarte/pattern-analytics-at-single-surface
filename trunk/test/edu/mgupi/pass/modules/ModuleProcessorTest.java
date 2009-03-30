@@ -55,10 +55,12 @@ public class ModuleProcessorTest {
 
 			processor.setModule(TestModule.class);
 
-			FilterChainsaw mainSaw = processor.getChainsaw();
+			FilterChainsaw mainSaw = processor.getPreChainsaw();
 			ResizeFilter resize = (ResizeFilter) mainSaw.appendFilter(ResizeFilter.class);
 			resize.getWIDTH().setValue(1024);
 			resize.getHEIGHT().setValue(1024);
+
+			processor.getChainsaw().appendFilter(GrayScaleFilter.class);
 
 			assertNotNull(processor.getChainsaw());
 			assertNotNull(processor.getPreChainsaw());
@@ -112,8 +114,9 @@ public class ModuleProcessorTest {
 			}
 
 		} finally {
-			transaction.rollback();
 			source.close();
+			
+			transaction.rollback();
 			PassPersistentManager.instance().disposePersistentManager();
 		}
 
@@ -134,10 +137,22 @@ public class ModuleProcessorTest {
 			resize.getWIDTH().setValue(1024);
 			resize.getHEIGHT().setValue(1024);
 
-			processor.getChainsaw().appendFilter(GrayScaleFilter.class);
+			GrayScaleFilter gray = (GrayScaleFilter) preprocessingSaw.appendFilter(GrayScaleFilter.class);
+
+			assertTrue(resize == preprocessingSaw.getFilter(0));
+			assertTrue(gray == preprocessingSaw.getFilter(1));
 
 			assertNotNull(processor.getChainsaw());
 			assertNotNull(processor.getPreChainsaw());
+
+			assertTrue(resize == preprocessingSaw.appendFilter(ResizeFilter.class));
+			assertTrue(resize == preprocessingSaw.getFilter(1));
+			assertTrue(gray == preprocessingSaw.getFilter(0));
+
+			assertTrue(gray == preprocessingSaw.appendFilter(GrayScaleFilter.class));
+
+			assertTrue(resize == preprocessingSaw.getFilter(0));
+			assertTrue(gray == preprocessingSaw.getFilter(1));
 
 			try {
 				Locuses myLocus = processor.startProcessing(source.getSingleSource());
@@ -175,8 +190,8 @@ public class ModuleProcessorTest {
 			}
 
 		} finally {
-			transaction.rollback();
 			source.close();
+			transaction.rollback();
 			PassPersistentManager.instance().disposePersistentManager();
 		}
 
@@ -200,8 +215,8 @@ public class ModuleProcessorTest {
 			}
 
 		} finally {
-			transaction.rollback();
 			source.close();
+			transaction.rollback();
 			PassPersistentManager.instance().disposePersistentManager();
 		}
 

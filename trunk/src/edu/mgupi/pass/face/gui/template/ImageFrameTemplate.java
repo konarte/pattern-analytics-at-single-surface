@@ -2,6 +2,7 @@ package edu.mgupi.pass.face.gui.template;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
@@ -18,6 +19,7 @@ import javax.swing.JScrollPane;
 import javax.swing.WindowConstants;
 
 import edu.mgupi.pass.face.gui.AppHelper;
+import edu.mgupi.pass.util.Config;
 
 /**
  * Special Frame for showing images (hisogram and module images).
@@ -35,9 +37,11 @@ public class ImageFrameTemplate extends JDialog {
 	/**
 	 * This is the default constructor
 	 * 
+	 * @param owner
+	 * 
 	 */
-	public ImageFrameTemplate() {
-		super();
+	public ImageFrameTemplate(Frame owner) {
+		super(owner);
 		initialize();
 	}
 
@@ -205,7 +209,7 @@ public class ImageFrameTemplate extends JDialog {
 				AppHelper.showErrorDialog(this, "Internal error. Expected panelImage layout not initialized yet.");
 			}
 			jCheckBoxScaleBox.setText("Масштаб под размеры окна");
-			jCheckBoxScaleBox.setName("scaleButton");
+			jCheckBoxScaleBox.setName(Config.DEFAULT_SCALE_BUTTON_NAME);
 		}
 		return jCheckBoxScaleBox;
 	}

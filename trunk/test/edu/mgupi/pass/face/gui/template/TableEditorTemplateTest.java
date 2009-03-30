@@ -15,8 +15,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
@@ -51,12 +51,14 @@ import edu.mgupi.pass.face.gui.AppHelper;
 import edu.mgupi.pass.face.gui.SwingTestHelper;
 import edu.mgupi.pass.face.gui.template.TableEditorTemplateTest.TestTableEditorTemplate.MyTableModel;
 import edu.mgupi.pass.util.Config;
+import edu.mgupi.pass.util.Secundomer;
+import edu.mgupi.pass.util.SecundomerList;
 import edu.mgupi.pass.util.Utils;
 import edu.mgupi.pass.util.WaitCondition;
 import edu.mgupi.pass.util.WorkSet;
 import edu.mgupi.pass.util.Config.DeletionCheckMode;
 import edu.mgupi.pass.util.Config.DeletionMode;
-import edu.mgupi.pass.util.Config.TransactionMode;
+import edu.mgupi.pass.util.Config.TestTransactionMode;
 
 public class TableEditorTemplateTest {
 
@@ -85,23 +87,50 @@ public class TableEditorTemplateTest {
 		button.setName(MY_SAMPLE_NAME);
 		parentFrame.add(button);
 
-		Config.setDebugInstance();
+		Config.getInstance().setDebugInstance();
 		removeAllData();
 
 	}
 
 	@After
 	public void tearDown() throws Exception {
+
+		/*
+		 * Reset
+		 */
 		SwingTestHelper.closeAllWindows();
 		AppHelper.reset();
 		removeAllData();
 	}
 
+	private Connection getConnection() throws SQLException {
+		DriverManager.registerDriver(new com.mysql.jdbc.Driver());
+		Properties properties = new Properties();
+		properties.put("user", "pass");
+		properties.put("password", "adesroot");
+
+		Connection conn = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/pass_db", properties);
+		return conn;
+	}
+
 	private void removeAllData() throws PersistentException, InterruptedException {
 
+		PassPersistentManager.instance().getSession().close();
 		try {
+			Connection conn = this.getConnection();
+			try {
+				conn.setAutoCommit(false);
 
-			PassPersistentManager.instance().getSession().close();
+				Statement st = conn.createStatement();
+				st.executeUpdate("delete from DefectTypes where name like 'TEST-%'");
+				st.executeUpdate("delete from DefectClasses where name like 'TEST-%'");
+
+				conn.commit();
+			} finally {
+				conn.close();
+			}
+
+		} catch (Exception e) {
 
 			PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
 
@@ -126,7 +155,7 @@ public class TableEditorTemplateTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testWorkEveryRowCancel() throws Exception {
-		Config.getInstance().setTransactionMode(TransactionMode.COMMIT_EVERY_ROW);
+		Config.getInstance().setTransactionMode(TestTransactionMode.COMMIT_EVERY_ROW);
 
 		assertNotNull(tableEditor);
 
@@ -168,6 +197,7 @@ public class TableEditorTemplateTest {
 			JTable table = (JTable) Utils.getChildNamed(tableEditor, "data");
 			assertNotNull(table);
 			table.setRowSelectionInterval(rowIndex, rowIndex);
+			//table.setEditingRow(rowIndex);
 		}
 
 		/*
@@ -244,7 +274,7 @@ public class TableEditorTemplateTest {
 		return id;
 	}
 
-	private void checkTestData(JTable table, PreparedStatement statement, TransactionMode mode,
+	private void checkTestData(JTable table, PreparedStatement statement, TestTransactionMode mode,
 			Collection<Integer> idList, boolean checkInterfaceTable) throws SQLException {
 		int idx = 0;
 
@@ -267,7 +297,7 @@ public class TableEditorTemplateTest {
 				// for COMMIT_EVERY_ROW all data must stay
 				// for COMMIT_BULK -- it is disappear
 				// We use mode = null only once -- when process 'save' event
-				if (mode == null || mode == TransactionMode.COMMIT_EVERY_ROW) {
+				if (mode == null || mode == TestTransactionMode.COMMIT_EVERY_ROW) {
 					if (rs.next()) {
 						assertEquals(index, rs.getInt(1));
 						assertEquals(text, rs.getString(2));
@@ -304,7 +334,7 @@ public class TableEditorTemplateTest {
 
 	private boolean returnValue = false;
 
-	public void testChangeData(TransactionMode mode) throws Exception {
+	public void testChangeData(TestTransactionMode mode) throws Exception {
 		Config.getInstance().setTransactionMode(mode);
 		assertNotNull(tableEditor);
 
@@ -339,12 +369,7 @@ public class TableEditorTemplateTest {
 		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME, TestTableEditorTemplate.class);
 		assertTrue(tableEditor.isVisible());
 
-		DriverManager.registerDriver(new com.mysql.jdbc.Driver());
-		Properties properties = new Properties();
-		properties.put("user", "pass");
-		properties.put("password", "adesroot");
-
-		Connection conn = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/pass_db", properties);
+		Connection conn = this.getConnection();
 		conn.setAutoCommit(true);
 		PreparedStatement statement = conn
 				.prepareStatement("select idDefectClass, name from DefectClasses where idDefectClass = ?");
@@ -380,7 +405,7 @@ public class TableEditorTemplateTest {
 		 * Reopen and try to click 'OK'
 		 */
 
-		if (mode == TransactionMode.COMMIT_EVERY_ROW) {
+		if (mode == TestTransactionMode.COMMIT_EVERY_ROW) {
 			assertFalse(tableEditor.isVisible());
 			SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME, TestTableEditorTemplate.class);
 			assertTrue(tableEditor.isVisible());
@@ -416,7 +441,7 @@ public class TableEditorTemplateTest {
 			}
 		}
 
-		if (mode == TransactionMode.COMMIT_BULK) {
+		if (mode == TestTransactionMode.COMMIT_BULK) {
 			assertFalse(tableEditor.isVisible());
 			SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME, TestTableEditorTemplate.class);
 			assertTrue(tableEditor.isVisible());
@@ -448,7 +473,7 @@ public class TableEditorTemplateTest {
 
 	@Test
 	public void testChangeDataWorkEveryRow() throws Exception {
-		this.testChangeData(TransactionMode.COMMIT_EVERY_ROW);
+		this.testChangeData(TestTransactionMode.COMMIT_EVERY_ROW);
 	}
 
 	//	@Test
@@ -544,7 +569,7 @@ public class TableEditorTemplateTest {
 				}
 			});
 		}
-		
+
 		Thread.sleep(100);
 	}
 
@@ -603,18 +628,18 @@ public class TableEditorTemplateTest {
 		/*
 		 * Step 3
 		 */
-		deleteRows("Yes", true, 0);
+		deleteRows("Yes|Да", true, 0);
 		assertEquals(5, table.getRowCount());
 		assertEquals("TEST-редактируемый2", table.getModel().getValueAt(0, 1));
 
-		deleteRows("No", false, 0);
+		deleteRows("No|Нет", false, 0);
 		assertEquals(5, table.getRowCount());
 		assertEquals("TEST-редактируемый2", table.getModel().getValueAt(0, 1));
 
 		/*
 		 * Step 4
 		 */
-		deleteRows("Yes", true, 0, 1);
+		deleteRows("Yes|Да", true, 0, 1);
 		assertEquals(3, table.getRowCount());
 		assertEquals("TEST-редактируемый4", table.getModel().getValueAt(0, 1));
 		assertEquals("TEST-редактируемый5", table.getModel().getValueAt(1, 1));
@@ -629,21 +654,21 @@ public class TableEditorTemplateTest {
 		assertEquals(2, table.getRowCount());
 		assertEquals("TEST-редактируемый5", table.getModel().getValueAt(0, 1));
 
-		deleteRows("No", false, 0, 1);
+		deleteRows("No|Нет", false, 0, 1);
 		assertEquals(2, table.getRowCount());
 		assertEquals("TEST-редактируемый5", table.getModel().getValueAt(0, 1));
 
 		/*
 		 * Step 6
 		 */
-		deleteRows("Yes", true, 0, 1);
+		deleteRows("Yes|Да", true, 0, 1);
 		assertEquals(0, table.getRowCount());
 
 		SwingTestHelper.clickCloseDialogButton(tableEditor, "cancel");
 
 	}
 
-	public void testCheckBeforeAsk(TransactionMode mode) throws Exception {
+	public void testCheckBeforeAsk(TestTransactionMode mode) throws Exception {
 		Config.getInstance().setTransactionMode(mode);
 		Config.getInstance().setRowsDeleteMode(DeletionMode.CONFIRM);
 
@@ -659,7 +684,7 @@ public class TableEditorTemplateTest {
 		openWindowAndSave(-1, "TEST-редактируемый-3");
 
 		PersistentTransaction trans = null;
-		if (mode == TransactionMode.COMMIT_EVERY_ROW) {
+		if (mode == TestTransactionMode.COMMIT_EVERY_ROW) {
 			trans = PassPersistentManager.instance().getSession().beginTransaction();
 		}
 		assertTrue(PassPersistentManager.instance().getSession().getTransaction().isActive());
@@ -693,7 +718,7 @@ public class TableEditorTemplateTest {
 
 		assertTrue(PassPersistentManager.instance().getSession().getTransaction().isActive());
 
-		SwingTestHelper.clickCloseDialogButton(tableEditor, mode == TransactionMode.COMMIT_BULK ? "OK" : "cancel");
+		SwingTestHelper.clickCloseDialogButton(tableEditor, mode == TestTransactionMode.COMMIT_BULK ? "OK" : "cancel");
 		if (trans != null) {
 
 			/*
@@ -709,10 +734,10 @@ public class TableEditorTemplateTest {
 		 * Check for can't delete
 		 */
 		Config.getInstance().setDeletionCheckModeMode(DeletionCheckMode.ACQUIRE_THEN_CHECK);
-		deleteRows("Yes", "OK", false, false, 0);
+		deleteRows("Yes|Да", "OK", false, false, 0);
 		assertEquals(4, table.getRowCount());
 
-		deleteRows("No", null, false, false, 0);
+		deleteRows("No|Нет", null, false, false, 0);
 		assertEquals(4, table.getRowCount());
 
 		Config.getInstance().setDeletionCheckModeMode(DeletionCheckMode.CHECK_THEN_ACQUIRE);
@@ -733,11 +758,11 @@ public class TableEditorTemplateTest {
 		 * Successfully removing
 		 */
 		Config.getInstance().setDeletionCheckModeMode(DeletionCheckMode.ACQUIRE_THEN_CHECK);
-		deleteRows("Yes", null, false, true, 1);
+		deleteRows("Yes|Да", null, false, true, 1);
 		assertEquals(3, table.getRowCount());
 
 		Config.getInstance().setDeletionCheckModeMode(DeletionCheckMode.CHECK_THEN_ACQUIRE);
-		deleteRows("Yes", null, false, true, 1);
+		deleteRows("Yes|Да", null, false, true, 1);
 		assertEquals(2, table.getRowCount());
 
 		/*
@@ -749,7 +774,7 @@ public class TableEditorTemplateTest {
 		/*
 		 * Reopening interface We have 2 rows
 		 */
-		SwingTestHelper.clickCloseDialogButton(tableEditor, mode == TransactionMode.COMMIT_BULK ? "OK" : "cancel");
+		SwingTestHelper.clickCloseDialogButton(tableEditor, mode == TestTransactionMode.COMMIT_BULK ? "OK" : "cancel");
 
 		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME, TestTableEditorTemplate.class);
 
@@ -770,10 +795,10 @@ public class TableEditorTemplateTest {
 
 	@Test
 	public void testCheckBeforeAskEveryRow() throws Exception {
-		this.testCheckBeforeAsk(TransactionMode.COMMIT_EVERY_ROW);
+		this.testCheckBeforeAsk(TestTransactionMode.COMMIT_EVERY_ROW);
 	}
 
-	public void testForErrors(TransactionMode mode) throws Exception {
+	public void testForErrors(TestTransactionMode mode) throws Exception {
 		Config.getInstance().setTransactionMode(mode);
 		Config.getInstance().setRowsDeleteMode(DeletionMode.NO_CONFIRM);
 		Config.getInstance().setDeletionCheckModeMode(DeletionCheckMode.NO_CHECK);
@@ -794,7 +819,7 @@ public class TableEditorTemplateTest {
 		openWindowAndSave(-1, "TEST-редактируемый-0-3");
 
 		PersistentTransaction trans = null;
-		if (mode == TransactionMode.COMMIT_EVERY_ROW) {
+		if (mode == TestTransactionMode.COMMIT_EVERY_ROW) {
 			trans = PassPersistentManager.instance().getSession().beginTransaction();
 		}
 		assertTrue(PassPersistentManager.instance().getSession().getTransaction().isActive());
@@ -824,7 +849,7 @@ public class TableEditorTemplateTest {
 
 		assertTrue(PassPersistentManager.instance().getSession().getTransaction().isActive());
 
-		SwingTestHelper.clickCloseDialogButton(tableEditor, mode == TransactionMode.COMMIT_BULK ? "OK" : "cancel");
+		SwingTestHelper.clickCloseDialogButton(tableEditor, mode == TestTransactionMode.COMMIT_BULK ? "OK" : "cancel");
 		if (trans != null) {
 
 			/*
@@ -884,6 +909,7 @@ public class TableEditorTemplateTest {
 		 * Reopen after exceptions.
 		 */
 		openWindowAndSave(1, "TEST-редактируемый-2-1");
+		openWindowAndSave(1, "TEST-редактируемый-2-1");
 
 		assertEquals("TEST-редактируемый-2-1", table.getModel().getValueAt(1, 1));
 
@@ -897,7 +923,7 @@ public class TableEditorTemplateTest {
 		 * Step 6 again, but in new window
 		 */
 
-		SwingTestHelper.clickCloseDialogButton(tableEditor, mode == TransactionMode.COMMIT_BULK ? "OK" : "cancel");
+		SwingTestHelper.clickCloseDialogButton(tableEditor, mode == TestTransactionMode.COMMIT_BULK ? "OK" : "cancel");
 
 		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME, TestTableEditorTemplate.class);
 		//		Thread.sleep(5000);
@@ -933,14 +959,181 @@ public class TableEditorTemplateTest {
 		openWindowAndSave(-1, "TEST-редактируемый-3-2");
 		assertEquals(5, table.getModel().getRowCount());
 		assertEquals("TEST-редактируемый-3-2", table.getModel().getValueAt(4, 1));
+
+		SecundomerList.printToOutput(System.out);
 	}
 
 	@Test
 	public void testForErrorsEveryRow() throws Exception {
-		this.testForErrors(TransactionMode.COMMIT_EVERY_ROW);
+		this.testForErrors(TestTransactionMode.COMMIT_EVERY_ROW);
+	}
+
+	@Test
+	public void testHugeAmountOfData() throws Exception {
+
+		Config.getInstance().setRowsDeleteMode(DeletionMode.NO_CONFIRM);
+		Config.getInstance().setDeletionCheckModeMode(DeletionCheckMode.CHECK_THEN_ACQUIRE);
+
+		JTable table = (JTable) Utils.getChildNamed(tableEditor, "data");
+		assertNotNull(table);
+
+		Connection conn = this.getConnection();
+		conn.setAutoCommit(false);
+
+		PreparedStatement psClasses = conn
+				.prepareStatement("insert into DefectClasses (IDDefectClass, Name) values (?,?)");
+		PreparedStatement psTypes = conn.prepareStatement("insert into DefectTypes (IdDefectType, Name, DefectImage, "
+				+ "DefectClassesIdDefectClass) values (?, ?, ?, ?)");
+
+		/*
+		 * Loading data into database
+		 */
+		int LOWIDX = 1000000;
+		int ROWCOUNT = 10000;
+		for (int i = 0; i < ROWCOUNT; i++) {
+			int idx = LOWIDX + i;
+			psClasses.setInt(1, idx);
+			psClasses.setString(2, "TEST-супер-класс-" + idx);
+			psClasses.addBatch();
+		}
+		psClasses.executeBatch();
+
+		System.out.println("Classes inserted...");
+
+		Random rand = new Random();
+		for (int i = 0; i < ROWCOUNT * 2; i++) {
+			int idx = LOWIDX + rand.nextInt(ROWCOUNT);
+			psTypes.setInt(1, LOWIDX + i);
+			psTypes.setString(2, "TEST-супер-тип-" + (LOWIDX + i) + "-для-супер-класса-" + idx);
+			psTypes.setNull(3, Types.BLOB);
+			psTypes.setInt(4, idx);
+			psTypes.addBatch();
+		}
+		psTypes.executeBatch();
+
+		System.out.println("Types inserted...");
+
+		conn.commit();
+
+		/*
+		 * Open window
+		 */
+		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME, TestTableEditorTemplate.class);
+		//SwingTestHelper.waitMe(AppHelper.getInstance().searchWindow(TestTableEditorTemplate.class));
+
+		int RANDOM_EDIT = 10;
+
+		/*
+		 * Random edition
+		 */
+		int changedIdx[] = new int[RANDOM_EDIT];
+
+		for (int i = 0; i < RANDOM_EDIT; i++) {
+			int pos = rand.nextInt(ROWCOUNT);
+			changedIdx[i] = pos;
+			assertEquals(LOWIDX + pos, table.getModel().getValueAt(pos, 0));
+			this.openWindowAndSave(pos, "TEST-супер-волшебные-значения-" + pos);
+			assertEquals("TEST-супер-волшебные-значения-" + pos, table.getModel().getValueAt(pos, 1));
+		}
+		//		conn.close();
+		//		conn = this.getConnection();
+		//		conn.setAutoCommit(false);
+
+		PreparedStatement psSel = conn.prepareStatement("select Name from DefectClasses where IdDefectClass = ?");
+		for (int i = 0; i < changedIdx.length; i++) {
+			int pos = changedIdx[i];
+			psSel.setInt(1, LOWIDX + pos);
+			String str = "TEST-супер-волшебные-значения-" + pos;
+			assertEquals(str, table.getModel().getValueAt(pos, 1));
+			assertEquals(LOWIDX + pos, table.getModel().getValueAt(pos, 0));
+
+			ResultSet rs = psSel.executeQuery();
+			if (rs.next()) {
+				String value = rs.getString(1);
+				assertEquals(str, value);
+			}
+			rs.close();
+
+		}
+		//
+		//		/*
+		//		 * Generate deletion rows
+		//		 */
+		//		int CHECKTYPES = 10;
+		//		ResultSet rs = conn.createStatement().executeQuery(
+		//				"select IdDefectClass from DefectClasses where Name like 'TEST-%' and IdDefectClass not in ("
+		//						+ "select DefectClassesIdDefectClass from DefectTypes) limit 200, 210");
+		//
+		//		int rowPos[] = new int[CHECKTYPES];
+		//		int rowIdx[] = new int[CHECKTYPES];
+		//		for (int i = 0; i < CHECKTYPES; i++) {
+		//			rs.next();
+		//			rowIdx[i] = rs.getInt(1);
+		//			rowPos[i] = rowIdx[i] - LOWIDX;
+		//
+		//		}
+		//
+		//		System.out.println("Found rows: " + Arrays.toString(rowPos));
+		//		for (int i = 0; i < rowPos.length; i++) {
+		//			int pos = rowPos[i];
+		//			System.out.println("Try to delete row: " + pos);
+		//			assertEquals(rowIdx[i], table.getModel().getValueAt(pos, 0));
+		//			deleteRows(null, true, pos);
+		//			for (int j = i + 1; j < rowIdx.length; j++) {
+		//				if (rowPos[j] >= rowPos[i]) {
+		//					rowPos[j]--;
+		//				}
+		//			}
+		//		}
+		//		int rowCount = table.getModel().getRowCount();
+		//		assertEquals(ROWCOUNT - rowPos.length, rowCount);
+		//
+		//		conn.close();
+		//		conn = this.getConnection();
+		//		conn.setAutoCommit(false);
+		//
+		//		rs = conn.createStatement().executeQuery(
+		//				"select IdDefectClass from DefectClasses where Name like 'TEST-%' and IdDefectClass not in ("
+		//						+ "select DefectClassesIdDefectClass from DefectTypes)");
+		//		rowPos = new int[200];
+		//		rowIdx = new int[200];
+		//		for (int i = 0; i < 200; i++) {
+		//			rs.next();
+		//			rowIdx[i] = rs.getInt(1);
+		//			rowPos[i] = -1;
+		//			for (int x = 0; x < table.getModel().getRowCount(); x++) {
+		//				if (table.getModel().getValueAt(x, 0).equals(rowIdx[i])) {
+		//					rowPos[i] = x;
+		//					break;
+		//				}
+		//			}
+		//			if (rowPos[i] == -1) {
+		//				fail("Unable to found pos for object " + rowIdx[i]);
+		//			}
+		//		}
+		//		deleteRows(null, true, rowPos);
+		//		assertEquals(rowCount - rowPos.length, table.getModel().getRowCount());
+
+		conn.close();
+		SecundomerList.printToOutput(System.out);
+
 	}
 
 	/**
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
 	 * 
 	 * 
 	 * Test sample of table editor
@@ -1001,21 +1194,38 @@ public class TableEditorTemplateTest {
 				return new String[] { "ID", "Класс дефекта" };
 			}
 
+			private final static Secundomer DATA_SEC = SecundomerList.registerSecundomer("Load data from database");
+
+			@SuppressWarnings("unchecked")
 			@Override
 			protected List<DefectClasses> getDataImpl() throws Exception {
+
 				System.out.println("LOADING CURRENT DEFECTS...");
-				DefectClassesCriteria criteria = new DefectClassesCriteria();
-				criteria.name.like("TEST-%");
-				List<DefectClasses> classes = new ArrayList<DefectClasses>();
-				classes.addAll(Arrays.asList(DefectClassesFactory.listDefectClassesByCriteria(criteria)));
-				return classes;
+
+				DATA_SEC.start();
+				try {
+					DefectClassesCriteria criteria = new DefectClassesCriteria();
+					criteria.name.like("TEST-%");
+					List<DefectClasses> classes = new ArrayList<DefectClasses>();
+					classes.addAll(criteria.list());
+					return classes;
+				} finally {
+					DATA_SEC.stop();
+				}
 			}
+
+			private final static Secundomer DATA_RET = SecundomerList.registerSecundomer("Get value for column");
 
 			@Override
 			public Object getValueAt(int rowIndex, int columnIndex) {
-				DefectClasses defect = data.get(rowIndex);
+				DATA_RET.start();
+				try {
+					DefectClasses defect = data.get(rowIndex);
 
-				return columnIndex == 0 ? defect.getIdDefectClass() : defect.getName();
+					return columnIndex == 0 ? defect.getIdDefectClass() : defect.getName();
+				} finally {
+					DATA_RET.stop();
+				}
 			}
 
 		}
@@ -1103,7 +1313,7 @@ public class TableEditorTemplateTest {
 		}
 
 		@Override
-		protected Criteria getSaveAllowCriteria(DefectClasses object, String newValue) throws Exception {
+		protected Criteria getUniqueCheckCriteria(DefectClasses object, String newValue) throws Exception {
 			if (!useCriterias) {
 				return null;
 			}

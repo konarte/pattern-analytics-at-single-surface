@@ -55,8 +55,9 @@ public class AppHelperTest {
 		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
-				splash = (SplashWindow) AppHelper.getInstance().registerAdditionalWindow(SplashWindow.class);
-				splash2 = (SplashWindow) AppHelper.getInstance().registerAdditionalWindow(SplashWindow.class);
+				splash = (SplashWindow) AppHelper.getInstance().registerAdditionalWindow(null, SplashWindow.class);
+				splash2 = (SplashWindow) AppHelper.getInstance().registerAdditionalWindow(null, SplashWindow.class);
+
 			}
 		}, new WaitCondition() {
 			@Override
@@ -73,7 +74,9 @@ public class AppHelperTest {
 		assertFalse(splash2.isVisible());
 		assertFalse(splash == splash2);
 
-		splash.dispose();
+		assertTrue(AppHelper.getInstance().unregisterAdditionalWindow(splash));
+
+		//splash.dispose();
 		splash2.dispose();
 	}
 
@@ -115,7 +118,7 @@ public class AppHelperTest {
 	@Test
 	public void testOpenWindowFrameMore() throws Exception {
 		splash = null;
-		final SplashWindow mySplash = (SplashWindow) AppHelper.getInstance().registerAdditionalWindow(
+		final SplashWindow mySplash = (SplashWindow) AppHelper.getInstance().registerAdditionalWindow(null,
 				SplashWindow.class);
 		assertNotNull(mySplash);
 
@@ -179,7 +182,8 @@ public class AppHelperTest {
 		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
-				registeredWindow = (MyFrame) AppHelper.getInstance().registerAdditionalWindow(MyFrame.class);
+				registeredWindow = (MyFrame) AppHelper.getInstance().registerAdditionalWindow(commonWindow,
+						MyFrame.class);
 				registeredComp1 = (MyFrame) AppHelper.getInstance().registerAdditionalComponent(new MyFrame());
 				registeredComp2 = (MyFrame) AppHelper.getInstance().registerAdditionalComponent(new MyFrame());
 			}

@@ -22,20 +22,20 @@
 			</fileset>
 		</copy>
 
-		<echo file="src/used-apps.properties" append="false">#Build Number for ANT. Do not edit!
+		<echo file="src/used-libs.properties" append="false">#Build Number for ANT. Do not edit!
 
 libraries=</echo>
 
 		<antcall target="listLibraries">
 			<param name="dir" value="model" />
-			<param name="file" value="src/used-apps.properties" />
+			<param name="file" value="src/used-libs.properties" />
 			<param name="sep" value="," />
 			<param name="endsep" value="," />
 		</antcall>
 
 		<antcall target="listLibraries">
 			<param name="dir" value="lib" />
-			<param name="file" value="src/used-apps.properties" />
+			<param name="file" value="src/used-libs.properties" />
 			<param name="sep" value="," />
 			<param name="endsep" value="" />
 		</antcall>
@@ -43,7 +43,7 @@ libraries=</echo>
 
 		<copy todir="bin">
 			<fileset dir="src">
-				<include name="used-apps.properties" />
+				<include name="used-libs.properties" />
 			</fileset>
 		</copy>
 	</target>
@@ -54,6 +54,7 @@ libraries=</echo>
 		<include name="**/*.properties" />
 		<include name="**/*.jpg" />
 		<include name="**/*.gif" />
+		<include name="**/*.png" />
 		<include name="**/*.xml" />
 
 		<!--<exclude name="**/test/**/*" />
@@ -96,6 +97,7 @@ libraries=</echo>
 			<manifest>
 				<attribute name="Built-by" value="raidan" />
 				<attribute name="Main-Class" value="edu.mgupi.pass.face.Application" />
+				<!--<attribute name="SplashScreen-Image" value="resources/splash/snaky.png" />-->
 				<attribute name="Class-Path" value="${libs_list}" />
 			</manifest>
 		</jar>

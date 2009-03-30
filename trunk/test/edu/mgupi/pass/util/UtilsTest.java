@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.text.MessageFormat;
 import java.util.Collection;
 
 import javax.swing.JButton;
@@ -146,4 +147,9 @@ public class UtilsTest {
 		System.out.println(new String(mess.getBytes("Windows-1252"), "UTF-8"));
 	}
 
+	@Test
+	public void testMessageFormat() {
+		String fmt = "{0} x {1} {2} bpp {3,number,percent}";
+		assertEquals("1 024 x 1 024 8 bpp 66%", MessageFormat.format(fmt, 1024, 1024, 8, 0.657));
+	}
 }

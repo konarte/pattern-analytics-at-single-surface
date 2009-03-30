@@ -1,16 +1,12 @@
 package edu.mgupi.pass.modules;
 
-import java.io.IOException;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.orm.PersistentException;
 import org.orm.PersistentTransaction;
 
 import edu.mgupi.pass.db.surfaces.PassPersistentManager;
 import edu.mgupi.pass.filters.FilterChainsaw;
-import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.service.ResizeFilter;
 import edu.mgupi.pass.inputs.TestInputImpl;
 import edu.mgupi.pass.util.Secundomer;
@@ -70,8 +66,7 @@ public class ModuleProcessorPerformanceTest {
 	}
 
 	@Test
-	public void testCommonWork() throws InstantiationException, IllegalAccessException, FilterException, IOException,
-			ModuleException, PersistentException {
+	public void testCommonWork() throws Exception {
 		PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
 		TestInputImpl source = new TestInputImpl();
 		source.init();
@@ -95,9 +90,10 @@ public class ModuleProcessorPerformanceTest {
 
 			SecundomerList.printToOutput(System.out);
 		} finally {
+			source.close();
 			System.out.println("Rollback");
 			transaction.rollback();
-			source.close();
+			
 		}
 	}
 

@@ -30,13 +30,17 @@ public class SurfacesClassesComboBox extends JComboBox {
 		 */
 		private static final long serialVersionUID = 1L;
 
-		public int refresh() throws PersistentException {
+		public int refresh() {
 
-			super.removeAllElements();
-			for (SurfaceClasses defClass : SurfaceClassesFactory.listSurfaceClassesByQuery(null, null)) {
-				super.addElement(defClass);
+			try {
+				super.removeAllElements();
+				for (SurfaceClasses defClass : SurfaceClassesFactory.listSurfaceClassesByQuery(null, null)) {
+					super.addElement(defClass);
+				}
+				return super.getSize();
+			} catch (PersistentException pe) {
+				throw new RuntimeException(pe);
 			}
-			return super.getSize();
 		}
 	}
 

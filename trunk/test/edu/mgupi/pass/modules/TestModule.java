@@ -100,7 +100,7 @@ public class TestModule implements IModule, IInitiable {
 			throw new IllegalArgumentException(
 					"Internal error. Store was already processed! Attemt to reuse store object!");
 		}
-
+		
 		String imageParams = "" + filteredImage.getWidth() + "x" + filteredImage.getHeight() + " : "
 				+ filteredImage.getType();
 

@@ -16,7 +16,7 @@ public class MainFramePreCacheTest {
 
 	@Before
 	public void setUp() throws Exception {
-		Config.setDebugInstance();
+		Config.getInstance().setDebugInstance();
 
 		frame = (MainFrame) AppHelper.getInstance().getFrameImpl(MainFrame.class);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

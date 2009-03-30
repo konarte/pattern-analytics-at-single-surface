@@ -27,7 +27,7 @@ import edu.mgupi.pass.util.WorkSet;
 import edu.mgupi.pass.util.Config.DeletionCheckMode;
 import edu.mgupi.pass.util.Config.DeletionMode;
 import edu.mgupi.pass.util.Config.SourceMode;
-import edu.mgupi.pass.util.Config.TransactionMode;
+import edu.mgupi.pass.util.Config.TestTransactionMode;
 
 public class SettingsDialogTest {
 
@@ -35,7 +35,7 @@ public class SettingsDialogTest {
 
 	@Before
 	public void setUp() throws Exception {
-		Config.setDebugInstance();
+		Config.getInstance().setDebugInstance();
 		dialog = (SettingsDialog) AppHelper.getInstance().getDialogImpl(SettingsDialog.class);
 	}
 
@@ -191,7 +191,7 @@ public class SettingsDialogTest {
 	public void testCommonSettings() throws Exception {
 		Config.getInstance().setLookAndFeel(WindowsLookAndFeel.class.getName());
 		Config.getInstance().setRowsDeleteMode(DeletionMode.CONFIRM);
-		Config.getInstance().setTransactionMode(TransactionMode.COMMIT_EVERY_ROW);
+		Config.getInstance().setTransactionMode(TestTransactionMode.COMMIT_EVERY_ROW);
 		Config.getInstance().setDeletionCheckModeMode(DeletionCheckMode.ACQUIRE_THEN_CHECK);
 
 		dialog.resetControls();
@@ -234,17 +234,17 @@ public class SettingsDialogTest {
 			radio.setSelected(true);
 		}
 
-		for (TransactionMode mode : TransactionMode.values()) {
+		for (TestTransactionMode mode : TestTransactionMode.values()) {
 			JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog, mode.name());
 			assertNotNull(radio);
-			if (mode == TransactionMode.COMMIT_EVERY_ROW) {
+			if (mode == TestTransactionMode.COMMIT_EVERY_ROW) {
 				assertTrue(radio.isSelected());
 			} else {
 				assertFalse(radio.isSelected());
 			}
 		}
 		{
-			JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog, TransactionMode.COMMIT_BULK.name());
+			JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog, TestTransactionMode.COMMIT_BULK.name());
 			assertNotNull(radio);
 			radio.setSelected(true);
 		}
@@ -272,7 +272,7 @@ public class SettingsDialogTest {
 		assertTrue(MotifLookAndFeel.class == UIManager.getLookAndFeel().getClass());
 
 		assertEquals(DeletionMode.NO_CONFIRM, Config.getInstance().getRowsDeleteMode());
-		assertEquals(TransactionMode.COMMIT_BULK, Config.getInstance().getTransactionMode());
+		assertEquals(TestTransactionMode.COMMIT_BULK, Config.getInstance().getTransactionMode());
 		assertEquals(DeletionCheckMode.CHECK_THEN_ACQUIRE, Config.getInstance().getDeletionCheckMode());
 
 		assertFalse(resultButton);
@@ -282,7 +282,7 @@ public class SettingsDialogTest {
 	public void testCommonSettingsCancel() throws Exception {
 		Config.getInstance().setLookAndFeel(WindowsLookAndFeel.class.getName());
 		Config.getInstance().setRowsDeleteMode(DeletionMode.CONFIRM);
-		Config.getInstance().setTransactionMode(TransactionMode.COMMIT_EVERY_ROW);
+		Config.getInstance().setTransactionMode(TestTransactionMode.COMMIT_EVERY_ROW);
 		Config.getInstance().setDeletionCheckModeMode(DeletionCheckMode.ACQUIRE_THEN_CHECK);
 
 		dialog.resetControls();
@@ -311,7 +311,7 @@ public class SettingsDialogTest {
 		assertNotNull(radio);
 		radio.setSelected(true);
 
-		radio = (JRadioButton) Utils.getChildNamed(dialog, TransactionMode.COMMIT_BULK.name());
+		radio = (JRadioButton) Utils.getChildNamed(dialog, TestTransactionMode.COMMIT_BULK.name());
 		assertNotNull(radio);
 		radio.setSelected(true);
 
@@ -326,7 +326,7 @@ public class SettingsDialogTest {
 		assertTrue(WindowsLookAndFeel.class == UIManager.getLookAndFeel().getClass());
 
 		assertEquals(DeletionMode.CONFIRM, Config.getInstance().getRowsDeleteMode());
-		assertEquals(TransactionMode.COMMIT_EVERY_ROW, Config.getInstance().getTransactionMode());
+		assertEquals(TestTransactionMode.COMMIT_EVERY_ROW, Config.getInstance().getTransactionMode());
 		assertEquals(DeletionCheckMode.ACQUIRE_THEN_CHECK, Config.getInstance().getDeletionCheckMode());
 
 		assertFalse(resultButton);

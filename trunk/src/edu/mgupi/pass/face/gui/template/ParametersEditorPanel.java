@@ -97,6 +97,7 @@ public class ParametersEditorPanel extends JPanel {
 		// previousWork means that this is not first opening
 		// If this is first opening (and received parameters null) -- continue execution  
 		if (parameters == editableParameters && hasPreviousWork) {
+			this.resetParameterValues();
 			return;
 		}
 

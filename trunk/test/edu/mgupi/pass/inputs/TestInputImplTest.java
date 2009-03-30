@@ -42,9 +42,8 @@ public class TestInputImplTest {
 
 	@Test
 	public void testGetSingleSource() throws IOException {
-
+		source.init();
 		try {
-			source.init();
 			InputStore store = source.getSingleSource();
 			System.out.println("Image " + store.getName() + " (" + store.getSourceImage().toString() + ")");
 		} finally {

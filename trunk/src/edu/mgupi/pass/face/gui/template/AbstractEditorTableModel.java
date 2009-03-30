@@ -7,8 +7,10 @@ import java.awt.event.MouseEvent;
 import java.util.Arrays;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
@@ -23,6 +25,28 @@ import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Utils;
 import edu.mgupi.pass.util.Config.DeletionMode;
 
+/**
+ * Model for editing tables -- such a table show list of rows, where user can
+ * add row ({@link #addRow()}), edit current row ({@link #editRow()}), delete
+ * row ({@link #deleteRows()}, move rows up ( {@link #moveRowsUp()}, move rows
+ * down ({@link #moveRowsDown()}, locate changed item event (
+ * {@link #valueChanged(ListSelectionEvent)}.
+ * 
+ * You can register 5 types of buttons, that provides events:
+ * {@link #registerAddRowButton(JButton)},
+ * {@link #registerDeleteRowButton(JButton)},
+ * {@link #registerEditRowButton(JButton)},
+ * {@link #registerMoveRowsDownButton(JButton)},
+ * {@link #registerMoveRowsUpButton(JButton)}.
+ * 
+ * Not all this methods are required to use, for example moving rows up and down
+ * is not required when you edit data, loaded from database.
+ * 
+ * You must implement few ...Impl methods.
+ * 
+ * @author raidan
+ * 
+ */
 public abstract class AbstractEditorTableModel extends AbstractTableModel implements ActionListener,
 		ListSelectionListener {
 
@@ -32,17 +56,35 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+
 	protected JTable owner = null;
 
+	/**
+	 * Main constructor.
+	 * 
+	 * @param owner
+	 *            instance of table, where you attach this model
+	 */
 	public AbstractEditorTableModel(JTable owner) {
 		if (owner == null) {
 			throw new IllegalArgumentException("Internal error. 'owner' must be not null.");
 		}
 
-		logger.debug("Initialize editor table model " + this);
+		logger.debug("Initialize editor table model {}.", this);
 
 		this.owner = owner;
+
+		// Set up interval selection mode
+		owner.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+
+		// see #valueChanged
 		this.owner.getSelectionModel().addListSelectionListener(this);
+
+		/*
+		 * Provide support for double-clicking on row.
+		 * 
+		 * If you do double-click -- we call 'edit' method.
+		 */
 		this.owner.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
@@ -53,6 +95,13 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		});
 	}
 
+	/**
+	 * Help method for set up preferred column with to specified columns.
+	 * 
+	 * @param width
+	 *            width value for every column; this array will use for simple
+	 *            iteration through all columns
+	 */
 	public void setColumnWidth(int... width) {
 		if (width == null) {
 			return;
@@ -64,6 +113,15 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		}
 	}
 
+	/**
+	 * Help method for set up align mode for specified column
+	 * 
+	 * @param column
+	 *            column number you wish to set up new align mode
+	 * @param mode
+	 *            alignment mode, see {@link JLabel#setHorizontalAlignment(int)}
+	 * 
+	 */
 	public void setHorizontalAlignMode(int column, int mode) {
 		TableColumn col = this.owner.getColumn(this.owner.getColumnName(column));
 
@@ -74,10 +132,24 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 
 	private JButton editButton;
 
+	/**
+	 * Register 'edit' button on dialog. Clicking this button will provide
+	 * 'edit' event.
+	 * 
+	 * @param button
+	 *            instance of button, required
+	 * 
+	 * @see #editRow()
+	 */
 	public void registerEditRowButton(JButton button) {
 		if (editButton != null) {
 			throw new IllegalStateException("'editButton' already registered (" + editButton.getText() + ").");
 		}
+
+		if (button == null) {
+			throw new IllegalStateException("Internal error. Parameter 'button' must be not null.");
+		}
+
 		this.editButton = button;
 		button.setActionCommand("edit");
 		button.setName("edit");
@@ -86,10 +158,26 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 
 	private JButton upButton;
 
-	public void registerUpRowButton(JButton button) {
+	/**
+	 * Register 'MoveRowsUp' button on dialog. Clicking this button will provide
+	 * 'up' event.
+	 * 
+	 * This is optional method.
+	 * 
+	 * @param button
+	 *            instance of button, required
+	 * 
+	 * @see #moveRowsUp()
+	 */
+	public void registerMoveRowsUpButton(JButton button) {
 		if (upButton != null) {
 			throw new IllegalStateException("'upButton' already registered (" + upButton.getText() + ").");
 		}
+
+		if (button == null) {
+			throw new IllegalStateException("Internal error. Parameter 'button' must be not null.");
+		}
+
 		this.upButton = button;
 		button.setActionCommand("up");
 		button.setName("up");
@@ -98,10 +186,26 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 
 	private JButton downButton;
 
-	public void registerDownRowButton(JButton button) {
+	/**
+	 * Register 'MoveRowsDown' button on dialog. Clicking this button will
+	 * provide 'down' event.
+	 * 
+	 * This is optional method.
+	 * 
+	 * @param button
+	 *            instance of button, required
+	 * 
+	 * @see #moveRowsDown()
+	 */
+	public void registerMoveRowsDownButton(JButton button) {
 		if (downButton != null) {
 			throw new IllegalStateException("'downButton' button already registered (" + downButton.getText() + ").");
 		}
+
+		if (button == null) {
+			throw new IllegalStateException("Internal error. Parameter 'button' must be not null.");
+		}
+
 		this.downButton = button;
 		button.setActionCommand("down");
 		button.setName("down");
@@ -110,10 +214,24 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 
 	private JButton addButton;
 
+	/**
+	 * Register 'AddRow' button on dialog. Clicking this button will provide
+	 * 'add' event.
+	 * 
+	 * @param button
+	 *            instance of button, required
+	 * 
+	 * @see #addRow()
+	 */
 	public void registerAddRowButton(JButton button) {
 		if (addButton != null) {
 			throw new IllegalStateException("'addButton' button already registered (" + addButton.getText() + ").");
 		}
+
+		if (button == null) {
+			throw new IllegalStateException("Internal error. Parameter 'button' must be not null.");
+		}
+
 		this.addButton = button;
 		button.setActionCommand("add");
 		button.setName("add");
@@ -122,6 +240,15 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 
 	private JButton deleteButton;
 
+	/**
+	 * Register 'DeleteRow' button on dialog. Clicking this button will provide
+	 * 'delete' event.
+	 * 
+	 * @param button
+	 *            instance of button, required
+	 * 
+	 * @see #deleteRows()
+	 */
 	public void registerDeleteRowButton(JButton button) {
 		if (deleteButton != null) {
 			throw new IllegalStateException("'deleteButton' button already registered (" + deleteButton.getText()
@@ -139,28 +266,38 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 			return;
 		}
 
+		/*
+		 * Process event from buttons
+		 */
 		if (command.equals("add")) {
 			logger.trace("Execution 'addRow' command.");
 			this.addRow();
 		} else if (command.equals("delete")) {
 			logger.trace("Execution 'deleteRow' command.");
-			this.deleteRow();
+			this.deleteRows();
 		} else if (command.equals("up")) {
 			logger.trace("Execution 'upRow' command.");
-			this.upRow();
+			this.moveRowsUp();
 		} else if (command.equals("down")) {
 			logger.trace("Execution 'downRow' command.");
-			this.downRow();
+			this.moveRowsDown();
 		} else if (command.equals("edit")) {
 			logger.trace("Execution 'editRow' command.");
 			this.editRow();
 		}
 	}
 
+	/**
+	 * @see #onRowSelectionImpl(int)
+	 */
 	public void valueChanged(ListSelectionEvent e) {
 		if (e.getValueIsAdjusting()) {
 			return;
 		}
+		/*
+		 * Select only non-adjusting rows (adjusting happens during continues
+		 * selection of rows)
+		 */
 
 		int rowIdx = this.owner.getSelectedRow();
 
@@ -173,11 +310,15 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		}
 
 		try {
-			this.rowSelectionImpl(rowIdx);
-		} catch (Exception e1) {
-			AppHelper.showExceptionDialog(this.owner, "Ошибка при смене строки.", e1);
+			this.onRowSelectionImpl(rowIdx);
+		} catch (Throwable t) {
+			AppHelper.showExceptionDialog(this.owner, "Ошибка при смене строки.", t);
 			return;
 		}
+
+		/*
+		 * Set up our buttons for enable states
+		 */
 
 		if (this.deleteButton != null) {
 			this.deleteButton.setEnabled(this.getRowCount() > 0);
@@ -187,6 +328,9 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 			this.editButton.setEnabled(this.getRowCount() > 0 && this.owner.getSelectedRowCount() == 1);
 		}
 
+		/*
+		 * Check up and down buttons for all selection ranges
+		 */
 		int selectedRows[] = this.owner.getSelectedRows();
 		int len = selectedRows.length;
 		if (this.upButton != null) {
@@ -197,68 +341,102 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		}
 	}
 
+	/**
+	 * Method called when user pressed 'AddRow' button.
+	 * 
+	 * @see #addRowImpl(int)
+	 */
 	public void addRow() {
-		int rowIdx = this.owner.getRowCount();
+		int currentRow = this.owner.getRowCount();
 
-		logger.trace("Adding row {}. ", rowIdx);
+		logger.trace("Adding row {}. ", currentRow);
 
 		try {
-			if (this.addRowImpl(rowIdx)) {
+			if (this.addRowImpl(currentRow)) {
 
 				logger.trace("OK, successfully added");
 
-				super.fireTableRowsInserted(rowIdx, rowIdx);
+				super.fireTableRowsInserted(currentRow, currentRow);
 
-				this.owner.setRowSelectionInterval(rowIdx, rowIdx);
+				this.owner.setRowSelectionInterval(currentRow, currentRow);
 			}
-		} catch (Exception e) {
-			AppHelper.showExceptionDialog(this.owner, "Ошибка при добавлении новой строки.", e);
+		} catch (Throwable t) {
+			AppHelper.showExceptionDialog(this.owner, "Ошибка при добавлении новой строки.", t);
 			return;
 		}
 	}
 
-	public void deleteRow() {
+	/**
+	 * Method called when user pressed 'DeleteRow' button.
+	 * 
+	 * If user selected more than one row -- all of them will be removed.
+	 * 
+	 * @see #allowDeleteRows(int[])
+	 * @see #deleteRowsImpl(int[])
+	 */
+	public void deleteRows() {
 
-		int rowIdx = this.owner.getSelectedRow();
+		int currentRow = this.owner.getSelectedRow();
 
-		logger.trace("Removing row {}.", rowIdx);
+		logger.trace("Removing row {}.", currentRow);
 
-		if (rowIdx < 0) {
+		if (currentRow < 0) {
 			return;
 		}
 		try {
+			// get range 
 			int[] selectedRows = this.owner.getSelectedRows();
-			if (this.checkDeleteRows(selectedRows.length > 1)) {
 
-				if (this.deleteRowsImpl(selectedRows)) {
+			// check for deletion
+			if (this.allowDeleteRows(selectedRows)) {
+
+				// delete now
+				if (this.deleteRowsImpl(selectedRows)) { // #1
 
 					logger.trace("OK, successfully delete");
 
 					super.fireTableRowsDeleted(selectedRows[0], selectedRows[selectedRows.length - 1]);
 
-					rowIdx = selectedRows[0];
-					if (rowIdx >= this.getRowCount()) {
-						rowIdx = this.getRowCount() - 1;
+					currentRow = selectedRows[0];
+					if (currentRow >= this.getRowCount()) {
+						currentRow = this.getRowCount() - 1;
 					}
 
-					if (rowIdx >= 0) {
-						this.owner.setRowSelectionInterval(rowIdx, rowIdx);
+					if (currentRow >= 0) {
+						// Go to the top of removed rows and mark previous
+						this.owner.setRowSelectionInterval(currentRow, currentRow);
 					} else {
+						// Well, we removed all rows
 						this.valueChanged(new ListSelectionEvent(this.owner, -1, -1, false));
 					}
 
-				}
+					/*
+					 * States of buttons (up, down, remove, edit) will be
+					 * updated in #valueChanged method.
+					 */
+
+				} // #1 if
 
 			}
-		} catch (Exception e) {
-			AppHelper.showExceptionDialog(this.owner, "Ошибка при удалении строки.", e);
+		} catch (Throwable t) {
+			AppHelper.showExceptionDialog(this.owner, "Ошибка при удалении строки.", t);
 			return;
 		}
 	}
 
-	protected boolean checkDeleteRows(boolean multiple) throws Exception {
+	/**
+	 * Method must check rows and return decision -- can we delete any selected
+	 * rows or not.
+	 * 
+	 * @param selectedRows
+	 *            rows we want to delete
+	 * @return true if we can delete and false if can't
+	 * @throws Exception
+	 *             on any error
+	 */
+	protected boolean allowDeleteRows(int selectedRows[]) throws Exception {
 		DeletionMode currentMode = Config.getInstance().getRowsDeleteMode();
-		if (multiple) {
+		if (selectedRows.length > 1) {
 			if (currentMode != DeletionMode.NO_CONFIRM) {
 				return JOptionPane.showConfirmDialog(this.owner.getTopLevelAncestor(),
 						"Вы действительно хотите удалить все выделенные строки?",
@@ -274,32 +452,42 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		return true;
 	}
 
+	/**
+	 * Method called when user pressed 'EditRow' button.
+	 * 
+	 * @see #editRowImpl(int)
+	 */
 	public void editRow() {
 		if (this.owner.getSelectedRowCount() != 1) {
 			return;
 		}
-		int rowIdx = this.owner.getSelectedRow();
+		int currentRow = this.owner.getSelectedRow();
 
-		logger.trace("Editing row {}.", rowIdx);
+		logger.trace("Editing row {}.", currentRow);
 
 		try {
-			if (this.editRowImpl(rowIdx)) {
+			if (this.editRowImpl(currentRow)) {
 
 				logger.trace("OK, successfully edit");
 
-				super.fireTableRowsUpdated(rowIdx, rowIdx);
+				super.fireTableRowsUpdated(currentRow, currentRow);
 			}
-		} catch (Exception e) {
-			AppHelper.showExceptionDialog(this.owner, "Ошибка при редактировании новой строки.", e);
+		} catch (Throwable t) {
+			AppHelper.showExceptionDialog(this.owner, "Ошибка при редактировании новой строки.", t);
 			return;
 		}
 	}
 
-	public void upRow() {
+	/**
+	 * Method called when user pressed 'MoveRowsUp' button.
+	 * 
+	 * @see #moveRowsUpImpl(int[])
+	 */
+	public void moveRowsUp() {
 		int[] selectedRows = this.owner.getSelectedRows();
 
 		if (selectedRows == null || selectedRows.length == 0) {
-			logger.trace("Unable to move row up. selected rows are empty.");
+			logger.trace("Unable to move rows up. Selected rows are empty.");
 			return;
 		}
 
@@ -307,6 +495,7 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		int first = selectedRows[0];
 		int last = selectedRows[len - 1];
 
+		// before do moving -- we must check 
 		if (first <= 0) {
 			logger.trace("Unable to move row up. First row is {}.", first);
 			return;
@@ -317,32 +506,30 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		}
 
 		try {
-			if (this.moveUpImpl(selectedRows)) {
+			if (this.moveRowsUpImpl(selectedRows)) {
 
 				logger.trace("OK, successfully moved up.");
 
 				super.fireTableRowsUpdated(first - 1, last);
 
-				if (this.upButton != null) {
-					this.upButton.setEnabled(first - 1 > 0);
-				}
-				if (this.downButton != null) {
-					this.downButton.setEnabled(last - 1 < this.getRowCount() - 1);
-				}
-
 				this.owner.setRowSelectionInterval(first - 1, last - 1);
 			}
-		} catch (Exception e) {
-			AppHelper.showExceptionDialog(this.owner, "Ошибка при перемещении строки.", e);
+		} catch (Throwable t) {
+			AppHelper.showExceptionDialog(this.owner, "Ошибка при перемещении строки.", t);
 			return;
 		}
 	}
 
-	public void downRow() {
+	/**
+	 * Method called when user pressed 'MoveRowsDown' button.
+	 * 
+	 * @see #moveRowsDownImpl(int[])
+	 */
+	public void moveRowsDown() {
 		int[] selectedRows = this.owner.getSelectedRows();
 
 		if (selectedRows == null || selectedRows.length == 0) {
-			logger.trace("Unable to move row down. selected rows are empty.");
+			logger.trace("Unable to move rows down. Selected rows are empty.");
 			return;
 		}
 
@@ -350,8 +537,9 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		int first = selectedRows[0];
 		int last = selectedRows[len - 1];
 
-		if (last <= 0) {
-			logger.trace("Unable to move row down. Last row is {} of {}.", last, len);
+		int totalRows = this.getRowCount();
+		if (last >= totalRows - 1) {
+			logger.trace("Unable to move row down. Last row is {} of {}.", last, totalRows);
 			return;
 		}
 
@@ -359,23 +547,16 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 			logger.trace("Moving rows {} down.", Arrays.toString(selectedRows));
 		}
 		try {
-			if (this.moveDownImpl(selectedRows)) {
+			if (this.moveRowsDownImpl(selectedRows)) {
 
 				logger.trace("OK, success down");
 
 				super.fireTableRowsUpdated(first, last + 1);
 
-				if (this.upButton != null) {
-					this.upButton.setEnabled(first + 1 > 0);
-				}
-				if (this.downButton != null) {
-					this.downButton.setEnabled(last + 1 < this.getRowCount() - 1);
-				}
-
 				this.owner.setRowSelectionInterval(first + 1, last + 1);
 			}
-		} catch (Exception e) {
-			AppHelper.showExceptionDialog(this.owner, "Ошибка при перемещении строки.", e);
+		} catch (Throwable t) {
+			AppHelper.showExceptionDialog(this.owner, "Ошибка при перемещении строки.", t);
 			return;
 		}
 	}
@@ -383,8 +564,19 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 	private int lastRowCount = 0;
 	private int lastRowSelected = -1;
 
-	public void open() throws Exception {
-		this.openImpl();
+	/**
+	 * Method open will be called by {@link AbstractDialogAdapter}, if you
+	 * attach to its constructor instance of this class.
+	 * 
+	 * Method open retrieves data from database, do some stuff.
+	 * 
+	 * We use them to select previously selected row :)
+	 * 
+	 * @throws Exception
+	 * @see #onOpenImpl()
+	 */
+	public void onOpenWindow() throws Exception {
+		this.onOpenImpl();
 
 		int rowCount = this.getRowCount();
 
@@ -401,27 +593,91 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		}
 	}
 
-	public void close() throws Exception {
+	/**
+	 * Method called by {@link AbstractDialogAdapter}, when parent interface is
+	 * done job (pressed 'Save' or 'Cancel').
+	 * 
+	 * @throws Exception
+	 * @see #onCloseImpl()
+	 */
+	public void onCloseWindow() throws Exception {
+
+		// We use lastRowCount for reopen interface on previously selected row
 		lastRowCount = this.getRowCount();
-		this.closeImpl();
+		this.onCloseImpl();
 	}
 
-	protected abstract void openImpl() throws Exception;
+	/**
+	 * This method must implement action on open window (loading data, for
+	 * example)
+	 * 
+	 * @throws Exception
+	 */
+	protected abstract void onOpenImpl() throws Exception;
 
-	protected abstract void closeImpl() throws Exception;
+	/**
+	 * This method must clear all loaded data. Calling on window hiding.
+	 * 
+	 * @throws Exception
+	 */
+	protected abstract void onCloseImpl() throws Exception;
 
-	protected abstract void rowSelectionImpl(int rowIdx) throws Exception;
+	/**
+	 * Actions on selection row.
+	 * 
+	 * @param selectedRow
+	 * @throws Exception
+	 */
+	protected abstract void onRowSelectionImpl(int selectedRow) throws Exception;
 
-	protected abstract boolean addRowImpl(int rowIdx) throws Exception;
+	/**
+	 * Adding new row.
+	 * 
+	 * @param newRow
+	 *            position where you need to insert new row
+	 * @return true if row successfully added, false otherwise
+	 * @throws Exception
+	 */
+	protected abstract boolean addRowImpl(int newRow) throws Exception;
 
-	protected abstract boolean deleteRowsImpl(int rowIdx[]) throws Exception;
+	/**
+	 * Deleting selected rows.
+	 * 
+	 * @param selectedRows
+	 * @return true if rows successfully deleted, false otherwise
+	 * @throws Exception
+	 */
+	protected abstract boolean deleteRowsImpl(int selectedRows[]) throws Exception;
 
-	protected abstract boolean editRowImpl(int rowIdx) throws Exception;
+	/**
+	 * Modifying existing row.
+	 * 
+	 * @param editRow
+	 *            row number where you must edit
+	 * @return true is row was modified, false otherwise
+	 * @throws Exception
+	 */
+	protected abstract boolean editRowImpl(int editRow) throws Exception;
 
-	protected abstract boolean moveUpImpl(int[] rowIdx) throws Exception;
+	/**
+	 * Moving rows up.
+	 * 
+	 * @param selectedRows
+	 * @return true if rows was moved up, false otherwise
+	 * @throws Exception
+	 */
+	protected abstract boolean moveRowsUpImpl(int[] selectedRows) throws Exception;
 
-	protected abstract boolean moveDownImpl(int[] rowIdx) throws Exception;
+	/**
+	 * Moving rows down.
+	 * 
+	 * @param selectedRows
+	 * @return true if rows was moved down, false otherwise
+	 * @throws Exception
+	 */
+	protected abstract boolean moveRowsDownImpl(int[] selectedRows) throws Exception;
 
+	// Standard method for displaying column on position
 	public abstract String getColumnName(int column);
 
 }

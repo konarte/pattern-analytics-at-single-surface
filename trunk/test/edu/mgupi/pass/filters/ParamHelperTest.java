@@ -65,10 +65,10 @@ public class ParamHelperTest {
 		this.testGetParameter(sampleMap);
 	}
 
-	private class MyFilter implements IFilter {
+	public static class TestMyFilterInternal implements IFilter {
 		private Collection<Param> paramList = null;
 
-		public MyFilter(Collection<Param> paramList) {
+		public TestMyFilterInternal(Collection<Param> paramList) {
 			this.paramList = paramList;
 		}
 
@@ -104,7 +104,7 @@ public class ParamHelperTest {
 
 		paramList.get(paramList.size() - 1).setValue(44.56);
 
-		MyFilter myFilter = new MyFilter(paramList);
+		TestMyFilterInternal myFilter = new TestMyFilterInternal(paramList);
 
 		assertNotNull(ParamHelper.updateToMap(myFilter.getParams()));
 		assertNotNull(ParamHelper.updateToMap(null));
@@ -119,7 +119,7 @@ public class ParamHelperTest {
 		paramList.add(new Param("key2", "Ключ 2", ParamType.INT, 6));
 		paramList.add(new Param("key3", "Ключ 3", ParamType.DOUBLE, 12.22));
 
-		MyFilter myFilter = new MyFilter(paramList);
+		TestMyFilterInternal myFilter = new TestMyFilterInternal(paramList);
 
 		assertNotNull(ParamHelper.searchParameter("key1", myFilter, false));
 		assertNull(ParamHelper.searchParameter("key1", (IFilter) null, false));
@@ -147,7 +147,7 @@ public class ParamHelperTest {
 		paramList.add(new Param("key2", "Ключ 2", ParamType.INT, 6));
 		paramList.add(new Param("key3", "Ключ 3", ParamType.DOUBLE, 12.22));
 
-		MyFilter myFilter = new MyFilter(paramList);
+		TestMyFilterInternal myFilter = new TestMyFilterInternal(paramList);
 		assertEquals("{\"key1\":\"14.55\",\"key2\":\"6\",\"key3\":\"12.22\"}", ParamHelper
 				.convertParamsToJSON(myFilter));
 	}
@@ -157,13 +157,13 @@ public class ParamHelperTest {
 		Collection<Param> paramList = new ArrayList<Param>();
 		ParamTest.fillParameters(paramList);
 
-		MyFilter myFilter = new MyFilter(paramList);
+		TestMyFilterInternal myFilter = new TestMyFilterInternal(paramList);
 		String converted = ParamHelper.convertParamsToJSON(myFilter);
 		System.out.println(converted);
 
 		Collection<Param> paramList2 = new ArrayList<Param>();
 		ParamTest.fillParameters(paramList2);
-		MyFilter myFilter2 = new MyFilter(paramList2);
+		TestMyFilterInternal myFilter2 = new TestMyFilterInternal(paramList2);
 
 		ParamHelper.fillParametersFromJSON(myFilter2, converted);
 

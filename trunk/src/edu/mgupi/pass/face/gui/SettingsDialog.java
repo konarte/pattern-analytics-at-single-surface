@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -30,7 +29,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -42,7 +40,7 @@ import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Config.DeletionCheckMode;
 import edu.mgupi.pass.util.Config.DeletionMode;
 import edu.mgupi.pass.util.Config.SourceMode;
-import edu.mgupi.pass.util.Config.TransactionMode;
+import edu.mgupi.pass.util.Config.TestTransactionMode;
 
 /**
  * Settings dialog. Current (for loaded images) and common settings.
@@ -83,12 +81,12 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 	 * 
 	 */
 	private void initialize() {
-		this.setSize(500, 450);
-		this.setMinimumSize(new Dimension(500, 450));
+
 		this.setName("settingsDialog");
 		this.setModal(true);
 		this.setTitle("Настройки");
 		this.setContentPane(getJContentPane());
+		this.setResizable(false);
 
 		//Config.getInstance().getWindowPosition(this);
 
@@ -121,6 +119,8 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 			@Override
 			protected void openDialogImpl() throws Exception {
 				SettingsDialog.this.resetControls();
+				pack();
+				setMinimumSize(new Dimension(getWidth(), getHeight()));
 			}
 
 			private boolean needRestartProcessing = false;
@@ -132,9 +132,7 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 				needRestartProcessing = false;
 
 				// LaF apply
-				String className = lafs.get(jComboBoxLaF.getSelectedItem());
-				Config.getInstance().setLookAndFeel(className);
-				if (!UIManager.getLookAndFeel().getClass().getName().equals(className)) {
+				if (Config.getInstance().setLookAndFeel(lafs.get(jComboBoxLaF.getSelectedItem()))) {
 					logger.debug("LaF changed. Save common.");
 					needSaveCommon = true;
 				}
@@ -146,7 +144,8 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 					needSaveCommon = true;
 				}
 
-				if (Config.getInstance().setTransactionMode((TransactionMode) getValue(TransactionMode.COMMIT_BULK))) {
+				if (Config.getInstance().setTransactionMode(
+						(TestTransactionMode) getValue(TestTransactionMode.COMMIT_BULK))) {
 					logger.debug("Transaction mode changed. Save common.");
 					needSaveCommon = true;
 				}
@@ -295,9 +294,7 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 			jLabelLaF.setText("Стиль");
 			jPanelLaF = new JPanel();
 			jPanelLaF.setLayout(new GridBagLayout());
-			jPanelLaF.setBorder(BorderFactory.createTitledBorder(null, "Настройки интерфейса",
-					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
-					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			jPanelLaF.setBorder(BorderFactory.createTitledBorder("Настройки интерфейса"));
 			jPanelLaF.setName("jPanelLaF");
 			jPanelLaF.add(getJPanelLaFPlace(), gridBagConstraints11);
 		}
@@ -571,9 +568,7 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 			gridBagConstraints13.gridy = 0;
 			jPanelFilterEdit = new JPanel();
 			jPanelFilterEdit.setLayout(new GridBagLayout());
-			jPanelFilterEdit.setBorder(BorderFactory.createTitledBorder(null, "Редактирование данных",
-					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
-					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			jPanelFilterEdit.setBorder(BorderFactory.createTitledBorder("Редактирование данных"));
 			jPanelFilterEdit.add(getJPanelFilterEditPlace(), gridBagConstraints13);
 
 		}
@@ -690,9 +685,7 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 			gridBagConstraints2.gridx = -1;
 			jPanelSourceMode = new JPanel();
 			jPanelSourceMode.setLayout(new GridBagLayout());
-			jPanelSourceMode.setBorder(BorderFactory.createTitledBorder(null, "Исходное изображение -> 1024x1024",
-					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
-					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			jPanelSourceMode.setBorder(BorderFactory.createTitledBorder("Исходное изображение -> 1024x1024"));
 			jPanelSourceMode.add(getJPanelSourceModePlace(), gridBagConstraints2);
 		}
 		return jPanelSourceMode;
@@ -713,9 +706,7 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 			jPanelTransactionMode = new JPanel();
 			jPanelTransactionMode.setVisible(false);
 			jPanelTransactionMode.setLayout(new GridBagLayout());
-			jPanelTransactionMode.setBorder(BorderFactory.createTitledBorder(null, "Транзакционная модель",
-					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
-					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			jPanelTransactionMode.setBorder(BorderFactory.createTitledBorder("Транзакционная модель"));
 			jPanelTransactionMode.add(getJPanelTransactionModePlace(), gridBagConstraints16);
 		}
 		return jPanelTransactionMode;
@@ -730,7 +721,7 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 		if (jPanelTransactionModePlace == null) {
 			jPanelTransactionModePlace = new JPanel();
 			jPanelTransactionModePlace.setLayout(new GridBagLayout());
-			setUpRadioButtons(TransactionMode.values(), jPanelTransactionModePlace);
+			setUpRadioButtons(TestTransactionMode.values(), jPanelTransactionModePlace);
 		}
 		return jPanelTransactionModePlace;
 	}
@@ -749,9 +740,7 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 			gridBagConstraints19.gridy = 0;
 			jPanelDeletionCheckMode = new JPanel();
 			jPanelDeletionCheckMode.setLayout(new GridBagLayout());
-			jPanelDeletionCheckMode.setBorder(BorderFactory.createTitledBorder(null, "При удалении строки из БД",
-					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
-					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			jPanelDeletionCheckMode.setBorder(BorderFactory.createTitledBorder("При удалении строки из БД"));
 			jPanelDeletionCheckMode.add(getJPanelDeletionCheckModePlace(), gridBagConstraints19);
 		}
 		return jPanelDeletionCheckMode;

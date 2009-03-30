@@ -19,6 +19,7 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URI;
+import java.text.MessageFormat;
 import java.util.Collection;
 
 import javax.swing.AbstractAction;
@@ -44,7 +45,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -60,8 +60,10 @@ import edu.mgupi.pass.face.IProgress;
 import edu.mgupi.pass.face.gui.template.ImageFrameTemplate;
 import edu.mgupi.pass.face.gui.template.ImagePanel;
 import edu.mgupi.pass.filters.FilterChainsaw;
+import edu.mgupi.pass.filters.FilterChainsawTransactional;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.Param;
+import edu.mgupi.pass.filters.ParamHelper;
 import edu.mgupi.pass.filters.java.GrayScaleFilter;
 import edu.mgupi.pass.filters.service.PlaceImageFilter;
 import edu.mgupi.pass.filters.service.ResizeFilter;
@@ -105,7 +107,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		HELP, ABOUT, //
 
 		// buttons
-		editCurrentFilters, editCurrentModuleParams
+		EDIT_FILTERS, EDIT_MODULE_PARAMS
 
 	};
 
@@ -132,6 +134,10 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 	private void initialize() throws Exception {
 
 		// Initializing interface
+
+		// Ensure that connection is OK
+		AppDataStorage.getInstance().listLFiltersImpl();
+		AppDataStorage.getInstance().listLModulesImpl();
 
 		this.setJMenuBar(getJmainMenuBar());
 		this.setContentPane(getJContentPane());
@@ -171,6 +177,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 
 	@SuppressWarnings("unchecked")
 	private void initImpl() throws Exception {
+
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				MainFrame.this.closeImpl();
@@ -182,15 +189,16 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 
 		mainModuleProcessor = new ModuleProcessor();
 
-		histogramFrame = (ImageFrameTemplate) AppHelper.getInstance()
-				.registerAdditionalWindow(ImageFrameTemplate.class);
+		histogramFrame = (ImageFrameTemplate) AppHelper.getInstance().registerAdditionalWindow(this,
+				ImageFrameTemplate.class);
 		histogramFrame.registerControlCheckbox(this.jCheckBoxHistogram);
 		histogramFrame.setTitle(mainModuleProcessor.getHistoFilters().toString());
 		histogramFrame.setName("histogramWindow");
 		histogramFrame.setLocation(100, 200);
 		Config.getInstance().loadWindowPosition(histogramFrame);
 
-		moduleFrame = (ImageFrameTemplate) AppHelper.getInstance().registerAdditionalWindow(ImageFrameTemplate.class);
+		moduleFrame = (ImageFrameTemplate) AppHelper.getInstance().registerAdditionalWindow(this,
+				ImageFrameTemplate.class);
 		moduleFrame.registerControlCheckbox(this.jCheckBoxModuleGraphic);
 		moduleFrame.setTitle("Модуль не выбран");
 		moduleFrame.setName("moduleFrameWindow");
@@ -247,7 +255,9 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			logger.error("Error when saving current config", e);
 		}
 
+		AppHelper.printCache();
 		AppHelper.reset();
+
 		this.clearMessage();
 	}
 
@@ -282,52 +292,54 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		this.setTitle(Const.PROGRAM_NAME_FULL + " -- " + source.getName());
 		this.processStarted = true;
 
-		try {
+		this.applySourcePreProcessor(source.getSourceImage());
 
-			this.applySourcePreProcessor(source.getSourceImage());
+		// Main cycle
 
-			// Main cycle
+		currentSource = source;
+		currentLocus = mainModuleProcessor.startProcessing(source);
 
-			currentSource = source;
-			currentLocus = mainModuleProcessor.startProcessing(source);
+		BufferedImage sourceImage = source.getSourceImage();
+		BufferedImage filteredImage = mainModuleProcessor.getLastProcessedImage();
 
-			BufferedImage sourceImage = source.getSourceImage();
-			BufferedImage filteredImage = mainModuleProcessor.getLastProcessedImage();
-			originalImageInfo = "" + sourceImage.getWidth() + "x" + sourceImage.getHeight() + " "
-					+ sourceImage.getColorModel().getPixelSize() + " bpp";
+		this.originalImageInfo = "" // 
+				+ sourceImage.getWidth() //
+				+ "x" // 
+				+ sourceImage.getHeight() //
+				+ MessageFormat.format(", {0} bpp", sourceImage.getColorModel().getPixelSize());
 
-			filteredImageInfo = "" + filteredImage.getWidth() + "x" + filteredImage.getHeight() + " "
-					+ filteredImage.getColorModel().getPixelSize() + " bpp";
-
-			ResizeFilter resize = (ResizeFilter) mainModuleProcessor.getPreChainsaw().searchFilterClass(
-					ResizeFilter.class);
-			if (resize != null) {
-				double lastRate = resize.getLastThumbRate();
-				filteredImageInfo += ", 1:" + Math.round(lastRate * 100.0d) / 100.0d;
-			}
-
-			jLabelImageInfo.setText(jTabbedPaneImages.getSelectedIndex() == 0 ? this.originalImageInfo
-					: this.filteredImageInfo);
-
-			// Locuses locus = mainModuleProcessor.startProcessing(source);
-			// REQUIRED SQUARE BASE!
-			this.jPanelImageFiltered.setImage(filteredImage/* , true */);
-			this.jPanelImageSource.setImage(sourceImage);
-			this.histogramFrame.setImage(mainModuleProcessor.getLastHistogramImage());
-
-			this.applyModuleProcessing();
-		} catch (Exception e) {
-			this.processStarted = false;
-			throw e;
+		double percentRate = 100;
+		ResizeFilter resize = (ResizeFilter) mainModuleProcessor.getPreChainsaw().searchFilterClass(ResizeFilter.class);
+		if (resize != null) {
+			percentRate = resize.getLastThumbRate();
 		}
+		this.filteredImageInfo = "" //
+				+ filteredImage.getWidth() //
+				+ "x" //
+				+ filteredImage.getHeight() //
+				+ MessageFormat.format(", {0} bpp, {1,number,percent}", filteredImage.getColorModel().getPixelSize(),
+						percentRate);
+
+		jLabelImageInfo.setText(jTabbedPaneImages.getSelectedIndex() == 0 ? this.originalImageInfo
+				: this.filteredImageInfo);
+
+		// Locuses locus = mainModuleProcessor.startProcessing(source);
+		// REQUIRED SQUARE BASE!
+		this.jPanelImageFiltered.setImage(filteredImage/* , true */);
+		this.jPanelImageSource.setImage(sourceImage);
+		this.histogramFrame.setImage(mainModuleProcessor.getLastHistogramImage());
+
+		this.applyModuleProcessing();
 
 	}
 
 	protected void closeProcessing() {
+		this.setTitle(Const.PROGRAM_NAME_FULL);
 		currentLocus = null;
 		currentSource = null;
 		originalImageInfo = "";
 		filteredImageInfo = "";
+		jLabelImageInfo.setText("");
 		this.jPanelImageFiltered.setImage(null);
 		this.jPanelImageSource.setImage(null);
 		this.histogramFrame.setImage(null);
@@ -373,8 +385,8 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		SourceMode sourceScaleMode = Config.getInstance().getCurrentSourceMode();
 		Color background = Config.getInstance().getCurrentBackground();
 
-		String placePosition = sourceScaleMode == SourceMode.CENTER || sourceScaleMode == SourceMode.SCALE_IF_CENTER ? "center"
-				: "topleft";
+		String placePosition = sourceScaleMode == SourceMode.CENTER || sourceScaleMode == SourceMode.SCALE_IF_CENTER ? PlaceImageFilter.PLACE_CENTER
+				: PlaceImageFilter.PLACE_TOP_LEFT;
 
 		boolean actionPlaceMode = false;
 		if (sourceScaleMode == SourceMode.CENTER || sourceScaleMode == SourceMode.LEFT_TOP) {
@@ -417,7 +429,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 
 	}
 
-	protected void restartProcessingByModuleParams() {
+	protected void restartProcessingByModuleParams(final Collection<Param> savedParameters) {
 		MainFrame.this.printMessage("Обновление параметров модуля...");
 		SwingUtilities.invokeLater(new Runnable() {
 
@@ -425,7 +437,24 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 				try {
 					MainFrame.this.restartProcessingByModuleParamsImpl();
 				} catch (Throwable t) {
-					AppHelper.showExceptionDialog(MainFrame.this, "Error when applying module parameters", t);
+
+					String messageOnRestore = "";
+					if (savedParameters != null) {
+						try {
+							logger.info("Restoring module parameters...");
+							ParamHelper.restoreParameterValues(mainModuleProcessor.getModule().getParams(),
+									savedParameters);
+							MainFrame.this.restartProcessingByModuleParamsImpl();
+						} catch (Throwable t1) {
+							logger.error("Error when restoring module parameters", t1);
+							messageOnRestore = " Ошибка при возврате параметров модуля (" + t1.getMessage()
+									+ "). Сброс системы.";
+							MainFrame.this.closeProcessing();
+						}
+					}
+
+					AppHelper.showExceptionDialog(MainFrame.this, "Ошибка при применении параметров модуля."
+							+ messageOnRestore, t);
 				} finally {
 					MainFrame.this.clearMessage();
 				}
@@ -444,11 +473,15 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		if (newModule == null) {
 			throw new IllegalArgumentException("Internal error. Parameter 'newModule' must be not null.");
 		}
+
 		logger.debug("Applying module {}", newModule);
+
 		this.mainModuleProcessor.setModule(newModule);
 		this.moduleFrame.setTitle(this.mainModuleProcessor.getModule().getName());
 		Collection<Param> params = mainModuleProcessor.getModule().getParams();
 		jButtonModuleParams.setEnabled(params != null && params.size() > 0);
+
+		jComboBoxModules.setSelectedItem(AppDataStorage.getInstance().getModuleByClass(newModule));
 
 		this.applyModuleProcessing();
 	}
@@ -460,7 +493,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		}
 	}
 
-	protected void restartProcessingByFilters() {
+	protected void restartProcessingByFilters(final FilterChainsawTransactional oldFilters) {
 		logger.debug("Restarting process by filters...");
 		MainFrame.this.printMessage("Обновление примененных фильтров...");
 		SwingUtilities.invokeLater(new Runnable() {
@@ -469,8 +502,23 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 				try {
 					MainFrame.this.restartProcessingByFiltersImpl();
 				} catch (Throwable t) {
-					AppHelper.showExceptionDialog(MainFrame.this, "Error when applying new filters", t);
+					String messageOnRestore = "";
+					if (oldFilters != null) {
+						try {
+							oldFilters.commitChanges();
+							MainFrame.this.restartProcessingByFiltersImpl();
+						} catch (Throwable t1) {
+							logger.error("Error when restoring filters", t1);
+							messageOnRestore = " Ошибка при возврате фильтров (" + t1.getMessage()
+									+ "). Сброс системы.";
+							MainFrame.this.closeProcessing();
+						}
+					}
+
+					AppHelper.showExceptionDialog(MainFrame.this, "Ошибка при установке новых фильтров."
+							+ messageOnRestore, t);
 				} finally {
+					oldFilters.close();
 					MainFrame.this.clearMessage();
 				}
 			}
@@ -807,7 +855,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			jCheckBoxScale.setText("Масштаб под размеры окна");
 			jCheckBoxScale.setHorizontalAlignment(SwingConstants.LEADING);
 			jCheckBoxScale.setMnemonic(KeyEvent.VK_UNDEFINED);
-			jCheckBoxScale.setName("scaleButton");
+			jCheckBoxScale.setName(Config.DEFAULT_SCALE_BUTTON_NAME);
 			jCheckBoxScale.setHorizontalTextPosition(SwingConstants.TRAILING);
 		}
 		return jCheckBoxScale;
@@ -963,9 +1011,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			gridBagConstraints8.gridx = 0;
 			jPanelFilters = new JPanel();
 			jPanelFilters.setLayout(new GridBagLayout());
-			jPanelFilters.setBorder(BorderFactory.createTitledBorder(null, "Фильтры",
-					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
-					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			jPanelFilters.setBorder(BorderFactory.createTitledBorder("Фильтры"));
 			jPanelFilters.setPreferredSize(new Dimension(183, 120));
 			jPanelFilters.add(getJScrollPaneFilters(), gridBagConstraints10);
 			jPanelFilters.add(getJButtonFiltersChange(), gridBagConstraints8);
@@ -1072,7 +1118,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		if (jButtonFiltersChange == null) {
 			jButtonFiltersChange = new JButton();
 			jButtonFiltersChange.setText("Изменить");
-			this.registerAction(jButtonFiltersChange, Actions.editCurrentFilters);
+			this.registerAction(jButtonFiltersChange, Actions.EDIT_FILTERS);
 		}
 		return jButtonFiltersChange;
 	}
@@ -1112,9 +1158,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			gridBagConstraints7.weightx = 1.0;
 			jPanelSensors = new JPanel();
 			jPanelSensors.setLayout(new GridBagLayout());
-			jPanelSensors.setBorder(BorderFactory.createTitledBorder(null, "Датчик",
-					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
-					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			jPanelSensors.setBorder(BorderFactory.createTitledBorder("Датчик"));
 			jPanelSensors.add(getJComboBoxSensor(), gridBagConstraints7);
 			jPanelSensors.add(getJButtonSensorSearch(), gridBagConstraints12);
 			jPanelSensors.add(getJCheckBoxSensor(), gridBagConstraints13);
@@ -1183,9 +1227,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			gridBagConstraints14.gridx = 0;
 			jPanelSurface = new JPanel();
 			jPanelSurface.setLayout(new GridBagLayout());
-			jPanelSurface.setBorder(BorderFactory.createTitledBorder(null, "Поверхность",
-					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
-					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			jPanelSurface.setBorder(BorderFactory.createTitledBorder("Поверхность"));
 			jPanelSurface.add(getJComboBoxSurface(), gridBagConstraints14);
 			jPanelSurface.add(getJButtonSurface(), gridBagConstraints15);
 			jPanelSurface.add(getJCheckBoxSurface(), gridBagConstraints17);
@@ -1330,9 +1372,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			gridBagConstraints25.weightx = 1.0;
 			jPanelModule = new JPanel();
 			jPanelModule.setLayout(new GridBagLayout());
-			jPanelModule.setBorder(BorderFactory.createTitledBorder(null, "Модуль анализа изображения",
-					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
-					new Font("Dialog", Font.BOLD, 12), new Color(51, 51, 51)));
+			jPanelModule.setBorder(BorderFactory.createTitledBorder("Модуль анализа изображения"));
 			jPanelModule.setMaximumSize(new Dimension(200, 50));
 			jPanelModule.add(getJComboBoxModules(), gridBagConstraints25);
 			jPanelModule.add(getJButtonModuleParams(), gridBagConstraints28);
@@ -1356,13 +1396,43 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 				@SuppressWarnings("unchecked")
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					LModules item = (LModules) jComboBoxModules.getSelectedItem();
-					try {
-						MainFrame.this.setModule((Class<IModule>) Class.forName(item.getCodename()));
-					} catch (Exception e1) {
-						String name = item.getCodename() + " (" + item.getName() + ")";
-						AppHelper.showExceptionDialog(MainFrame.this, "Ошибка при подключении модуля " + name, e1);
+
+					final LModules item = (LModules) jComboBoxModules.getSelectedItem();
+					if (item == null) {
+						return;
 					}
+
+					final IModule currentModule = MainFrame.this.mainModuleProcessor.getModule();
+					if (currentModule.getClass().getName().equals(item.getCodename())) {
+						logger.trace("Do not check module, it's already checked.");
+						return;
+					}
+
+					SwingUtilities.invokeLater(new Runnable() {
+						@Override
+						public void run() {
+							IModule currentModule = mainModuleProcessor.getModule();
+							try {
+								MainFrame.this.setModule((Class<IModule>) Class.forName(item.getCodename()));
+							} catch (Throwable t) {
+								String messageOnRestore = "";
+								if (currentModule != null) {
+									try {
+										MainFrame.this.setModule(currentModule.getClass());
+									} catch (Throwable t1) {
+										logger.error("Error when restoring module", t1);
+										messageOnRestore = " Ошибка при возврате модуля (" + t1.getMessage()
+												+ "). Сброс системы.";
+										MainFrame.this.closeProcessing();
+									}
+								}
+								String name = item.getCodename() + " (" + item.getName() + ")";
+								AppHelper.showExceptionDialog(MainFrame.this, "Ошибка при подключении модуля " + name
+										+ "." + messageOnRestore, t);
+							}
+						}
+					});
+
 				}
 			});
 
@@ -1512,7 +1582,7 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		if (jButtonModuleParams == null) {
 			jButtonModuleParams = new JButton();
 			jButtonModuleParams.setText("Параметры модуля");
-			this.registerAction(jButtonModuleParams, Actions.editCurrentModuleParams);
+			this.registerAction(jButtonModuleParams, Actions.EDIT_MODULE_PARAMS);
 		}
 		return jButtonModuleParams;
 	}
@@ -1700,8 +1770,9 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 				this.printMessage("Открытие нового годографа");
 				this.startProcessingImpl(this.singleFilePicker.getSingleSource());
 				this.jMenuItemClose.setEnabled(true);
-			} catch (Exception e1) {
-				AppHelper.showExceptionDialog(this, "Error when processing image.", e1);
+			} catch (Throwable t) {
+				this.closeProcessing();
+				AppHelper.showExceptionDialog(this, "Error when processing image.", t);
 			} finally {
 				this.clearMessage();
 			}
@@ -1720,9 +1791,9 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 						logger.debug("Actual saving file " + newFile.getAbsolutePath());
 						this.mainModuleProcessor.saveSettingsToFile(newFile);
 					}
-				} catch (Exception e1) {
-					AppHelper.showExceptionDialog(this, "Unexpected eror when saving settings file '" + newFile.getName()
-									+ "'.", e1);
+				} catch (Throwable t) {
+					AppHelper.showExceptionDialog(this, "Unexpected eror when saving settings file '"
+							+ newFile.getName() + "'.", t);
 				}
 			}
 
@@ -1734,12 +1805,13 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 				try {
 					this.mainModuleProcessor.loadSettingsFromFile(newFile);
 					this.restartProcessingByFiltersImpl();
-					this.jComboBoxModules.setSelectedItem(AppDataStorage.getInstance().getModuleByInstance(
-							this.mainModuleProcessor.getModule()));
+					this.jComboBoxModules.setSelectedItem(AppDataStorage.getInstance().getModuleByClass(
+							this.mainModuleProcessor.getModule().getClass()));
 
-				} catch (Exception e1) {
-					AppHelper.showExceptionDialog(this, "Unexpected eror when opening settings file '" + newFile.getName()
-									+ "'.", e1);
+				} catch (Throwable t) {
+					this.closeProcessing();
+					AppHelper.showExceptionDialog(this, "Unexpected eror when opening settings file '"
+							+ newFile.getName() + "'.", t);
 				}
 			}
 		} else if (action == Actions.SETTINGS) {
@@ -1796,8 +1868,8 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			try {
 				Desktop.getDesktop().browse(new URI(Const.WEB_HELP_PAGE));
 			} catch (Exception e1) {
-				AppHelper.showExceptionDialog(this,
-						"Unexpected eror when opening help link '" + Const.WEB_HELP_PAGE + "'.", e1);
+				AppHelper.showExceptionDialog(this, "Unexpected eror when opening help link '" + Const.WEB_HELP_PAGE
+						+ "'.", e1);
 			}
 		} else if (action == Actions.ABOUT) {
 			// View about
@@ -1808,20 +1880,30 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 		} else if (action == Actions.NOT_IMPLEMENTED) {
 			// Not implemented yet. Sorry.
 			JOptionPane.showMessageDialog(null, "Not implemented yet.", "Info", JOptionPane.INFORMATION_MESSAGE);
-		} else if (action == Actions.editCurrentFilters) {
-			// 
-			FiltersEditor editor = (FiltersEditor) AppHelper.getInstance().getDialog(FiltersEditor.class);
-			if (editor != null
-					&& editor.openDialog("Основные фильтры", MainFrame.this.mainModuleProcessor.getChainsaw())) {
+		} else if (action == Actions.EDIT_FILTERS) {
+			//
+			FilterChainsawTransactional currentFilters = new FilterChainsawTransactional(mainModuleProcessor
+					.getChainsaw());
 
-				this.restartProcessingByFilters();
+			FiltersEditor editor = (FiltersEditor) AppHelper.getInstance().getDialog(FiltersEditor.class);
+			if (editor != null && editor.openDialog("Основные фильтры", mainModuleProcessor.getChainsaw())) {
+				this.restartProcessingByFilters(currentFilters);
 			}
-		} else if (action == Actions.editCurrentModuleParams) {
+		} else if (action == Actions.EDIT_MODULE_PARAMS) {
+
+			Collection<Param> currentParameters = null;
+			try {
+				currentParameters = ParamHelper.cloneParameters(mainModuleProcessor.getModule().getParams());
+			} catch (CloneNotSupportedException cnse) {
+				AppHelper.showExceptionDialog(this, "Неожиданная ошибка при попытке подготовки параметров.", cnse);
+				return;
+			}
+
 			ParametersEditor editor = (ParametersEditor) AppHelper.getInstance().getDialog(ParametersEditor.class);
 			if (editor != null
 					&& editor.openDialog(mainModuleProcessor.getModule().getName(), mainModuleProcessor.getModule()
 							.getParams())) {
-				this.restartProcessingByModuleParams();
+				this.restartProcessingByModuleParams(currentParameters);
 
 			}
 		} else {

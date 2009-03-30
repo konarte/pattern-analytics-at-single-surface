@@ -1,6 +1,7 @@
 package edu.mgupi.pass.face.gui.template;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 
@@ -9,7 +10,6 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
 
 public abstract class TableEditorTemplate extends JDialog {
 
@@ -48,9 +48,8 @@ public abstract class TableEditorTemplate extends JDialog {
 	 * 
 	 */
 	private void initialize() {
-		this.setSize(587, 348);
-		this.setTitle("Редактирование таблицы");
-		this.setName("editorTemplateDialog");
+		this.setSize(400, 350);
+		this.setMinimumSize(new Dimension(400, 250));
 		this.setContentPane(getJContentPane());
 	}
 
@@ -76,36 +75,36 @@ public abstract class TableEditorTemplate extends JDialog {
 
 			@Override
 			protected void cancelImpl() throws Exception {
-//				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
-//					Transaction transaction = PassPersistentManager.instance().getSession().getTransaction();
-//					if (transaction.isActive()) {
-//						logger.trace("Rollback MAIN transaction {}.", transaction);
-//						transaction.rollback();
-//					}
-//				}
+				//				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
+				//					Transaction transaction = PassPersistentManager.instance().getSession().getTransaction();
+				//					if (transaction.isActive()) {
+				//						logger.trace("Rollback MAIN transaction {}.", transaction);
+				//						transaction.rollback();
+				//					}
+				//				}
 			}
 
 			@Override
 			protected void openDialogImpl() throws Exception {
-//				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
-//					PassPersistentManager.instance().getSession().beginTransaction();
-//					logger.trace("Begin MAIN transaction {}.", PassPersistentManager.instance().getSession()
-//							.getTransaction());
-//				}
+				//				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
+				//					PassPersistentManager.instance().getSession().beginTransaction();
+				//					logger.trace("Begin MAIN transaction {}.", PassPersistentManager.instance().getSession()
+				//							.getTransaction());
+				//				}
 			}
 
 			@Override
 			protected boolean saveImpl() throws Exception {
-//				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
-//					Transaction transaction = PassPersistentManager.instance().getSession().getTransaction();
-//					if (transaction.isActive()) {
-//						//						PassPersistentManager.instance().getSession().flush();
-//						logger.trace("Commit MAIN transaction {}.", transaction);
-//						transaction.commit();
-//					}
-//					return true;
-//				}
-//				return false;
+				//				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
+				//					Transaction transaction = PassPersistentManager.instance().getSession().getTransaction();
+				//					if (transaction.isActive()) {
+				//						//						PassPersistentManager.instance().getSession().flush();
+				//						logger.trace("Commit MAIN transaction {}.", transaction);
+				//						transaction.commit();
+				//					}
+				//					return true;
+				//				}
+				//				return false;
 				return false;
 			}
 
@@ -115,18 +114,18 @@ public abstract class TableEditorTemplate extends JDialog {
 	}
 
 	public boolean openDialog() {
-//		TransactionMode mode = null;
-//		try {
-//			mode = Config.getInstance().getTransactionMode();
-//		} catch (PersistentException pe) {
-//			AppHelper.showExceptionDialog(this, "Ошибка при получении текущего режима транзакций", pe);
-//		}
-//		if (mode == TransactionMode.COMMIT_BULK) {
-//			return getDialogAdapter().openDialog();
-//		} else {
-//			getDialogAdapter().showDialogCancelOnly();
-//			return false;
-//		}
+		//		TransactionMode mode = null;
+		//		try {
+		//			mode = Config.getInstance().getTransactionMode();
+		//		} catch (PersistentException pe) {
+		//			AppHelper.showExceptionDialog(this, "Ошибка при получении текущего режима транзакций", pe);
+		//		}
+		//		if (mode == TransactionMode.COMMIT_BULK) {
+		//			return getDialogAdapter().openDialog();
+		//		} else {
+		//			getDialogAdapter().showDialogCancelOnly();
+		//			return false;
+		//		}
 		getDialogAdapter().showDialogCancelOnly();
 		return false;
 	}
@@ -197,7 +196,6 @@ public abstract class TableEditorTemplate extends JDialog {
 	private JTable getJTableData() {
 		if (jTableData == null) {
 			jTableData = new JTableReadOnly();
-			jTableData.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 			jTableData.setModel(getTableModel());
 			jTableData.setName("data");
 			this.tablePostInit(jTableData);

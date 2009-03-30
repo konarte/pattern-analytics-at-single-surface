@@ -32,14 +32,13 @@ import edu.mgupi.pass.face.gui.AppDataStorage;
 import edu.mgupi.pass.filters.FilterChainsaw;
 import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
-import edu.mgupi.pass.filters.IllegalParameterValueException;
-import edu.mgupi.pass.filters.NoSuchParamException;
 import edu.mgupi.pass.filters.ParamHelper;
+import edu.mgupi.pass.filters.FilterChainsaw.SawMode;
 import edu.mgupi.pass.filters.service.HistogramFilter;
 import edu.mgupi.pass.filters.service.ResizeFilter;
 import edu.mgupi.pass.inputs.InputStore;
+import edu.mgupi.pass.util.AbstractCacheInitiable;
 import edu.mgupi.pass.util.CacheIFactory;
-import edu.mgupi.pass.util.CacheInitiable;
 import edu.mgupi.pass.util.Const;
 import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
@@ -61,19 +60,34 @@ public class ModuleProcessor {
 
 	private HistogramFilter histogramFilter;
 
+	//	private boolean keepIntegrity = false;
+
+	//	/**
+	//	 * Common constructor. We immediate create two chains -- for thumb and for
+	//	 * histogram.
+	//	 * 
+	//	 * @throws Exception
+	//	 */
+	//	public ModuleProcessor() throws Exception {
+	//		this(false);
+	//	}
+	//	 * @param keepIntegrity
+	//	 *            if true, this module processor will be very carefully about
+	//	 *            their data. For example, if you set up new {@link IModule} and
+	//	 *            that going to failure -- module automatically revert
+	//	 *            previously saved module.
+
 	/**
 	 * Common constructor. We immediate create two chains -- for thumb and for
 	 * histogram.
 	 * 
-	 * @throws InstantiationException
 	 * @throws IllegalAccessException
-	 * @throws IllegalParameterValueException
-	 * @throws NoSuchParamException
+	 * @throws InstantiationException
 	 * @throws FilterException
 	 * @throws PersistentException
 	 */
-	public ModuleProcessor() throws InstantiationException, IllegalAccessException, IllegalParameterValueException,
-			NoSuchParamException, FilterException, PersistentException {
+	public ModuleProcessor() throws PersistentException, FilterException, InstantiationException,
+			IllegalAccessException {
 
 		histogramFilter = new HistogramFilter();
 
@@ -86,8 +100,8 @@ public class ModuleProcessor {
 		//histoFilters.appendFilter(GrayScaleFilter.class);
 		histogramFilter = (HistogramFilter) histoCS.appendFilter(HistogramFilter.class);
 
-		processingChainsaw = new FilterChainsaw();
-		preProcessingChainsaw = new FilterChainsaw(true);
+		processingChainsaw = new FilterChainsaw(SawMode.USER_EDIT_CHAINSAW);
+		preProcessingChainsaw = new FilterChainsaw(SawMode.SINGLE_INSTANCE);
 	}
 
 	private IModule module;
@@ -123,12 +137,12 @@ public class ModuleProcessor {
 		logger.debug("ModuleProcessor closed");
 	}
 
-	private CacheInitiable<IModule> cachedModules = CacheIFactory.getSingleInstanceModules();
+	private AbstractCacheInitiable<IModule> cachedModules = CacheIFactory.getSingleInstanceModules();
 
 	//new CacheInitiable<IModule>(MODE.SINGLE_INSTANCE);
 
-	public IModule setModule(Class<? extends IModule> moduleClass) throws InstantiationException,
-			IllegalAccessException, IOException, ModuleException, PersistentException {
+	public IModule setModule(Class<? extends IModule> moduleClass) throws PersistentException, ModuleException,
+			InstantiationException, IllegalAccessException, IOException {
 		if (moduleClass == null) {
 			throw new IllegalArgumentException("Internal error. moduleClass must be not null.");
 		}
@@ -140,10 +154,16 @@ public class ModuleProcessor {
 		}
 		logger.debug("Registering module as class {}", moduleClass);
 
-		IModule instance = cachedModules.getInstance(moduleClass);
-		AppDataStorage.getInstance().checkUsingModule(instance);
+		/*
+		 * Check using this module in registered in database.
+		 * 
+		 * We always check it ;)
+		 */
+		AppDataStorage.getInstance().checkUsingModule(moduleClass);
 
-		this.module = instance;
+		IModule newInstance = cachedModules.getInstance(moduleClass);
+
+		this.module = newInstance;
 		this.updateModule();
 
 		return this.module;
@@ -400,6 +420,14 @@ public class ModuleProcessor {
 		return this.processingChainsaw;
 	}
 
+	/**
+	 * Return instance of pre-processing filter set (chainsaw).
+	 * 
+	 * <b>Do not forget! This chainsaw store only one instance of every using
+	 * filter!</b>
+	 * 
+	 * @return instance of pre-processing filter set
+	 */
 	public FilterChainsaw getPreChainsaw() {
 		return this.preProcessingChainsaw;
 	}

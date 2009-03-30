@@ -9,7 +9,6 @@ import java.awt.event.WindowEvent;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
@@ -19,8 +18,11 @@ import org.slf4j.LoggerFactory;
 import edu.mgupi.pass.face.gui.AppHelper;
 
 /**
- * Help class for providing selection from opening dialogs. We open them, give
+ * Special adapter for providing control from dialogs. We open them, give
  * control and wait for result.
+ * 
+ * Special registered buttons {@link #registerOKButton(JButton)} and
+ * {@link #registerCancelButton(JButton)} helps to open and close page.
  * 
  * @author raidan
  * 
@@ -49,21 +51,34 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	 * @param owner
 	 *            reference to dialog we adapting, required
 	 * @param editorModel
+	 *            table list model for integration with
 	 */
 	public AbstractDialogAdapter(JDialog owner, AbstractEditorTableModel editorModel) {
 		this(owner, editorModel, false);
 	}
 
-	public AbstractDialogAdapter(JDialog instance, boolean saveRequired) {
-		this(instance, null, saveRequired);
+	/**
+	 * Constructor for owner and special flag.
+	 * 
+	 * @param owner
+	 *            reference to dialog we adapting, required
+	 * @param saveRequired
+	 *            if true -- this dialog will require entering value, i.e.
+	 *            method {@link #saveImpl()} must return true for accepting and
+	 *            closing dialog; if false -- this method can return true or
+	 *            false
+	 */
+	public AbstractDialogAdapter(JDialog owner, boolean saveRequired) {
+		this(owner, null, saveRequired);
 	}
 
 	/**
+	 * Expanded constructor.
 	 * 
 	 * @param owner
-	 *            is required parameter, contains reference to dialog we
-	 *            adapting
+	 *            reference to dialog we adapting, required
 	 * @param editorModel
+	 *            table list model for integration with
 	 * @param saveRequired
 	 *            if true -- this dialog will require entering value, i.e.
 	 *            method {@link #saveImpl()} must return true for accepting and
@@ -89,10 +104,19 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 			}
 		});
 
-		// Provide support for pressing 'Esc' key on keyboard
-		// If 'Esc' will be pressing -- this method do 'Cancel' 
+		/*
+		 * Provide support for pressing 'Esc' key on keyboard.
+		 * 
+		 * If 'Esc' will be pressing -- this method will call 'Cancel'
+		 */
 		this.owner.getRootPane().registerKeyboardAction(this, "escape", KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
 				JComponent.WHEN_IN_FOCUSED_WINDOW);
+
+		/*
+		 * Provide support for pressing 'Enter' key on keyboard.
+		 * 
+		 * If 'Enter' will be pressing -- this method will call 'Save'
+		 */
 
 		this.owner.getRootPane().registerKeyboardAction(this, "accept", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
 				JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -116,8 +140,8 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	private JButton okButton;
 
 	/**
-	 * Register 'OK' button on dialog. Clicking this button will provide 'save'
-	 * event
+	 * Register 'OK' button on dialog. Clicking this button will provide 'OK'
+	 * (save) event.
 	 * 
 	 * @param button
 	 *            instance of button, required
@@ -128,6 +152,9 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 		if (okButton != null) {
 			throw new IllegalStateException("'okButton' already registered (" + okButton.getText() + ").");
+		}
+		if (button == null) {
+			throw new IllegalStateException("Internal error. Parameter 'button' must be not null.");
 		}
 
 		this.okButton = button;
@@ -148,7 +175,7 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 	/**
 	 * Register 'cancel' button. Clicking this button will provide 'cancel'
-	 * event
+	 * event.
 	 * 
 	 * @param button
 	 *            instance of button, required
@@ -159,6 +186,9 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 		if (cancelButton != null) {
 			throw new IllegalStateException("'cancelButton' already registered (" + cancelButton.getText() + ").");
+		}
+		if (button == null) {
+			throw new IllegalStateException("Internal error. Parameter 'button' must be not null.");
 		}
 
 		this.cancelButton = button;
@@ -179,7 +209,7 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 	/**
 	 * Main method, open dialog and waiting til it's done. If anything goes
-	 * wrong -- message will be shown
+	 * wrong -- message will be shown.
 	 * 
 	 * @return true if pressed 'OK' button, false if 'Cancel' button or window
 	 *         was closed by window-button
@@ -187,32 +217,8 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	 * @see #openDialogImpl()
 	 */
 	public boolean openDialog() {
-
 		logger.debug("Dialog '{}' about to open.", owner.getTitle());
-
-		setOK = false;
-		cancelledAlready = false;
-		cancelOnly = false;
-
-		if (this.okButton != null && !this.okButton.isVisible()) {
-			this.okButton.setVisible(true);
-			this.cancelButton.setText("Отмена");
-		}
-
-		try {
-			if (editorMode != null) {
-				editorMode.open();
-			}
-			this.openDialogImpl();
-			this.owner.setVisible(true);
-			logger.debug("Dialog '' finished. Return {}.", owner.getTitle(), setOK);
-
-			return setOK;
-
-		} catch (Exception e) {
-			AppHelper.showExceptionDialog(this.owner, "Ошибка при открытии окна '" + this.owner.getTitle() + "'", e);
-			return false;
-		}
+		return this.openDialog(false);
 	}
 
 	private boolean cancelOnly = false;
@@ -228,44 +234,63 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	 */
 	public void showDialogCancelOnly() {
 		if (this.cancelButton == null) {
-			JOptionPane
-					.showMessageDialog(
-							this.owner,
-							"Ошибка при открытии окна '"
-									+ this.owner.getTitle()
-									+ "'. Данное окно не может работать в режиме 'Только отмена'. Кнопка 'cancel' не зарегестрирована.",
-							"Неверный режим работы", JOptionPane.OK_OPTION);
+			AppHelper.showErrorDialog(this.owner, "Ошибка при открытии окна '" + this.owner.getTitle()
+					+ "'. Данное окно не может работать в режиме 'Только отмена'. "
+					+ "Кнопка 'cancel' не зарегестрирована.", "Неверный режим работы");
 			return;
 		}
 
 		logger.debug("Dialog '{}' about to open in ReadOnly.", owner.getTitle());
+		this.openDialog(true);
 
+	}
+
+	private boolean openDialog(boolean cancelOnly) {
 		setOK = false;
 		cancelledAlready = false;
-		cancelOnly = true;
-		if (this.okButton != null && this.okButton.isVisible()) {
+		this.cancelOnly = cancelOnly;
+
+		if (!cancelOnly && this.okButton != null && !this.okButton.isVisible()) {
+			this.okButton.setVisible(true);
+			this.cancelButton.setText("Отмена");
+		} else if (cancelOnly && this.okButton != null && this.okButton.isVisible()) {
 			this.okButton.setVisible(false);
 			this.cancelButton.setText("Закрыть");
 		}
 
 		try {
 			if (editorMode != null) {
-				editorMode.open();
+				editorMode.onOpenWindow();
 			}
 			this.openDialogImpl();
 
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					owner.setVisible(true);
+			if (this.cancelOnly) {
+				logger.trace("Dialog '{}' will be invoked later.", owner.getTitle());
 
-					logger.debug("Dialog '{}' finished.", owner.getTitle());
-				}
-			});
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							owner.setVisible(true);
+							logger.debug("Dialog '{}' finisheds.", owner.getTitle());
+						} catch (Throwable t) {
+							AppHelper.showExceptionDialog(owner, "Ошибка при открытии окна '" + owner.getTitle() + "'",
+									t);
+						}
+					}
+				});
+			} else {
+				this.owner.setVisible(true);
+				logger.debug("Dialog '' finished. Return {}.", owner.getTitle(), setOK);
+			}
 
-		} catch (Exception e) {
-			AppHelper.showExceptionDialog(this.owner, "Ошибка при открытии окна '" + this.owner.getTitle() + "'", e);
+			return setOK;
+
+		} catch (Throwable t) {
+			AppHelper.showExceptionDialog(this.owner, "Ошибка при открытии окна '" + this.owner.getTitle() + "'", t);
+			return false;
 		}
+
 	}
 
 	/**
@@ -291,7 +316,7 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 			setOK = this.saveImpl();
 			if (editorMode != null) {
-				editorMode.close();
+				editorMode.onCloseWindow();
 			}
 
 			if (setOK || !saveRequired) {
@@ -300,8 +325,8 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 				this.owner.setVisible(false);
 			}
 
-		} catch (Exception e) {
-			AppHelper.showExceptionDialog(this.owner, "Ошибка при выполнении сохранения.", e);
+		} catch (Throwable t) {
+			AppHelper.showExceptionDialog(this.owner, "Ошибка при выполнении сохранения.", t);
 		}
 	}
 
@@ -326,12 +351,12 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 			this.cancelImpl();
 			if (editorMode != null) {
-				editorMode.close();
+				editorMode.onCloseWindow();
 			}
 
 			logger.debug("Dialog '{}' done job. After cancel is {}.", owner.getTitle(), setOK);
-		} catch (Exception e) {
-			AppHelper.showExceptionDialog(this.owner, "Ошибка при выполнении отмены.", e);
+		} catch (Throwable t) {
+			AppHelper.showExceptionDialog(this.owner, "Ошибка при выполнении отмены.", t);
 		} finally {
 			cancelledAlready = true;
 			this.owner.setVisible(false);
@@ -350,15 +375,15 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	 * This method user for saving data you need. Called only if pressed 'OK'
 	 * button (or {@link #save()} called directly.
 	 * 
-	 * @return true if you actually save/receive data, false if you nothing to
-	 *         do. Method {@link #save()} return this value.
+	 * @return true if you actually save data, false if you nothing to do.
+	 *         Method {@link #save()} return this value.
 	 * @throws Exception
 	 */
 	protected abstract boolean saveImpl() throws Exception;
 
 	/**
-	 * Method used when user pressed 'Cancel' or escape button. You may do
-	 * uninitializing stuff.
+	 * Method used when user pressed 'Cancel' or escape button. You may do some
+	 * canceling stuff.
 	 * 
 	 * @throws Exception
 	 */

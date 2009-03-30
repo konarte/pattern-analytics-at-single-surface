@@ -25,6 +25,7 @@ import edu.mgupi.pass.db.locuses.Locuses;
 import edu.mgupi.pass.db.locuses.LocusesFactory;
 import edu.mgupi.pass.filters.FilterChainsaw;
 import edu.mgupi.pass.filters.Param;
+import edu.mgupi.pass.filters.FilterChainsaw.SawMode;
 import edu.mgupi.pass.filters.Param.ParamType;
 import edu.mgupi.pass.filters.java.GrayScaleFilter;
 import edu.mgupi.pass.filters.service.PlaceImageFilter;
@@ -114,7 +115,7 @@ public class SimpleMatrixModuleTest {
 				+ RenderingHints.VALUE_INTERPOLATION_BILINEAR.getClass() + ")");
 
 		TestInputImpl source = new TestInputImpl();
-		FilterChainsaw mySaw = new FilterChainsaw(true);
+		FilterChainsaw mySaw = new FilterChainsaw(SawMode.SINGLE_INSTANCE);
 		source.init();
 		try {
 			SecundomerList.reset();
@@ -126,7 +127,7 @@ public class SimpleMatrixModuleTest {
 			PlaceImageFilter place = (PlaceImageFilter) mySaw.appendFilter(PlaceImageFilter.class);
 			place.getWIDTH().setValue(Const.MAIN_IMAGE_WIDTH);
 			place.getHEIGHT().setValue(Const.MAIN_IMAGE_HEIGHT);
-			place.getPLACE().setValue("topleft");
+			place.getPLACE().setValue(PlaceImageFilter.PLACE_TOP_LEFT);
 
 			mySaw.appendFilter(GrayScaleFilter.class);
 			this.module.getRENREDING_METHOD().setValue("fast");
