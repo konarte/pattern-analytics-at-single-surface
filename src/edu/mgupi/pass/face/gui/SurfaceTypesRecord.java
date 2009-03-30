@@ -26,15 +26,15 @@ public class SurfaceTypesRecord extends RecordEditorTemplate<SurfaceTypes> {
 	private static final long serialVersionUID = 1L;
 
 	public SurfaceTypesRecord(Frame owner) {
-		super(owner, "surfaceTypesRecordDialog", "Типы поверхностей");
+		super(owner, "surfaceTypesRecordDialog", Messages.getString("SurfaceTypesRecord.title"));
 		setFormPanelData(getFormPanel());
 	}
 
 	@Override
 	protected String getDenyDeletionMessage(Object foundObject) {
 		Surfaces surf = (Surfaces) foundObject;
-		return "Поверхность с кодом '" + surf.getIdSurface() + "' использует тип '" + surf.getSurfaceType().getName()
-				+ "'.";
+		return Messages.getString("SurfaceTypesRecord.exists", surf.getIdSurface(), surf
+				.getSurfaceType().getName());
 	}
 
 	@Override
@@ -50,7 +50,8 @@ public class SurfaceTypesRecord extends RecordEditorTemplate<SurfaceTypes> {
 	}
 
 	@Override
-	protected Criteria getUniqueCheckCriteria(SurfaceTypes object, String newValue) throws Exception {
+	protected Criteria getUniqueCheckCriteria(SurfaceTypes object, String newValue)
+			throws Exception {
 		SurfaceTypesCriteria criteria = new SurfaceTypesCriteria();
 		criteria.name.eq(newValue);
 		if (object.getIdSurfaceType() != 0) {
@@ -118,13 +119,16 @@ public class SurfaceTypesRecord extends RecordEditorTemplate<SurfaceTypes> {
 
 			jPanelPlace.setLayout(new GridBagLayout());
 
-			jLabelIDValue = new JLabel("0");
+			jLabelIDValue = new JLabel("0"); //$NON-NLS-1$
 			jTextFieldNameValue = new JTextField();
 			jComboBoxClassValue = new SurfacesClassesComboBox();
 
-			super.putComponentPair(jPanelPlace, "Код", jLabelIDValue);
-			super.putComponentPair(jPanelPlace, "Класс поверхности", jComboBoxClassValue);
-			super.putUniqueComponentPair(jPanelPlace, "Название типа", jTextFieldNameValue);
+			super.putComponentPair(jPanelPlace, Messages.getString("SurfaceTypesRecord.id"),
+					jLabelIDValue);
+			super.putComponentPair(jPanelPlace, Messages.getString("SurfaceTypesRecord.class"),
+					jComboBoxClassValue);
+			super.putUniqueComponentPair(jPanelPlace,
+					Messages.getString("SurfaceTypesRecord.name"), jTextFieldNameValue);
 		}
 		return jPanelPlace;
 	}

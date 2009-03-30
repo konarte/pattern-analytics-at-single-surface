@@ -30,13 +30,14 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.db.surfaces.PassPersistentManager;
 import edu.mgupi.pass.face.gui.AppHelper;
-import edu.mgupi.pass.util.IInitiable;
+import edu.mgupi.pass.face.gui.IWindowCloseable;
 import edu.mgupi.pass.util.IRefreshable;
 import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
 import edu.mgupi.pass.util.Utils;
 
-public abstract class RecordEditorTemplate<T> extends JDialog implements IInitiable, IRefreshable {
+public abstract class RecordEditorTemplate<T> extends JDialog implements IWindowCloseable,
+		IRefreshable {
 
 	private final static Logger logger = LoggerFactory.getLogger(RecordEditorTemplate.class); //  @jve:decl-index=0:
 
@@ -62,14 +63,7 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IInitia
 	}
 
 	/**
-	 * @see IInitiable#init()
-	 */
-	public void init() {
-		// do nothing
-	}
-
-	/**
-	 * @see IInitiable#close()
+	 * @see IWindowCloseable#close()
 	 */
 	public void close() {
 		if (jPanelData != null && jPanelData instanceof RecordFormWithImageTemplate) {
@@ -99,16 +93,16 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IInitia
 
 	private AbstractDialogAdapter getDialogAdapter() {
 		if (dialogAdapter == null) {
-			this.secundomerLoad = SecundomerList.registerSecundomer("" + this.hashCode() + " Loading object time for "
-					+ this.getTitle());
-			this.secundomerSave = SecundomerList.registerSecundomer("" + this.hashCode() + " Saving object time for "
-					+ this.getTitle());
+			this.secundomerLoad = SecundomerList.registerSecundomer("" + this.hashCode()
+					+ " Loading object time for " + this.getTitle());
+			this.secundomerSave = SecundomerList.registerSecundomer("" + this.hashCode()
+					+ " Saving object time for " + this.getTitle());
 			this.secundomerCheckSave = SecundomerList.registerSecundomer("" + this.hashCode()
 					+ " Check allow save for " + this.getTitle());
-			this.secundomerRollback = SecundomerList.registerSecundomer("" + this.hashCode() + " Rollback time for "
-					+ this.getTitle());
-			this.secundomerDelete = SecundomerList.registerSecundomer("" + this.hashCode() + " Deleting object for "
-					+ this.getTitle());
+			this.secundomerRollback = SecundomerList.registerSecundomer("" + this.hashCode()
+					+ " Rollback time for " + this.getTitle());
+			this.secundomerDelete = SecundomerList.registerSecundomer("" + this.hashCode()
+					+ " Deleting object for " + this.getTitle());
 			this.secundomerCheckDelete = SecundomerList.registerSecundomer("" + this.hashCode()
 					+ " Check allow delete for " + this.getTitle());
 
@@ -133,7 +127,8 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IInitia
 					for (Map.Entry<JTextComponent, String> comp : requiredMap.entrySet()) {
 						String text = comp.getKey().getText();
 						if (text == null || text.isEmpty()) {
-							AppHelper.showFieldRequiredDialog(RecordEditorTemplate.this, comp.getValue());
+							AppHelper.showFieldRequiredDialog(RecordEditorTemplate.this, comp
+									.getValue());
 							return false;
 						}
 					}
@@ -144,8 +139,8 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IInitia
 					}
 
 					// We do not need to commit\rollback
-					logger.trace("Saving in transaction {}.", PassPersistentManager.instance().getSession()
-							.getTransaction());
+					logger.trace("Saving in transaction {}.", PassPersistentManager.instance()
+							.getSession().getTransaction());
 					saveFormToObjectImpl(workObject);
 
 					//					PersistentTransaction transaction = null;
@@ -154,8 +149,8 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IInitia
 					//					}
 					secundomerSave.start();
 					try {
-						PersistentTransaction transaction = PassPersistentManager.instance().getSession()
-								.beginTransaction();
+						PersistentTransaction transaction = PassPersistentManager.instance()
+								.getSession().beginTransaction();
 						try {
 
 							saveObject(workObject);
@@ -163,7 +158,7 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IInitia
 							if (transaction != null) {
 								transaction.commit();
 							}
-							PassPersistentManager.instance().getSession().flush();
+							//PassPersistentManager.instance().getSession().flush();
 						} catch (Exception e) {
 							secundomerSave.stop();
 							secundomerRollback.start();
@@ -204,7 +199,9 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IInitia
 		}
 
 		if (jPanelData.getBorder() != null && jPanelData.getBorder() instanceof TitledBorder) {
-			((TitledBorder) jPanelData.getBorder()).setTitle(isAdd ? "Создание новой записи" : "Редактирование записи");
+			((TitledBorder) jPanelData.getBorder()).setTitle(isAdd ? Messages
+					.getString("RecordEditorTemplate.title.create") : Messages
+					.getString("RecordEditorTemplate.title.edit"));
 		}
 
 		this.workObject = source;
@@ -222,7 +219,8 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IInitia
 		}
 	}
 
-	public boolean deleteRecords(boolean checkForDeleteAllowed, Collection<T> source) throws Exception {
+	public boolean deleteRecords(boolean checkForDeleteAllowed, Collection<T> source)
+			throws Exception {
 		if (source == null) {
 			throw new IllegalArgumentException("Internal error. Source must be not null.");
 		}
@@ -234,7 +232,8 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IInitia
 			return false;
 		}
 		if (!checkForDeleteAllowed || isDeleteAllowed(source)) {
-			logger.trace("Deleting in transaction {}.", PassPersistentManager.instance().getSession().getTransaction());
+			logger.trace("Deleting in transaction {}.", PassPersistentManager.instance()
+					.getSession().getTransaction());
 
 			//			PersistentTransaction transaction = null;
 			//			if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_EVERY_ROW) {
@@ -242,14 +241,15 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IInitia
 			//			}
 			secundomerDelete.start();
 			try {
-				PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
+				PersistentTransaction transaction = PassPersistentManager.instance().getSession()
+						.beginTransaction();
 				try {
 
 					deleteObjects(source);
 					if (transaction != null) {
 						transaction.commit();
 					}
-					PassPersistentManager.instance().getSession().flush();
+					//PassPersistentManager.instance().getSession().flush();
 				} catch (Exception e) {
 					secundomerDelete.stop();
 					secundomerRollback.start();
@@ -290,8 +290,8 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IInitia
 			for (Map.Entry<IRefreshable, String> key : this.refresheableMap.entrySet()) {
 				if (key.getKey().refresh() == 0) {
 					secundomerLoad.stop();
-					AppHelper.showErrorDialog(this, "Зписок значений в поле '" + key.getValue()
-							+ "' пуст. Необходимо заполнить данные в родительской таблице.");
+					AppHelper.showErrorDialog(this, Messages.getString(
+							"RecordEditorTemplate.noValuesInSelect", key.getValue()));
 					return false;
 				}
 			}
@@ -335,8 +335,9 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IInitia
 				if (foundObject != null) {
 					secundomerCheckSave.stop();
 					logger.trace("Found existing value in database.");
-					AppHelper.showErrorDialog(this, "Значение '" + newValue + "' для поля '"
-							+ this.requiredMap.get(uniqueComponent) + "' уже существует в базе данных.");
+					AppHelper.showErrorDialog(this, Messages.getString(
+							"RecordEditorTemplate.duplicateRowInsert", newValue, this.requiredMap
+									.get(uniqueComponent)));
 					return false;
 				}
 			} finally {
@@ -376,18 +377,11 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IInitia
 			}
 
 			logger.trace("Found {}.", foundObjects);
-			if (foundObjects.size() == 1) {
-				secundomerCheckDelete.stop();
-				AppHelper.showErrorDialog(this, "Удаление строки запрещено: "
-						+ this.getDenyDeletionMessage(foundObjects.get(0)));
-			} else {
-				StringBuilder buffer = new StringBuilder("<html>При удалении строк");
-				buffer.append(objects.size() == 1 ? "и" : "");
-				buffer.append(" возникли следующие ошибки");
-				if (foundObjects.size() > 10) {
-					buffer.append(" (первые десять)");
-				}
-				buffer.append(":<ul>");
+			if (foundObjects.size() >= 0) {
+				StringBuilder buffer = new StringBuilder("<html>");
+				buffer.append(Messages.getString("RecordEditorTemplate.rowsDeleteDenied", objects
+						.size(), foundObjects.size(), Utils.getPluralForm(foundObjects.size())));
+				buffer.append("<ul>");
 				for (Object obj : foundObjects) {
 					buffer.append("<li>").append(getDenyDeletionMessage(obj));
 				}
@@ -395,7 +389,8 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IInitia
 
 				secundomerCheckDelete.stop();
 				logger.error(buffer.toString());
-				JOptionPane.showMessageDialog(this, buffer.toString(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(this, buffer.toString(), Messages
+						.getString("RecordEditorTemplate.title.error"), JOptionPane.ERROR_MESSAGE);
 			}
 
 			return false;
@@ -431,7 +426,8 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IInitia
 	protected void setFormPanelData(JPanel panel) {
 		if (jPanelData == null) {
 			jPanelData = panel;
-			jPanelData.setBorder(BorderFactory.createTitledBorder("Редактирование"));
+			jPanelData.setBorder(BorderFactory.createTitledBorder(Messages
+					.getString("RecordEditorTemplate.edit")));
 			jContentPane.add(panel, BorderLayout.CENTER);
 
 			this.refresh();
@@ -509,6 +505,10 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IInitia
 	}
 
 	private int gridy = 0;
+
+	protected int getNextComponentGridY() {
+		return this.gridy++;
+	}
 
 	protected void putRequiredComponentPair(JPanel place, String label, JTextComponent component) {
 		this.putComponentPair(place, label, component);

@@ -16,10 +16,10 @@ import edu.mgupi.pass.db.locuses.Locuses;
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.Param.ParamType;
 import edu.mgupi.pass.modules.IModule;
-import edu.mgupi.pass.modules.ModuleCantProcessException;
 import edu.mgupi.pass.modules.ModuleException;
 import edu.mgupi.pass.modules.ModuleHelper;
 import edu.mgupi.pass.modules.ModuleParamException;
+import edu.mgupi.pass.modules.ModuleProcessionException;
 
 public class SimpleMatrixModule implements IModule {
 
@@ -28,8 +28,9 @@ public class SimpleMatrixModule implements IModule {
 	private final static String METHOD_FAST = "fast";
 	private final static String METHOD_SLOW = "slow";
 
-	private Param RENREDING_METHOD = new Param("RenderMethod", "Способ рендеринга", ParamType.STRING, "fast",
-			new Object[] { METHOD_FAST, METHOD_SLOW }, new String[] { "Быстрый", "Медленный, многослойный" });
+	private Param RENREDING_METHOD = new Param("RenderMethod", "Способ рендеринга",
+			ParamType.STRING, "fast", new Object[] { METHOD_FAST, METHOD_SLOW }, new String[] {
+					"Быстрый", "Медленный, многослойный" });
 	private Param CELL_SIZE = new Param("CellSize", "Размер ячейки", ParamType.INT, 10, 5, 15);
 
 	private Collection<Param> paramList = null;
@@ -72,7 +73,8 @@ public class SimpleMatrixModule implements IModule {
 		return result;
 	}
 
-	public void analyze(BufferedImage filteredImage, Locuses store) throws IOException, ModuleException {
+	public void analyze(BufferedImage filteredImage, Locuses store) throws IOException,
+			ModuleException {
 
 		int cellSize = (Integer) CELL_SIZE.getValue();
 		String renredMethod = (String) RENREDING_METHOD.getValue();
@@ -110,8 +112,8 @@ public class SimpleMatrixModule implements IModule {
 		}
 		if (right - left < 2 || bottom - top < 2) {
 			// cant't analyze
-			throw new ModuleCantProcessException("Unable to build matrix from image. Right-left = " + (right - left)
-					+ " and bottom-top = " + (bottom - top));
+			throw new ModuleProcessionException("Unable to build matrix from image. Right-left = "
+					+ (right - left) + " and bottom-top = " + (bottom - top));
 		}
 
 		// Warning!
@@ -171,13 +173,14 @@ public class SimpleMatrixModule implements IModule {
 						int x = (int) ((f * MULTIPLIER + i) * dx + left);
 						int y = (int) ((g * MULTIPLIER + j) * dy + top);
 
-						matrix[f][g] = matrix[f][g] + (1.0 - raster.getSampleFloat(x, y, 0) / MAX_LEVEL) / 16;
+						matrix[f][g] = matrix[f][g]
+								+ (1.0 - raster.getSampleFloat(x, y, 0) / MAX_LEVEL) / 16;
 						int color = (int) Math.round((1 - matrix[f][g]) * 255);
 
 						graph.setColor(new Color(color, color, color));
 						if (isOldMethod) {
-							graph.fillRect(f * cellSize + 2, g * cellSize + 2, (f + 1) * cellSize - 1, (g + 1)
-									* cellSize - 1);
+							graph.fillRect(f * cellSize + 2, g * cellSize + 2, (f + 1) * cellSize
+									- 1, (g + 1) * cellSize - 1);
 						} else {
 							graph.fillRect(f * cellSize, g * cellSize, cellSize - 1, cellSize - 1);
 						}
@@ -200,14 +203,16 @@ public class SimpleMatrixModule implements IModule {
 		double[][] matrix1 = (double[][]) ModuleHelper.getParameterValue(graph1, "matrix", true);
 		double[][] matrix2 = (double[][]) ModuleHelper.getParameterValue(graph2, "matrix", true);
 
-		if (matrix1.length != MATRIX_SIZE || (matrix1.length > 0 && matrix1[0].length != MATRIX_SIZE)) {
-			throw new ModuleParamException("Received invalid parameter 'matrix' for first locus '" + graph1.getName()
-					+ "'. Length of matrix does not equals of " + MATRIX_SIZE);
+		if (matrix1.length != MATRIX_SIZE
+				|| (matrix1.length > 0 && matrix1[0].length != MATRIX_SIZE)) {
+			throw new ModuleParamException("Received invalid parameter 'matrix' for first locus '"
+					+ graph1.getName() + "'. Length of matrix does not equals of " + MATRIX_SIZE);
 		}
 
-		if (matrix2.length != MATRIX_SIZE || (matrix2.length > 0 && matrix2[0].length != MATRIX_SIZE)) {
-			throw new ModuleParamException("Received invalid parameter 'matrix' for second locus '" + graph2.getName()
-					+ "'. Length of matrix does not equals of " + MATRIX_SIZE);
+		if (matrix2.length != MATRIX_SIZE
+				|| (matrix2.length > 0 && matrix2[0].length != MATRIX_SIZE)) {
+			throw new ModuleParamException("Received invalid parameter 'matrix' for second locus '"
+					+ graph2.getName() + "'. Length of matrix does not equals of " + MATRIX_SIZE);
 		}
 
 		double result = 0.0;

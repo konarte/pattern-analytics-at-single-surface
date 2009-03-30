@@ -70,7 +70,8 @@ public class CacheFreeLists<E> extends AbstractCacheInitiable<E> {
 	}
 
 	@Override
-	public E getInstance(Class<? extends E> moduleClass) throws InstantiationException, IllegalAccessException {
+	public E getInstance(Class<? extends E> moduleClass) throws InstantiationException,
+			IllegalAccessException {
 		lock.lock();
 
 		try {

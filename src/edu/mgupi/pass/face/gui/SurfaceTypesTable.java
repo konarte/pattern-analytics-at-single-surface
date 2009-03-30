@@ -22,7 +22,7 @@ public class SurfaceTypesTable extends TableEditorTemplate {
 	private static final long serialVersionUID = 1L;
 
 	public SurfaceTypesTable(Frame owner) {
-		super(owner, "surfaceTypesTable", "Список типов поверхностей");
+		super(owner, "surfaceTypesTable", Messages.getString("SurfaceTypesTable.title"));
 	}
 
 	private AbstractEditorTableModel tableModel = null;
@@ -40,13 +40,17 @@ public class SurfaceTypesTable extends TableEditorTemplate {
 
 				@Override
 				protected String[] getColumns() {
-					return new String[] { "ID", "Класс", "Название", "Материал" };
+					return new String[] { Messages.getString("SurfaceTypesTable.head.id"),
+							Messages.getString("SurfaceTypesTable.head.class"),
+							Messages.getString("SurfaceTypesTable.head.name"),
+							Messages.getString("SurfaceTypesTable.head.material") };
 				}
 
 				@Override
 				protected List<SurfaceTypes> getDataImpl() throws Exception {
 					List<SurfaceTypes> types = new ArrayList<SurfaceTypes>();
-					types.addAll(Arrays.asList(SurfaceTypesFactory.listSurfaceTypesByQuery(null, null)));
+					types.addAll(Arrays.asList(SurfaceTypesFactory.listSurfaceTypesByQuery(null,
+							null)));
 					return types;
 				}
 

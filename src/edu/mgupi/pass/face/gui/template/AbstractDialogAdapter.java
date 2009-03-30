@@ -9,6 +9,7 @@ import java.awt.event.WindowEvent;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
@@ -85,7 +86,8 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	 *            closing dialog; if false -- this method can return true or
 	 *            false
 	 */
-	public AbstractDialogAdapter(JDialog owner, final AbstractEditorTableModel editorModel, boolean saveRequired) {
+	public AbstractDialogAdapter(JDialog owner, final AbstractEditorTableModel editorModel,
+			boolean saveRequired) {
 
 		if (owner == null) {
 			throw new IllegalArgumentException("Internal error. 'instance' must be not null.");
@@ -109,8 +111,8 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 		 * 
 		 * If 'Esc' will be pressing -- this method will call 'Cancel'
 		 */
-		this.owner.getRootPane().registerKeyboardAction(this, "escape", KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-				JComponent.WHEN_IN_FOCUSED_WINDOW);
+		this.owner.getRootPane().registerKeyboardAction(this, "escape",
+				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		/*
 		 * Provide support for pressing 'Enter' key on keyboard.
@@ -118,8 +120,8 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 		 * If 'Enter' will be pressing -- this method will call 'Save'
 		 */
 
-		this.owner.getRootPane().registerKeyboardAction(this, "accept", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
-				JComponent.WHEN_IN_FOCUSED_WINDOW);
+		this.owner.getRootPane().registerKeyboardAction(this, "accept",
+				KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 	}
 
@@ -151,7 +153,8 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	public void registerOKButton(JButton button) {
 
 		if (okButton != null) {
-			throw new IllegalStateException("'okButton' already registered (" + okButton.getText() + ").");
+			throw new IllegalStateException("'okButton' already registered (" + okButton.getText()
+					+ ").");
 		}
 		if (button == null) {
 			throw new IllegalStateException("Internal error. Parameter 'button' must be not null.");
@@ -163,7 +166,7 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 			throw new RuntimeException("Internal error. Please name OK button as 'OK'.");
 		}
 
-		button.setText("OK");
+		button.setText(Messages.getString("AbstractDialogAdapter.ok"));
 
 		button.setName("OK");
 		button.setActionCommand("OK");
@@ -185,7 +188,8 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	public void registerCancelButton(JButton button) {
 
 		if (cancelButton != null) {
-			throw new IllegalStateException("'cancelButton' already registered (" + cancelButton.getText() + ").");
+			throw new IllegalStateException("'cancelButton' already registered ("
+					+ cancelButton.getText() + ").");
 		}
 		if (button == null) {
 			throw new IllegalStateException("Internal error. Parameter 'button' must be not null.");
@@ -197,7 +201,7 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 			throw new RuntimeException("Internal error. Please name CANCEL button as 'cancel'.");
 		}
 
-		button.setText("Отмена");
+		button.setText(Messages.getString("AbstractDialogAdapter.cancel"));
 		button.setName("cancel");
 		button.setActionCommand("cancel");
 
@@ -234,9 +238,9 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	 */
 	public void showDialogCancelOnly() {
 		if (this.cancelButton == null) {
-			AppHelper.showErrorDialog(this.owner, "Ошибка при открытии окна '" + this.owner.getTitle()
-					+ "'. Данное окно не может работать в режиме 'Только отмена'. "
-					+ "Кнопка 'cancel' не зарегестрирована.", "Неверный режим работы");
+			AppHelper.showErrorDialog(this.owner, Messages.getString(
+					"AbstractDialogAdapter.err.noOnlyCancelMode", this.owner.getTitle()), Messages
+					.getString("AbstractDialogAdapter.title.noOnlyCancelMode"));
 			return;
 		}
 
@@ -252,10 +256,10 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 		if (!cancelOnly && this.okButton != null && !this.okButton.isVisible()) {
 			this.okButton.setVisible(true);
-			this.cancelButton.setText("Отмена");
+			this.cancelButton.setText(Messages.getString("AbstractDialogAdapter.cancel"));
 		} else if (cancelOnly && this.okButton != null && this.okButton.isVisible()) {
 			this.okButton.setVisible(false);
-			this.cancelButton.setText("Закрыть");
+			this.cancelButton.setText(Messages.getString("AbstractDialogAdapter.close"));
 		}
 
 		try {
@@ -274,8 +278,8 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 							owner.setVisible(true);
 							logger.debug("Dialog '{}' finisheds.", owner.getTitle());
 						} catch (Throwable t) {
-							AppHelper.showExceptionDialog(owner, "Ошибка при открытии окна '" + owner.getTitle() + "'",
-									t);
+							AppHelper.showExceptionDialog(owner, Messages.getString(
+									"AbstractDialogAdapter.err.windowOpen", owner.getTitle()), t);
 						}
 					}
 				});
@@ -287,7 +291,9 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 			return setOK;
 
 		} catch (Throwable t) {
-			AppHelper.showExceptionDialog(this.owner, "Ошибка при открытии окна '" + this.owner.getTitle() + "'", t);
+			AppHelper.showExceptionDialog(this.owner, Messages
+					.getString("AbstractDialogAdapter.err.windowOpen")
+					+ this.owner.getTitle() + "'", t);
 			return false;
 		}
 
@@ -319,14 +325,22 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 				editorMode.onCloseWindow();
 			}
 
-			if (setOK || !saveRequired) {
-				logger.debug("Dialog '{}' done job. After save is {}.", owner.getTitle(), setOK);
+			if (saveRequired && !setOK) {
+				logger.debug("Dialog '{}' wait for successfully saving event.", owner.getTitle());
 
+				JOptionPane.showMessageDialog(this.owner, Messages
+						.getString("AbstractDialogAdapter.selectRequered"), Messages
+						.getString("AbstractDialogAdapter.title.selectRequered"),
+						JOptionPane.WARNING_MESSAGE);
+			} else {
+
+				logger.debug("Dialog '{}' done job. After save is {}.", owner.getTitle(), setOK);
 				this.owner.setVisible(false);
 			}
 
 		} catch (Throwable t) {
-			AppHelper.showExceptionDialog(this.owner, "Ошибка при выполнении сохранения.", t);
+			AppHelper.showExceptionDialog(this.owner, Messages
+					.getString("AbstractDialogAdapter.err.windowSave"), t);
 		}
 	}
 
@@ -356,7 +370,8 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 			logger.debug("Dialog '{}' done job. After cancel is {}.", owner.getTitle(), setOK);
 		} catch (Throwable t) {
-			AppHelper.showExceptionDialog(this.owner, "Ошибка при выполнении отмены.", t);
+			AppHelper.showExceptionDialog(this.owner, Messages
+					.getString("AbstractDialogAdapter.err.windowCancel"), t);
 		} finally {
 			cancelledAlready = true;
 			this.owner.setVisible(false);

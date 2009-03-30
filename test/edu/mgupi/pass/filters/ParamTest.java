@@ -54,7 +54,8 @@ public class ParamTest {
 		compareTwoParametersDefinitions(firstParam, secondParam, true);
 	}
 
-	public static void compareTwoParametersDefinitions(Param firstParam, Param secondParam, boolean cloned) {
+	public static void compareTwoParametersDefinitions(Param firstParam, Param secondParam,
+			boolean cloned) {
 		if (cloned) {
 			assertTrue(firstParam.getAllowed_values() == secondParam.getAllowed_values());
 			assertTrue(firstParam.getVisual_values() == secondParam.getVisual_values());
@@ -72,18 +73,18 @@ public class ParamTest {
 
 	}
 
-	public static void compareInClonedCollections(Collection<Param> first, Collection<Param> second,
-			boolean definitionOnly) throws NoSuchParamException {
+	public static void compareInClonedCollections(Collection<Param> first,
+			Collection<Param> second, boolean definitionOnly) throws NoSuchParamException {
 		compareInCollections(first, second, definitionOnly, true);
 	}
 
-	public static void compareInCollections(Collection<Param> first, Collection<Param> second, boolean definitionOnly)
-			throws NoSuchParamException {
+	public static void compareInCollections(Collection<Param> first, Collection<Param> second,
+			boolean definitionOnly) throws NoSuchParamException {
 		compareInCollections(first, second, definitionOnly, false);
 	}
 
-	public static void compareInCollections(Collection<Param> first, Collection<Param> second, boolean definitionOnly,
-			boolean cloned) throws NoSuchParamException {
+	public static void compareInCollections(Collection<Param> first, Collection<Param> second,
+			boolean definitionOnly, boolean cloned) throws NoSuchParamException {
 		if (first == null && second == null) {
 			return;
 		}
@@ -115,10 +116,10 @@ public class ParamTest {
 		fullParams.add(new Param("p7", "Параметр7", ParamType.COLOR, null));
 		fullParams.add(new Param("p8", "Параметр8", ParamType.COLOR, Color.BLUE));
 
-		fullParams.add(new Param("p9", "Параметр9", ParamType.STRING, null, new Object[] { "айн", "цвай", "драй" },
-				new String[] { "Первый", "Второй", "Третий" }));
-		fullParams.add(new Param("p10", "Параметр10", ParamType.STRING, "цвай", new Object[] { "айн", "цвай", "драй" },
-				new String[] { "Первый", "Второй", "Третий" }));
+		fullParams.add(new Param("p9", "Параметр9", ParamType.STRING, null, new Object[] { "айн",
+				"цвай", "драй" }, new String[] { "Первый", "Второй", "Третий" }));
+		fullParams.add(new Param("p10", "Параметр10", ParamType.STRING, "цвай", new Object[] {
+				"айн", "цвай", "драй" }, new String[] { "Первый", "Второй", "Третий" }));
 
 		return fullParams;
 	}

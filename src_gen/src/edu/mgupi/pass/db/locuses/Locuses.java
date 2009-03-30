@@ -74,8 +74,8 @@ public class Locuses implements Serializable {
 	
 	@Column(name="IdLocus", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D31204C98ABF408FCE")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31204C98ABF408FCE", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31205627A6C50317A")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31205627A6C50317A", strategy="native")	
 	private int idLocus;
 	
 	@Column(name="Name", nullable=true, length=255)	
@@ -159,7 +159,7 @@ public class Locuses implements Serializable {
 	 * и представлен в виде изображения. 
 	 * 
 	 * Размер изображения должен составлять 256x256 пикселей и храниться в формате, 
-	 * удобном для загрузки в приложение.
+	 * удобном для загрузки в приложение. Мы будем использовать JPG.
 	 */
 	public void setThumbImage(byte[] value) {
 		this.thumbImage = value;
@@ -172,7 +172,7 @@ public class Locuses implements Serializable {
 	 * и представлен в виде изображения. 
 	 * 
 	 * Размер изображения должен составлять 256x256 пикселей и храниться в формате, 
-	 * удобном для загрузки в приложение.
+	 * удобном для загрузки в приложение. Мы будем использовать JPG.
 	 */
 	public byte[] getThumbImage() {
 		return thumbImage;

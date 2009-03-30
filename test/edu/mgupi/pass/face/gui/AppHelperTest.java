@@ -23,9 +23,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.mgupi.pass.util.WaitCondition;
-import edu.mgupi.pass.util.WorkSet;
-
 public class AppHelperTest {
 
 	@Before
@@ -55,8 +52,10 @@ public class AppHelperTest {
 		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
-				splash = (SplashWindow) AppHelper.getInstance().registerAdditionalWindow(null, SplashWindow.class);
-				splash2 = (SplashWindow) AppHelper.getInstance().registerAdditionalWindow(null, SplashWindow.class);
+				splash = (SplashWindow) AppHelper.getInstance().registerAdditionalWindow(null,
+						SplashWindow.class);
+				splash2 = (SplashWindow) AppHelper.getInstance().registerAdditionalWindow(null,
+						SplashWindow.class);
 
 			}
 		}, new WaitCondition() {
@@ -118,8 +117,8 @@ public class AppHelperTest {
 	@Test
 	public void testOpenWindowFrameMore() throws Exception {
 		splash = null;
-		final SplashWindow mySplash = (SplashWindow) AppHelper.getInstance().registerAdditionalWindow(null,
-				SplashWindow.class);
+		final SplashWindow mySplash = (SplashWindow) AppHelper.getInstance()
+				.registerAdditionalWindow(null, SplashWindow.class);
 		assertNotNull(mySplash);
 
 		splash = (SplashWindow) SwingTestHelper.openDialog(SplashWindow.class, true);
@@ -182,15 +181,18 @@ public class AppHelperTest {
 		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
-				registeredWindow = (MyFrame) AppHelper.getInstance().registerAdditionalWindow(commonWindow,
-						MyFrame.class);
-				registeredComp1 = (MyFrame) AppHelper.getInstance().registerAdditionalComponent(new MyFrame());
-				registeredComp2 = (MyFrame) AppHelper.getInstance().registerAdditionalComponent(new MyFrame());
+				registeredWindow = (MyFrame) AppHelper.getInstance().registerAdditionalWindow(
+						commonWindow, MyFrame.class);
+				registeredComp1 = (MyFrame) AppHelper.getInstance().registerAdditionalComponent(
+						new MyFrame());
+				registeredComp2 = (MyFrame) AppHelper.getInstance().registerAdditionalComponent(
+						new MyFrame());
 			}
 		}, new WaitCondition() {
 			@Override
 			public boolean keepWorking() {
-				return registeredComp1 == null || registeredComp2 == null || registeredWindow == null;
+				return registeredComp1 == null || registeredComp2 == null
+						|| registeredWindow == null;
 			}
 		});
 
@@ -267,14 +269,17 @@ public class AppHelperTest {
 			SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 				@Override
 				public void workImpl() throws Exception {
-					AppHelper.showExceptionDialog(null,
-							"Принцип восприятия непредвзято создает паллиативный интеллект, условно. "
-									+ "Концепция ментально оспособляет закон внешнего мира. "
-									+ "Сомнение раскладывает на элементы неоднозначный структурализм. Wait 5 sec...",
-							new Exception("Много много много разного такого разного такого супер-текста. "
-									+ "Количество текста не поддается осмыслению. А нам надо проверить, "
-									+ "чтобы экран не разосрался вширь.", new RuntimeException(
-									"Stars will show me the way...")));
+					AppHelper
+							.showExceptionDialog(
+									null,
+									"Принцип восприятия непредвзято создает паллиативный интеллект, условно. "
+											+ "Концепция ментально оспособляет закон внешнего мира. "
+											+ "Сомнение раскладывает на элементы неоднозначный структурализм. Wait 5 sec...",
+									new Exception(
+											"Много много много разного такого разного такого супер-текста. "
+													+ "Количество текста не поддается осмыслению. А нам надо проверить, "
+													+ "чтобы экран не разосрался вширь.",
+											new RuntimeException("Stars will show me the way...")));
 				}
 			});
 			fail("No exception thrown!");
@@ -300,10 +305,12 @@ public class AppHelperTest {
 			SwingTestHelper.addWorkAndWaitForTheEnd(new WorkSet() {
 				@Override
 				public void workImpl() throws Exception {
-					AppHelper.showErrorDialog(null,
-							"Принцип восприятия непредвзято создает паллиативный интеллект, условно. "
-									+ "Концепция ментально оспособляет закон внешнего мира. "
-									+ "Сомнение раскладывает на элементы неоднозначный структурализм. Wait 5 sec...");
+					AppHelper
+							.showErrorDialog(
+									null,
+									"Принцип восприятия непредвзято создает паллиативный интеллект, условно. "
+											+ "Концепция ментально оспособляет закон внешнего мира. "
+											+ "Сомнение раскладывает на элементы неоднозначный структурализм. Wait 5 sec...");
 				}
 			});
 			fail("No exception thrown!");
@@ -403,7 +410,8 @@ public class AppHelperTest {
 			public boolean keepWorking() {
 				// We must remove all components before done
 				return AppHelper.getInstance().getCachedWindowsCount() != 1
-						|| AppHelper.getInstance().getAdditionalWindowsCount() != TOTAL_COUNT * (INTERNAL_COUNT / 2);
+						|| AppHelper.getInstance().getAdditionalWindowsCount() != TOTAL_COUNT
+								* (INTERNAL_COUNT / 2);
 			}
 		});
 

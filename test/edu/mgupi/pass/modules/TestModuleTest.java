@@ -84,7 +84,8 @@ public class TestModuleTest {
 	}
 
 	@Test
-	public void testAnalyze() throws IOException, ClassNotFoundException, ModuleException, FilterException {
+	public void testAnalyze() throws IOException, ClassNotFoundException, ModuleException,
+			FilterException {
 
 		TestInputImpl source = new TestInputImpl();
 		source.init();

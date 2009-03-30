@@ -1,4 +1,6 @@
-package edu.mgupi.pass.util;
+package edu.mgupi.pass.face.gui;
+
+import edu.mgupi.pass.util.Utils;
 
 /**
  * Simple interface for define work

@@ -33,7 +33,8 @@ public class TransactionsTest {
 	}
 
 	private void clearDB() throws PersistentException {
-		PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
+		PersistentTransaction transaction = PassPersistentManager.instance().getSession()
+				.beginTransaction();
 
 		DefectTypesCriteria tc = new DefectTypesCriteria();
 		tc.name.ilike("TEST-%");
@@ -75,12 +76,14 @@ public class TransactionsTest {
 	@Test
 	public void testSampleTwoTransactions() throws Exception {
 		System.out.println("Begin first transaction");
-		PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
+		PersistentTransaction transaction = PassPersistentManager.instance().getSession()
+				.beginTransaction();
 
 		System.out.println("Begin second transaction");
-		Session session = PassPersistentManager.instance().getSession().getSessionFactory().openSession();
-		Transaction transaction2 = PassPersistentManager.instance().getSession().getSessionFactory().openSession()
-				.beginTransaction();
+		Session session = PassPersistentManager.instance().getSession().getSessionFactory()
+				.openSession();
+		Transaction transaction2 = PassPersistentManager.instance().getSession()
+				.getSessionFactory().openSession().beginTransaction();
 		try {
 
 			System.out.println("transaction = " + transaction);
@@ -109,7 +112,8 @@ public class TransactionsTest {
 
 	@Test
 	public void testChainedTransactions() throws Exception {
-		PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
+		PersistentTransaction transaction = PassPersistentManager.instance().getSession()
+				.beginTransaction();
 
 		//		Session session = PassPersistentManager.instance().getSession().getSessionFactory().openSession();
 		//		Transaction transaction2 = PassPersistentManager.instance().getSession().getSessionFactory().openSession()
@@ -192,7 +196,8 @@ public class TransactionsTest {
 
 	@Test
 	public void testBigWork() throws Exception {
-		PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
+		PersistentTransaction transaction = PassPersistentManager.instance().getSession()
+				.beginTransaction();
 
 		System.out.println("BIGWORK");
 

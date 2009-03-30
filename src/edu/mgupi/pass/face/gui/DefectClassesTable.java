@@ -22,7 +22,7 @@ public class DefectClassesTable extends TableEditorTemplate {
 	private static final long serialVersionUID = 1L;
 
 	public DefectClassesTable(Frame owner) {
-		super(owner, "defectClassesTable", "Классы дефектов");
+		super(owner, "defectClassesTable", Messages.getString("DefectClassesTable.title"));
 	}
 
 	private AbstractEditorTableModel tableModel = null;
@@ -40,13 +40,15 @@ public class DefectClassesTable extends TableEditorTemplate {
 
 				@Override
 				protected String[] getColumns() {
-					return new String[] { "ID", "Класс дефекта" };
+					return new String[] { Messages.getString("DefectClassesTable.id"),
+							Messages.getString("DefectClassesTable.name") };
 				}
 
 				@Override
 				protected List<DefectClasses> getDataImpl() throws Exception {
 					List<DefectClasses> classes = new ArrayList<DefectClasses>();
-					classes.addAll(Arrays.asList(DefectClassesFactory.listDefectClassesByQuery(null, null)));
+					classes.addAll(Arrays.asList(DefectClassesFactory.listDefectClassesByQuery(
+							null, null)));
 					return classes;
 				}
 

@@ -23,7 +23,8 @@ public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel
 
 	private Class<? extends RecordEditorTemplate<T>> recordEditorClass = null;
 
-	public CommonEditorTableModel(JTable owner, Class<? extends RecordEditorTemplate<T>> recordEditorClass) {
+	public CommonEditorTableModel(JTable owner,
+			Class<? extends RecordEditorTemplate<T>> recordEditorClass) {
 		super(owner);
 		if (recordEditorClass == null) {
 			throw new IllegalArgumentException("Internal error. 'editDialog' must be not null.");
@@ -71,8 +72,8 @@ public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel
 					"Internal error. Unable to add row, 'data' does not initialized yet. Maybe, you forget to 'openDialog'?");
 		}
 
-		RecordEditorTemplate<T> dialog = (RecordEditorTemplate<T>) AppHelper.getInstance().getDialogImpl(
-				recordEditorClass);
+		RecordEditorTemplate<T> dialog = (RecordEditorTemplate<T>) AppHelper.getInstance()
+				.getDialogImpl(recordEditorClass);
 		T added = dialog.addRecord(createInstanceImpl());
 		if (added != null) {
 
@@ -101,12 +102,14 @@ public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel
 
 		logger.trace("Try to delete {} rows.", rowIdx.length);
 
-		RecordEditorTemplate<T> dialog = (RecordEditorTemplate<T>) AppHelper.getInstance().getDialogImpl(
-				recordEditorClass);
+		RecordEditorTemplate<T> dialog = (RecordEditorTemplate<T>) AppHelper.getInstance()
+				.getDialogImpl(recordEditorClass);
 
 		Collection<T> rows = data.subList(rowIdx[0], rowIdx[rowIdx.length - 1] + 1);
-		boolean deleted = dialog.deleteRecords(
-				Config.getInstance().getDeletionCheckMode() == DeletionCheckMode.ACQUIRE_THEN_CHECK, rows);
+		boolean deleted = dialog
+				.deleteRecords(
+						Config.getInstance().getDeletionCheckMode() == DeletionCheckMode.ACQUIRE_THEN_CHECK,
+						rows);
 		if (deleted) {
 
 			logger.trace("Successfully deleted. Removing rows from model.");
@@ -134,12 +137,13 @@ public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel
 
 		if (allow && Config.getInstance().getDeletionCheckMode() != DeletionCheckMode.NO_CHECK) {
 			Collection<T> rowList = data.subList(rows[0], rows[rows.length - 1] + 1);
-			RecordEditorTemplate<T> dialog = (RecordEditorTemplate<T>) AppHelper.getInstance().getDialogImpl(
-					recordEditorClass);
+			RecordEditorTemplate<T> dialog = (RecordEditorTemplate<T>) AppHelper.getInstance()
+					.getDialogImpl(recordEditorClass);
 
 			allow = dialog.isDeleteAllowed(rowList);
 
-			if (allow && Config.getInstance().getDeletionCheckMode() == DeletionCheckMode.CHECK_THEN_ACQUIRE) {
+			if (allow
+					&& Config.getInstance().getDeletionCheckMode() == DeletionCheckMode.CHECK_THEN_ACQUIRE) {
 				allow = super.allowDeleteRows(rows);
 			}
 		}
@@ -156,8 +160,8 @@ public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel
 					"Internal error. Unable to add row, 'data' does not initialized yet. Maybe, you forget to 'openDialog'?");
 		}
 
-		RecordEditorTemplate<T> dialog = (RecordEditorTemplate<T>) AppHelper.getInstance().getDialogImpl(
-				recordEditorClass);
+		RecordEditorTemplate<T> dialog = (RecordEditorTemplate<T>) AppHelper.getInstance()
+				.getDialogImpl(recordEditorClass);
 		boolean edited = dialog.editRecord(data.get(rowIdx));
 		if (edited) {
 			logger.trace("Successfully edited. Edited object: {}.", edited);

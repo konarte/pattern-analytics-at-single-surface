@@ -14,7 +14,8 @@ public class ParamHelper {
 
 	private final static Logger logger = LoggerFactory.getLogger(ParamHelper.class);
 
-	public static Param getParameter(String name, Collection<Param> params) throws NoSuchParamException {
+	public static Param getParameter(String name, Collection<Param> params)
+			throws NoSuchParamException {
 		return searchParameter(name, params, true);
 	}
 
@@ -26,7 +27,8 @@ public class ParamHelper {
 		return searchParameter(name, filter, false);
 	}
 
-	protected static Param searchParameter(String name, IFilter filter, boolean mandatory) throws NoSuchParamException {
+	protected static Param searchParameter(String name, IFilter filter, boolean mandatory)
+			throws NoSuchParamException {
 		if (name == null) {
 			throw new IllegalArgumentException("Internal error. Name is null.");
 		}
@@ -37,8 +39,8 @@ public class ParamHelper {
 		return searchParameter(name, filter.getParams(), mandatory);
 	}
 
-	protected static Param searchParameter(String name, Collection<Param> paramList, boolean mandatory)
-			throws NoSuchParamException {
+	protected static Param searchParameter(String name, Collection<Param> paramList,
+			boolean mandatory) throws NoSuchParamException {
 		if (name == null) {
 			throw new IllegalArgumentException("Internal error. Name is null.");
 		}
@@ -53,14 +55,15 @@ public class ParamHelper {
 		}
 
 		if (mandatory) {
-			throw new NoSuchParamException("Unable to find parameter '" + name + "' into parameters list '" + paramList
-					+ "'. This parameter is required.");
+			throw new NoSuchParamException("Unable to find parameter '" + name
+					+ "' into parameters list '" + paramList + "'. This parameter is required.");
 		}
 
 		return null;
 	}
 
-	protected static Object getParameterM(String key, Map<String, Object> params) throws NoSuchParamException {
+	protected static Object getParameterM(String key, Map<String, Object> params)
+			throws NoSuchParamException {
 		if (key == null) {
 			throw new IllegalArgumentException("Internal error. Key is null.");
 		}
@@ -70,8 +73,9 @@ public class ParamHelper {
 
 		Object value = params.get(key);
 		if (value == null) {
-			throw new NoSuchParamException("Internal error. Unable to find value by requested key '" + key + "'. Map '"
-					+ params + "' does not contains this required parameter.");
+			throw new NoSuchParamException(
+					"Internal error. Unable to find value by requested key '" + key + "'. Map '"
+							+ params + "' does not contains this required parameter.");
 		}
 		return value;
 	}
@@ -102,7 +106,8 @@ public class ParamHelper {
 		for (Param param : paramList) {
 			String value = map.get(param.getName());
 
-			logger.trace("Attempt to set value '{}' for parameter '{}'.", (value == null ? "<null>" : value), param);
+			logger.trace("Attempt to set value '{}' for parameter '{}'.", (value == null ? "<null>"
+					: value), param);
 
 			param.setStringValue(value);
 		}
@@ -129,8 +134,8 @@ public class ParamHelper {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void fillParametersFromJSON(Collection<Param> params, String value) throws ParseException,
-			NumberFormatException, IllegalParameterValueException {
+	public static void fillParametersFromJSON(Collection<Param> params, String value)
+			throws ParseException, NumberFormatException, IllegalParameterValueException {
 
 		if (value == null) {
 			throw new IllegalArgumentException("Internal error. Value is null.");
@@ -152,8 +157,9 @@ public class ParamHelper {
 		return cloned;
 	}
 
-	public static void restoreParameterValues(Collection<Param> oldParameters, Collection<Param> newParameters)
-			throws NoSuchParamException, IllegalParameterValueException {
+	public static void restoreParameterValues(Collection<Param> oldParameters,
+			Collection<Param> newParameters) throws NoSuchParamException,
+			IllegalParameterValueException {
 		for (Param param : oldParameters) {
 			Param storeParam = ParamHelper.getParameter(param.getName(), newParameters);
 			logger.debug(param.getName() + " " + storeParam.getValue() + " -> " + param.getValue());

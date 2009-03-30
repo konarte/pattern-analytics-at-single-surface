@@ -34,7 +34,8 @@ public class SurfacesClassesComboBox extends JComboBox {
 
 			try {
 				super.removeAllElements();
-				for (SurfaceClasses defClass : SurfaceClassesFactory.listSurfaceClassesByQuery(null, null)) {
+				for (SurfaceClasses defClass : SurfaceClassesFactory.listSurfaceClassesByQuery(
+						null, null)) {
 					super.addElement(defClass);
 				}
 				return super.getSize();
@@ -52,10 +53,10 @@ public class SurfacesClassesComboBox extends JComboBox {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
-				boolean cellHasFocus) {
-			return super.getListCellRendererComponent(list, value == null ? value : ((SurfaceClasses) value).getName(),
-					index, isSelected, cellHasFocus);
+		public Component getListCellRendererComponent(JList list, Object value, int index,
+				boolean isSelected, boolean cellHasFocus) {
+			return super.getListCellRendererComponent(list, value == null ? value
+					: ((SurfaceClasses) value).getName(), index, isSelected, cellHasFocus);
 		}
 
 	}

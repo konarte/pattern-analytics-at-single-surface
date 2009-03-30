@@ -67,7 +67,8 @@ public class ModuleProcessorPerformanceTest {
 
 	@Test
 	public void testCommonWork() throws Exception {
-		PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
+		PersistentTransaction transaction = PassPersistentManager.instance().getSession()
+				.beginTransaction();
 		TestInputImpl source = new TestInputImpl();
 		source.init();
 		try {
@@ -93,7 +94,7 @@ public class ModuleProcessorPerformanceTest {
 			source.close();
 			System.out.println("Rollback");
 			transaction.rollback();
-			
+
 		}
 	}
 

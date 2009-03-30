@@ -77,8 +77,8 @@ public class Materials implements Serializable {
 	
 	@Column(name="IdSurfaceMaterial", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D31204C98ACCF08FDB")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31204C98ACCF08FDB", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31205627A78103187")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31205627A78103187", strategy="native")	
 	private int idSurfaceMaterial;
 	
 	@Column(name="Name", nullable=false, length=255)	

@@ -66,7 +66,8 @@ public class SimpleMatrixModuleTest {
 
 	private DecimalFormat fmt = new DecimalFormat("0.0000");
 
-	private void processModule(InputStore sourceStore, BufferedImage alternativeImage, String desc) throws Exception {
+	private void processModule(InputStore sourceStore, BufferedImage alternativeImage, String desc)
+			throws Exception {
 		Locuses locus = LocusesFactory.createLocuses();
 		LocusSources locusSource = LocusSourcesFactory.createLocusSources();
 		locusSource.setFilename(sourceStore.getName());
@@ -76,7 +77,8 @@ public class SimpleMatrixModuleTest {
 		LocusAppliedModule appModule = LocusAppliedModuleFactory.createLocusAppliedModule();
 		locus.setModule(appModule);
 
-		BufferedImage sourceImage = alternativeImage == null ? sourceStore.getSourceImage() : alternativeImage;
+		BufferedImage sourceImage = alternativeImage == null ? sourceStore.getSourceImage()
+				: alternativeImage;
 		module.analyze(sourceImage, locus);
 
 		BufferedImage moduleImage = ModuleHelper.getTemporaryModuleImage(locus);
@@ -101,10 +103,11 @@ public class SimpleMatrixModuleTest {
 			out.close();
 		}
 
-		ImageIO.write(ModuleHelper.getTemporaryModuleImage(locus), "PNG", new File("tmp/simple-matrix-module-" + desc
-				+ ".png"));
+		ImageIO.write(ModuleHelper.getTemporaryModuleImage(locus), "PNG", new File(
+				"tmp/simple-matrix-module-" + desc + ".png"));
 
-		ImageIO.write(sourceImage, "PNG", new File("tmp/simple-matrix-module-" + desc + "-source.png"));
+		ImageIO.write(sourceImage, "PNG", new File("tmp/simple-matrix-module-" + desc
+				+ "-source.png"));
 
 	}
 

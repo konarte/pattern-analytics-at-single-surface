@@ -58,7 +58,8 @@ public class ImageControlAdapter implements ActionListener, PropertyChangeListen
 				logger.trace("Set up new image {}.", newImage);
 				this.imagePanel.setImage(newImage);
 			} catch (IOException e1) {
-				AppHelper.showExceptionDialog(null, "Ошибка при загрузке изображения", e1);
+				AppHelper.showExceptionDialog(null, Messages
+						.getString("ImageControlAdapter.err.imageSet"), e1);
 			}
 		} else if (command.equals("reset")) {
 			this.imagePanel.setImage(null);
@@ -88,7 +89,8 @@ public class ImageControlAdapter implements ActionListener, PropertyChangeListen
 	public void registerLoadImageButton(JButton button) {
 
 		if (loadButton != null) {
-			throw new IllegalStateException("'loadButton' already registered (" + loadButton.getText() + ").");
+			throw new IllegalStateException("'loadButton' already registered ("
+					+ loadButton.getText() + ").");
 		}
 
 		this.loadButton = button;
@@ -110,7 +112,8 @@ public class ImageControlAdapter implements ActionListener, PropertyChangeListen
 	public void registerResetImageButton(JButton button) {
 
 		if (resetButton != null) {
-			throw new IllegalStateException("'resetButton' already registered (" + resetButton.getText() + ").");
+			throw new IllegalStateException("'resetButton' already registered ("
+					+ resetButton.getText() + ").");
 		}
 
 		this.resetButton = button;

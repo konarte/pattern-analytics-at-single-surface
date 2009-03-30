@@ -109,7 +109,8 @@ public class ImagePanel extends JPanel implements ActionListener {
 	@Override
 	public void updateUI() {
 		Dimension dim = new Dimension(imageWidht, imageHeight);
-		if (this.getBorder() != null && this.getBorder() instanceof TitledBorder && imageWidht > 0 && imageHeight > 0) {
+		if (this.getBorder() != null && this.getBorder() instanceof TitledBorder && imageWidht > 0
+				&& imageHeight > 0) {
 
 			TitledBorder titleBorder = (TitledBorder) this.getBorder();
 
@@ -217,6 +218,19 @@ public class ImagePanel extends JPanel implements ActionListener {
 	private boolean fitImageToWindowSize;
 	private JScrollPane parent = null;
 
+	private void fitImageImpl() {
+		this.setPreferredSize(new Dimension((int) parent.getVisibleRect().getWidth(), (int) parent
+				.getVisibleRect().getHeight()));
+		int width = parent.getWidth();
+		int height = parent.getHeight();
+
+		this.setSize(width, height);
+		this.setLocation(0, 0);
+
+		parent.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		parent.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+	}
+
 	/**
 	 * Refreshing mode, change current size if need
 	 */
@@ -230,15 +244,17 @@ public class ImagePanel extends JPanel implements ActionListener {
 			/*
 			 * Do nothing, except repaint.
 			 */
+			if (parent != null && !fitImageToWindowSize) {
+				/*
+				 * We must reset fit, otherwise huge scroll-bars may be stay.
+				 * 
+				 * And immediately clear preferred size, cause we don't care
+				 * about :)
+				 */
+				this.fitImageImpl();
+				this.setPreferredSize(new Dimension(0, 0));
+			}
 			this.repaint();
-
-			// 			 This method provide immediate painting, may useful at forms.
-			//			Graphics g = this.getGraphics();
-			//			if (forceRepaintComponent && g != null) {
-			//				this.paintComponent(g);
-			//			} else {
-			//				this.repaint();
-			//			}
 			return;
 		}
 
@@ -247,7 +263,8 @@ public class ImagePanel extends JPanel implements ActionListener {
 		 */
 		if (parent == null) {
 			Container parentContainer = this.getParent();
-			if (parentContainer == null || !((parentContainer = parentContainer.getParent()) instanceof JScrollPane)) {
+			if (parentContainer == null
+					|| !((parentContainer = parentContainer.getParent()) instanceof JScrollPane)) {
 				// otherwise, we don't care
 				this.repaint();
 
@@ -259,16 +276,7 @@ public class ImagePanel extends JPanel implements ActionListener {
 
 		// We must redefine scrollPane constants
 		if (this.fitImageToWindowSize) {
-			this.setPreferredSize(new Dimension((int) parent.getVisibleRect().getWidth(), (int) parent.getVisibleRect()
-					.getHeight()));
-			int width = parent.getWidth();
-			int height = parent.getHeight();
-
-			this.setSize(width, height);
-			this.setLocation(0, 0);
-
-			parent.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-			parent.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+			this.fitImageImpl();
 
 		} else {
 			int width = myImage.getWidth();
@@ -292,6 +300,8 @@ public class ImagePanel extends JPanel implements ActionListener {
 	private Secundomer secundomerNormalDraw = null;
 	private Secundomer secundomerScaleDraw = null;
 
+	private final static String NO_IMAGE_TEXT = Messages.getString("ImagePanel.noImage");
+
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
@@ -300,7 +310,7 @@ public class ImagePanel extends JPanel implements ActionListener {
 
 			if (myImage == null) { // #1
 				// Simple visual cake :)
-				String text = "No image";
+				String text = NO_IMAGE_TEXT;
 
 				Graphics2D graphics2D = (Graphics2D) g;
 				graphics2D.setFont(new Font("Courier", Font.PLAIN, 22));
@@ -316,10 +326,14 @@ public class ImagePanel extends JPanel implements ActionListener {
 				// Initializing counters
 				if (secundomerNormalDraw == null) {
 					Container topContainer = this.getTopLevelAncestor();
-					secundomerNormalDraw = SecundomerList.registerSecundomer("Draw simple image for "
-							+ (topContainer == null ? this.getName() : topContainer.getName()));
-					secundomerScaleDraw = SecundomerList.registerSecundomer("Draw scaled image for "
-							+ (topContainer == null ? this.getName() : topContainer.getName()));
+					secundomerNormalDraw = SecundomerList
+							.registerSecundomer("Draw simple image for "
+									+ (topContainer == null ? this.getName() : topContainer
+											.getName()));
+					secundomerScaleDraw = SecundomerList
+							.registerSecundomer("Draw scaled image for "
+									+ (topContainer == null ? this.getName() : topContainer
+											.getName()));
 				}
 
 				if (this.fitImageToWindowSize) {
@@ -328,8 +342,8 @@ public class ImagePanel extends JPanel implements ActionListener {
 					secundomerScaleDraw.start();
 
 					// Must set preferred size!
-					this.setPreferredSize(new Dimension((int) parent.getVisibleRect().getWidth(), (int) parent
-							.getVisibleRect().getHeight()));
+					this.setPreferredSize(new Dimension((int) parent.getVisibleRect().getWidth(),
+							(int) parent.getVisibleRect().getHeight()));
 
 					try {
 						Dimension thumb = new Dimension(this.getWidth(), this.getHeight());

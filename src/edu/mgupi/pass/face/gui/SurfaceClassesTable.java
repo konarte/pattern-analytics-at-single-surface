@@ -22,15 +22,19 @@ public class SurfaceClassesTable extends TableEditorTemplate {
 	private static final long serialVersionUID = 1L;
 
 	public SurfaceClassesTable(Frame owner) {
-		super(owner, "surfaceClassesTable", "Список классов поверхностей");
+		super(owner, "surfaceClassesTable", Messages.getString("SurfaceClassesTable.title"));
 	}
 
 	private AbstractEditorTableModel tableModel = null;
 
+	private final static String YES = Messages.getString("SurfaceClassesTable.yes");
+	private final static String NO = Messages.getString("SurfaceClassesTable.no");
+
 	@Override
 	protected AbstractEditorTableModel getTableModelImpl(JTable owner) {
 		if (tableModel == null) {
-			tableModel = new CommonEditorTableModel<SurfaceClasses>(owner, SurfaceClassesRecord.class) {
+			tableModel = new CommonEditorTableModel<SurfaceClasses>(owner,
+					SurfaceClassesRecord.class) {
 				private static final long serialVersionUID = 1L;
 
 				@Override
@@ -40,13 +44,16 @@ public class SurfaceClassesTable extends TableEditorTemplate {
 
 				@Override
 				protected String[] getColumns() {
-					return new String[] { "ID", "Класс поверхности", "Картинка" };
+					return new String[] { Messages.getString("SurfaceClassesTable.head.id"),
+							Messages.getString("SurfaceClassesTable.head.name"),
+							Messages.getString("SurfaceClassesTable.head.image") };
 				}
 
 				@Override
 				protected List<SurfaceClasses> getDataImpl() throws Exception {
 					List<SurfaceClasses> classes = new ArrayList<SurfaceClasses>();
-					classes.addAll(Arrays.asList(SurfaceClassesFactory.listSurfaceClassesByQuery(null, null)));
+					classes.addAll(Arrays.asList(SurfaceClassesFactory.listSurfaceClassesByQuery(
+							null, null)));
 					return classes;
 				}
 
@@ -59,7 +66,7 @@ public class SurfaceClassesTable extends TableEditorTemplate {
 					case 1:
 						return surface.getName();
 					case 2:
-						return surface.getSurfaceImage() == null ? "Нет" : "Да";
+						return surface.getSurfaceImage() == null ? NO : YES;
 					default:
 						return columnIndex;
 					}

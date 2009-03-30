@@ -9,10 +9,10 @@ import org.junit.Test;
 import edu.mgupi.pass.face.gui.AppHelper;
 import edu.mgupi.pass.face.gui.MainFrame;
 import edu.mgupi.pass.face.gui.SwingTestHelper;
+import edu.mgupi.pass.face.gui.WaitCondition;
+import edu.mgupi.pass.face.gui.WorkSet;
 import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
-import edu.mgupi.pass.util.WaitCondition;
-import edu.mgupi.pass.util.WorkSet;
 
 public class ApplicationTest {
 

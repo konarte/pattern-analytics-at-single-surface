@@ -1,6 +1,7 @@
 /*
  * Pattern Analytics at Single Surface
- * @(#)RecordEditorTemplateTest.java	1.0 29.03.2009
+ * 
+ * @(#)RecordEditorTemplateTest.java 1.0 29.03.2009
  */
 
 package edu.mgupi.pass.face.gui.template;

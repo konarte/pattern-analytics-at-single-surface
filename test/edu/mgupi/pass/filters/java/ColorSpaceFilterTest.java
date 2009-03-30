@@ -56,10 +56,12 @@ public class ColorSpaceFilterTest {
 		//
 	}
 
-	private void convertImage(BufferedImage image, int space, String name) throws IOException, FilterException {
+	private void convertImage(BufferedImage image, int space, String name) throws IOException,
+			FilterException {
 		filter.getCOLOR_MODE().setValue(space);
 		BufferedImage newImage = filter.convert(image);
-		logger.info("Image converted to " + name + " SUCCESSFULLY (image type is " + newImage.getType() + ")");
+		logger.info("Image converted to " + name + " SUCCESSFULLY (image type is "
+				+ newImage.getType() + ")");
 
 		new File("tmp").mkdir();
 
@@ -83,10 +85,11 @@ public class ColorSpaceFilterTest {
 			Param param = filter.getCOLOR_MODE();
 			for (int i = 0; i < param.getAllowed_values().length; i++) {
 				try {
-					this.convertImage(image, (Integer) param.getAllowed_values()[i], param.getVisual_values()[i]);
+					this.convertImage(image, (Integer) param.getAllowed_values()[i], param
+							.getVisual_values()[i]);
 				} catch (Exception e) {
-					new Exception("Error on converting to ColorSpace " + param.getVisual_values()[i], e)
-							.printStackTrace();
+					new Exception("Error on converting to ColorSpace "
+							+ param.getVisual_values()[i], e).printStackTrace();
 					savedE = e;
 				}
 			}

@@ -52,8 +52,8 @@ public class FilterChainsaw {
 		//		this.cacheInstance = singleInstanceCaching ? CacheIFactory.getSingleInstanceFilters() : CacheIFactory
 		//				.getFreeListFilters();
 		this.currentMode = mode;
-		this.cacheInstance = mode == SawMode.SINGLE_INSTANCE ? CacheIFactory.getSingleInstanceFilters() : CacheIFactory
-				.getFreeListFilters();
+		this.cacheInstance = mode == SawMode.SINGLE_INSTANCE ? CacheIFactory
+				.getSingleInstanceFilters() : CacheIFactory.getFreeListFilters();
 
 	}
 
@@ -111,13 +111,14 @@ public class FilterChainsaw {
 	 * 
 	 * 
 	 */
-	public IFilter appendFilter(Class<? extends IFilter> filterClass) throws PersistentException, FilterException,
-			InstantiationException, IllegalAccessException {
+	public IFilter appendFilter(Class<? extends IFilter> filterClass) throws PersistentException,
+			FilterException, InstantiationException, IllegalAccessException {
 		return this.appendFilter(this.filterList.size(), filterClass);
 	}
 
-	public IFilter appendFilter(int pos, Class<? extends IFilter> filterClass) throws PersistentException,
-			FilterException, InstantiationException, IllegalAccessException {
+	public IFilter appendFilter(int pos, Class<? extends IFilter> filterClass)
+			throws PersistentException, FilterException, InstantiationException,
+			IllegalAccessException {
 		if (filterClass == null) {
 			throw new IllegalArgumentException("Internal error. filterClass must be not null.");
 		}
@@ -228,14 +229,16 @@ public class FilterChainsaw {
 
 	public void removeFilter(Class<? extends IFilter> filterClass) {
 		if (currentMode != SawMode.SINGLE_INSTANCE) {
-			throw new IllegalStateException("Removing filters by class allowed only for 'SINGLE_INSTANCE' mode.");
+			throw new IllegalStateException(
+					"Removing filters by class allowed only for 'SINGLE_INSTANCE' mode.");
 		}
 		this.removeFilter(this.searchFilterClassPos(filterClass));
 	}
 
 	private int searchFilterClassPos(Class<? extends IFilter> filterClass) {
 		if (currentMode != SawMode.SINGLE_INSTANCE) {
-			throw new IllegalStateException("Removing filters by class allowed only for 'SINGLE_INSTANCE' mode.");
+			throw new IllegalStateException(
+					"Removing filters by class allowed only for 'SINGLE_INSTANCE' mode.");
 		}
 		for (int pos = 0; pos < filterList.size(); pos++) {
 			IFilter filter = filterList.get(pos);

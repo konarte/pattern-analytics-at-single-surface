@@ -22,12 +22,14 @@ public class LFiltersCriteria extends AbstractORMCriteria {
 	public final IntegerExpression idLFilter;
 	public final StringExpression name;
 	public final StringExpression codename;
+	public final BooleanExpression serviceFilter;
 	
 	public LFiltersCriteria(Criteria criteria) {
 		super(criteria);
 		idLFilter = new IntegerExpression("idLFilter", this);
 		name = new StringExpression("name", this);
 		codename = new StringExpression("codename", this);
+		serviceFilter = new BooleanExpression("serviceFilter", this);
 	}
 	
 	public LFiltersCriteria(PersistentSession session) {

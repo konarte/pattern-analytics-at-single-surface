@@ -12,7 +12,6 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -47,7 +46,7 @@ public class LFiltersList extends JDialog {
 		this.setSize(400, 300);
 		this.setName("lFiltersList");
 		this.setMinimumSize(new Dimension(400, 300));
-		this.setTitle("Список фильтров");
+		this.setTitle(Messages.getString("LFiltersList.title"));
 		this.setContentPane(getJContentPane());
 	}
 
@@ -76,14 +75,13 @@ public class LFiltersList extends JDialog {
 
 			@Override
 			protected boolean saveImpl() throws Exception {
+				selectedClass = null;
 				int index = jTableData.getSelectedRow();
 				if (index != -1) {
-					selectedClass = (String) (jTableData.getModel().getValueAt(index, getDataColumnIndex()));
+					selectedClass = (String) (jTableData.getModel().getValueAt(index,
+							getDataColumnIndex()));
 					return true;
 				} else {
-					JOptionPane.showMessageDialog(LFiltersList.this, "Необходимо выбрать строку.", "Внимание",
-							JOptionPane.WARNING_MESSAGE);
-					selectedClass = null;
 					return false;
 				}
 			}
@@ -161,7 +159,7 @@ public class LFiltersList extends JDialog {
 					}
 				}
 			});
-			jTableData.setName("data");
+			jTableData.setName("data"); //$NON-NLS-1$
 		}
 
 		return jTableData;
@@ -176,7 +174,9 @@ public class LFiltersList extends JDialog {
 			cells[i][1] = filters[i].getCodename();
 		}
 
-		JTableReadOnly table = new JTableReadOnly(cells, new String[] { "Название фильтра", "Используемый класс" });
+		JTableReadOnly table = new JTableReadOnly(cells, new String[] {
+				Messages.getString("LFiltersList.filterName"), //$NON-NLS-1$
+				Messages.getString("LFiltersList.class") }); //$NON-NLS-1$
 		return table;
 	}
 
@@ -192,7 +192,7 @@ public class LFiltersList extends JDialog {
 	private JButton getJButtonOK() {
 		if (jButtonOK == null) {
 			jButtonOK = new JButton();
-			jButtonOK.setText("OK");
+			jButtonOK.setText("OK"); //$NON-NLS-1$
 			getDialogAdapter().registerOKButton(jButtonOK);
 
 		}
@@ -207,7 +207,7 @@ public class LFiltersList extends JDialog {
 	private JButton getJButtonCancel() {
 		if (jButtonCancel == null) {
 			jButtonCancel = new JButton();
-			jButtonCancel.setText("cancel");
+			jButtonCancel.setText("cancel"); //$NON-NLS-1$
 			getDialogAdapter().registerCancelButton(jButtonCancel);
 		}
 		return jButtonCancel;

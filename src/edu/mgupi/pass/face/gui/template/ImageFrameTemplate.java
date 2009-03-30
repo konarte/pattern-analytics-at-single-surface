@@ -59,8 +59,8 @@ public class ImageFrameTemplate extends JDialog {
 	public void registerControlCheckbox(final JCheckBox controlCheckBox) throws Exception {
 
 		if (registeredAlready) {
-			throw new IllegalStateException("Error when registering " + controlCheckBox + " for " + this
-					+ ". Already registered.");
+			throw new IllegalStateException("Error when registering " + controlCheckBox + " for "
+					+ this + ". Already registered.");
 		}
 
 		this.addWindowListener(new WindowAdapter() {
@@ -206,9 +206,10 @@ public class ImageFrameTemplate extends JDialog {
 			if (jPanelImage != null) {
 				jPanelImage.registerFitButton(jCheckBoxScaleBox);
 			} else {
-				AppHelper.showErrorDialog(this, "Internal error. Expected panelImage layout not initialized yet.");
+				AppHelper.showErrorDialog(this, Messages
+						.getString("ImageFrameTemplate.err.formNotSet"));
 			}
-			jCheckBoxScaleBox.setText("Масштаб под размеры окна");
+			jCheckBoxScaleBox.setText(Messages.getString("ImageFrameTemplate.scaleButton"));
 			jCheckBoxScaleBox.setName(Config.DEFAULT_SCALE_BUTTON_NAME);
 		}
 		return jCheckBoxScaleBox;

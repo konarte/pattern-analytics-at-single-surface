@@ -57,8 +57,8 @@ public class HistogramFilter implements IFilter {
 			bytesPerPixes = 1;
 		}
 
-		logger.debug("Building histogram 256x" + HEIGHT + " for image " + width + "x" + height + ", " + bytesPerPixes
-				+ "Bpp (" + source.getColorModel().getPixelSize() + " pxs)");
+		logger.debug("Building histogram 256x" + HEIGHT + " for image " + width + "x" + height
+				+ ", " + bytesPerPixes + "Bpp (" + source.getColorModel().getPixelSize() + " pxs)");
 
 		histogram = new int[bytesPerPixes][256];
 
@@ -109,17 +109,20 @@ public class HistogramFilter implements IFilter {
 
 		gc.setColor(bytesPerPixes == 1 ? Color.BLACK : Color.RED);
 		for (int i = 0; i < histogram[0].length; i++) {
-			gc.drawLine(i, HEIGHT, i, (int) (HEIGHT - (useDiv ? histogram[0][i] / div : histogram[0][i])));
+			gc.drawLine(i, HEIGHT, i, (int) (HEIGHT - (useDiv ? histogram[0][i] / div
+					: histogram[0][i])));
 		}
 		if (bytesPerPixes > 1) {
 			gc.setColor(Color.GREEN);
 			for (int i = 0; i < histogram[1].length; i++) {
-				gc.drawLine(i, HEIGHT, i, (int) (HEIGHT - (useDiv ? histogram[1][i] / div : histogram[1][i])));
+				gc.drawLine(i, HEIGHT, i, (int) (HEIGHT - (useDiv ? histogram[1][i] / div
+						: histogram[1][i])));
 			}
 
 			gc.setColor(Color.BLUE);
 			for (int i = 0; i < histogram[2].length; i++) {
-				gc.drawLine(i, HEIGHT, i, (int) (HEIGHT - (useDiv ? histogram[2][i] / div : histogram[2][i])));
+				gc.drawLine(i, HEIGHT, i, (int) (HEIGHT - (useDiv ? histogram[2][i] / div
+						: histogram[2][i])));
 			}
 		}
 

@@ -28,8 +28,6 @@ import edu.mgupi.pass.modules.TestModule2;
 import edu.mgupi.pass.modules.basic.SimpleMatrixModule;
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Utils;
-import edu.mgupi.pass.util.WaitCondition;
-import edu.mgupi.pass.util.WorkSet;
 import edu.mgupi.pass.util.Config.SourceMode;
 
 public class MainFrameTest {
@@ -115,7 +113,7 @@ public class MainFrameTest {
 
 		infoLabel.setText("");
 		tabbed.setSelectedIndex(0);
-
+		tabbed.repaint();
 		SwingTestHelper.waitWhile(new WaitCondition() {
 			@Override
 			public boolean keepWorking() {
@@ -127,13 +125,14 @@ public class MainFrameTest {
 
 		infoLabel.setText("");
 		tabbed.setSelectedIndex(1);
+		tabbed.repaint();
 		SwingTestHelper.waitWhile(new WaitCondition() {
 			@Override
 			public boolean keepWorking() {
 				return !infoLabel.getText().equals(oldLabel);
 			}
 		});
-		
+
 		final String oldLabel2 = infoLabel.getText();
 
 		frame.mainModuleProcessor.getChainsaw().removeAllFilters();
@@ -142,6 +141,7 @@ public class MainFrameTest {
 
 		infoLabel.setText("");
 		tabbed.setSelectedIndex(1);
+		tabbed.repaint();
 		SwingTestHelper.waitWhile(new WaitCondition() {
 			@Override
 			public boolean keepWorking() {
@@ -149,7 +149,8 @@ public class MainFrameTest {
 			}
 		});
 
-		final JCheckBox scaleButton = (JCheckBox) Utils.getChildNamed(frame, Config.DEFAULT_SCALE_BUTTON_NAME);
+		final JCheckBox scaleButton = (JCheckBox) Utils.getChildNamed(frame,
+				Config.DEFAULT_SCALE_BUTTON_NAME);
 		assertNotNull(scaleButton);
 		assertFalse(scaleButton.isSelected());
 
@@ -195,7 +196,8 @@ public class MainFrameTest {
 
 	@Test
 	public void testCloseImage() throws Exception {
-		final JMenuItem close = (JMenuItem) Utils.getChildNamed(frame, MainFrame.Actions.CLOSE.name());
+		final JMenuItem close = (JMenuItem) Utils.getChildNamed(frame, MainFrame.Actions.CLOSE
+				.name());
 		assertNotNull(close);
 
 		assertFalse(frame.isProcessStarted());
@@ -230,10 +232,11 @@ public class MainFrameTest {
 	@Test
 	public void testSettings() throws Exception {
 
-		SwingTestHelper.clickOpenDialogButton(frame, null, MainFrame.Actions.SETTINGS.name(), SettingsDialog.class);
+		SwingTestHelper.clickOpenDialogButton(frame, null, MainFrame.Actions.SETTINGS.name(),
+				SettingsDialog.class);
 
-		SwingTestHelper.clickCloseDialogButton((SettingsDialog) AppHelper.getInstance().searchWindow(
-				SettingsDialog.class), "cancel");
+		SwingTestHelper.clickCloseDialogButton((SettingsDialog) AppHelper.getInstance()
+				.searchWindow(SettingsDialog.class), "cancel");
 
 	}
 

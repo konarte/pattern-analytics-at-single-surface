@@ -9,6 +9,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
@@ -35,11 +37,13 @@ import javax.swing.event.ChangeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.face.Application;
 import edu.mgupi.pass.face.gui.template.AbstractDialogAdapter;
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Config.DeletionCheckMode;
 import edu.mgupi.pass.util.Config.DeletionMode;
 import edu.mgupi.pass.util.Config.SourceMode;
+import edu.mgupi.pass.util.Config.SupportedLocale;
 import edu.mgupi.pass.util.Config.TestTransactionMode;
 
 /**
@@ -52,7 +56,7 @@ import edu.mgupi.pass.util.Config.TestTransactionMode;
  * @author raidan
  * 
  */
-public class SettingsDialog extends JDialog implements ChangeListener {
+public class SettingsDialog extends JDialog implements ChangeListener, ActionListener {
 
 	private final static Logger logger = LoggerFactory.getLogger(SettingsDialog.class); // @jve:decl-index=0:
 
@@ -63,8 +67,13 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 	private JButton jButtonCancel = null;
 	private JPanel jPanelSettings = null;
 	private JPanel jPanelLaF = null;
+	private JPanel jPanelLocale = null;
 	private JComboBox jComboBoxLaF = null;
 	private JLabel jLabelLaF = null;
+	//	private JLabel jLabelLocale = null;
+	private JPanel jPanelLocalePlace = null;
+
+	//	private JComboBox jComboBoxLocale = null;
 
 	/**
 	 * Default constructor
@@ -81,10 +90,10 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 	 * 
 	 */
 	private void initialize() {
-
+		this.setLocation(300, 200);
 		this.setName("settingsDialog");
 		this.setModal(true);
-		this.setTitle("Настройки");
+		this.setTitle(Messages.getString("SettingsDialog.title"));
 		this.setContentPane(getJContentPane());
 		this.setResizable(false);
 
@@ -119,6 +128,10 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 			@Override
 			protected void openDialogImpl() throws Exception {
 				SettingsDialog.this.resetControls();
+
+				/*
+				 * Reloading window size.
+				 */
 				pack();
 				setMinimumSize(new Dimension(getWidth(), getHeight()));
 			}
@@ -139,24 +152,50 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 
 				// Do not be scare :)
 				// I use class-map for enums 
-				if (Config.getInstance().setRowsDeleteMode((DeletionMode) getValue(DeletionMode.CONFIRM))) {
+				if (Config.getInstance().setRowsDeleteMode(
+						(DeletionMode) getValue(DeletionMode.class))) {
 					logger.debug("Deletion mode changed. Save common.");
 					needSaveCommon = true;
 				}
 
 				if (Config.getInstance().setTransactionMode(
-						(TestTransactionMode) getValue(TestTransactionMode.COMMIT_BULK))) {
+						(TestTransactionMode) getValue(TestTransactionMode.class))) {
 					logger.debug("Transaction mode changed. Save common.");
 					needSaveCommon = true;
 				}
 
 				if (Config.getInstance().setDeletionCheckModeMode(
-						(DeletionCheckMode) getValue(DeletionCheckMode.ACQUIRE_THEN_CHECK))) {
+						(DeletionCheckMode) getValue(DeletionCheckMode.class))) {
 					logger.debug("Deletion check mode changed. Save common.");
 					needSaveCommon = true;
 				}
 
-				if (Config.getInstance().setCurrentSourceMode((SourceMode) jComboBoxSourceMode.getSelectedItem())) {
+				if (Config.getInstance().setCurrentLocale(
+						(SupportedLocale) getValue(SupportedLocale.class))) {
+					logger.debug("Current locale changed. Save common.");
+
+					needSaveCommon = true;
+
+					boolean restart = false;
+					if (Application.isRestartAvailable()) {
+						restart = JOptionPane.showConfirmDialog(SettingsDialog.this, Messages
+								.getString("SettingsDialog.confirm.localeReload"), Messages
+								.getString("SettingsDialog.title.localeReload"),
+								JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+						if (restart) {
+							Application.enqueRestart();
+						}
+					} else {
+						JOptionPane.showMessageDialog(SettingsDialog.this, Messages
+								.getString("SettingsDialog.confirm.localeReloadManual"), Messages
+								.getString("SettingsDialog.title.localeReload"),
+								JOptionPane.INFORMATION_MESSAGE);
+					}
+
+				}
+
+				if (Config.getInstance().setCurrentSourceMode(
+						(SourceMode) jComboBoxSourceMode.getSelectedItem())) {
 					logger.debug("Selection source mode changed. Restart process.");
 					needRestartProcessing = true;
 				}
@@ -187,7 +226,13 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 
 		SourceMode currentSource = Config.getInstance().getCurrentSourceMode();
 
-		jComboBoxLaF.setSelectedItem(UIManager.getLookAndFeel().getName());
+		String currentLaF = Config.getInstance().getLookAndFeel();
+		for (Map.Entry<String, String> key : this.lafs.entrySet()) {
+			if (key.getValue().equals(currentLaF)) {
+				jComboBoxLaF.setSelectedItem(key.getKey());
+			}
+		}
+
 		jComboBoxSourceMode.setSelectedItem(currentSource);
 
 		Color currentBackground = Config.getInstance().getCurrentBackground();
@@ -197,6 +242,7 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 		this.setValue(Config.getInstance().getRowsDeleteMode());
 		this.setValue(Config.getInstance().getTransactionMode());
 		this.setValue(Config.getInstance().getDeletionCheckMode());
+		this.setValue(Config.getInstance().getCurrentLocale());
 	}
 
 	/**
@@ -282,21 +328,49 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 	 * 
 	 * @return javax.swing.JPanel
 	 */
+	private JPanel getJPanelLocale() {
+		if (jPanelLocale == null) {
+			GridBagConstraints jbcLocale = new GridBagConstraints();
+			jbcLocale.fill = GridBagConstraints.NONE;
+			jbcLocale.anchor = GridBagConstraints.WEST;
+			jbcLocale.weightx = 1.0D;
+			jbcLocale.gridx = 0;
+			jbcLocale.gridy = 0;
+			jbcLocale.insets = new Insets(0, 5, 0, 5);
+
+			jPanelLocale = new JPanel();
+			jPanelLocale.setLayout(new GridBagLayout());
+			jPanelLocale.setBorder(BorderFactory.createTitledBorder(Messages
+					.getString("SettingsDialog.localeBorder")));
+			jPanelLocale.setName("jPanelLocale");
+			jPanelLocale.add(getJPanelLocalePlace(), jbcLocale);
+		}
+		return jPanelLocale;
+	}
+
+	/**
+	 * This method initializes jPanelLaF
+	 * 
+	 * @return javax.swing.JPanel
+	 */
 	private JPanel getJPanelLaF() {
 		if (jPanelLaF == null) {
-			GridBagConstraints gridBagConstraints11 = new GridBagConstraints();
-			gridBagConstraints11.gridx = 0;
-			gridBagConstraints11.fill = GridBagConstraints.NONE;
-			gridBagConstraints11.anchor = GridBagConstraints.WEST;
-			gridBagConstraints11.weightx = 1.0D;
-			gridBagConstraints11.gridy = 0;
+			GridBagConstraints jbcLaf = new GridBagConstraints();
+			jbcLaf.fill = GridBagConstraints.NONE;
+			jbcLaf.anchor = GridBagConstraints.WEST;
+			jbcLaf.weightx = 1.0D;
+			jbcLaf.gridx = 0;
+			jbcLaf.gridy = 0;
+			jbcLaf.insets = new Insets(0, 5, 0, 5);
+
 			jLabelLaF = new JLabel();
-			jLabelLaF.setText("Стиль");
+			jLabelLaF.setText(Messages.getString("SettingsDialog.laf"));
 			jPanelLaF = new JPanel();
 			jPanelLaF.setLayout(new GridBagLayout());
-			jPanelLaF.setBorder(BorderFactory.createTitledBorder("Настройки интерфейса"));
+			jPanelLaF.setBorder(BorderFactory.createTitledBorder(Messages
+					.getString("SettingsDialog.lafBorder")));
 			jPanelLaF.setName("jPanelLaF");
-			jPanelLaF.add(getJPanelLaFPlace(), gridBagConstraints11);
+			jPanelLaF.add(getJPanelLaFPlace(), jbcLaf);
 		}
 		return jPanelLaF;
 	}
@@ -334,48 +408,57 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 	 */
 	private JPanel getJPanelSourceModePlace() {
 		if (jPanelSourceModePlace == null) {
-			GridBagConstraints gridBagConstraints10 = new GridBagConstraints();
-			gridBagConstraints10.gridx = 2;
-			gridBagConstraints10.fill = GridBagConstraints.HORIZONTAL;
-			gridBagConstraints10.weightx = 0.0D;
-			gridBagConstraints10.anchor = GridBagConstraints.WEST;
-			gridBagConstraints10.insets = new Insets(0, 5, 0, 5);
-			gridBagConstraints10.gridy = 1;
+
 			jLabelBackgroundShow = new JLabel();
 			jLabelBackgroundShow.setText(" ");
 			jLabelBackgroundShow.setName("backgroundSample");
 			jLabelBackgroundShow.setOpaque(true);
-			GridBagConstraints gridBagConstraints9 = new GridBagConstraints();
-			gridBagConstraints9.gridx = 1;
-			gridBagConstraints9.anchor = GridBagConstraints.WEST;
-			gridBagConstraints9.gridy = 1;
-			GridBagConstraints gridBagConstraints7 = new GridBagConstraints();
-			gridBagConstraints7.gridx = 0;
-			gridBagConstraints7.gridy = 1;
+
 			jLabelBackground = new JLabel();
-			jLabelBackground.setText("Цвет фона");
-			GridBagConstraints gridBagConstraints8 = new GridBagConstraints();
-			gridBagConstraints8.gridx = 0;
-			gridBagConstraints8.gridy = 1;
-			GridBagConstraints gridBagConstraints5 = new GridBagConstraints();
-			gridBagConstraints5.gridx = 0;
-			gridBagConstraints5.insets = new Insets(0, 0, 0, 5);
-			gridBagConstraints5.gridy = 0;
+			jLabelBackground.setText(Messages.getString("SettingsDialog.backgroundImage"));
+
 			jLabelSourceMode = new JLabel();
-			jLabelSourceMode.setText("Режим загрузки");
-			GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
-			gridBagConstraints3.fill = GridBagConstraints.VERTICAL;
-			gridBagConstraints3.gridx = 1;
-			gridBagConstraints3.gridy = 0;
-			gridBagConstraints3.gridwidth = 2;
-			gridBagConstraints3.weightx = 1.0;
+			jLabelSourceMode.setText(Messages.getString("SettingsDialog.imageLoadMode"));
+
+			GridBagConstraints jbcSourceMode = new GridBagConstraints();
+			jbcSourceMode.gridx = 0;
+			jbcSourceMode.insets = new Insets(0, 5, 0, 5);
+			jbcSourceMode.anchor = GridBagConstraints.EAST;
+			jbcSourceMode.gridy = 0;
+
+			GridBagConstraints jbcComboSourceMode = new GridBagConstraints();
+			jbcComboSourceMode.fill = GridBagConstraints.VERTICAL;
+			jbcComboSourceMode.gridx = 1;
+			jbcComboSourceMode.gridy = 0;
+			jbcComboSourceMode.gridwidth = 2;
+			jbcComboSourceMode.weightx = 1.0;
+
+			GridBagConstraints jbcBackground = new GridBagConstraints();
+			jbcBackground.gridx = 0;
+			jbcBackground.gridy = 1;
+			jbcBackground.anchor = GridBagConstraints.EAST;
+			jbcBackground.insets = new Insets(0, 5, 0, 5);
+
+			GridBagConstraints jbcButtonBackground = new GridBagConstraints();
+			jbcButtonBackground.gridx = 1;
+			jbcButtonBackground.anchor = GridBagConstraints.WEST;
+			jbcButtonBackground.gridy = 1;
+
+			GridBagConstraints jbcLabelBackgroundShow = new GridBagConstraints();
+			jbcLabelBackgroundShow.gridx = 2;
+			jbcLabelBackgroundShow.fill = GridBagConstraints.HORIZONTAL;
+			jbcLabelBackgroundShow.weightx = 0.0D;
+			jbcLabelBackgroundShow.anchor = GridBagConstraints.WEST;
+			jbcLabelBackgroundShow.insets = new Insets(0, 5, 0, 5);
+			jbcLabelBackgroundShow.gridy = 1;
+
 			jPanelSourceModePlace = new JPanel();
 			jPanelSourceModePlace.setLayout(new GridBagLayout());
-			jPanelSourceModePlace.add(jLabelSourceMode, gridBagConstraints5);
-			jPanelSourceModePlace.add(getJComboBoxSourceMode(), gridBagConstraints3);
-			jPanelSourceModePlace.add(jLabelBackground, gridBagConstraints7);
-			jPanelSourceModePlace.add(getJButtonBackground(), gridBagConstraints9);
-			jPanelSourceModePlace.add(jLabelBackgroundShow, gridBagConstraints10);
+			jPanelSourceModePlace.add(jLabelSourceMode, jbcSourceMode);
+			jPanelSourceModePlace.add(getJComboBoxSourceMode(), jbcComboSourceMode);
+			jPanelSourceModePlace.add(jLabelBackground, jbcBackground);
+			jPanelSourceModePlace.add(getJButtonBackground(), jbcButtonBackground);
+			jPanelSourceModePlace.add(jLabelBackgroundShow, jbcLabelBackgroundShow);
 		}
 		return jPanelSourceModePlace;
 	}
@@ -394,9 +477,9 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 
 	private JPanel jPanelLaFPlace = null;
 
-	private JPanel jPanelFilterEdit = null;
+	private JPanel jPanelDeletionMode = null;
 
-	private JPanel jPanelFilterEditPlace = null;
+	private JPanel jPanelDeletionModePlace = null;
 
 	/**
 	 * This method initializes jComboBoxSourceMode
@@ -420,8 +503,10 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 		if (jTabbedPaneSettings == null) {
 			jTabbedPaneSettings = new JTabbedPane();
 			jTabbedPaneSettings.setName("settingsPane");
-			jTabbedPaneSettings.addTab("Текущие настройки", null, getJPanelSettingsCurrent(), null);
-			jTabbedPaneSettings.addTab("Общие настройки", null, getJPanelSettingsCommon(), null);
+			jTabbedPaneSettings.addTab(Messages.getString("SettingsDialog.currentSettings"), null,
+					getJPanelSettingsCurrent(), null);
+			jTabbedPaneSettings.addTab(Messages.getString("SettingsDialog.commonSettings"), null,
+					getJPanelSettingsCommon(), null);
 		}
 		return jTabbedPaneSettings;
 	}
@@ -455,44 +540,54 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 	 */
 	private JPanel getJPanelSettingsCommon() {
 		if (jPanelSettingsCommon == null) {
-			GridBagConstraints gridBagConstraints18 = new GridBagConstraints();
-			gridBagConstraints18.gridx = -1;
-			gridBagConstraints18.gridy = -1;
-			GridBagConstraints gridBagConstraints17 = new GridBagConstraints();
-			gridBagConstraints17.gridx = 0;
-			gridBagConstraints17.weighty = 1.0D;
-			gridBagConstraints17.weightx = 1.0D;
-			gridBagConstraints17.fill = GridBagConstraints.HORIZONTAL;
-			gridBagConstraints17.anchor = GridBagConstraints.NORTH;
-			gridBagConstraints17.gridy = 3;
-			GridBagConstraints gridBagConstraints15 = new GridBagConstraints();
-			gridBagConstraints15.gridx = 0;
-			gridBagConstraints15.anchor = GridBagConstraints.NORTH;
-			gridBagConstraints15.fill = GridBagConstraints.HORIZONTAL;
-			gridBagConstraints15.weightx = 1.0D;
-			gridBagConstraints15.weighty = 0.0D;
-			gridBagConstraints15.gridy = 2;
-			GridBagConstraints gridBagConstraints12 = new GridBagConstraints();
-			gridBagConstraints12.weightx = 1.0D;
-			gridBagConstraints12.gridy = 1;
-			gridBagConstraints12.fill = GridBagConstraints.HORIZONTAL;
-			gridBagConstraints12.weighty = 0.0D;
-			gridBagConstraints12.anchor = GridBagConstraints.NORTH;
-			gridBagConstraints12.gridx = 0;
-			GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
-			gridBagConstraints4.anchor = GridBagConstraints.NORTH;
-			gridBagConstraints4.gridy = 0;
-			gridBagConstraints4.weightx = 1.0D;
-			gridBagConstraints4.weighty = 0.0D;
-			gridBagConstraints4.fill = GridBagConstraints.HORIZONTAL;
-			gridBagConstraints4.gridx = 0;
+			GridBagConstraints jbcLaf = new GridBagConstraints();
+			jbcLaf.anchor = GridBagConstraints.NORTH;
+			jbcLaf.weightx = 1.0D;
+			jbcLaf.weighty = 0.0D;
+			jbcLaf.fill = GridBagConstraints.HORIZONTAL;
+			jbcLaf.gridx = 0;
+			jbcLaf.gridy = 0;
+
+			GridBagConstraints jbcLocale = new GridBagConstraints();
+			jbcLocale.anchor = GridBagConstraints.NORTH;
+			jbcLocale.fill = GridBagConstraints.HORIZONTAL;
+			jbcLocale.weightx = 1.0D;
+			jbcLocale.weighty = 0.0D;
+			jbcLocale.gridx = 0;
+			jbcLocale.gridy = 1;
+
+			GridBagConstraints jbcDeletioMode = new GridBagConstraints();
+			jbcDeletioMode.weightx = 1.0D;
+			jbcDeletioMode.fill = GridBagConstraints.HORIZONTAL;
+			jbcDeletioMode.weighty = 0.0D;
+			jbcDeletioMode.anchor = GridBagConstraints.NORTH;
+			jbcDeletioMode.gridx = 0;
+			jbcDeletioMode.gridy = 2;
+
+			GridBagConstraints jbcTransactionMode = new GridBagConstraints();
+			jbcTransactionMode.anchor = GridBagConstraints.NORTH;
+			jbcTransactionMode.fill = GridBagConstraints.HORIZONTAL;
+			jbcTransactionMode.weightx = 1.0D;
+			jbcTransactionMode.weighty = 0.0D;
+			jbcTransactionMode.gridx = 0;
+			jbcTransactionMode.gridy = 3;
+
+			GridBagConstraints jbcDeletionCheckMode = new GridBagConstraints();
+			jbcDeletionCheckMode.weighty = 1.0D;
+			jbcDeletionCheckMode.weightx = 1.0D;
+			jbcDeletionCheckMode.fill = GridBagConstraints.HORIZONTAL;
+			jbcDeletionCheckMode.anchor = GridBagConstraints.NORTH;
+			jbcDeletionCheckMode.gridx = 0;
+			jbcDeletionCheckMode.gridy = 4;
+
 			jPanelSettingsCommon = new JPanel();
 			jPanelSettingsCommon.setLayout(new GridBagLayout());
 			jPanelSettingsCommon.setName("settingsCommon");
-			jPanelSettingsCommon.add(getJPanelLaF(), gridBagConstraints4);
-			jPanelSettingsCommon.add(getJPanelFilterEdit(), gridBagConstraints12);
-			jPanelSettingsCommon.add(getJPanelTransactionMode(), gridBagConstraints15);
-			jPanelSettingsCommon.add(getJPanelDeletionCheckMode(), gridBagConstraints17);
+			jPanelSettingsCommon.add(getJPanelLaF(), jbcLaf);
+			jPanelSettingsCommon.add(getJPanelLocale(), jbcLocale);
+			jPanelSettingsCommon.add(getJPanelDeletionMode(), jbcDeletioMode);
+			jPanelSettingsCommon.add(getJPanelTransactionMode(), jbcTransactionMode);
+			jPanelSettingsCommon.add(getJPanelDeletionCheckMode(), jbcDeletionCheckMode);
 		}
 		return jPanelSettingsCommon;
 	}
@@ -506,9 +601,11 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 		if (jButtonBackground == null) {
 			jButtonBackground = new JButton();
 
-			// Shit-head Visual Editor shows me Color chooser dialog
-			//  every time opening this page (if a use addActionListener for instance 
-			//  instead of setAction)
+			/*
+			 * / Shit-head Visual Editor shows me Color chooser dialog every
+			 * time opening this page (if a use addActionListener for instance
+			 * instead of setAction)
+			 */
 			jButtonBackground.setAction(new AbstractAction() {
 				/**
 				 * 
@@ -517,7 +614,8 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					Color newBack = JColorChooser.showDialog(SettingsDialog.this, "Выбор цвета для фона",
+					Color newBack = JColorChooser.showDialog(SettingsDialog.this, Messages
+							.getString("SettingsDialog.title.backgroundSelect"),
 							SettingsDialog.this.newBackground);
 					if (newBack != null) {
 						SettingsDialog.this.newBackground = newBack;
@@ -555,24 +653,63 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 	}
 
 	/**
+	 * This method initializes jPanelLaFPlace
+	 * 
+	 * @return javax.swing.JPanel
+	 */
+	private JPanel getJPanelLocalePlace() {
+		if (jPanelLocalePlace == null) {
+			jPanelLocalePlace = new JPanel();
+			//setUpRadioButtons(SupportedLocale.values(), jPanelLocalePlace);
+			setUpComboBox(SupportedLocale.values(), Messages.getString("SettingsDialog.locale"),
+					jPanelLocalePlace);
+			//			GridBagConstraints jbcLabel = new GridBagConstraints();
+			//			jbcLabel.insets = new Insets(0, 0, 0, 5);
+			//			jbcLabel.gridy = 0;
+			//			jbcLabel.gridx = 0;
+			//			GridBagConstraints jbcCombo = new GridBagConstraints();
+			//			jbcCombo.fill = GridBagConstraints.NONE;
+			//			jbcCombo.gridy = 0;
+			//			jbcCombo.gridx = 1;
+			//
+			//			jLabelLocale = new JLabel();
+			//			jLabelLocale.setText(Messages.getString("SettingsDialog.locale")); 
+			//
+			//			for (LookAndFeelInfo laf : UIManager.getInstalledLookAndFeels()) {
+			//				lafs.put(laf.getName(), laf.getClassName());
+			//			}
+			//
+			//			jComboBoxLocale = new JComboBox(lafs.keySet().toArray(new String[0]));
+			//			jComboBoxLocale.setName("laf"); 
+			//
+			//			jPanelLocalePlace = new JPanel();
+			//			jPanelLocalePlace.setLayout(new GridBagLayout());
+			//			jPanelLocalePlace.add(jComboBoxLocale, jbcCombo);
+			//			jPanelLocalePlace.add(jLabelLocale, jbcLabel);
+		}
+		return jPanelLocalePlace;
+	}
+
+	/**
 	 * This method initializes jPanelFilterEdit
 	 * 
 	 * @return javax.swing.JPanel
 	 */
-	private JPanel getJPanelFilterEdit() {
-		if (jPanelFilterEdit == null) {
+	private JPanel getJPanelDeletionMode() {
+		if (jPanelDeletionMode == null) {
 			GridBagConstraints gridBagConstraints13 = new GridBagConstraints();
 			gridBagConstraints13.gridx = 0;
 			gridBagConstraints13.anchor = GridBagConstraints.NORTHWEST;
 			gridBagConstraints13.weightx = 1.0D;
 			gridBagConstraints13.gridy = 0;
-			jPanelFilterEdit = new JPanel();
-			jPanelFilterEdit.setLayout(new GridBagLayout());
-			jPanelFilterEdit.setBorder(BorderFactory.createTitledBorder("Редактирование данных"));
-			jPanelFilterEdit.add(getJPanelFilterEditPlace(), gridBagConstraints13);
+			jPanelDeletionMode = new JPanel();
+			jPanelDeletionMode.setLayout(new GridBagLayout());
+			jPanelDeletionMode.setBorder(BorderFactory.createTitledBorder(Messages
+					.getString("SettingsDialog.deletionMode")));
+			jPanelDeletionMode.add(getJPanelDeletionModePlace(), gridBagConstraints13);
 
 		}
-		return jPanelFilterEdit;
+		return jPanelDeletionMode;
 	}
 
 	private JPanel jPanelSourceMode = null;
@@ -584,8 +721,11 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 	private Map<JLabel, JRadioButton> cachedLinks = new HashMap<JLabel, JRadioButton>(); //  @jve:decl-index=0:
 	private Map<JRadioButton, Enum<?>> cachedEnums = new HashMap<JRadioButton, Enum<?>>(); //  @jve:decl-index=0:
 	private Map<Enum<?>, JRadioButton> cachedButtons = new HashMap<Enum<?>, JRadioButton>(); //  @jve:decl-index=0:
+
 	@SuppressWarnings("unchecked")
-	private Map<Class<? extends Enum>, Enum<?>> selectedValues = new HashMap<Class<? extends Enum>, Enum<?>>(); //  @jve:decl-index=0:
+	private Map<Class<? extends Enum>, JComboBox> cachedCombos = new HashMap<Class<? extends Enum>, JComboBox>(); //  @jve:decl-index=0:
+	@SuppressWarnings("unchecked")
+	private Map<Class<? extends Enum>, Enum<?>> selectedValues = new HashMap<Class<? extends Enum>, Enum<?>>(); //  @jve:decl-index=0:	
 
 	private JPanel jPanelDeletionCheckMode = null;
 
@@ -593,11 +733,25 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 
 	private void setValue(Enum<?> value) {
 		selectedValues.put(value.getClass(), value);
-		cachedButtons.get(value).setSelected(true);
+
+		JRadioButton radio = cachedButtons.get(value);
+		if (radio != null) {
+			radio.setSelected(true);
+		} else {
+			JComboBox combo = cachedCombos.get(value.getClass());
+			if (combo != null) {
+				combo.setSelectedItem(value);
+			} else {
+				AppHelper.showErrorDialog(this, Messages.getString(
+						"SettingsDialog.err.enumRecipient", value.getClass()));
+			}
+		}
+
 	}
 
-	private Enum<?> getValue(Enum<?> value) {
-		return selectedValues.get(value.getClass());
+	@SuppressWarnings("unchecked")
+	private Enum<?> getValue(Class<? extends Enum> clazz) {
+		return selectedValues.get(clazz);
 	}
 
 	@Override
@@ -605,6 +759,16 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 		Enum<?> enum_ = this.cachedEnums.get(e.getSource());
 		if (enum_ != null) {
 			selectedValues.put(enum_.getClass(), enum_);
+		}
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() instanceof JComboBox) {
+			JComboBox box = (JComboBox) e.getSource();
+			Enum<?> enum_ = (Enum<?>) box.getSelectedItem();
+			if (enum_ != null) {
+				selectedValues.put(enum_.getClass(), enum_);
+			}
 		}
 	}
 
@@ -620,6 +784,14 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 	// Be care!!!
 	// Use this method only for unique enums classes!!!
 	private void setUpRadioButtons(Enum<?> enumValues[], JPanel placePanel) {
+		if (enumValues == null) {
+			throw new IllegalArgumentException("Internal error. 'enumValues' must be not null.");
+		}
+		if (placePanel == null) {
+			throw new IllegalArgumentException("Internal error. 'placePanel' must be not null.");
+		}
+
+		placePanel.setLayout(new GridBagLayout());
 		ButtonGroup group = new ButtonGroup();
 		int index = 0;
 		for (final Enum<?> mode : enumValues) {
@@ -653,6 +825,37 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 
 			index++;
 		}
+	}
+
+	private void setUpComboBox(Enum<?> enumValues[], String title, JPanel placePanel) {
+		if (enumValues == null || enumValues.length == 0) {
+			throw new IllegalArgumentException(
+					"Internal error. 'enumValues' must be not null and not empty.");
+		}
+		if (placePanel == null) {
+			throw new IllegalArgumentException("Internal error. 'placePanel' must be not null.");
+		}
+
+		placePanel.setLayout(new GridBagLayout());
+
+		GridBagConstraints gridBagConstraints = new GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 0;
+		gridBagConstraints.insets = new Insets(0, 0, 0, 5);
+		placePanel.add(new JLabel(title), gridBagConstraints);
+
+		gridBagConstraints = new GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 0;
+		gridBagConstraints.weightx = 1;
+		gridBagConstraints.fill = GridBagConstraints.NONE;
+		gridBagConstraints.anchor = GridBagConstraints.WEST;
+
+		JComboBox comboBox = new JComboBox(enumValues);
+		comboBox.addActionListener(this);
+		placePanel.add(comboBox, gridBagConstraints);
+
+		cachedCombos.put(enumValues[0].getClass(), comboBox);
 
 	}
 
@@ -661,13 +864,12 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 	 * 
 	 * @return javax.swing.JPanel
 	 */
-	private JPanel getJPanelFilterEditPlace() {
-		if (jPanelFilterEditPlace == null) {
-			jPanelFilterEditPlace = new JPanel();
-			jPanelFilterEditPlace.setLayout(new GridBagLayout());
-			setUpRadioButtons(DeletionMode.values(), jPanelFilterEditPlace);
+	private JPanel getJPanelDeletionModePlace() {
+		if (jPanelDeletionModePlace == null) {
+			jPanelDeletionModePlace = new JPanel();
+			setUpRadioButtons(DeletionMode.values(), jPanelDeletionModePlace);
 		}
-		return jPanelFilterEditPlace;
+		return jPanelDeletionModePlace;
 	}
 
 	/**
@@ -685,7 +887,8 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 			gridBagConstraints2.gridx = -1;
 			jPanelSourceMode = new JPanel();
 			jPanelSourceMode.setLayout(new GridBagLayout());
-			jPanelSourceMode.setBorder(BorderFactory.createTitledBorder("Исходное изображение -> 1024x1024"));
+			jPanelSourceMode.setBorder(BorderFactory.createTitledBorder(Messages
+					.getString("SettingsDialog.sourceImage")));
 			jPanelSourceMode.add(getJPanelSourceModePlace(), gridBagConstraints2);
 		}
 		return jPanelSourceMode;
@@ -706,7 +909,8 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 			jPanelTransactionMode = new JPanel();
 			jPanelTransactionMode.setVisible(false);
 			jPanelTransactionMode.setLayout(new GridBagLayout());
-			jPanelTransactionMode.setBorder(BorderFactory.createTitledBorder("Транзакционная модель"));
+			jPanelTransactionMode.setBorder(BorderFactory.createTitledBorder(Messages
+					.getString("SettingsDialog.transMode")));
 			jPanelTransactionMode.add(getJPanelTransactionModePlace(), gridBagConstraints16);
 		}
 		return jPanelTransactionMode;
@@ -720,7 +924,6 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 	private JPanel getJPanelTransactionModePlace() {
 		if (jPanelTransactionModePlace == null) {
 			jPanelTransactionModePlace = new JPanel();
-			jPanelTransactionModePlace.setLayout(new GridBagLayout());
 			setUpRadioButtons(TestTransactionMode.values(), jPanelTransactionModePlace);
 		}
 		return jPanelTransactionModePlace;
@@ -740,7 +943,8 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 			gridBagConstraints19.gridy = 0;
 			jPanelDeletionCheckMode = new JPanel();
 			jPanelDeletionCheckMode.setLayout(new GridBagLayout());
-			jPanelDeletionCheckMode.setBorder(BorderFactory.createTitledBorder("При удалении строки из БД"));
+			jPanelDeletionCheckMode.setBorder(BorderFactory.createTitledBorder(Messages
+					.getString("SettingsDialog.deletionCheckMode")));
 			jPanelDeletionCheckMode.add(getJPanelDeletionCheckModePlace(), gridBagConstraints19);
 		}
 		return jPanelDeletionCheckMode;
@@ -754,7 +958,6 @@ public class SettingsDialog extends JDialog implements ChangeListener {
 	private JPanel getJPanelDeletionCheckModePlace() {
 		if (jPanelDeletionCheckModePlace == null) {
 			jPanelDeletionCheckModePlace = new JPanel();
-			jPanelDeletionCheckModePlace.setLayout(new GridBagLayout());
 			setUpRadioButtons(DeletionCheckMode.values(), jPanelDeletionCheckModePlace);
 		}
 		return jPanelDeletionCheckModePlace;

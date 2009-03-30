@@ -74,8 +74,8 @@ public class SurfaceClasses implements Serializable {
 	
 	@Column(name="IdSurfaceClass", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D31204C98ACA008FD8")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31204C98ACA008FD8", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31205627A76203184")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31205627A76203184", strategy="native")	
 	private int idSurfaceClass;
 	
 	@Column(name="Name", nullable=false, length=255)	
@@ -109,7 +109,7 @@ public class SurfaceClasses implements Serializable {
 	 * Изображение поверхности в виде картинки.
 	 * Картинка должна быть стандартизованного размера. 256x256 пикселей.
 	 * 
-	 * Формат хранения -- PNG
+	 * Формат хранения -- JPG
 	 */
 	public void setSurfaceImage(byte[] value) {
 		this.surfaceImage = value;
@@ -119,7 +119,7 @@ public class SurfaceClasses implements Serializable {
 	 * Изображение поверхности в виде картинки.
 	 * Картинка должна быть стандартизованного размера. 256x256 пикселей.
 	 * 
-	 * Формат хранения -- PNG
+	 * Формат хранения -- JPG
 	 */
 	public byte[] getSurfaceImage() {
 		return surfaceImage;

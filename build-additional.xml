@@ -63,7 +63,7 @@ libraries=</echo>
 		<exclude name="**/*Test.class" />-->
 	</patternset>
 
-	<property name="basicJar" value="pass.jar" />
+	<property name="basicJar" value="pattern-analytics.jar" />
 
 	<target name="packJar">
 

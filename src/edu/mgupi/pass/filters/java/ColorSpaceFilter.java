@@ -30,7 +30,8 @@ public class ColorSpaceFilter implements IFilter {
 
 	// ColorSpace.CS_PYCC
 	// "Photo YCC"
-	private Param COLOR_MODE = new Param("ColorMode", "Режим цветности", ParamType.INT, ColorSpace.CS_GRAY,//
+	private Param COLOR_MODE = new Param("ColorMode", "Режим цветности", ParamType.INT,
+			ColorSpace.CS_GRAY,//
 			new Integer[] { ColorSpace.CS_GRAY, ColorSpace.CS_LINEAR_RGB, ColorSpace.CS_CIEXYZ }, //
 			new String[] { "Gray scale", "linear RGB", "CIEXYZ" });
 
@@ -57,11 +58,12 @@ public class ColorSpaceFilter implements IFilter {
 		ColorSpace sourceColorSpace = source.getColorModel().getColorSpace();
 		ColorSpace destColorSpace = ColorSpace.getInstance(destMode);
 
-		logger.debug("Converting image from color space {} to {}.", sourceColorSpace.getType(), destColorSpace
-				.getType());
+		logger.debug("Converting image from color space {} to {}.", sourceColorSpace.getType(),
+				destColorSpace.getType());
 
-		// TODO Поисследовать, даст ли прирост скорости кэширование
-		// ColorConvertOp-а
+		/**
+		 * No, don't give a shit :)
+		 */
 		return new ColorConvertOp(destColorSpace, null).filter(source, null);
 	}
 

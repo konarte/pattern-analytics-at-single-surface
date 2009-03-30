@@ -1,9 +1,13 @@
 package edu.mgupi.pass.face.gui;
 
+import java.awt.BorderLayout;
 import java.awt.Frame;
+import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -16,8 +20,10 @@ import edu.mgupi.pass.db.defects.DefectTypesCriteria;
 import edu.mgupi.pass.db.defects.Defects;
 import edu.mgupi.pass.db.defects.DefectsCriteria;
 import edu.mgupi.pass.face.gui.template.DefectClassesComboBox;
+import edu.mgupi.pass.face.gui.template.ParametersEditorPanel;
 import edu.mgupi.pass.face.gui.template.RecordEditorTemplate;
 import edu.mgupi.pass.face.gui.template.RecordFormWithImageTemplate;
+import edu.mgupi.pass.filters.Param;
 
 public class DefectTypesRecord extends RecordEditorTemplate<DefectTypes> {
 
@@ -26,14 +32,15 @@ public class DefectTypesRecord extends RecordEditorTemplate<DefectTypes> {
 	private static final long serialVersionUID = 1L;
 
 	public DefectTypesRecord(Frame owner) {
-		super(owner, "defectTypesRecordDialog", "Типы дефектов");
+		super(owner, "defectTypesRecordDialog", Messages.getString("DefectTypesRecord.title"));
 		super.setFormPanelData(getFormPanel());
 	}
 
 	@Override
 	protected String getDenyDeletionMessage(Object foundObject) {
 		Defects type = (Defects) foundObject;
-		return "Дефект с кодом '" + type.getIdDefect() + "' использует тип '" + type.getDefectType().getName() + "'.";
+		return Messages.getString("DefectTypesRecord.exists", type.getIdDefect(), type
+				.getDefectType().getName());
 	}
 
 	@Override
@@ -100,6 +107,7 @@ public class DefectTypesRecord extends RecordEditorTemplate<DefectTypes> {
 	private JLabel jLabelIDValue = null;
 	private JTextField jTextFieldNameValue = null;
 	private DefectClassesComboBox jComboBoxClassValue = null;
+	private ParametersEditorPanel parametersEditorPanel = null;
 
 	private RecordFormWithImageTemplate formPanel = null;
 
@@ -126,11 +134,34 @@ public class DefectTypesRecord extends RecordEditorTemplate<DefectTypes> {
 			jTextFieldNameValue = new JTextField();
 			jComboBoxClassValue = new DefectClassesComboBox();
 
-			super.putComponentPair(jPanelPlace, "Код", jLabelIDValue);
-			super.putComponentPair(jPanelPlace, "Класс дефекта", jComboBoxClassValue);
-			super.putUniqueComponentPair(jPanelPlace, "Название типа", jTextFieldNameValue);
+			super.putComponentPair(jPanelPlace, Messages.getString("DefectTypesRecord.id"),
+					jLabelIDValue);
+			super.putComponentPair(jPanelPlace, Messages.getString("DefectTypesRecord.class"),
+					jComboBoxClassValue);
+			super.putUniqueComponentPair(jPanelPlace, Messages.getString("DefectTypesRecord.name"),
+					jTextFieldNameValue);
+
+			this.parametersEditorPanel = new ParametersEditorPanel();
+
+			JPanel jCover = new JPanel();
+			jCover.setLayout(new BorderLayout());
+			jCover.setBorder(BorderFactory.createTitledBorder(Messages
+					.getString("DefectTypesRecord.additionalParams")));
+			jCover.add(this.parametersEditorPanel, BorderLayout.CENTER);
+
+			GridBagConstraints jbcParametersEditor = new GridBagConstraints();
+			jbcParametersEditor.gridx = 0;
+			jbcParametersEditor.gridy = super.getNextComponentGridY();
+			jbcParametersEditor.weightx = 1;
+			jbcParametersEditor.weighty = 1;
+			jbcParametersEditor.fill = GridBagConstraints.HORIZONTAL;
+			jbcParametersEditor.anchor = GridBagConstraints.NORTH;
+			jbcParametersEditor.gridwidth = 2;
+			jPanelPlace.add(jCover, jbcParametersEditor);
+
+			parametersEditorPanel.setModelData(new ArrayList<Param>());
+
 		}
 		return jPanelPlace;
 	}
-
 } //  @jve:decl-index=0:visual-constraint="16,-1"

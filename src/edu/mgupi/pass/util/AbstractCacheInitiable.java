@@ -45,7 +45,8 @@ public abstract class AbstractCacheInitiable<E> {
 	 * @throws IllegalAccessException
 	 *             standard exception of {@link Class#newInstance()} method.
 	 */
-	public abstract E getInstance(Class<? extends E> moduleClass) throws InstantiationException, IllegalAccessException;
+	public abstract E getInstance(Class<? extends E> moduleClass) throws InstantiationException,
+			IllegalAccessException;
 
 	/**
 	 * Mark cached instance as deleted (it keeps in special 'free-lists', given
@@ -83,7 +84,8 @@ public abstract class AbstractCacheInitiable<E> {
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 */
-	protected E initInstance(Class<? extends E> moduleClass) throws InstantiationException, IllegalAccessException {
+	protected E initInstance(Class<? extends E> moduleClass) throws InstantiationException,
+			IllegalAccessException {
 		E instance = moduleClass.newInstance();
 		if (instance instanceof IInitiable) {
 			((IInitiable) instance).init();

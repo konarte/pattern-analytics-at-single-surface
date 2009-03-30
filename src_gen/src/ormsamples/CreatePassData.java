@@ -25,7 +25,7 @@ public class CreatePassData {
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : codename, name
 			ledumgupipassdblocusesLModules.save();
 			edu.mgupi.pass.db.locuses.LFilters ledumgupipassdblocusesLFilters = edu.mgupi.pass.db.locuses.LFiltersFactory.createLFilters();
-			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : codename, name
+			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : serviceFilter, codename, name
 			ledumgupipassdblocusesLFilters.save();
 			edu.mgupi.pass.db.locuses.Locuses ledumgupipassdblocusesLocuses = edu.mgupi.pass.db.locuses.LocusesFactory.createLocuses();
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : module, sensor, locusSource, surface, filteredImage, thumbImage

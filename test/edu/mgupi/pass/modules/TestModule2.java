@@ -10,7 +10,8 @@ import edu.mgupi.pass.filters.Param;
 public class TestModule2 implements IModule {
 
 	@Override
-	public void analyze(BufferedImage filteredImage, Locuses store) throws IOException, ModuleException {
+	public void analyze(BufferedImage filteredImage, Locuses store) throws IOException,
+			ModuleException {
 	}
 
 	@Override

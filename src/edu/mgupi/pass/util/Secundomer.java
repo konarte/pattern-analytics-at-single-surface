@@ -20,6 +20,12 @@ public class Secundomer {
 
 	private String name;
 
+	/**
+	 * Default constructor.
+	 * 
+	 * @param name
+	 *            is actually title of this counter class
+	 */
 	protected Secundomer(String name) {
 		this.name = name;
 	}
@@ -104,7 +110,8 @@ public class Secundomer {
 		string.append("Total: ").append(this.getTotalTime()).append(" msec (");
 		string.append(this.getTotalCalls()).append(")");
 		if (this.cnt > 1) {
-			string.append(", avg = ").append(((float) this.getTotalTime() / (float) this.getTotalCalls()));
+			string.append(", avg = ").append(
+					((float) this.getTotalTime() / (float) this.getTotalCalls()));
 			string.append(" msec/call").append(", min = ").append(this.min).append(" msec, max = ");
 			string.append(this.max).append(" msec");
 		}

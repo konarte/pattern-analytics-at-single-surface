@@ -93,7 +93,8 @@ public class FilterPerformanceTest {
 
 	BufferedImage image2;
 
-	private void testImpl(IFilter filter, boolean readEveryImage) throws IOException, FilterException {
+	private void testImpl(IFilter filter, boolean readEveryImage) throws IOException,
+			FilterException {
 		BufferedImage image = source.getSingleSource().getSourceImage();
 
 		Secundomer sec = SecundomerList.registerSecundomer(filter.getClass().getName()
@@ -178,8 +179,8 @@ public class FilterPerformanceTest {
 			saw.attachImage(image);
 		}
 
-		Secundomer sec = SecundomerList.registerSecundomer(filter.getClass().getName() + " CHAINSAW"
-				+ (readEveryImage ? " EVERYIMAGE" : ""));
+		Secundomer sec = SecundomerList.registerSecundomer(filter.getClass().getName()
+				+ " CHAINSAW" + (readEveryImage ? " EVERYIMAGE" : ""));
 		for (int i = 0; i < CNT; i++) {
 			sec.start();
 			if (readEveryImage) {

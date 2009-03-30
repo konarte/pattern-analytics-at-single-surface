@@ -41,7 +41,8 @@ public class FilterChainsawTransactional extends FilterChainsaw {
 
 	@Override
 	public IFilter getFilter(int pos) {
-		throw new IllegalStateException("Method 'getFilter' is prohibited for FilterChainsawTransaction2.");
+		throw new IllegalStateException(
+				"Method 'getFilter' is prohibited for FilterChainsawTransaction2.");
 	}
 
 	private void precacheFilters() {
@@ -128,14 +129,16 @@ public class FilterChainsawTransactional extends FilterChainsaw {
 		}
 
 		if (this.filterList.size() != source.filterList.size()) {
-			throw new IllegalStateException("Internal error. After recombination of filters, sizes are not equals.");
+			throw new IllegalStateException(
+					"Internal error. After recombination of filters, sizes are not equals.");
 		}
 
 		for (IFilter filter : this.filterList) {
 			FilterStore store = this.changedParameters.get(filter);
 			if (store == null) {
-				throw new IllegalStateException("Internal error. After recombination of filters, can't find filter "
-						+ filter + ".");
+				throw new IllegalStateException(
+						"Internal error. After recombination of filters, can't find filter "
+								+ filter + ".");
 			}
 			if (store.parameters != EMPTY && filter.getParams() != null) {
 				ParamHelper.restoreParameterValues(filter.getParams(), store.parameters);

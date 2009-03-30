@@ -52,7 +52,7 @@ public class ParametersEditor extends JDialog implements ActionListener {
 		this.setResizable(false);
 		this.setName("parametersEditorDialog");
 		this.setContentPane(getJContentPane());
-		this.setTitle("Редактирование параметров модуля");
+		this.setTitle(Messages.getString("ParametersEditor.title"));
 
 	}
 
@@ -95,7 +95,8 @@ public class ParametersEditor extends JDialog implements ActionListener {
 		try {
 			this.setParametersImpl(name, parameters);
 		} catch (Throwable t) {
-			AppHelper.showExceptionDialog(this, "Ошибка при установке параметров.", t);
+			AppHelper.showExceptionDialog(this, Messages
+					.getString("ParametersEditor.err.loadParameters"), t);
 			return false;
 		}
 
@@ -181,7 +182,7 @@ public class ParametersEditor extends JDialog implements ActionListener {
 	private JButton getJButtonRetoreDefaults() {
 		if (jButtonRetoreDefaults == null) {
 			jButtonRetoreDefaults = new JButton();
-			jButtonRetoreDefaults.setText("Восстановить");
+			jButtonRetoreDefaults.setText(Messages.getString("ParametersEditor.restoreDefaults"));
 			jButtonRetoreDefaults.setName("restoreDefaults");
 			jButtonRetoreDefaults.setActionCommand("restoreDefaults");
 			jButtonRetoreDefaults.addActionListener(this);
@@ -197,15 +198,15 @@ public class ParametersEditor extends JDialog implements ActionListener {
 		}
 
 		if (command.equals("restoreDefaults")) {
-			if (JOptionPane.showConfirmDialog(this,
-					"Вы уверены, что хотите восстановить все значения параметров по-умолчанию?",
-					"Восстановление значений", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+			if (JOptionPane.showConfirmDialog(this, Messages
+					.getString("ParametersEditor.confirm.restoreDefaults"), Messages
+					.getString("ParametersEditor.title.restore"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 
 				try {
 					jPanelParams.restoreDefaults();
 				} catch (Throwable t) {
-					AppHelper.showExceptionDialog(this,
-							"Unexpected error when restoring defaults for module parameters.", t);
+					AppHelper.showExceptionDialog(this, Messages
+							.getString("ParametersEditor.err.restore"), t);
 				}
 			}
 

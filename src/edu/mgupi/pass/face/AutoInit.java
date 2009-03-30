@@ -54,8 +54,9 @@ public class AutoInit {
 
 	private boolean dropSchema() throws Exception {
 		System.out.println("Dropping existing database schema...");
-		System.out.println("Are you sure to drop table(s)? (Y/N)");
-		java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
+		System.out.println("Are you sure to drop all tables in schema? (Y/N)");
+		java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(
+				System.in));
 		if (reader.readLine().trim().toUpperCase().equals("Y")) {
 			try {
 				ORMDatabaseInitiator.dropSchema(PassPersistentManager.instance());
@@ -87,14 +88,17 @@ public class AutoInit {
 
 		try {
 
-			PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
+			PersistentTransaction transaction = PassPersistentManager.instance().getSession()
+					.beginTransaction();
 			try {
 
 				// Filters first
-				Collection<Class<?>> filterClasses = ClassesHelper.getAvailableClasses(IFilter.class);
+				Collection<Class<?>> filterClasses = ClassesHelper
+						.getAvailableClasses(IFilter.class);
 				Collection<LFilters> detachedFilters = new ArrayList<LFilters>();
 
-				System.out.println("Registering filters (" + filterClasses.size() + " expected)...");
+				System.out
+						.println("Registering filters (" + filterClasses.size() + " expected)...");
 
 				LFiltersCriteria fNICriteria = new LFiltersCriteria();
 				for (Class<?> clazz : filterClasses) {
@@ -102,8 +106,10 @@ public class AutoInit {
 					if (clazz.getSimpleName().startsWith("Test")) {
 						continue; //
 					}
+
+					boolean isService = false;
 					if (clazz.getPackage() == HistogramFilter.class.getPackage()) {
-						continue; //
+						isService = true;
 					}
 
 					IFilter filter = (IFilter) clazz.newInstance();
@@ -114,16 +120,18 @@ public class AutoInit {
 					//						codename = "edu.mgupi.pass.filters.tst.TestFilter";
 					//					}
 
-					System.out.print("Checking filter class " + codename + " (" + filter.getName() + ")...");
+					System.out.print("Checking filter class " + codename + " (" + filter.getName()
+							+ ")...");
 
 					LFiltersCriteria fCriteria = new LFiltersCriteria();
 					fCriteria.codename.eq(codename);
 					LFilters dbFilter = LFiltersFactory.loadLFiltersByCriteria(fCriteria);
 					if (dbFilter == null) {
-						System.out.println(" CREATE");
+						System.out.println(" CREATE" + (isService ? " SERVICE" : ""));
 						dbFilter = LFiltersFactory.createLFilters();
 						dbFilter.setName(filter.getName());
 						dbFilter.setCodename(codename);
+						dbFilter.setServiceFilter(isService);
 						detachedFilters.add(dbFilter);
 					} else {
 						if (!dbFilter.getName().equals(name)) {
@@ -151,7 +159,8 @@ public class AutoInit {
 					LocusAppliedFilters found = LocusAppliedFiltersFactory
 							.loadLocusAppliedFiltersByCriteria(appliedCriteria);
 					if (found == null) {
-						System.out.println("Filter " + checkFilter.getCodename() + " (" + checkFilter.getName()
+						System.out.println("Filter " + checkFilter.getCodename() + " ("
+								+ checkFilter.getName()
 								+ ") stored in database does not have reference " + "in "
 								+ LocusAppliedFilters.class.getSimpleName()
 								+ " table. Removing unexisted class reference.");
@@ -159,9 +168,11 @@ public class AutoInit {
 					}
 				}
 				// Processing modules, the same way
-				Collection<Class<?>> moduleClasses = ClassesHelper.getAvailableClasses(IModule.class);
+				Collection<Class<?>> moduleClasses = ClassesHelper
+						.getAvailableClasses(IModule.class);
 				Collection<LModules> detachedModules = new ArrayList<LModules>();
-				System.out.println("Registering modules (" + moduleClasses.size() + " expected)...");
+				System.out
+						.println("Registering modules (" + moduleClasses.size() + " expected)...");
 
 				LModulesCriteria mNICriteria = new LModulesCriteria();
 				for (Class<?> clazz : moduleClasses) {
@@ -169,7 +180,8 @@ public class AutoInit {
 					String name = module.getName();
 					String codename = module.getClass().getName();
 
-					System.out.print("Checking module class " + codename + " (" + module.getName() + ")...");
+					System.out.print("Checking module class " + codename + " (" + module.getName()
+							+ ")...");
 
 					LModulesCriteria mCriteria = new LModulesCriteria();
 					mCriteria.codename.eq(codename);
@@ -205,7 +217,8 @@ public class AutoInit {
 					LocusAppliedModule found = LocusAppliedModuleFactory
 							.loadLocusAppliedModuleByCriteria(appliedCriteria);
 					if (found == null) {
-						System.out.println("Module " + checkModule.getCodename() + " (" + checkModule.getName()
+						System.out.println("Module " + checkModule.getCodename() + " ("
+								+ checkModule.getName()
 								+ ") stored in database does not have reference " + "in "
 								+ LocusAppliedModule.class.getSimpleName()
 								+ " table. Removing unexisted class reference.");
