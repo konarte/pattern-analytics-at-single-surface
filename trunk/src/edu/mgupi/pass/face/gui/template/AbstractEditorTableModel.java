@@ -47,8 +47,8 @@ import edu.mgupi.pass.util.Config.DeletionMode;
  * @author raidan
  * 
  */
-public abstract class AbstractEditorTableModel extends AbstractTableModel implements ActionListener,
-		ListSelectionListener {
+public abstract class AbstractEditorTableModel extends AbstractTableModel implements
+		ActionListener, ListSelectionListener {
 
 	private final static Logger logger = LoggerFactory.getLogger(AbstractEditorTableModel.class);
 
@@ -75,7 +75,7 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		this.owner = owner;
 
 		// Set up interval selection mode
-		owner.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		this.owner.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 
 		// see #valueChanged
 		this.owner.getSelectionModel().addListSelectionListener(this);
@@ -143,7 +143,8 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 	 */
 	public void registerEditRowButton(JButton button) {
 		if (editButton != null) {
-			throw new IllegalStateException("'editButton' already registered (" + editButton.getText() + ").");
+			throw new IllegalStateException("'editButton' already registered ("
+					+ editButton.getText() + ").");
 		}
 
 		if (button == null) {
@@ -171,7 +172,8 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 	 */
 	public void registerMoveRowsUpButton(JButton button) {
 		if (upButton != null) {
-			throw new IllegalStateException("'upButton' already registered (" + upButton.getText() + ").");
+			throw new IllegalStateException("'upButton' already registered (" + upButton.getText()
+					+ ").");
 		}
 
 		if (button == null) {
@@ -199,7 +201,8 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 	 */
 	public void registerMoveRowsDownButton(JButton button) {
 		if (downButton != null) {
-			throw new IllegalStateException("'downButton' button already registered (" + downButton.getText() + ").");
+			throw new IllegalStateException("'downButton' button already registered ("
+					+ downButton.getText() + ").");
 		}
 
 		if (button == null) {
@@ -225,7 +228,8 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 	 */
 	public void registerAddRowButton(JButton button) {
 		if (addButton != null) {
-			throw new IllegalStateException("'addButton' button already registered (" + addButton.getText() + ").");
+			throw new IllegalStateException("'addButton' button already registered ("
+					+ addButton.getText() + ").");
 		}
 
 		if (button == null) {
@@ -251,8 +255,8 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 	 */
 	public void registerDeleteRowButton(JButton button) {
 		if (deleteButton != null) {
-			throw new IllegalStateException("'deleteButton' button already registered (" + deleteButton.getText()
-					+ ").");
+			throw new IllegalStateException("'deleteButton' button already registered ("
+					+ deleteButton.getText() + ").");
 		}
 		this.deleteButton = button;
 		button.setActionCommand("delete");
@@ -312,7 +316,8 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		try {
 			this.onRowSelectionImpl(rowIdx);
 		} catch (Throwable t) {
-			AppHelper.showExceptionDialog(this.owner, "Ошибка при смене строки.", t);
+			AppHelper.showExceptionDialog(this.owner, Messages
+					.getString("AbstractEditorTableModel.err.selectRow"), t);
 			return;
 		}
 
@@ -325,7 +330,8 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		}
 
 		if (this.editButton != null) {
-			this.editButton.setEnabled(this.getRowCount() > 0 && this.owner.getSelectedRowCount() == 1);
+			this.editButton.setEnabled(this.getRowCount() > 0
+					&& this.owner.getSelectedRowCount() == 1);
 		}
 
 		/*
@@ -337,7 +343,8 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 			this.upButton.setEnabled((len > 0 ? selectedRows[0] : rowIdx) > 0);
 		}
 		if (this.downButton != null) {
-			this.downButton.setEnabled((len > 0 ? selectedRows[len - 1] : rowIdx) < this.getRowCount() - 1);
+			this.downButton.setEnabled((len > 0 ? selectedRows[len - 1] : rowIdx) < this
+					.getRowCount() - 1);
 		}
 	}
 
@@ -361,7 +368,8 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 				this.owner.setRowSelectionInterval(currentRow, currentRow);
 			}
 		} catch (Throwable t) {
-			AppHelper.showExceptionDialog(this.owner, "Ошибка при добавлении новой строки.", t);
+			AppHelper.showExceptionDialog(this.owner, Messages
+					.getString("AbstractEditorTableModel.err.addRow"), t);
 			return;
 		}
 	}
@@ -395,7 +403,8 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 
 					logger.trace("OK, successfully delete");
 
-					super.fireTableRowsDeleted(selectedRows[0], selectedRows[selectedRows.length - 1]);
+					super.fireTableRowsDeleted(selectedRows[0],
+							selectedRows[selectedRows.length - 1]);
 
 					currentRow = selectedRows[0];
 					if (currentRow >= this.getRowCount()) {
@@ -419,7 +428,8 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 
 			}
 		} catch (Throwable t) {
-			AppHelper.showExceptionDialog(this.owner, "Ошибка при удалении строки.", t);
+			AppHelper.showExceptionDialog(this.owner, Messages
+					.getString("AbstractEditorTableModel.err.deleteRow"), t);
 			return;
 		}
 	}
@@ -438,14 +448,20 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		DeletionMode currentMode = Config.getInstance().getRowsDeleteMode();
 		if (selectedRows.length > 1) {
 			if (currentMode != DeletionMode.NO_CONFIRM) {
-				return JOptionPane.showConfirmDialog(this.owner.getTopLevelAncestor(),
-						"Вы действительно хотите удалить все выделенные строки?",
-						"Подтверждение множественного удаления", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+				return JOptionPane.showConfirmDialog(this.owner.getTopLevelAncestor(), Utils
+						.formatSimplePlurals(Messages
+								.getString("AbstractEditorTableModel.confirm.deleteMultiple"),
+								selectedRows.length), Messages
+						.getString("AbstractEditorTableModel.title.confirmDelete"),
+						JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+
 			}
 		} else {
-			if (currentMode != DeletionMode.NO_CONFIRM && currentMode != DeletionMode.CONFIRM_MULTPLES) {
-				return JOptionPane.showConfirmDialog(this.owner.getTopLevelAncestor(),
-						"Вы действительно хотите удалить выделенную строку?", "Подтверждение удаления",
+			if (currentMode != DeletionMode.NO_CONFIRM
+					&& currentMode != DeletionMode.CONFIRM_MULTPLES) {
+				return JOptionPane.showConfirmDialog(this.owner.getTopLevelAncestor(), Messages
+						.getString("AbstractEditorTableModel.confirm.deleteSingle"), Messages
+						.getString("AbstractEditorTableModel.title.confirmDelete"),
 						JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
 			}
 		}
@@ -473,7 +489,8 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 				super.fireTableRowsUpdated(currentRow, currentRow);
 			}
 		} catch (Throwable t) {
-			AppHelper.showExceptionDialog(this.owner, "Ошибка при редактировании новой строки.", t);
+			AppHelper.showExceptionDialog(this.owner, Messages
+					.getString("AbstractEditorTableModel.err.editRow"), t);
 			return;
 		}
 	}
@@ -515,7 +532,8 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 				this.owner.setRowSelectionInterval(first - 1, last - 1);
 			}
 		} catch (Throwable t) {
-			AppHelper.showExceptionDialog(this.owner, "Ошибка при перемещении строки.", t);
+			AppHelper.showExceptionDialog(this.owner, Messages
+					.getString("AbstractEditorTableModel.err.moveUp"), t);
 			return;
 		}
 	}
@@ -556,7 +574,8 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 				this.owner.setRowSelectionInterval(first + 1, last + 1);
 			}
 		} catch (Throwable t) {
-			AppHelper.showExceptionDialog(this.owner, "Ошибка при перемещении строки.", t);
+			AppHelper.showExceptionDialog(this.owner, Messages
+					.getString("AbstractEditorTableModel.err.moveDown"), t);
 			return;
 		}
 	}

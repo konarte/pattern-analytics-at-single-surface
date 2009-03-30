@@ -28,27 +28,29 @@ public class Param implements Cloneable {
 		}
 	}
 
-	public Param(String name, String title, ParamType type, Object default_, int lowBorder, int hiBorder) {
+	public Param(String name, String title, ParamType type, Object default_, int lowBorder,
+			int hiBorder) {
 		this(name, title, type, default_);
 
 		if (hiBorder < lowBorder) {
-			throw new IllegalArgumentException("Incorrect using of hiBorder (" + hiBorder + ") and lowBorder ("
-					+ lowBorder + "). lowBorder must be smaller.");
+			throw new IllegalArgumentException("Incorrect using of hiBorder (" + hiBorder
+					+ ") and lowBorder (" + lowBorder + "). lowBorder must be smaller.");
 		}
 
 		this.low_border = lowBorder;
 		this.hi_border = hiBorder;
 	}
 
-	public Param(String name, String title, ParamType type, Object default_, Object[] allowedValues,
-			String[] visualValues) {
+	public Param(String name, String title, ParamType type, Object default_,
+			Object[] allowedValues, String[] visualValues) {
 		this(name, title, type, default_);
 
 		if (allowedValues != null && allowedValues.length > 0) {
 			if (visualValues != null && visualValues.length > 0) {
 				if (allowedValues.length != visualValues.length) {
-					throw new IllegalArgumentException("visualValues count don't equals allowedValues. "
-							+ "Please, set correct equation between allowed and visual elemenet.");
+					throw new IllegalArgumentException(
+							"visualValues count don't equals allowedValues. "
+									+ "Please, set correct equation between allowed and visual elemenet.");
 				}
 			} else {
 				// set visual same as allowed
@@ -56,7 +58,8 @@ public class Param implements Cloneable {
 				System.arraycopy(allowedValues, 0, visualValues, 0, allowedValues.length);
 			}
 		} else {
-			throw new IllegalArgumentException("Incorrect construction call. Please, specify allowedValues.");
+			throw new IllegalArgumentException(
+					"Incorrect construction call. Please, specify allowedValues.");
 		}
 		this.allowed_values = allowedValues;
 		this.visual_values = visualValues;
@@ -134,8 +137,9 @@ public class Param implements Cloneable {
 
 			if (!found) {
 
-				throw new IllegalParameterValueException("Parameter " + this + " attempt to use incorrect value "
-						+ value + ". This is value not acceptable by allowed_parameters. Allowed are: "
+				throw new IllegalParameterValueException("Parameter " + this
+						+ " attempt to use incorrect value " + value
+						+ ". This is value not acceptable by allowed_parameters. Allowed are: "
 						+ Arrays.toString(this.getAllowed_values()));
 			}
 		}
@@ -146,8 +150,8 @@ public class Param implements Cloneable {
 			} else {
 				if (!(value instanceof Double)) {
 					throw new IllegalParameterValueException("Parameter " + this
-							+ " attempt to set up incorrect value " + value + " (" + value.getClass()
-							+ "). This value must be a double.");
+							+ " attempt to set up incorrect value " + value + " ("
+							+ value.getClass() + "). This value must be a double.");
 				}
 			}
 		}
@@ -158,26 +162,30 @@ public class Param implements Cloneable {
 			} else {
 				if (!(value instanceof Integer)) {
 					throw new IllegalParameterValueException("Parameter " + this
-							+ " attempt to set up incorrect value " + value + ". This value must be an integer.");
+							+ " attempt to set up incorrect value " + value
+							+ ". This value must be an integer.");
 				}
 			}
 
 			int newValue = (Integer) value;
 			if (newValue < this.low_border) {
-				throw new IllegalParameterValueException("Parameter " + this + " attempt to set up incorrect value "
-						+ value + ". This value must be greater that lowBorder " + this.low_border + ".");
+				throw new IllegalParameterValueException("Parameter " + this
+						+ " attempt to set up incorrect value " + value
+						+ ". This value must be greater that lowBorder " + this.low_border + ".");
 			}
 
 			if (newValue > this.hi_border) {
-				throw new IllegalParameterValueException("Parameter " + this + " attempt to set up incorrect value "
-						+ value + ". This value must be smaller that hiBorder " + this.hi_border + ".");
+				throw new IllegalParameterValueException("Parameter " + this
+						+ " attempt to set up incorrect value " + value
+						+ ". This value must be smaller that hiBorder " + this.hi_border + ".");
 			}
 		}
 
 		if (this.type == ParamType.STRING) {
 			if (!(value instanceof String)) {
-				throw new IllegalParameterValueException("Parameter " + this + " attempt to set up incorrect value "
-						+ value + ". This value must be a string.");
+				throw new IllegalParameterValueException("Parameter " + this
+						+ " attempt to set up incorrect value " + value
+						+ ". This value must be a string.");
 			}
 		}
 
@@ -196,7 +204,8 @@ public class Param implements Cloneable {
 		return this.value == null ? (String) null : String.valueOf(this.value);
 	}
 
-	protected void setStringValue(String value) throws NumberFormatException, IllegalParameterValueException {
+	protected void setStringValue(String value) throws NumberFormatException,
+			IllegalParameterValueException {
 		if (value == null) {
 			this.resetValue();
 			return;

@@ -26,6 +26,9 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.mgupi.pass.face.gui.template.AbstractDialogAdapter;
 import edu.mgupi.pass.face.gui.template.JTableReadOnly;
 import edu.mgupi.pass.util.Const;
@@ -37,6 +40,8 @@ import edu.mgupi.pass.util.Const;
  * 
  */
 public class AboutDialog extends JDialog {
+
+	private final static Logger logger = LoggerFactory.getLogger(AboutDialog.class);
 
 	/**
 	 * 
@@ -70,7 +75,7 @@ public class AboutDialog extends JDialog {
 		this.setMinimumSize(new Dimension(500, 550));
 		this.setName("aboutDialog");
 		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
-		this.setTitle("О программе...");
+		this.setTitle(Messages.getString("AboutDialog.title"));
 		this.setContentPane(getJContentPane());
 	}
 
@@ -119,7 +124,20 @@ public class AboutDialog extends JDialog {
 
 			@Override
 			protected void openDialogImpl() throws Exception {
-				// do nothing
+				long maxMemory = Runtime.getRuntime().maxMemory();
+				long totalMemory = Runtime.getRuntime().totalMemory();
+				long freeMemory = Runtime.getRuntime().freeMemory();
+
+				logger.debug("Max memory: {}, total memory: {}, free memory: {}.", new Object[] {
+						maxMemory, totalMemory, freeMemory });
+
+				/*
+				 * Free memory = max memory - (total memory - free memory), i.e.
+				 * free memory = max memory - current used memory.
+				 */
+				jLabelMemory.setText(Messages.getString("AboutDialog.memory",
+						(maxMemory - (totalMemory - freeMemory)) / 1024 / 1024,
+						maxMemory / 1024 / 1024));
 			}
 
 			@Override
@@ -155,6 +173,7 @@ public class AboutDialog extends JDialog {
 	private JTable jTableLibraries = null;
 	private JLabel jLabelProps = null;
 	private JLabel jLabelLibraries = null;
+	private JLabel jLabelMemory = null;
 
 	private JLabel jLabelLink = null;
 
@@ -165,10 +184,27 @@ public class AboutDialog extends JDialog {
 	 */
 	private JPanel getJPanelData() {
 		if (jPanelData == null) {
-			GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
-			gridBagConstraints1.gridy = 6;
-			gridBagConstraints1.insets = new Insets(0, 0, 10, 0);
-			gridBagConstraints1.gridx = 0;
+
+			jLabelProgramTitle = new JLabel();
+			jLabelProgramTitle.setText("<html><h3>" + Const.PROGRAM_NAME_FIRST + "<br>"
+					+ Const.PROGRAM_NAME_LAST + "</h3>"
+					+ "<b>Science content:</b> Konart<br><b>Code, design:</b> raidan</html>");
+
+			jLabelLibraries = new JLabel();
+			jLabelLibraries.setText(Messages.getString("AboutDialog.usedLibs"));
+			jLabelLibraries.setFont(new Font("Dialog", Font.BOLD, 12));
+
+			jLabelProps = new JLabel();
+			jLabelProps.setText(Messages.getString("AboutDialog.sysProperties"));
+			jLabelProps.setFont(new Font("Dialog", Font.BOLD, 12));
+
+			jLabelMemory = new JLabel();
+
+			jLabelAuthor = new JLabel();
+			jLabelAuthor.setText("<html><hr>(c) raidan, Konart 2009</html>");
+			jLabelAuthor.setHorizontalAlignment(SwingConstants.CENTER);
+			jLabelAuthor.setName("authors");
+
 			jLabelLink = new JLabel();
 
 			// Clicking on HTTP link
@@ -178,8 +214,8 @@ public class AboutDialog extends JDialog {
 					try {
 						Desktop.getDesktop().browse(new URI(Const.WEB_PROJECT_PAGE));
 					} catch (Exception e1) {
-						AppHelper.showExceptionDialog(AboutDialog.this, "Unexpected eror when opening project link '"
-								+ Const.WEB_PROJECT_PAGE + "'.", e1);
+						AppHelper.showExceptionDialog(AboutDialog.this, Messages.getString(
+								"AboutDialog.err.openLink", Const.WEB_PROJECT_PAGE), e1);
 					}
 				}
 
@@ -193,77 +229,81 @@ public class AboutDialog extends JDialog {
 				}
 
 			});
-			jLabelLink.setText("<html><center><a href=\"" + Const.WEB_HELP_PAGE + "\">" + Const.WEB_PROJECT_PAGE
-					+ "</a></html>");
-
-			GridBagConstraints gridBagConstraints41 = new GridBagConstraints();
-			gridBagConstraints41.gridx = 0;
-			gridBagConstraints41.anchor = GridBagConstraints.CENTER;
-			gridBagConstraints41.insets = new Insets(5, 0, 0, 0);
-			gridBagConstraints41.gridy = 3;
-			jLabelLibraries = new JLabel();
-			jLabelLibraries.setText("Используемые библиотеки");
-			jLabelLibraries.setFont(new Font("Dialog", Font.BOLD, 12));
-			GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
-			gridBagConstraints3.gridx = 0;
-			gridBagConstraints3.anchor = GridBagConstraints.CENTER;
-			gridBagConstraints3.insets = new Insets(0, 0, 0, 0);
-			gridBagConstraints3.gridy = 1;
-			jLabelProps = new JLabel();
-			jLabelProps.setText("Системные переменные");
-			jLabelProps.setFont(new Font("Dialog", Font.BOLD, 12));
-			GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
-			gridBagConstraints2.fill = GridBagConstraints.BOTH;
-			gridBagConstraints2.gridy = 4;
-			gridBagConstraints2.weightx = 1.0;
-			gridBagConstraints2.weighty = 1.0D;
-			gridBagConstraints2.insets = new Insets(0, 15, 0, 15);
-			gridBagConstraints2.gridx = 0;
-			GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
-			gridBagConstraints4.fill = GridBagConstraints.BOTH;
-			gridBagConstraints4.gridy = 2;
-			gridBagConstraints4.weightx = 1.0;
-			gridBagConstraints4.weighty = 2.0D;
-			gridBagConstraints4.insets = new Insets(0, 15, 0, 15);
-			gridBagConstraints4.gridx = 0;
-			GridBagConstraints gridBagConstraints11 = new GridBagConstraints();
-			gridBagConstraints11.gridx = 0;
-			gridBagConstraints11.insets = new Insets(10, 0, 0, 0);
-			gridBagConstraints11.fill = GridBagConstraints.HORIZONTAL;
-			gridBagConstraints11.weightx = 1.0D;
-			gridBagConstraints11.anchor = GridBagConstraints.CENTER;
-			gridBagConstraints11.gridwidth = 1;
-			gridBagConstraints11.gridy = 5;
-
-			jLabelAuthor = new JLabel();
-
-			jLabelAuthor.setText("<html><hr>(c) raidan, Konart 2009</html>");
-			jLabelAuthor.setHorizontalAlignment(SwingConstants.CENTER);
-			//jLabelAuthor.setHorizontalTextPosition(SwingConstants.TRAILING);
-			//jLabelAuthor.setPreferredSize(new Dimension(200, 40));
-			jLabelAuthor.setName("authors");
-
-			GridBagConstraints gridBagConstraints = new GridBagConstraints();
-			gridBagConstraints.insets = new Insets(0, 15, 5, 15);
-			gridBagConstraints.gridy = 0;
-			gridBagConstraints.weightx = 1.0D;
-			gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-			gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-			gridBagConstraints.gridx = 0;
-			jLabelProgramTitle = new JLabel();
-			jLabelProgramTitle.setText("<html><h3>" + Const.PROGRAM_NAME_FIRST + "<br>" + Const.PROGRAM_NAME_LAST
-					+ "</h3>" + "<b>Science content:</b> Konart<br><b>Code, design:</b> raidan</html>");
+			jLabelLink.setText("<html><center><a href=\"" + Const.WEB_HELP_PAGE + "\">"
+					+ Const.WEB_PROJECT_PAGE + "</a></html>");
 
 			jPanelData = new JPanel();
 			jPanelData.setLayout(new GridBagLayout());
 			jPanelData.setEnabled(true);
-			jPanelData.add(jLabelProgramTitle, gridBagConstraints);
-			jPanelData.add(jLabelProps, gridBagConstraints3);
-			jPanelData.add(getJScrollPaneProps(), gridBagConstraints4);
-			jPanelData.add(jLabelLibraries, gridBagConstraints41);
-			jPanelData.add(getJScrollPaneLibraries(), gridBagConstraints2);
-			jPanelData.add(jLabelAuthor, gridBagConstraints11);
-			jPanelData.add(jLabelLink, gridBagConstraints1);
+
+			int y = 0;
+
+			GridBagConstraints gbcProgramTitle = new GridBagConstraints();
+			gbcProgramTitle.insets = new Insets(0, 15, 5, 15);
+			gbcProgramTitle.weightx = 1.0D;
+			gbcProgramTitle.anchor = GridBagConstraints.NORTHWEST;
+			gbcProgramTitle.fill = GridBagConstraints.HORIZONTAL;
+			gbcProgramTitle.gridx = 0;
+			gbcProgramTitle.gridy = y++;
+			jPanelData.add(jLabelProgramTitle, gbcProgramTitle);
+
+			GridBagConstraints jbcLabelProps = new GridBagConstraints();
+			jbcLabelProps.anchor = GridBagConstraints.CENTER;
+			jbcLabelProps.insets = new Insets(0, 0, 0, 0);
+			jbcLabelProps.gridx = 0;
+			jbcLabelProps.gridy = y++;
+			jPanelData.add(jLabelProps, jbcLabelProps);
+
+			GridBagConstraints jbcPanelProps = new GridBagConstraints();
+			jbcPanelProps.fill = GridBagConstraints.BOTH;
+			jbcPanelProps.weightx = 1.0;
+			jbcPanelProps.weighty = 2.0D;
+			jbcPanelProps.insets = new Insets(0, 15, 0, 15);
+			jbcPanelProps.gridx = 0;
+			jbcPanelProps.gridy = y++;
+			jPanelData.add(getJScrollPaneProps(), jbcPanelProps);
+
+			GridBagConstraints jbcLibraries = new GridBagConstraints();
+			jbcLibraries.anchor = GridBagConstraints.CENTER;
+			jbcLibraries.insets = new Insets(5, 0, 0, 0);
+			jbcLibraries.gridx = 0;
+			jbcLibraries.gridy = y++;
+			jPanelData.add(jLabelLibraries, jbcLibraries);
+
+			GridBagConstraints jbcPanelLibraries = new GridBagConstraints();
+			jbcPanelLibraries.fill = GridBagConstraints.BOTH;
+			jbcPanelLibraries.weightx = 1.0;
+			jbcPanelLibraries.weighty = 1.0D;
+			jbcPanelLibraries.insets = new Insets(0, 15, 0, 15);
+			jbcPanelLibraries.gridx = 0;
+			jbcPanelLibraries.gridy = y++;
+			jPanelData.add(getJScrollPaneLibraries(), jbcPanelLibraries);
+
+			GridBagConstraints gbcMemory = new GridBagConstraints();
+			gbcMemory.insets = new Insets(5, 15, 0, 15);
+			gbcMemory.weightx = 1.0D;
+			gbcMemory.anchor = GridBagConstraints.NORTHWEST;
+			gbcMemory.fill = GridBagConstraints.HORIZONTAL;
+			gbcMemory.gridx = 0;
+			gbcMemory.gridy = y++;
+			jPanelData.add(jLabelMemory, gbcMemory);
+
+			GridBagConstraints jbcAuthor = new GridBagConstraints();
+			jbcAuthor.insets = new Insets(10, 0, 0, 0);
+			jbcAuthor.fill = GridBagConstraints.HORIZONTAL;
+			jbcAuthor.weightx = 1.0D;
+			jbcAuthor.anchor = GridBagConstraints.CENTER;
+			jbcAuthor.gridwidth = 1;
+			jbcAuthor.gridx = 0;
+			jbcAuthor.gridy = y++;
+			jPanelData.add(jLabelAuthor, jbcAuthor);
+
+			GridBagConstraints jbcLink = new GridBagConstraints();
+			jbcLink.insets = new Insets(0, 0, 10, 0);
+			jbcLink.gridx = 0;
+			jbcLink.gridy = y++;
+			jPanelData.add(jLabelLink, jbcLink);
+
 		}
 		return jPanelData;
 	}
@@ -300,7 +340,9 @@ public class AboutDialog extends JDialog {
 				cells[i][1] = props.getProperty(cells[i][0]);
 			}
 
-			jTableProps = new JTableReadOnly(cells, new String[] { "Property", "Value" });
+			jTableProps = new JTableReadOnly(cells, new String[] {
+					Messages.getString("AboutDialog.properties.prop"),
+					Messages.getString("AboutDialog.properties.value") });
 			jTableProps.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 			jTableProps.setName("properties");
 		}
@@ -336,7 +378,8 @@ public class AboutDialog extends JDialog {
 				cells[i][0] = libs[i];
 			}
 
-			jTableLibraries = new JTableReadOnly(cells, new String[] { "Used library" });
+			jTableLibraries = new JTableReadOnly(cells, new String[] { Messages
+					.getString("AboutDialog.libraries.lib") });
 			jTableLibraries.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 			jTableLibraries.setName("libraries");
 		}

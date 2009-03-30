@@ -34,7 +34,8 @@ public class DefectClassesComboBox extends JComboBox {
 
 			try {
 				super.removeAllElements();
-				for (DefectClasses defClass : DefectClassesFactory.listDefectClassesByQuery(null, null)) {
+				for (DefectClasses defClass : DefectClassesFactory.listDefectClassesByQuery(null,
+						null)) {
 					super.addElement(defClass);
 				}
 				return super.getSize();
@@ -52,10 +53,10 @@ public class DefectClassesComboBox extends JComboBox {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
-				boolean cellHasFocus) {
-			return super.getListCellRendererComponent(list, value == null ? value : ((DefectClasses) value).getName(),
-					index, isSelected, cellHasFocus);
+		public Component getListCellRendererComponent(JList list, Object value, int index,
+				boolean isSelected, boolean cellHasFocus) {
+			return super.getListCellRendererComponent(list, value == null ? value
+					: ((DefectClasses) value).getName(), index, isSelected, cellHasFocus);
 		}
 
 	}

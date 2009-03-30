@@ -22,10 +22,13 @@ public class DefectTypesTable extends TableEditorTemplate {
 	private static final long serialVersionUID = 1L;
 
 	public DefectTypesTable(Frame owner) {
-		super(owner, "defectTypesTable", "Список типов дефектов");
+		super(owner, "defectTypesTable", Messages.getString("DefectTypesTable.title"));
 	}
 
 	private AbstractEditorTableModel tableModel = null;
+
+	private final static String YES = Messages.getString("DefectTypesTable.yes");
+	private final static String NO = Messages.getString("DefectTypesTable.no");
 
 	@Override
 	protected AbstractEditorTableModel getTableModelImpl(JTable owner) {
@@ -40,13 +43,18 @@ public class DefectTypesTable extends TableEditorTemplate {
 
 				@Override
 				protected String[] getColumns() {
-					return new String[] { "ID", "Класс дефекта", "Тип дефекта", "Доп. опции", "Картинка" };
+					return new String[] { Messages.getString("DefectTypesTable.id"),
+							Messages.getString("DefectTypesTable.class"),
+							Messages.getString("DefectTypesTable.name"),
+							Messages.getString("DefectTypesTable.options"),
+							Messages.getString("DefectTypesTable.image") };
 				}
 
 				@Override
 				protected List<DefectTypes> getDataImpl() throws Exception {
 					List<DefectTypes> classes = new ArrayList<DefectTypes>();
-					classes.addAll(Arrays.asList(DefectTypesFactory.listDefectTypesByQuery(null, null)));
+					classes.addAll(Arrays.asList(DefectTypesFactory.listDefectTypesByQuery(null,
+							null)));
 					return classes;
 				}
 
@@ -61,9 +69,9 @@ public class DefectTypesTable extends TableEditorTemplate {
 					case 2:
 						return defect.getName();
 					case 3:
-						return defect.getOptions().size() == 0 ? "Нет" : "Да";
+						return defect.getOptions().size() == 0 ? NO : YES;
 					case 4:
-						return defect.getDefectImage() == null ? "Нет" : "Да";
+						return defect.getDefectImage() == null ? NO : YES;
 					default:
 						return columnIndex;
 					}

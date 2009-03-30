@@ -44,7 +44,8 @@ public class ResizeFilterTest {
 		//
 	}
 
-	private void convertImage(BufferedImage image, int width, int height) throws IOException, FilterException {
+	private void convertImage(BufferedImage image, int width, int height) throws IOException,
+			FilterException {
 		filter.getWIDTH().setValue(width);
 		filter.getHEIGHT().setValue(height);
 

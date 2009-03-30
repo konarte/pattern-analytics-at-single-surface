@@ -17,6 +17,7 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -36,9 +37,10 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.face.IProgress;
 import edu.mgupi.pass.util.Config;
-import edu.mgupi.pass.util.IInitiable;
+import edu.mgupi.pass.util.Const;
 import edu.mgupi.pass.util.IRefreshable;
 import edu.mgupi.pass.util.Utils;
+import edu.mgupi.pass.util.Config.SupportedLocale;
 
 /**
  * Class for application support -- make easy change LookAndFeel, set window
@@ -76,8 +78,8 @@ public class AppHelper {
 		if (instance != null) {
 
 			for (Window window : instance.windowsCollection.values()) {
-				if (window instanceof IInitiable) {
-					((IInitiable) window).close();
+				if (window instanceof IWindowCloseable) {
+					((IWindowCloseable) window).close();
 				}
 			}
 
@@ -86,7 +88,7 @@ public class AppHelper {
 			instance.components.clear();
 			instance = null;
 		}
-		AppDataStorage.reset();
+		AppDataStorage.getInstance().reset();
 	}
 
 	public static void printCache() {
@@ -95,12 +97,14 @@ public class AppHelper {
 				instance.cachedLock.lock();
 				instance.componentsLock.lock();
 
-				for (Map.Entry<Class<? extends Window>, Window> entry : instance.windowsCollection.entrySet()) {
-					logger.debug("-- Cached window instance of " + entry.getKey() + " = " + entry.getValue().getName()
-							+ " (" + entry.getValue() + ")");
+				for (Map.Entry<Class<? extends Window>, Window> entry : instance.windowsCollection
+						.entrySet()) {
+					logger.debug("-- Cached window instance of " + entry.getKey() + " = "
+							+ entry.getValue().getName() + " (" + entry.getValue() + ")");
 				}
 				for (Window window : instance.additionalWindows) {
-					logger.debug("-- Additional window instance " + window.getName() + " (" + window + ")");
+					logger.debug("-- Additional window instance " + window.getName() + " ("
+							+ window + ")");
 				}
 				for (Component comp : instance.components) {
 					logger.debug("-- Additional component " + comp.getName() + " (" + comp + ")");
@@ -112,10 +116,43 @@ public class AppHelper {
 		}
 	}
 
-	private Image windowsIcon;
+	private Image iconImage;
 
-	public void setWindowsIcon(Image windowsIcon) {
-		this.windowsIcon = windowsIcon;
+	/**
+	 * Set image icon for all creating windows.
+	 * 
+	 * @param iconImage
+	 */
+	public void setWindowsIcon(Image iconImage) {
+		this.iconImage = iconImage;
+	}
+
+	/**
+	 * Return image icon.
+	 * 
+	 * @return Image instance or null
+	 * 
+	 */
+	public Image getWindowIcon() {
+		return this.iconImage;
+	}
+
+	/**
+	 * Set supported locale, change {@link Locale#setDefault(Locale)}. <br>
+	 * 
+	 * <b>Do not call this method when frames or dialogs are loaded!</b> <br>
+	 * <b>The only way to safe change locale is call it before any initialization.</b>
+	 * 
+	 * @param locale
+	 */
+	public static void setLocale(SupportedLocale locale) {
+		if (locale == SupportedLocale.ENGLISH) {
+			Locale.setDefault(Locale.ENGLISH);
+		} else if (locale == SupportedLocale.RUSSIAN) {
+			Locale.setDefault(Const.LOCALE_RU);
+		} else {
+			logger.error("Unknown locale type {}. Using default {}.", locale, Locale.getDefault());
+		}
 	}
 
 	private IProgress progressInterface;
@@ -136,7 +173,8 @@ public class AppHelper {
 	 */
 	public IProgress getProgressInstance() {
 		if (this.progressInterface == null) {
-			throw new IllegalStateException("Internal error. Progress interface does not setup yet.");
+			throw new IllegalStateException(
+					"Internal error. Progress interface does not setup yet.");
 		}
 		return this.progressInterface;
 	}
@@ -207,7 +245,8 @@ public class AppHelper {
 	 * @throws Exception
 	 *             on any error
 	 */
-	public Window registerAdditionalWindow(Frame parent, Class<? extends Window> windowType) throws Exception {
+	public Window registerAdditionalWindow(Frame parent, Class<? extends Window> windowType)
+			throws Exception {
 		return this.getWindowImpl(parent, windowType, true);
 	}
 
@@ -264,8 +303,8 @@ public class AppHelper {
 		try {
 			return this.getWindowImpl(windowType, false);
 		} catch (Exception e) {
-			AppHelper.showExceptionDialog(null, "Unexpected error when creating instance of '" + windowType
-					+ "'. Please, consult with developers.", e);
+			AppHelper.showExceptionDialog(null, Messages.getString("AppHelper.err.windowCreate",
+					windowType), e);
 			return null;
 		}
 	}
@@ -305,8 +344,8 @@ public class AppHelper {
 	 *             on any error
 	 * @see #getWindowImpl(Frame, Class, boolean)
 	 */
-	protected synchronized Window getWindowImpl(Class<? extends Window> windowType, boolean additionalWindow)
-			throws Exception {
+	protected synchronized Window getWindowImpl(Class<? extends Window> windowType,
+			boolean additionalWindow) throws Exception {
 		return getWindowImpl(null, windowType, additionalWindow);
 	}
 
@@ -362,8 +401,8 @@ public class AppHelper {
 
 			}
 
-			if (this.windowsIcon != null) {
-				window.setIconImage(windowsIcon);
+			if (this.iconImage != null) {
+				window.setIconImage(iconImage);
 			}
 			if (additionalWindow) {
 				// Register in special collection
@@ -454,12 +493,11 @@ public class AppHelper {
 			// Updating all opened components
 			UIManager.setLookAndFeel(className);
 			for (Window window : windowsCollection.values()) {
+				SwingUtilities.updateComponentTreeUI(window);
 
 				if (window instanceof IRefreshable) {
 					((IRefreshable) window).refresh();
 				}
-
-				SwingUtilities.updateComponentTreeUI(window);
 			}
 			for (Window window : additionalWindows) {
 				SwingUtilities.updateComponentTreeUI(window);
@@ -533,8 +571,9 @@ public class AppHelper {
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout());
-		panel.add(new JLabel("<html><h2>" + Utils.splitStingBySlices(message, 60, "<br>") + "</h2><b>"
-				+ Utils.splitStingBySlices(e.toString(), 100, "<br>") + "</b><hr></html>"), BorderLayout.NORTH);
+		panel.add(new JLabel("<html><h2>" + Utils.splitStingBySlices(message, 60, "<br>")
+				+ "</h2><b>" + Utils.splitStingBySlices(e.toString(), 100, "<br>")
+				+ "</b><hr></html>"), BorderLayout.NORTH);
 
 		// Creating text area for big stack :)
 		JTextArea area = new JTextArea(out.toString());
@@ -545,7 +584,8 @@ public class AppHelper {
 		pane.setPreferredSize(new Dimension(600, 300));
 		panel.add(pane, BorderLayout.CENTER);
 
-		JOptionPane.showMessageDialog(parent, panel, "Ошибка", JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(parent, panel, Messages.getString("AppHelper.title.error"),
+				JOptionPane.ERROR_MESSAGE);
 
 		try {
 			out.close();
@@ -583,7 +623,7 @@ public class AppHelper {
 	 * @see #showErrorDialog(Component, String, String)
 	 */
 	public static void showErrorDialog(Component parent, String message) {
-		showErrorDialog(parent, message, "Ошибка");
+		showErrorDialog(parent, message, Messages.getString("AppHelper.title.error"));
 	}
 
 	/**
@@ -596,7 +636,8 @@ public class AppHelper {
 	 * @see #showErrorDialog(Component, String, String)
 	 */
 	public static void showFieldRequiredDialog(Component parent, String fieldName) {
-		showErrorDialog(parent, "Поле '" + fieldName + "' обязательно для заполнения.", "Ожидание ввода");
+		showErrorDialog(parent, Messages.getString("AppHelper.err.requiredField", fieldName),
+				Messages.getString("AppHelper.requiredFieldTitle"));
 	}
 
 }

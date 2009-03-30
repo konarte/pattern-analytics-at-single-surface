@@ -55,7 +55,8 @@ public class ClassesHelper {
 
 				if (zipFile != null) { // #2
 					try {
-						for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements();) {
+						for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e
+								.hasMoreElements();) {
 							ZipEntry entry = (ZipEntry) e.nextElement();
 							if (entry.getName().endsWith(".class")) {
 								names.add(entry.getName());
@@ -146,8 +147,9 @@ public class ClassesHelper {
 		Collection<Class<?>> result = new ArrayList<Class<?>>();
 
 		for (Class<?> clazz : getAvailableClasses()) {
-			if (!clazz.isInterface() && !clazz.isPrimitive() && !clazz.isAnonymousClass() && !clazz.isLocalClass()
-					&& !clazz.isMemberClass() && (clazz.getName().indexOf("Abstract") < 0)) {
+			if (!clazz.isInterface() && !clazz.isPrimitive() && !clazz.isAnonymousClass()
+					&& !clazz.isLocalClass() && !clazz.isMemberClass()
+					&& (clazz.getName().indexOf("Abstract") < 0)) {
 				boolean accept = true;
 				if (packageFrom != null) {
 					accept = clazz.getPackage().getName().startsWith(packageFrom);

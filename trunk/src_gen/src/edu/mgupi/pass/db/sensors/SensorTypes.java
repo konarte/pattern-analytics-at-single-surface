@@ -80,8 +80,8 @@ public class SensorTypes implements Serializable {
 	
 	@Column(name="IdSensorType", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D31204C98AC9008FD7")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31204C98AC9008FD7", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31205627A75203183")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31205627A75203183", strategy="native")	
 	private int idSensorType;
 	
 	@Column(name="Name", nullable=false, length=255)	
@@ -121,7 +121,7 @@ public class SensorTypes implements Serializable {
 	 * Изображение (конструктивная схема) датчика в виде картинки. 
 	 * Картинка должна быть стандартизированного размера. 256x256 пикселей.
 	 * 
-	 * Формат хранения -- PNG
+	 * Формат хранения -- JPG
 	 */
 	public void setSensorImage(byte[] value) {
 		this.sensorImage = value;
@@ -131,7 +131,7 @@ public class SensorTypes implements Serializable {
 	 * Изображение (конструктивная схема) датчика в виде картинки. 
 	 * Картинка должна быть стандартизированного размера. 256x256 пикселей.
 	 * 
-	 * Формат хранения -- PNG
+	 * Формат хранения -- JPG
 	 */
 	public byte[] getSensorImage() {
 		return sensorImage;

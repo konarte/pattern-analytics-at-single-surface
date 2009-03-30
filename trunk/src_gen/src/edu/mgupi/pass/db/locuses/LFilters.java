@@ -74,8 +74,8 @@ public class LFilters implements Serializable {
 	
 	@Column(name="IdLFilter", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D31204C98ABE408FCD")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31204C98ABE408FCD", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31205627A6B603179")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31205627A6B603179", strategy="native")	
 	private int idLFilter;
 	
 	@Column(name="Name", nullable=false, length=255)	
@@ -83,6 +83,9 @@ public class LFilters implements Serializable {
 	
 	@Column(name="Codename", nullable=false, length=255)	
 	private String codename;
+	
+	@Column(name="ServiceFilter", nullable=false, length=1)	
+	private boolean serviceFilter = false;
 	
 	private void setIdLFilter(int value) {
 		this.idLFilter = value;
@@ -122,6 +125,24 @@ public class LFilters implements Serializable {
 	 */
 	public String getCodename() {
 		return codename;
+	}
+	
+	/**
+	 * Если true, то это специальный, сервисный фильтр (он не выбирается
+	 * пользователем и может использоваться только в фильтрах
+	 * пре-процессинга).
+	 */
+	public void setServiceFilter(boolean value) {
+		this.serviceFilter = value;
+	}
+	
+	/**
+	 * Если true, то это специальный, сервисный фильтр (он не выбирается
+	 * пользователем и может использоваться только в фильтрах
+	 * пре-процессинга).
+	 */
+	public boolean getServiceFilter() {
+		return serviceFilter;
 	}
 	
 	public String toString() {

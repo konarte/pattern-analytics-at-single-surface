@@ -67,7 +67,9 @@ public interface IModule {
 	 * @return range from 0 to 1, where 0 -- locuses are not the same at any
 	 *         kind of criteria, 1 -- there are the same (other numbers is a
 	 *         measure of alike)
+	 * 
 	 * @throws IOException
+	 *             if anything goes wrong.
 	 * 
 	 * @throws ModuleException
 	 *             if anything goes wrong.

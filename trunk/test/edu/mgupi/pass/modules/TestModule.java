@@ -86,7 +86,8 @@ public class TestModule implements IModule, IInitiable {
 		logger.debug("Module closed");
 	}
 
-	public void analyze(BufferedImage filteredImage, Locuses store) throws IOException, ModuleException {
+	public void analyze(BufferedImage filteredImage, Locuses store) throws IOException,
+			ModuleException {
 		if (!init) {
 			throw new IllegalStateException("Internal error. Please, call init first.");
 		}
@@ -100,16 +101,21 @@ public class TestModule implements IModule, IInitiable {
 			throw new IllegalArgumentException(
 					"Internal error. Store was already processed! Attemt to reuse store object!");
 		}
-		
-		String imageParams = "" + filteredImage.getWidth() + "x" + filteredImage.getHeight() + " : "
-				+ filteredImage.getType();
+
+		//		if (true) {
+		//			throw new ModuleException("fuck!");
+		//		}
+
+		String imageParams = "" + filteredImage.getWidth() + "x" + filteredImage.getHeight()
+				+ " : " + filteredImage.getType();
 
 		ModuleHelper.putParameterValue(store, "myParam1", imageParams);
 		ModuleHelper.putParameterValue(store, "myParam2", filteredImage);
 
 		BufferedImage dest = new BufferedImage(256, 256, filteredImage.getType());
 		Graphics2D graphics2D = dest.createGraphics();
-		graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+				RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 		graphics2D.drawImage(filteredImage, 0, 0, 256, 256, null);
 
 		graphics2D.setFont(new Font("Courier", Font.PLAIN, 22));
@@ -117,11 +123,12 @@ public class TestModule implements IModule, IInitiable {
 
 		// graphics2D.setStroke(new BasicStroke(3.0f));
 
-		String text = TEST_PARAM1.getName() + "(" + TEST_PARAM1.getValue() + ") \n " + TEST_PARAM2.getName() + "("
-				+ TEST_PARAM2.getValue() + ")";
+		String text = TEST_PARAM1.getName() + "(" + TEST_PARAM1.getValue() + ") \n "
+				+ TEST_PARAM2.getName() + "(" + TEST_PARAM2.getValue() + ")";
 		graphics2D.setColor(Color.WHITE);
-		graphics2D.fillRect(20, 35 - graphics2D.getFontMetrics().getHeight() + 5, graphics2D.getFontMetrics()
-				.charsWidth(text.toCharArray(), 0, text.length()), graphics2D.getFontMetrics().getHeight());
+		graphics2D.fillRect(20, 35 - graphics2D.getFontMetrics().getHeight() + 5, graphics2D
+				.getFontMetrics().charsWidth(text.toCharArray(), 0, text.length()), graphics2D
+				.getFontMetrics().getHeight());
 
 		graphics2D.setColor(Color.BLACK);
 		graphics2D.drawString(text, 20, 35);
@@ -143,10 +150,12 @@ public class TestModule implements IModule, IInitiable {
 			throw new IllegalArgumentException("Internal error. graph2 must be not null.");
 		}
 		if (!graph1.getProcessed()) {
-			throw new IllegalArgumentException("Internal error. graph1 was not marked as processed!");
+			throw new IllegalArgumentException(
+					"Internal error. graph1 was not marked as processed!");
 		}
 		if (!graph2.getProcessed()) {
-			throw new IllegalArgumentException("Internal error. graph2 was not marked as processed!");
+			throw new IllegalArgumentException(
+					"Internal error. graph2 was not marked as processed!");
 		}
 
 		LocusModuleData param_g1 = ModuleHelper.getParameter(graph1, "myParam2");
@@ -154,10 +163,10 @@ public class TestModule implements IModule, IInitiable {
 
 		try {
 			new File("tmp").mkdir();
-			ImageIO.write((BufferedImage) ModuleHelper.getParameterValue(graph1, "myParam2", true), "PNG", new File(
-					"tmp/G1-myParam1-imageRestored.png"));
-			ImageIO.write((BufferedImage) ModuleHelper.getParameterValue(graph2, "myParam2", true), "PNG", new File(
-					"tmp/G2-myParam1-imageRestored.png"));
+			ImageIO.write((BufferedImage) ModuleHelper.getParameterValue(graph1, "myParam2", true),
+					"PNG", new File("tmp/G1-myParam1-imageRestored.png"));
+			ImageIO.write((BufferedImage) ModuleHelper.getParameterValue(graph2, "myParam2", true),
+					"PNG", new File("tmp/G2-myParam1-imageRestored.png"));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

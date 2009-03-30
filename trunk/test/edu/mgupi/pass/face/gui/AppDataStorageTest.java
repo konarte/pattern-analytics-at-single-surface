@@ -62,19 +62,22 @@ public class AppDataStorageTest {
 
 	@Test
 	public void testSearchModuleByClass() throws Exception {
-		LModules module = AppDataStorage.getInstance().searchModuleByClass(SimpleMatrixModule.class);
+		LModules module = AppDataStorage.getInstance()
+				.searchModuleByClass(SimpleMatrixModule.class);
 		assertNotNull(module);
 		assertEquals(SimpleMatrixModule.class.getName(), module.getCodename());
 
 		assertNull(AppDataStorage.getInstance().searchModuleByClass(new IModule() {
 
 			@Override
-			public void analyze(BufferedImage filteredImage, Locuses store) throws IOException, ModuleException {
+			public void analyze(BufferedImage filteredImage, Locuses store) throws IOException,
+					ModuleException {
 				fail("Not implemented.");
 			}
 
 			@Override
-			public double compare(Locuses graph1, Locuses graph2) throws IOException, ModuleException {
+			public double compare(Locuses graph1, Locuses graph2) throws IOException,
+					ModuleException {
 				fail("Not implemented.");
 				return 0;
 			}
@@ -108,12 +111,14 @@ public class AppDataStorageTest {
 			assertNull(AppDataStorage.getInstance().getModuleByClass(new IModule() {
 
 				@Override
-				public void analyze(BufferedImage filteredImage, Locuses store) throws IOException, ModuleException {
+				public void analyze(BufferedImage filteredImage, Locuses store) throws IOException,
+						ModuleException {
 					fail("Not implemented.");
 				}
 
 				@Override
-				public double compare(Locuses graph1, Locuses graph2) throws IOException, ModuleException {
+				public double compare(Locuses graph1, Locuses graph2) throws IOException,
+						ModuleException {
 					fail("Not implemented.");
 					return 0;
 				}

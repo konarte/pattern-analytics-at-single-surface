@@ -53,8 +53,8 @@ public class RescaleFilterTest {
 		//
 	}
 
-	private void convertImage(BufferedImage image, int brightness, int contrast, String name) throws IOException,
-			FilterException {
+	private void convertImage(BufferedImage image, int brightness, int contrast, String name)
+			throws IOException, FilterException {
 		filter.getBRIGHTNESS().setValue(brightness);
 		filter.getCONTRAST().setValue(contrast);
 
@@ -62,7 +62,8 @@ public class RescaleFilterTest {
 
 		new File("tmp").mkdir();
 
-		ImageIO.write(newImage, "JPG", new File("tmp/" + name + "-" + contrast + "-" + brightness + ".jpg"));
+		ImageIO.write(newImage, "JPG", new File("tmp/" + name + "-" + contrast + "-" + brightness
+				+ ".jpg"));
 	}
 
 	@Test

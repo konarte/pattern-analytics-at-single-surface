@@ -88,6 +88,12 @@ public class RecordFormWithImageTemplate extends JPanel {
 	 */
 	private JPanel getJPanelForm() {
 		if (jPanelForm == null) {
+
+			if (jPanelFormData == null) {
+				throw new IllegalStateException(
+						"Internal error. 'jPanelFormData' must be sets already.");
+			}
+
 			GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
 			gridBagConstraints1.weighty = 1.0D;
 			gridBagConstraints1.gridy = 1;
@@ -95,7 +101,7 @@ public class RecordFormWithImageTemplate extends JPanel {
 			gridBagConstraints1.fill = GridBagConstraints.HORIZONTAL;
 			gridBagConstraints1.anchor = GridBagConstraints.NORTH;
 			gridBagConstraints1.weightx = 1.0D;
-			
+
 			GridBagConstraints gridBagConstraints = new GridBagConstraints();
 			gridBagConstraints.gridy = 0;
 			gridBagConstraints.anchor = GridBagConstraints.NORTH;
@@ -133,7 +139,8 @@ public class RecordFormWithImageTemplate extends JPanel {
 	 */
 	public ImagePanel getImagePanel() {
 		if (imagePanel == null) {
-			imagePanel = new ImagePanel(Const.THUMB_WIDTH, Const.THUMB_WIDTH, true, "Изображение");
+			imagePanel = new ImagePanel(Const.THUMB_WIDTH, Const.THUMB_WIDTH, true, Messages
+					.getString("RecordFormWithImageTemplate.image"));
 		}
 		return imagePanel;
 	}
@@ -155,7 +162,7 @@ public class RecordFormWithImageTemplate extends JPanel {
 			gridBagConstraintsLabel.gridy = 0;
 			gridBagConstraintsLabel.weightx = 1;
 			jLabelImage = new JLabel();
-			jLabelImage.setText("Изображение:");
+			jLabelImage.setText(Messages.getString("RecordFormWithImageTemplate.image") + ":");
 			jPanelFormImageControl = new JPanel();
 			jPanelFormImageControl.setLayout(new GridBagLayout());
 			jPanelFormImageControl.add(jLabelImage, gridBagConstraintsLabel);
@@ -187,7 +194,7 @@ public class RecordFormWithImageTemplate extends JPanel {
 	private JButton getJButtonLoad() {
 		if (jButtonLoad == null) {
 			jButtonLoad = new JButton();
-			jButtonLoad.setText("Загрузить");
+			jButtonLoad.setText(Messages.getString("RecordFormWithImageTemplate.load"));
 			getImageControlAdapter().registerLoadImageButton(jButtonLoad);
 		}
 		return jButtonLoad;
@@ -201,7 +208,7 @@ public class RecordFormWithImageTemplate extends JPanel {
 	private JButton getJButtonReset() {
 		if (jButtonReset == null) {
 			jButtonReset = new JButton();
-			jButtonReset.setText("Очистить");
+			jButtonReset.setText(Messages.getString("RecordFormWithImageTemplate.clear"));
 			getImageControlAdapter().registerResetImageButton(jButtonReset);
 		}
 		return jButtonReset;

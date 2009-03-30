@@ -1,5 +1,6 @@
 package edu.mgupi.pass.util;
 
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 import edu.mgupi.pass.db.locuses.Locuses;
@@ -12,6 +13,18 @@ import edu.mgupi.pass.face.gui.SplashWindow;
  * 
  */
 public class Const {
+
+	/**
+	 * If this flag = true, then we'll show all errors with localization
+	 * (resources we not found).
+	 */
+	public final static boolean PRODUCTION_MODE = false;
+
+	/**
+	 * Russian locale.
+	 */
+	public final static Locale LOCALE_RU = new Locale("ru", "RU");
+
 	/**
 	 * Width of all thumbnails (for source image and images in tables)
 	 */
@@ -36,6 +49,11 @@ public class Const {
 	public final static int MAIN_IMAGE_HEIGHT = 1024;
 
 	/**
+	 * Name of production packed jar.
+	 */
+	public final static String DEFAULT_PACKED_JAR_NAME = "pattern-analytics.jar";
+
+	/**
 	 * Path to image we'll use for splash window. <br>
 	 * 
 	 * If null, than we use {@value #SPLASH_IMAGE_PLACE_DIR} and show random
@@ -54,11 +72,8 @@ public class Const {
 	/**
 	 * Path to file what we'll use as application icon.
 	 */
-	public final static String FORM_ICON_IMAGE_PATH = "resources/icon/icon.jpg";
-	/*
-	 * 
-	 * Stuff for help.
-	 */
+	public final static String FORM_ICON_IMAGE_PATH = "resources/icon/icon.gif";
+
 	/**
 	 * Program name.
 	 */
@@ -66,13 +81,14 @@ public class Const {
 	/**
 	 * Program version.
 	 */
-	public final static String VERSION = "0.1.R3";
+	public final static String VERSION = "0.1.R3.I18N";
 	/**
 	 * Program build number. Build increments on every built by Eclipse by now.
 	 * This is programmed in Ant script. Build number stored in file
 	 * "src/build".
 	 */
-	public final static String BUILD = ResourceBundle.getBundle("mybuild").getString("build.number");
+	public final static String BUILD = ResourceBundle.getBundle("mybuild")
+			.getString("build.number");
 
 	/**
 	 * Program last name (version info), formed as " v." + {@value #VERSION} +
@@ -100,6 +116,7 @@ public class Const {
 	 * List of used libraries. This is list builded by Ant script and stored in
 	 * file "src/used-libs".
 	 */
-	public final static String USED_LIBRARIES = ResourceBundle.getBundle("used-libs").getString("libraries");
+	public final static String USED_LIBRARIES = ResourceBundle.getBundle("used-libs").getString(
+			"libraries");
 
 }

@@ -42,7 +42,8 @@ public class SimpleSmoothFilter implements IFilter {
 
 		logger.debug("Smoothing image");
 
-		BufferedImage dest = new BufferedImage(source.getWidth(), source.getHeight(), source.getType());
+		BufferedImage dest = new BufferedImage(source.getWidth(), source.getHeight(), source
+				.getType());
 		return op.filter(source, dest);
 	}
 

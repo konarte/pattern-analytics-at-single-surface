@@ -18,7 +18,8 @@ import edu.mgupi.pass.db.locuses.Locuses;
 
 public class ModuleHelper {
 
-	public static LocusModuleData getParameter(Locuses locus, String name) throws ModuleParamException {
+	public static LocusModuleData getParameter(Locuses locus, String name)
+			throws ModuleParamException {
 		if (locus == null) {
 			return null;
 		}
@@ -33,16 +34,18 @@ public class ModuleHelper {
 
 	private final static String TMP_IMAGE_PARAM_NAME = "TEMPORARY_MODULE_IMAGE";
 
-	public static void putTemporaryModuleImage(Locuses store, BufferedImage image) throws ModuleParamException,
-			IOException {
+	public static void putTemporaryModuleImage(Locuses store, BufferedImage image)
+			throws ModuleParamException, IOException {
 		putParameterValue(store, TMP_IMAGE_PARAM_NAME, image);
 	}
 
-	public static BufferedImage getTemporaryModuleImage(Locuses store) throws ModuleParamException, IOException {
+	public static BufferedImage getTemporaryModuleImage(Locuses store) throws ModuleParamException,
+			IOException {
 		return (BufferedImage) getParameterValue(store, TMP_IMAGE_PARAM_NAME, false);
 	}
 
-	public static void putParameterValue(Locuses store, String name, Object value) throws ModuleParamException {
+	public static void putParameterValue(Locuses store, String name, Object value)
+			throws ModuleParamException {
 		if (store == null) {
 			throw new IllegalArgumentException("Internal error. Store is null.");
 		}
@@ -70,15 +73,16 @@ public class ModuleHelper {
 		} else if (value instanceof Serializable) {
 			param.setDataType(PARAM_TYPE_SERIALIZABLE);
 		} else {
-			throw new IllegalArgumentException("Internal error. Attempt to set non-serializable parameter '" + name
-					+ "' " + " of class '" + value.getClass() + "'");
+			throw new IllegalArgumentException(
+					"Internal error. Attempt to set non-serializable parameter '" + name + "' "
+							+ " of class '" + value.getClass() + "'");
 		}
 
 		param.setObjectData(value);
 	}
 
-	public static Object getParameterValue(Locuses store, String name, boolean required) throws ModuleParamException,
-			IOException {
+	public static Object getParameterValue(Locuses store, String name, boolean required)
+			throws ModuleParamException, IOException {
 		if (store == null) {
 			throw new IllegalArgumentException("Internal error. Store is null.");
 		}
@@ -129,8 +133,8 @@ public class ModuleHelper {
 	// return searchParameter(name, paramList, false);
 	// }
 
-	private static LocusModuleData searchParameter(String name, Collection<LocusModuleData> paramList, boolean mandatory)
-			throws ModuleParamException {
+	private static LocusModuleData searchParameter(String name,
+			Collection<LocusModuleData> paramList, boolean mandatory) throws ModuleParamException {
 		if (paramList == null) {
 			return null;
 		}
@@ -145,8 +149,8 @@ public class ModuleHelper {
 		}
 
 		if (mandatory) {
-			throw new ModuleParamException("Unable to find module parameter '" + name + "' into parameters list '"
-					+ paramList + "'. This parameter is required.");
+			throw new ModuleParamException("Unable to find module parameter '" + name
+					+ "' into parameters list '" + paramList + "'. This parameter is required.");
 		}
 
 		return null;

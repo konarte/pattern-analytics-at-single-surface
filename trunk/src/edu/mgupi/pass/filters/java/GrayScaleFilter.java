@@ -33,7 +33,8 @@ public class GrayScaleFilter implements IFilter {
 
 		logger.debug("Grayscaling image");
 
-		BufferedImage dest = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+		BufferedImage dest = new BufferedImage(source.getWidth(), source.getHeight(),
+				BufferedImage.TYPE_BYTE_GRAY);
 		Graphics2D graphics2D = dest.createGraphics();
 		graphics2D.drawImage(source, 0, 0, source.getWidth(), source.getHeight(), null);
 		graphics2D.dispose();

@@ -3,15 +3,19 @@ package edu.mgupi.pass.util;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -19,7 +23,7 @@ import javax.swing.AbstractButton;
 import javax.swing.JMenu;
 
 /**
- * Common utils class. In common, this class is not required to test.
+ * Common utilities class. In common, this class is not required to test.
  * 
  * @author raidan
  * 
@@ -81,6 +85,15 @@ public class Utils {
 		} while (source.length() > 0);
 
 		return dest.toString();
+	}
+
+	public static boolean isWeLoadedFromJar() {
+		URL url = Utils.class.getProtectionDomain().getCodeSource().getLocation();
+		if (url != null && url.getPath().endsWith(".jar")) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -191,6 +204,21 @@ public class Utils {
 
 	}
 
+	public static Collection<String> loadFromFile(File file) throws IOException {
+		Collection<String> lines = new ArrayList<String>();
+
+		BufferedReader input = new BufferedReader(new FileReader(file));
+		try {
+			String line = null;
+			while ((line = input.readLine()) != null) {
+				lines.add(line);
+			}
+			return lines;
+		} finally {
+			input.close();
+		}
+	}
+
 	public static List<File> listFiles(final String dir, final String ext) {
 		return listFiles(dir, new FileFilter() {
 
@@ -247,7 +275,8 @@ public class Utils {
 	 * @param replaceTo
 	 * @return string with replaces
 	 */
-	public final static StringBuilder replaceAll(StringBuilder buffer, String replaceWhat, String replaceTo) {
+	public final static StringBuilder replaceAll(StringBuilder buffer, String replaceWhat,
+			String replaceTo) {
 		if (buffer == null || replaceWhat == null) {
 			return null;
 		}
@@ -261,8 +290,8 @@ public class Utils {
 				buffer.replace(idx, idx + len, replaceTo);
 				cnt++;
 				if (cnt > MAX_REPLACEABLE_ITERATIONS) {
-					throw new IllegalStateException("Critical error. Replacing '" + replaceWhat + "' to '" + replaceTo
-							+ "' going to infinite loop.");
+					throw new IllegalStateException("Critical error. Replacing '" + replaceWhat
+							+ "' to '" + replaceTo + "' going to infinite loop.");
 				}
 				idx = buffer.indexOf(replaceWhat, idx + len_to);
 			}
@@ -299,8 +328,8 @@ public class Utils {
 	 * 
 	 * @param parent
 	 * @param name
-	 * @return found Component with this name or null, if component with this
-	 *         name is not found
+	 * @return instance of found component or null (if component with this name
+	 *         is not found)
 	 */
 	public static Component getChildNamed(Component parent, String name) {
 
@@ -310,11 +339,6 @@ public class Utils {
 		if (name == null) {
 			return null;
 		}
-
-		//		// Debug line
-		//		if (logger.isTraceEnabled()) {
-		//			logger.trace("Search: " + name + " Class: " + parent.getClass() + " Name: " + parent.getName());
-		//		}
 
 		if (name.equals(parent.getName())) {
 			return parent;
@@ -333,6 +357,38 @@ public class Utils {
 		}
 
 		return null;
+	}
+
+	public final static int PLURAL_FIRST = 1;
+	public final static int PLURAL_SECOND = 2;
+	public final static int PLURAL_THIRD = 5;
+
+	public static int getPluralForm(int value) {
+		int pluralForm = 0;
+		if (Locale.getDefault().equals(Const.LOCALE_RU)) {
+
+			pluralForm = PLURAL_THIRD;
+			if (value > 0) {
+				pluralForm = Math.abs(value) % 100;
+				int dec = pluralForm % 10;
+				if (pluralForm >= 10 && pluralForm <= 20) {
+					pluralForm = PLURAL_THIRD;
+				} else if (dec > 1 && dec < 5) {
+					pluralForm = PLURAL_SECOND;
+				} else if (dec == 1) {
+					pluralForm = PLURAL_FIRST;
+				} else {
+					pluralForm = PLURAL_THIRD;
+				}
+			}
+		} else {
+			pluralForm = value == 1 ? PLURAL_FIRST : PLURAL_SECOND;
+		}
+		return pluralForm;
+	}
+
+	public static String formatSimplePlurals(String pattern, int value) {
+		return MessageFormat.format(pattern, new Object[] { value, getPluralForm(value) });
 	}
 
 }

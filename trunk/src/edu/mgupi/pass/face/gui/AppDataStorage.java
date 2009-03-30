@@ -6,6 +6,7 @@ import java.util.Comparator;
 import org.orm.PersistentException;
 
 import edu.mgupi.pass.db.locuses.LFilters;
+import edu.mgupi.pass.db.locuses.LFiltersCriteria;
 import edu.mgupi.pass.db.locuses.LFiltersFactory;
 import edu.mgupi.pass.db.locuses.LModules;
 import edu.mgupi.pass.db.locuses.LModulesFactory;
@@ -47,16 +48,18 @@ public class AppDataStorage {
 	/**
 	 * Special reset method.
 	 */
-	protected static void reset() {
+	protected void reset() {
 		if (instance != null) {
-			instance.moduleList = null;
-			instance.filterList = null;
+			instance.modulesList = null;
+			instance.filtersList = null;
+			instance.serviceFiltersList = null;
 			instance = null;
 		}
 	}
 
-	private LModules[] moduleList = null;
-	private LFilters[] filterList = null;
+	private LModules[] modulesList = null;
+	private LFilters[] filtersList = null;
+	private LFilters[] serviceFiltersList = null;
 
 	/**
 	 * Check using module for use in application. Method will ensure that this
@@ -67,29 +70,28 @@ public class AppDataStorage {
 	 * @throws PersistentException
 	 * @throws ModuleException
 	 */
-	public void checkUsingModule(Class<? extends IModule> moduleClass) throws PersistentException, ModuleException {
-		if (this.searchModuleByClass(moduleClass) == null) {
-			throw new ModuleNotFoundException("Module '" + moduleClass.getName()
-					+ "' is not registered. Unable to use.");
-		}
+	public void checkUsingModule(Class<? extends IModule> moduleClass) throws PersistentException,
+			ModuleException {
+		this.getModuleByClass(moduleClass);
 	}
 
-	public void checkUsingFilter(Class<? extends IFilter> filterClass) throws PersistentException, FilterException {
-		if (this.searchFilterByClass(filterClass) == null) {
-			throw new FilterNotFoundException("Filter '" + filterClass.getName()
-					+ "' is not registered. Unable to use.");
-		}
+	public void checkUsingFilter(Class<? extends IFilter> filterClass) throws PersistentException,
+			FilterException {
+		this.getFilterByClass(filterClass);
 	}
 
-	public LModules getModuleByClass(Class<? extends IModule> moduleClass) throws PersistentException, ModuleException {
+	public LModules getModuleByClass(Class<? extends IModule> moduleClass)
+			throws PersistentException, ModuleException {
 		LModules module = this.searchModuleByClass(moduleClass);
 		if (module == null) {
-			throw new ModuleNotFoundException("Unable to find registered module '" + moduleClass.getName() + "'.");
+			throw new ModuleNotFoundException(Messages
+					.getString("AppDataStorage.err.moduleNotFound", moduleClass.getName()));
 		}
 		return module;
 	}
 
-	public LModules searchModuleByClass(Class<? extends IModule> moduleClass) throws PersistentException {
+	public LModules searchModuleByClass(Class<? extends IModule> moduleClass)
+			throws PersistentException {
 
 		if (moduleClass == null) {
 			throw new IllegalArgumentException("Internal error. 'moduleClass' must be not null.");
@@ -108,19 +110,20 @@ public class AppDataStorage {
 		try {
 			return this.listLModulesImpl();
 		} catch (Throwable t) {
-			AppHelper.showExceptionDialog(null, "Error when loading modules list", t);
+			AppHelper.showExceptionDialog(null, Messages
+					.getString("AppDataStorage.err.loadingModuleList"), t);
 			return null;
 		}
 	}
 
 	public LModules[] listLModulesImpl() throws PersistentException {
-		if (this.moduleList == null) {
-			moduleList = LModulesFactory.listLModulesByQuery(null, null);
-			if (moduleList == null || moduleList.length == 0) {
-				throw new PersistentException(
-						"No registered analyze modules found. Unable to work. Please, fill table 'LModules'.");
+		if (this.modulesList == null) {
+			modulesList = LModulesFactory.listLModulesByQuery(null, null);
+			if (modulesList == null || modulesList.length == 0) {
+				throw new PersistentException(Messages
+						.getString("AppDataStorage.err.noModulesFound"));
 			}
-			Arrays.sort(moduleList, new Comparator<LModules>() {
+			Arrays.sort(modulesList, new Comparator<LModules>() {
 				@Override
 				public int compare(LModules o1, LModules o2) {
 					if (o1 != null && o2 != null) {
@@ -131,10 +134,11 @@ public class AppDataStorage {
 			});
 
 		}
-		return this.moduleList;
+		return this.modulesList;
 	}
 
-	public LFilters searchFilterByClass(Class<? extends IFilter> filterClass) throws PersistentException {
+	public LFilters searchFilterByClass(Class<? extends IFilter> filterClass)
+			throws PersistentException {
 
 		if (filterClass == null) {
 			throw new IllegalArgumentException("Internal error. 'filterClass' must be not null.");
@@ -149,24 +153,56 @@ public class AppDataStorage {
 		return null;
 	}
 
+	public LFilters getFilterByClass(Class<? extends IFilter> filterClass)
+			throws PersistentException, FilterException {
+		LFilters filter = this.searchFilterByClass(filterClass);
+		if (filter == null) {
+			throw new FilterNotFoundException(Messages
+					.getString("AppDataStorage.err.filterNotFound", filterClass.getName()));
+		}
+		return filter;
+	}
+
+	public LFilters getServiceFilterByClass(Class<? extends IFilter> filterClass)
+			throws PersistentException, FilterException {
+		LFilters filter = this.searchFilterByClass(filterClass);
+		if (filter == null) {
+			String className = filterClass.getName();
+			for (LFilters module : this.listServiceFilters()) {
+				if (module.getCodename().equals(className)) {
+					return module;
+				}
+			}
+		}
+		if (filter == null) {
+			throw new FilterNotFoundException(Messages
+					.getString("AppDataStorage.err.serviceFilterNotFound", filterClass.getName()));
+		}
+		return filter;
+	}
+
 	public LFilters[] listLFilters() {
 		try {
 			return this.listLFiltersImpl();
 		} catch (Throwable t) {
-			AppHelper.showExceptionDialog(null, "Error when loading filters list", t);
+			AppHelper.showExceptionDialog(null, Messages
+					.getString("AppDataStorage.err.loadingFilterList"), t);
 			return null;
 		}
 	}
 
 	public LFilters[] listLFiltersImpl() throws PersistentException {
-		if (this.filterList == null) {
-			filterList = LFiltersFactory.listLFiltersByQuery(null, null);
-			if (filterList == null || filterList.length == 0) {
-				throw new PersistentException(
-						"No registered filters found. Unable to work. Please, fill table 'LFilters'.");
+		if (this.filtersList == null) {
+			LFiltersCriteria criteria = new LFiltersCriteria();
+			criteria.serviceFilter.eq(false);
+
+			filtersList = LFiltersFactory.listLFiltersByCriteria(criteria);
+			if (filtersList == null || filtersList.length == 0) {
+				throw new PersistentException(Messages
+						.getString("AppDataStorage.err.noFiltersFound"));
 			}
 
-			Arrays.sort(filterList, new Comparator<LFilters>() {
+			Arrays.sort(filtersList, new Comparator<LFilters>() {
 				@Override
 				public int compare(LFilters o1, LFilters o2) {
 					if (o1 != null && o2 != null) {
@@ -176,8 +212,18 @@ public class AppDataStorage {
 				}
 			});
 		}
-		return this.filterList;
+		return this.filtersList;
 
+	}
+
+	private LFilters[] listServiceFilters() throws PersistentException {
+		if (this.serviceFiltersList == null) {
+			LFiltersCriteria criteria = new LFiltersCriteria();
+			criteria.serviceFilter.eq(true);
+
+			serviceFiltersList = LFiltersFactory.listLFiltersByCriteria(criteria);
+		}
+		return serviceFiltersList;
 	}
 
 }

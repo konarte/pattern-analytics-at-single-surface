@@ -15,7 +15,7 @@ public class LModulesList extends LFiltersList {
 
 	public LModulesList(Frame owner) {
 		super(owner);
-		this.setTitle("Список модулей");
+		this.setTitle(Messages.getString("LModulesList.title"));
 		this.setName("lModulesList");
 	}
 
@@ -28,7 +28,8 @@ public class LModulesList extends LFiltersList {
 			cells[i][1] = modules[i].getCodename();
 		}
 
-		JTableReadOnly table = new JTableReadOnly(cells, new String[] { "Название модуля", "Используемый класс" });
+		JTableReadOnly table = new JTableReadOnly(cells, new String[] {
+				Messages.getString("LModulesList.name"), Messages.getString("LModulesList.class") });
 		return table;
 	}
 

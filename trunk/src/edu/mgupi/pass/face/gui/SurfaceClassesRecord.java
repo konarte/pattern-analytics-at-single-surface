@@ -26,19 +26,20 @@ public class SurfaceClassesRecord extends RecordEditorTemplate<SurfaceClasses> {
 	//private final static Logger logger = LoggerFactory.getLogger(SurfaceClassesRecord.class);
 
 	public SurfaceClassesRecord(Frame owner) {
-		super(owner, "surfaceClassesRecordDialog", "Классы дефектов");
+		super(owner, "surfaceClassesRecordDialog", Messages.getString("SurfaceClassesRecord.title"));
 		super.setFormPanelData(getFormPanel());
 	}
 
 	@Override
 	protected String getDenyDeletionMessage(Object foundObject) {
 		SurfaceTypes type = (SurfaceTypes) foundObject;
-		return "Поверхность с типом '" + type.getName() + "' использует класс '" + type.getSurfaceClass().getName()
-				+ "'.";
+		return Messages.getString("SurfaceClassesRecord.exists", type.getName(), type
+				.getSurfaceClass().getName());
 	}
 
 	@Override
-	protected Criteria getMultipleDeleteCriteria(Collection<SurfaceClasses> objects) throws Exception {
+	protected Criteria getMultipleDeleteCriteria(Collection<SurfaceClasses> objects)
+			throws Exception {
 
 		SurfaceTypesCriteria criteria = new SurfaceTypesCriteria();
 		int[] in = new int[objects.size()];
@@ -51,7 +52,8 @@ public class SurfaceClassesRecord extends RecordEditorTemplate<SurfaceClasses> {
 	}
 
 	@Override
-	protected Criteria getUniqueCheckCriteria(SurfaceClasses object, String newValue) throws Exception {
+	protected Criteria getUniqueCheckCriteria(SurfaceClasses object, String newValue)
+			throws Exception {
 		SurfaceClassesCriteria criteria = new SurfaceClassesCriteria();
 		criteria.name.eq(newValue);
 		if (object.getIdSurfaceClass() != 0) {
@@ -107,11 +109,13 @@ public class SurfaceClassesRecord extends RecordEditorTemplate<SurfaceClasses> {
 
 			jPanelPlace.setLayout(new GridBagLayout());
 
-			jLabelIDValue = new JLabel("0");
+			jLabelIDValue = new JLabel("0"); //$NON-NLS-1$
 			jTextFieldNameValue = new JTextField();
 
-			super.putComponentPair(jPanelPlace, "Код", jLabelIDValue);
-			super.putUniqueComponentPair(jPanelPlace, "Название класса", jTextFieldNameValue);
+			super.putComponentPair(jPanelPlace,
+					Messages.getString("SurfaceClassesRecord.id"), jLabelIDValue); //$NON-NLS-1$
+			super.putUniqueComponentPair(jPanelPlace, Messages
+					.getString("SurfaceClassesRecord.name"), jTextFieldNameValue); //$NON-NLS-1$
 		}
 		return jPanelPlace;
 	}

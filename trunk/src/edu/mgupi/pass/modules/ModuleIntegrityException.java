@@ -13,8 +13,8 @@ public class ModuleIntegrityException extends ModuleException {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public ModuleIntegrityException(Throwable integrityExceptiom, Throwable cause) {
-		super("Module integrity exception: " + integrityExceptiom.toString(), cause);
+	public ModuleIntegrityException(String message, Throwable cause) {
+		super(message, cause);
 	}
 
 }

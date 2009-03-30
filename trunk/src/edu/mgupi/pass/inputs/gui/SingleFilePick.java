@@ -33,17 +33,17 @@ public class SingleFilePick implements IInput {
 
 	public void init() {
 		//
-		logger.debug("{}. Init single file pick.", this);
+		logger.debug("{}. Init single file pick.", this); //$NON-NLS-1$
 
 		chooser = new JFileChooser();
 		AppHelper.getInstance().registerAdditionalComponent(chooser);
 
-		chooser.setCurrentDirectory(new File("."));
+		chooser.setCurrentDirectory(new File(".")); //$NON-NLS-1$
 		chooser.setMultiSelectionEnabled(false);
 
 		String formatNames[] = ImageIO.getReaderFileSuffixes();
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("Все поддерживаемые изображения "
-				+ Arrays.toString(formatNames), formatNames));
+		chooser.addChoosableFileFilter(new FileNameExtensionFilter(Messages.getString(
+				"SingleFilePick.supportedImages", Arrays.toString(formatNames)), formatNames)); //$NON-NLS-1$
 		chooser.setAccessory(new ImagePreviewer(chooser));
 
 	}
@@ -67,7 +67,8 @@ public class SingleFilePick implements IInput {
 					if (newFile != null) {
 						ImageIcon icon = new ImageIcon(newFile.getPath());
 						if (icon.getIconWidth() > getWidth())
-							icon = new ImageIcon(icon.getImage().getScaledInstance(getWidth(), -1, Image.SCALE_DEFAULT));
+							icon = new ImageIcon(icon.getImage().getScaledInstance(getWidth(), -1,
+									Image.SCALE_DEFAULT));
 						setIcon(icon);
 						repaint();
 					}
@@ -79,7 +80,7 @@ public class SingleFilePick implements IInput {
 
 	public void close() {
 		if (chooser != null) {
-			logger.debug("{}. Close single file pick.", this);
+			logger.debug("{}. Close single file pick.", this); //$NON-NLS-1$
 			chooser.removeAll();
 			AppHelper.getInstance().unregisterAdditionalComponent(chooser);
 			chooser = null;

@@ -5,8 +5,8 @@ import java.awt.Component;
 import java.awt.Window;
 import java.io.File;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.Iterator;
+import java.util.Locale;
 
 import javax.swing.JCheckBox;
 import javax.swing.LookAndFeel;
@@ -20,8 +20,10 @@ import org.orm.PersistentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.mgupi.pass.face.Application;
 import edu.mgupi.pass.face.gui.AppHelper;
 import edu.mgupi.pass.face.gui.MainFrame;
+import edu.mgupi.pass.face.gui.SettingsDialog;
 import edu.mgupi.pass.face.gui.template.ImagePanel;
 import edu.mgupi.pass.modules.ModuleProcessor;
 
@@ -59,12 +61,12 @@ public class Config {
 	 * 
 	 */
 	public static enum SourceMode {
-		LEFT_TOP("Разместить слева сверху"), //
-		CENTER("Разместить в центре"), //
-		SCALE("Отмасштабировать и дополнить"), //
-		SCALE_IF_LEFT_TOP(MessageFormat.format("Больше {0}x{1} -- масштабировать, меньше -- разместить слева сверху",
+		LEFT_TOP(Messages.getString("Config.sourceMode.LEFT_TOP")), // 
+		CENTER(Messages.getString("Config.sourceMode.CENTER")), // 
+		SCALE(Messages.getString("Config.sourceMode.SCALE")), // 
+		SCALE_IF_LEFT_TOP(Messages.getString("Config.sourceMode.SCALE_IF_LEFT_TOP",
 				Const.MAIN_IMAGE_WIDTH, Const.MAIN_IMAGE_HEIGHT)), //
-		SCALE_IF_CENTER(MessageFormat.format("Больше {0}x{1} -- масштабировать, меньше -- разместить в центре",
+		SCALE_IF_CENTER(Messages.getString("Config.sourceMode.SCALE_IF_CENTER",
 				Const.MAIN_IMAGE_WIDTH, Const.MAIN_IMAGE_HEIGHT));
 
 		private String title;
@@ -86,12 +88,12 @@ public class Config {
 	 * 
 	 */
 	public static enum DeletionMode {
-		CONFIRM("Требовать подтверждение удаления каждой записи"), //
-		CONFIRM_MULTPLES("Требовать подтверждение только при удалении нескольких строк"), //
+		CONFIRM(Messages.getString("Config.deletionMode.CONFIRM")), // 
+		CONFIRM_MULTPLES(Messages.getString("Config.deletionMode.CONFIRM_MULTIPLIES")), // 
 		/*
 		 * CONFIRM_USERS_ONLY("Требовать подтверждения только у пользователей"),
 		 */
-		NO_CONFIRM("Удалять без подтверждения"); //
+		NO_CONFIRM(Messages.getString("Config.deletionMode.NO_CONFIRM")); // 
 
 		private String title;
 
@@ -111,13 +113,32 @@ public class Config {
 	 * 
 	 */
 	public static enum DeletionCheckMode {
-		ACQUIRE_THEN_CHECK("Сначала спросить, потом проверить возможность удаления."), //
-		CHECK_THEN_ACQUIRE("Сначала проверить возможность удаления, потом спросить."), //
-		NO_CHECK("DEBUG. Не проверять возможность удаления (выдавать SQL-исключение при ошибке).");
+		ACQUIRE_THEN_CHECK(Messages.getString("Config.delectionCheckMode.ACQUIRE_THEN_CHECK")), // 
+		CHECK_THEN_ACQUIRE(Messages.getString("Config.deletionCheckMode.CHECK_THEN_ACQUIRE")), // 
+		NO_CHECK(Messages.getString("Config.deletionCheckMode.NO_CHECK"));
 
 		private String title;
 
 		private DeletionCheckMode(String title) {
+			this.title = title;
+		}
+
+		public String toString() {
+			return title;
+		}
+	}
+
+	/**
+	 * Supported language packs and locales.
+	 * 
+	 * @author raidan
+	 * 
+	 */
+	public static enum SupportedLocale {
+		RUSSIAN("Русский язык"), ENGLISH("English language");
+		private String title;
+
+		private SupportedLocale(String title) {
 			this.title = title;
 		}
 
@@ -134,8 +155,8 @@ public class Config {
 	 * @author raidan
 	 */
 	public static enum TestTransactionMode {
-		COMMIT_EVERY_ROW("'commit' на каждую вставку/удаление"), // 
-		COMMIT_BULK("'commit' на весь табличный интерфейс");
+		COMMIT_EVERY_ROW(Messages.getString("Config.testTM.COMMIT_EVERY_ROW")), //  
+		COMMIT_BULK(Messages.getString("Config.testTM.COMMIT_BULK"));
 
 		private String title;
 
@@ -165,6 +186,12 @@ public class Config {
 			instance.prepareConfig();
 		}
 		return instance;
+	}
+
+	public static synchronized void close() {
+		if (instance == null) {
+			instance = null;
+		}
 	}
 
 	/**
@@ -200,7 +227,8 @@ public class Config {
 				}
 			}
 
-			configInstance = new org.apache.commons.configuration.INIConfiguration(DEFAULT_COMMON_CONFIG_NAME);
+			configInstance = new org.apache.commons.configuration.INIConfiguration(
+					DEFAULT_COMMON_CONFIG_NAME);
 			configInstance.setEncoding("UTF-8");
 
 			currentConfigInstance = configInstance.subset("current");
@@ -214,6 +242,7 @@ public class Config {
 	private final static String PARAM_CURRENT_SOURCE_MODE = "sourceMode";
 	private final static String PARAM_CURRENT_BACKGROUND = "imageBackground";
 	private final static String PARAM_LOOK_AND_FEEL = "lookAndFeel";
+	private final static String PARAM_LOCALE = "locale";
 	private final static String PARAM_ROWS_DELETE_MODE = "rowsDeleteMode";
 	private final static String PARAM_TRANSACTION_MODE = "transactionMode";
 	private final static String PARAM_DATA_DELETION_CHECK = "dataDeletionCheck";
@@ -231,8 +260,8 @@ public class Config {
 		}
 		final SourceMode default_ = SourceMode.LEFT_TOP;
 		try {
-			currentSourceMode = SourceMode.valueOf(this.currentConfigInstance.getString(PARAM_CURRENT_SOURCE_MODE,
-					default_.name()));
+			currentSourceMode = SourceMode.valueOf(this.currentConfigInstance.getString(
+					PARAM_CURRENT_SOURCE_MODE, default_.name()));
 			return currentSourceMode;
 		} catch (IllegalArgumentException iae) {
 			return default_;
@@ -251,7 +280,8 @@ public class Config {
 			return currentColor;
 		}
 		final Color default_ = Color.WHITE;
-		currentColor = new Color(this.currentConfigInstance.getInt(PARAM_CURRENT_BACKGROUND, default_.getRGB()));
+		currentColor = new Color(this.currentConfigInstance.getInt(PARAM_CURRENT_BACKGROUND,
+				default_.getRGB()));
 		return currentColor;
 	}
 
@@ -278,8 +308,8 @@ public class Config {
 		}
 		final DeletionMode default_ = DeletionMode.CONFIRM;
 		try {
-			currentRowsDeletionMode = DeletionMode.valueOf(this.commonConfigInstance.getString(PARAM_ROWS_DELETE_MODE,
-					default_.name()));
+			currentRowsDeletionMode = DeletionMode.valueOf(this.commonConfigInstance.getString(
+					PARAM_ROWS_DELETE_MODE, default_.name()));
 			return currentRowsDeletionMode;
 		} catch (IllegalArgumentException iae) {
 			return default_;
@@ -303,8 +333,8 @@ public class Config {
 		}
 		final TestTransactionMode default_ = TestTransactionMode.COMMIT_EVERY_ROW;
 		try {
-			currentTransactionMode = TestTransactionMode.valueOf(this.commonConfigInstance.getString(
-					PARAM_TRANSACTION_MODE, default_.name()));
+			currentTransactionMode = TestTransactionMode.valueOf(this.commonConfigInstance
+					.getString(PARAM_TRANSACTION_MODE, default_.name()));
 
 			//AppHelper.setDatabaseTransactionMode(currentTransactionMode);
 			return currentTransactionMode;
@@ -326,9 +356,44 @@ public class Config {
 		}
 		final DeletionCheckMode default_ = DeletionCheckMode.ACQUIRE_THEN_CHECK;
 		try {
-			currentDeletionCheckMode = DeletionCheckMode.valueOf(this.commonConfigInstance.getString(
-					PARAM_DATA_DELETION_CHECK, default_.name()));
+			currentDeletionCheckMode = DeletionCheckMode.valueOf(this.commonConfigInstance
+					.getString(PARAM_DATA_DELETION_CHECK, default_.name()));
 			return currentDeletionCheckMode;
+		} catch (IllegalArgumentException iae) {
+			return default_;
+		}
+	}
+
+	private String defaultEncoding = "UTF-8";
+
+	/**
+	 * Return default encoding for all saved/loaded files.
+	 * 
+	 * @return encoding name
+	 */
+	public String getDefaultEncoding() {
+		return defaultEncoding;
+	}
+
+	private SupportedLocale currentLocale = null;
+
+	/**
+	 * Return current locale from supported list. <br>
+	 * 
+	 * Usually used by {@link SettingsDialog} and {@link Application}.
+	 * 
+	 * @return locale
+	 */
+	public SupportedLocale getCurrentLocale() {
+		if (currentLocale != null) {
+			return currentLocale;
+		}
+		final SupportedLocale default_ = Locale.getDefault().equals(Const.LOCALE_RU) ? SupportedLocale.RUSSIAN
+				: SupportedLocale.ENGLISH;
+		try {
+			currentLocale = SupportedLocale.valueOf(this.commonConfigInstance.getString(
+					PARAM_LOCALE, default_.name()));
+			return currentLocale;
 		} catch (IllegalArgumentException iae) {
 			return default_;
 		}
@@ -343,8 +408,8 @@ public class Config {
 	 */
 	public boolean setCurrentSourceMode(SourceMode value) {
 
-		boolean res = this.setCurrentParameterImpl(PARAM_CURRENT_SOURCE_MODE, this.getCurrentSourceMode().name(), value
-				.name());
+		boolean res = this.setCurrentParameterImpl(PARAM_CURRENT_SOURCE_MODE, this
+				.getCurrentSourceMode().name(), value.name());
 		this.currentSourceMode = value;
 		return res;
 	}
@@ -357,8 +422,8 @@ public class Config {
 	 * @return true if values changed, false if this is equals to previous
 	 */
 	public boolean setCurrentBackground(Color value) {
-		boolean res = this.setCurrentParameterImpl(PARAM_CURRENT_BACKGROUND, this.getCurrentBackground().getRGB(),
-				value.getRGB());
+		boolean res = this.setCurrentParameterImpl(PARAM_CURRENT_BACKGROUND, this
+				.getCurrentBackground().getRGB(), value.getRGB());
 		this.currentColor = value;
 		return res;
 	}
@@ -375,8 +440,8 @@ public class Config {
 	 * @throws IllegalAccessException
 	 * @throws UnsupportedLookAndFeelException
 	 */
-	public boolean setLookAndFeel(String value) throws ClassNotFoundException, InstantiationException,
-			IllegalAccessException, UnsupportedLookAndFeelException {
+	public boolean setLookAndFeel(String value) throws ClassNotFoundException,
+			InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
 		if (this.setCommonParameterImpl(PARAM_LOOK_AND_FEEL, this.getLookAndFeel(), value)) {
 			AppHelper.getInstance().updateUI(value);
 			return true;
@@ -393,8 +458,8 @@ public class Config {
 	 * @return true if values changed, false if this is equals to previous
 	 */
 	public boolean setRowsDeleteMode(DeletionMode value) {
-		boolean res = this
-				.setCommonParameterImpl(PARAM_ROWS_DELETE_MODE, this.getRowsDeleteMode().name(), value.name());
+		boolean res = this.setCommonParameterImpl(PARAM_ROWS_DELETE_MODE, this.getRowsDeleteMode()
+				.name(), value.name());
 		this.currentRowsDeletionMode = value;
 		return res;
 	}
@@ -410,15 +475,16 @@ public class Config {
 	 * @throws PersistentException
 	 */
 	public boolean setTransactionMode(TestTransactionMode value) throws PersistentException {
-		boolean res = this.setCommonParameterImpl(PARAM_TRANSACTION_MODE, this.getTransactionMode().name(), value
-				.name());
+		boolean res = this.setCommonParameterImpl(PARAM_TRANSACTION_MODE, this.getTransactionMode()
+				.name(), value.name());
 		this.currentTransactionMode = value;
-		if (res) {
-			//AppHelper.setDatabaseTransactionMode(value);
-			return true;
-		} else {
-			return false;
-		}
+		return res;
+		//		if (res) {
+		//			//AppHelper.setDatabaseTransactionMode(value);
+		//			return true;
+		//		} else {
+		//			return false;
+		//		}
 	}
 
 	/**
@@ -430,13 +496,32 @@ public class Config {
 	 */
 	public boolean setDeletionCheckModeMode(DeletionCheckMode value) {
 
-		boolean res = this.setCommonParameterImpl(PARAM_DATA_DELETION_CHECK, this.getDeletionCheckMode().name(), value
-				.name());
+		boolean res = this.setCommonParameterImpl(PARAM_DATA_DELETION_CHECK, this
+				.getDeletionCheckMode().name(), value.name());
 		this.currentDeletionCheckMode = value;
 		return res;
 	}
 
-	private boolean setParameterImpl(Configuration config, String paramName, Object oldValue, Object newValue) {
+	/**
+	 * Set new {@link Locale}. Do not forget, that we must restart application
+	 * for apply changes. <br>
+	 * 
+	 * <b>This method does not change locale in runtime, this is too dangerous.</b>
+	 * 
+	 * @param value
+	 *            new {@link SupportedLocale}
+	 * @return true if values changed, false if this is equals to previous
+	 * @see AppHelper#setLocale(SupportedLocale)
+	 */
+	public boolean setCurrentLocale(SupportedLocale value) {
+		boolean res = this.setCommonParameterImpl(PARAM_LOCALE, this.getCurrentLocale().name(),
+				value.name());
+		this.currentLocale = value;
+		return res;
+	}
+
+	private boolean setParameterImpl(Configuration config, String paramName, Object oldValue,
+			Object newValue) {
 		if (Utils.equals(newValue, oldValue)) {
 			return false;
 		} else {
@@ -553,8 +638,9 @@ public class Config {
 		logger.trace("Loading window position for window {}.", window.getName());
 
 		Configuration config = this.configInstance.subset("window-" + window.getName());
-		window.setBounds(config.getInt("x", window.getX()), config.getInt("y", window.getY()), config.getInt("width",
-				window.getWidth()), config.getInt("height", window.getHeight()));
+		window.setBounds(config.getInt("x", window.getX()), config.getInt("y", window.getY()),
+				config.getInt("width", window.getWidth()), config.getInt("height", window
+						.getHeight()));
 
 		Component component = Utils.getChildNamed(window, DEFAULT_SCALE_BUTTON_NAME);
 		if (component != null && component instanceof JCheckBox) {

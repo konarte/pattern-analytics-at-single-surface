@@ -21,18 +21,20 @@ public class DefectClassesRecord extends RecordEditorTemplate<DefectClasses> {
 	private static final long serialVersionUID = 1L;
 
 	public DefectClassesRecord(Frame owner) {
-		super(owner, "defectClassesRecordDialog", "Классы дефектов");
+		super(owner, "defectClassesRecordDialog", Messages.getString("DefectClassesRecord.title"));
 		super.setFormPanelData(getFormPanel());
 	}
 
 	@Override
 	protected String getDenyDeletionMessage(Object foundObject) {
 		DefectTypes type = (DefectTypes) foundObject;
-		return "Тип дефекта '" + type.getName() + "' использует класс '" + type.getDefectClass().getName() + "'.";
+		return Messages.getString("DefectClassesRecord.exists", type.getName(), type
+				.getDefectClass().getName());
 	}
 
 	@Override
-	protected Criteria getMultipleDeleteCriteria(Collection<DefectClasses> objects) throws Exception {
+	protected Criteria getMultipleDeleteCriteria(Collection<DefectClasses> objects)
+			throws Exception {
 		DefectTypesCriteria criteria = new DefectTypesCriteria();
 		int[] in = new int[objects.size()];
 		int idx = 0;
@@ -44,7 +46,8 @@ public class DefectClassesRecord extends RecordEditorTemplate<DefectClasses> {
 	}
 
 	@Override
-	protected Criteria getUniqueCheckCriteria(DefectClasses object, String newValue) throws Exception {
+	protected Criteria getUniqueCheckCriteria(DefectClasses object, String newValue)
+			throws Exception {
 		DefectClassesCriteria criteria = new DefectClassesCriteria();
 		criteria.name.eq(newValue);
 		if (object.getIdDefectClass() != 0) {
@@ -103,8 +106,10 @@ public class DefectClassesRecord extends RecordEditorTemplate<DefectClasses> {
 			jLabelIDValue = new JLabel("0");
 			jTextFieldNameValue = new JTextField();
 
-			super.putComponentPair(jPanelPlace, "Код", jLabelIDValue);
-			super.putUniqueComponentPair(jPanelPlace, "Название класса", jTextFieldNameValue);
+			super.putComponentPair(jPanelPlace, Messages.getString("DefectClassesRecord.id"),
+					jLabelIDValue);
+			super.putUniqueComponentPair(jPanelPlace, Messages
+					.getString("DefectClassesRecord.name"), jTextFieldNameValue);
 		}
 		return jPanelPlace;
 	}

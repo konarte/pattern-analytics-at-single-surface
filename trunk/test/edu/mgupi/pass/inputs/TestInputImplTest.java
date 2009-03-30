@@ -45,7 +45,8 @@ public class TestInputImplTest {
 		source.init();
 		try {
 			InputStore store = source.getSingleSource();
-			System.out.println("Image " + store.getName() + " (" + store.getSourceImage().toString() + ")");
+			System.out.println("Image " + store.getName() + " ("
+					+ store.getSourceImage().toString() + ")");
 		} finally {
 			source.close();
 		}

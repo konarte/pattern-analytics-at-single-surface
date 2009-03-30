@@ -46,8 +46,8 @@ public class PlaceImageFilterTest {
 		}
 	}
 
-	private void convertImage(BufferedImage image, int width, int height, Color background) throws IOException,
-			FilterException {
+	private void convertImage(BufferedImage image, int width, int height, Color background)
+			throws IOException, FilterException {
 		filter.getWIDTH().setValue(width);
 		filter.getHEIGHT().setValue(height);
 		filter.getBACKGROUND().setValue(background);

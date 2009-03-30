@@ -85,8 +85,8 @@ public class FilterChainsawTransactionTest {
 		param.setValue("Мухлобойка");
 
 		ParamTest.compareTwoClonedParametersDefinitions(origParam, param);
-		ParamTest.compareTwoClonedParametersDefinitions(ParamHelper.getParameter("p2_string", filter2.getParams()),
-				param);
+		ParamTest.compareTwoClonedParametersDefinitions(ParamHelper.getParameter("p2_string",
+				filter2.getParams()), param);
 
 		assertFalse(origParam.getValue().equals(param.getValue()));
 

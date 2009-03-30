@@ -271,7 +271,7 @@ public abstract class TableEditorTemplate extends JDialog {
 	private JButton getJButtonAdd() {
 		if (jButtonAdd == null) {
 			jButtonAdd = new JButton();
-			jButtonAdd.setText("Добавить");
+			jButtonAdd.setText(Messages.getString("TableEditorTemplate.add"));
 			getTableModel().registerAddRowButton(jButtonAdd);
 		}
 		return jButtonAdd;
@@ -285,7 +285,7 @@ public abstract class TableEditorTemplate extends JDialog {
 	private JButton getJButtonRemove() {
 		if (jButtonRemove == null) {
 			jButtonRemove = new JButton();
-			jButtonRemove.setText("Удалить");
+			jButtonRemove.setText(Messages.getString("TableEditorTemplate.delete"));
 			getTableModel().registerDeleteRowButton(jButtonRemove);
 		}
 		return jButtonRemove;
@@ -299,7 +299,7 @@ public abstract class TableEditorTemplate extends JDialog {
 	private JButton getJButtonEdit() {
 		if (jButtonEdit == null) {
 			jButtonEdit = new JButton();
-			jButtonEdit.setText("Редактировать");
+			jButtonEdit.setText(Messages.getString("TableEditorTemplate.edit"));
 			getTableModel().registerEditRowButton(jButtonEdit);
 		}
 		return jButtonEdit;

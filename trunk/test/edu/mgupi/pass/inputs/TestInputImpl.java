@@ -17,7 +17,8 @@ public class TestInputImpl implements IInput {
 
 	protected void finalize() throws Throwable {
 		if (init && !done) {
-			new Exception("WARNING!!! Close not called. Terminating application immediately.").printStackTrace();
+			new Exception("WARNING!!! Close not called. Terminating application immediately.")
+					.printStackTrace();
 			System.exit(1);
 		}
 	}

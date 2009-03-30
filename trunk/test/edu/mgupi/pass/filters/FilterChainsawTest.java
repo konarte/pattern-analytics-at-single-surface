@@ -292,7 +292,8 @@ public class FilterChainsawTest {
 
 	}
 
-	private void convertImage(BufferedImage image, String addText) throws IOException, FilterException {
+	private void convertImage(BufferedImage image, String addText) throws IOException,
+			FilterException {
 		BufferedImage newImage = chainsaw.filterSaw();
 
 		new File("tmp").mkdir();
@@ -312,7 +313,8 @@ public class FilterChainsawTest {
 
 			this.convertImage(image, "");
 
-			ColorSpaceFilter color = (ColorSpaceFilter) chainsaw.appendFilter(ColorSpaceFilter.class);
+			ColorSpaceFilter color = (ColorSpaceFilter) chainsaw
+					.appendFilter(ColorSpaceFilter.class);
 			color.getCOLOR_MODE().setValue(ColorSpace.CS_GRAY);
 
 			RescaleFilter rescale = (RescaleFilter) chainsaw.appendFilter(RescaleFilter.class);

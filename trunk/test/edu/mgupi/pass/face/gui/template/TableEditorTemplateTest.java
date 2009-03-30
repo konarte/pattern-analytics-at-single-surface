@@ -49,13 +49,13 @@ import edu.mgupi.pass.db.defects.DefectTypesFactory;
 import edu.mgupi.pass.db.surfaces.PassPersistentManager;
 import edu.mgupi.pass.face.gui.AppHelper;
 import edu.mgupi.pass.face.gui.SwingTestHelper;
+import edu.mgupi.pass.face.gui.WaitCondition;
+import edu.mgupi.pass.face.gui.WorkSet;
 import edu.mgupi.pass.face.gui.template.TableEditorTemplateTest.TestTableEditorTemplate.MyTableModel;
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
 import edu.mgupi.pass.util.Utils;
-import edu.mgupi.pass.util.WaitCondition;
-import edu.mgupi.pass.util.WorkSet;
 import edu.mgupi.pass.util.Config.DeletionCheckMode;
 import edu.mgupi.pass.util.Config.DeletionMode;
 import edu.mgupi.pass.util.Config.TestTransactionMode;
@@ -70,7 +70,8 @@ public class TableEditorTemplateTest {
 	@Before
 	public void setUp() throws Exception {
 
-		tableEditor = (TestTableEditorTemplate) AppHelper.getInstance().getDialogImpl(TestTableEditorTemplate.class);
+		tableEditor = (TestTableEditorTemplate) AppHelper.getInstance().getDialogImpl(
+				TestTableEditorTemplate.class);
 
 		parentFrame = new JFrame();
 		JButton button = new JButton();
@@ -109,7 +110,8 @@ public class TableEditorTemplateTest {
 		properties.put("user", "pass");
 		properties.put("password", "adesroot");
 
-		Connection conn = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/pass_db", properties);
+		Connection conn = (Connection) DriverManager.getConnection(
+				"jdbc:mysql://localhost:3306/pass_db", properties);
 		return conn;
 	}
 
@@ -132,7 +134,8 @@ public class TableEditorTemplateTest {
 
 		} catch (Exception e) {
 
-			PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
+			PersistentTransaction transaction = PassPersistentManager.instance().getSession()
+					.beginTransaction();
 
 			DefectTypesCriteria tc = new DefectTypesCriteria();
 			tc.name.ilike("TEST-%");
@@ -160,15 +163,16 @@ public class TableEditorTemplateTest {
 		assertNotNull(tableEditor);
 
 		assertFalse(tableEditor.isVisible());
-		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME, TestTableEditorTemplate.class);
+		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME,
+				TestTableEditorTemplate.class);
 		assertTrue(tableEditor.isVisible());
 
 		JTable table = (JTable) Utils.getChildNamed(tableEditor, "data");
 		assertNotNull(table);
 		assertEquals(0, table.getRowCount());
 
-		RecordEditorTemplate editForm = (RecordEditorTemplate) SwingTestHelper.clickOpenDialogButton(tableEditor, null,
-				"add", TestRecordEditorTemplate.class);
+		RecordEditorTemplate editForm = (RecordEditorTemplate) SwingTestHelper
+				.clickOpenDialogButton(tableEditor, null, "add", TestRecordEditorTemplate.class);
 		assertNotNull(editForm);
 
 		JTextField text = (JTextField) Utils.getChildNamed(editForm, "className");
@@ -187,8 +191,9 @@ public class TableEditorTemplateTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void openWindowAndSave(final int rowIndex, String value, final String expectedMessageButton,
-			final String expectedSecondCloseButton) throws Exception {
+	private void openWindowAndSave(final int rowIndex, String value,
+			final String expectedMessageButton, final String expectedSecondCloseButton)
+			throws Exception {
 
 		/*
 		 * if rowIndex == -1 -- this is add new row, othersiwe -- it is edit
@@ -203,8 +208,9 @@ public class TableEditorTemplateTest {
 		/*
 		 * Do click
 		 */
-		final RecordEditorTemplate editForm = (RecordEditorTemplate) SwingTestHelper.clickOpenDialogButton(tableEditor,
-				null, rowIndex == -1 ? "add" : "edit", TestRecordEditorTemplate.class);
+		final RecordEditorTemplate editForm = (RecordEditorTemplate) SwingTestHelper
+				.clickOpenDialogButton(tableEditor, null, rowIndex == -1 ? "add" : "edit",
+						TestRecordEditorTemplate.class);
 		assertNotNull(editForm);
 
 		JTextField text = (JTextField) Utils.getChildNamed(editForm, "className");
@@ -246,8 +252,8 @@ public class TableEditorTemplateTest {
 		SwingTestHelper.waitWhile(new WaitCondition() {
 			@Override
 			public boolean keepWorking() {
-				return rowIndex == -1 && expectedSecondCloseButton == null ? table.getModel().getRowCount() == rowcount
-						: false;
+				return rowIndex == -1 && expectedSecondCloseButton == null ? table.getModel()
+						.getRowCount() == rowcount : false;
 			}
 		});
 	}
@@ -339,7 +345,8 @@ public class TableEditorTemplateTest {
 		assertNotNull(tableEditor);
 
 		assertFalse(tableEditor.isVisible());
-		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME, TestTableEditorTemplate.class);
+		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME,
+				TestTableEditorTemplate.class);
 		assertTrue(tableEditor.isVisible());
 
 		JTable table = (JTable) Utils.getChildNamed(tableEditor, "data");
@@ -366,7 +373,8 @@ public class TableEditorTemplateTest {
 		 * Reopen and try to click 'OK'
 		 */
 		assertFalse(tableEditor.isVisible());
-		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME, TestTableEditorTemplate.class);
+		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME,
+				TestTableEditorTemplate.class);
 		assertTrue(tableEditor.isVisible());
 
 		Connection conn = this.getConnection();
@@ -407,7 +415,8 @@ public class TableEditorTemplateTest {
 
 		if (mode == TestTransactionMode.COMMIT_EVERY_ROW) {
 			assertFalse(tableEditor.isVisible());
-			SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME, TestTableEditorTemplate.class);
+			SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME,
+					TestTableEditorTemplate.class);
 			assertTrue(tableEditor.isVisible());
 
 			id = createTestData(table);
@@ -443,7 +452,8 @@ public class TableEditorTemplateTest {
 
 		if (mode == TestTransactionMode.COMMIT_BULK) {
 			assertFalse(tableEditor.isVisible());
-			SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME, TestTableEditorTemplate.class);
+			SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME,
+					TestTableEditorTemplate.class);
 			assertTrue(tableEditor.isVisible());
 
 			id = createTestData(table);
@@ -481,17 +491,19 @@ public class TableEditorTemplateTest {
 	//		this.testChangeData(TransactionMode.COMMIT_BULK);
 	//	}
 
-	private void deleteRows(String expectedFirstButton, boolean expectDeletedRows, int... rows) throws Exception {
+	private void deleteRows(String expectedFirstButton, boolean expectDeletedRows, int... rows)
+			throws Exception {
 		this.deleteRows(expectedFirstButton, null, false, expectDeletedRows, rows);
 	}
 
 	private void deleteRows(String expectedFirstMessageButton, String expectedSecondMessageButton,
-			final boolean expectOwnerIsSecond, final boolean expectDeletedRows, int... rows) throws Exception {
+			final boolean expectOwnerIsSecond, final boolean expectDeletedRows, int... rows)
+			throws Exception {
 		assertNotNull(rows);
 		assertTrue(rows.length > 0);
 
-		final TestTableEditorTemplate tableEditor = (TestTableEditorTemplate) AppHelper.getInstance().searchWindow(
-				TestTableEditorTemplate.class);
+		final TestTableEditorTemplate tableEditor = (TestTableEditorTemplate) AppHelper
+				.getInstance().searchWindow(TestTableEditorTemplate.class);
 
 		assertNotNull(tableEditor);
 
@@ -508,16 +520,16 @@ public class TableEditorTemplateTest {
 			 * If we expected first message button -- wait for it
 			 */
 
-			final TestRecordEditorTemplate recordEditor = (TestRecordEditorTemplate) AppHelper.getInstance()
-					.getDialogImpl(TestRecordEditorTemplate.class);
+			final TestRecordEditorTemplate recordEditor = (TestRecordEditorTemplate) AppHelper
+					.getInstance().getDialogImpl(TestRecordEditorTemplate.class);
 
 			/*
 			 * When use expectOwnerIsSecond -- I means, that owner of message
 			 * will be editor form, not the table form! This may happen if row
 			 * DeletionCheckMode = CHECK_THEN_ACQUIRE
 			 */
-			Window window = SwingTestHelper.clickOpenDialogButton(tableEditor, expectOwnerIsSecond ? recordEditor
-					: tableEditor, "delete");
+			Window window = SwingTestHelper.clickOpenDialogButton(tableEditor,
+					expectOwnerIsSecond ? recordEditor : tableEditor, "delete");
 			assertNotNull(window);
 			SwingTestHelper.clickCloseDialogButton(window, expectedFirstMessageButton);
 
@@ -530,7 +542,9 @@ public class TableEditorTemplateTest {
 				SwingTestHelper.waitWhile(new WaitCondition() {
 					@Override
 					public boolean keepWorking() {
-						return SwingTestHelper.searchAnyOpenedWindow(expectOwnerIsSecond ? tableEditor : recordEditor) == null;
+						return SwingTestHelper
+								.searchAnyOpenedWindow(expectOwnerIsSecond ? tableEditor
+										: recordEditor) == null;
 					}
 				});
 				window = SwingTestHelper.searchAnyOpenedWindow(recordEditor);
@@ -558,7 +572,8 @@ public class TableEditorTemplateTest {
 			SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
 				@Override
 				public void workImpl() throws Exception {
-					AbstractButton button = (AbstractButton) Utils.getChildNamed(tableEditor, "delete");
+					AbstractButton button = (AbstractButton) Utils.getChildNamed(tableEditor,
+							"delete");
 					assertNotNull(button);
 					button.doClick();
 				}
@@ -582,7 +597,8 @@ public class TableEditorTemplateTest {
 		assertNotNull(tableEditor);
 
 		assertFalse(tableEditor.isVisible());
-		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME, TestTableEditorTemplate.class);
+		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME,
+				TestTableEditorTemplate.class);
 		assertTrue(tableEditor.isVisible());
 
 		JTable table = (JTable) Utils.getChildNamed(tableEditor, "data");
@@ -672,7 +688,8 @@ public class TableEditorTemplateTest {
 		Config.getInstance().setTransactionMode(mode);
 		Config.getInstance().setRowsDeleteMode(DeletionMode.CONFIRM);
 
-		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME, TestTableEditorTemplate.class);
+		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME,
+				TestTableEditorTemplate.class);
 
 		/*
 		 * Creating classes
@@ -718,7 +735,8 @@ public class TableEditorTemplateTest {
 
 		assertTrue(PassPersistentManager.instance().getSession().getTransaction().isActive());
 
-		SwingTestHelper.clickCloseDialogButton(tableEditor, mode == TestTransactionMode.COMMIT_BULK ? "OK" : "cancel");
+		SwingTestHelper.clickCloseDialogButton(tableEditor,
+				mode == TestTransactionMode.COMMIT_BULK ? "OK" : "cancel");
 		if (trans != null) {
 
 			/*
@@ -728,7 +746,8 @@ public class TableEditorTemplateTest {
 			trans = PassPersistentManager.instance().getSession().beginTransaction();
 		}
 
-		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME, TestTableEditorTemplate.class);
+		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME,
+				TestTableEditorTemplate.class);
 
 		/*
 		 * Check for can't delete
@@ -774,9 +793,11 @@ public class TableEditorTemplateTest {
 		/*
 		 * Reopening interface We have 2 rows
 		 */
-		SwingTestHelper.clickCloseDialogButton(tableEditor, mode == TestTransactionMode.COMMIT_BULK ? "OK" : "cancel");
+		SwingTestHelper.clickCloseDialogButton(tableEditor,
+				mode == TestTransactionMode.COMMIT_BULK ? "OK" : "cancel");
 
-		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME, TestTableEditorTemplate.class);
+		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME,
+				TestTableEditorTemplate.class);
 
 		/*
 		 * Check for records existing. This row is really exists :)
@@ -803,11 +824,12 @@ public class TableEditorTemplateTest {
 		Config.getInstance().setRowsDeleteMode(DeletionMode.NO_CONFIRM);
 		Config.getInstance().setDeletionCheckModeMode(DeletionCheckMode.NO_CHECK);
 
-		TestRecordEditorTemplate template = (TestRecordEditorTemplate) AppHelper.getInstance().getDialogImpl(
-				TestRecordEditorTemplate.class);
+		TestRecordEditorTemplate template = (TestRecordEditorTemplate) AppHelper.getInstance()
+				.getDialogImpl(TestRecordEditorTemplate.class);
 		template.setUseCriterias(false);
 
-		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME, TestTableEditorTemplate.class);
+		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME,
+				TestTableEditorTemplate.class);
 
 		/*
 		 * Creating classes
@@ -849,7 +871,8 @@ public class TableEditorTemplateTest {
 
 		assertTrue(PassPersistentManager.instance().getSession().getTransaction().isActive());
 
-		SwingTestHelper.clickCloseDialogButton(tableEditor, mode == TestTransactionMode.COMMIT_BULK ? "OK" : "cancel");
+		SwingTestHelper.clickCloseDialogButton(tableEditor,
+				mode == TestTransactionMode.COMMIT_BULK ? "OK" : "cancel");
 		if (trans != null) {
 
 			/*
@@ -859,7 +882,8 @@ public class TableEditorTemplateTest {
 			trans = PassPersistentManager.instance().getSession().beginTransaction();
 		}
 
-		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME, TestTableEditorTemplate.class);
+		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME,
+				TestTableEditorTemplate.class);
 
 		/*
 		 * Step 1.
@@ -923,9 +947,11 @@ public class TableEditorTemplateTest {
 		 * Step 6 again, but in new window
 		 */
 
-		SwingTestHelper.clickCloseDialogButton(tableEditor, mode == TestTransactionMode.COMMIT_BULK ? "OK" : "cancel");
+		SwingTestHelper.clickCloseDialogButton(tableEditor,
+				mode == TestTransactionMode.COMMIT_BULK ? "OK" : "cancel");
 
-		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME, TestTableEditorTemplate.class);
+		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME,
+				TestTableEditorTemplate.class);
 		//		Thread.sleep(5000);
 		for (int i = 0; i < table.getModel().getRowCount(); i++) {
 			System.out.println(" " + i + " = " + table.getModel().getValueAt(i, 0) + ", "
@@ -982,8 +1008,9 @@ public class TableEditorTemplateTest {
 
 		PreparedStatement psClasses = conn
 				.prepareStatement("insert into DefectClasses (IDDefectClass, Name) values (?,?)");
-		PreparedStatement psTypes = conn.prepareStatement("insert into DefectTypes (IdDefectType, Name, DefectImage, "
-				+ "DefectClassesIdDefectClass) values (?, ?, ?, ?)");
+		PreparedStatement psTypes = conn
+				.prepareStatement("insert into DefectTypes (IdDefectType, Name, DefectImage, "
+						+ "DefectClassesIdDefectClass) values (?, ?, ?, ?)");
 
 		/*
 		 * Loading data into database
@@ -1018,7 +1045,8 @@ public class TableEditorTemplateTest {
 		/*
 		 * Open window
 		 */
-		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME, TestTableEditorTemplate.class);
+		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME,
+				TestTableEditorTemplate.class);
 		//SwingTestHelper.waitMe(AppHelper.getInstance().searchWindow(TestTableEditorTemplate.class));
 
 		int RANDOM_EDIT = 10;
@@ -1033,13 +1061,15 @@ public class TableEditorTemplateTest {
 			changedIdx[i] = pos;
 			assertEquals(LOWIDX + pos, table.getModel().getValueAt(pos, 0));
 			this.openWindowAndSave(pos, "TEST-супер-волшебные-значения-" + pos);
-			assertEquals("TEST-супер-волшебные-значения-" + pos, table.getModel().getValueAt(pos, 1));
+			assertEquals("TEST-супер-волшебные-значения-" + pos, table.getModel()
+					.getValueAt(pos, 1));
 		}
 		//		conn.close();
 		//		conn = this.getConnection();
 		//		conn.setAutoCommit(false);
 
-		PreparedStatement psSel = conn.prepareStatement("select Name from DefectClasses where IdDefectClass = ?");
+		PreparedStatement psSel = conn
+				.prepareStatement("select Name from DefectClasses where IdDefectClass = ?");
 		for (int i = 0; i < changedIdx.length; i++) {
 			int pos = changedIdx[i];
 			psSel.setInt(1, LOWIDX + pos);
@@ -1194,7 +1224,8 @@ public class TableEditorTemplateTest {
 				return new String[] { "ID", "Класс дефекта" };
 			}
 
-			private final static Secundomer DATA_SEC = SecundomerList.registerSecundomer("Load data from database");
+			private final static Secundomer DATA_SEC = SecundomerList
+					.registerSecundomer("Load data from database");
 
 			@SuppressWarnings("unchecked")
 			@Override
@@ -1214,7 +1245,8 @@ public class TableEditorTemplateTest {
 				}
 			}
 
-			private final static Secundomer DATA_RET = SecundomerList.registerSecundomer("Get value for column");
+			private final static Secundomer DATA_RET = SecundomerList
+					.registerSecundomer("Get value for column");
 
 			@Override
 			public Object getValueAt(int rowIndex, int columnIndex) {
@@ -1288,7 +1320,8 @@ public class TableEditorTemplateTest {
 		@Override
 		protected String getDenyDeletionMessage(Object foundObject) {
 			DefectTypes type = (DefectTypes) foundObject;
-			return "Тип дефекта '" + type.getName() + "' использует класс '" + type.getDefectClass().getName() + "'.";
+			return "Тип дефекта '" + type.getName() + "' использует класс '"
+					+ type.getDefectClass().getName() + "'.";
 		}
 
 		private boolean useCriterias = true;
@@ -1298,7 +1331,8 @@ public class TableEditorTemplateTest {
 		}
 
 		@Override
-		protected Criteria getMultipleDeleteCriteria(Collection<DefectClasses> objects) throws Exception {
+		protected Criteria getMultipleDeleteCriteria(Collection<DefectClasses> objects)
+				throws Exception {
 			if (!useCriterias) {
 				return null;
 			}
@@ -1313,7 +1347,8 @@ public class TableEditorTemplateTest {
 		}
 
 		@Override
-		protected Criteria getUniqueCheckCriteria(DefectClasses object, String newValue) throws Exception {
+		protected Criteria getUniqueCheckCriteria(DefectClasses object, String newValue)
+				throws Exception {
 			if (!useCriterias) {
 				return null;
 			}
@@ -1333,7 +1368,8 @@ public class TableEditorTemplateTest {
 			assertNotNull(field);
 
 			DefectClasses defectObject = ((DefectClasses) object);
-			System.out.println("Opening " + defectObject.getIdDefectClass() + " (" + defectObject.getName() + ")");
+			System.out.println("Opening " + defectObject.getIdDefectClass() + " ("
+					+ defectObject.getName() + ")");
 			field.setText(((DefectClasses) object).getName());
 			lastName = field.getText();
 
@@ -1347,7 +1383,8 @@ public class TableEditorTemplateTest {
 
 			DefectClasses defectObject = ((DefectClasses) object);
 			defectObject.setName(field.getText());
-			System.out.println("Saving " + defectObject.getIdDefectClass() + " (" + defectObject.getName() + ")");
+			System.out.println("Saving " + defectObject.getIdDefectClass() + " ("
+					+ defectObject.getName() + ")");
 		}
 
 		@Override

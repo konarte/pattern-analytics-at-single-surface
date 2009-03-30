@@ -23,8 +23,6 @@ import javax.swing.JMenu;
 import javax.swing.SwingUtilities;
 
 import edu.mgupi.pass.util.Utils;
-import edu.mgupi.pass.util.WaitCondition;
-import edu.mgupi.pass.util.WorkSet;
 
 public class SwingTestHelper {
 
@@ -66,7 +64,8 @@ public class SwingTestHelper {
 	 * 
 	 * @throws Exception
 	 */
-	public static void addWorkAndWaitThis(WorkSet actualWork, WaitCondition waitCondition) throws Exception {
+	public static void addWorkAndWaitThis(WorkSet actualWork, WaitCondition waitCondition)
+			throws Exception {
 		waitWhile(waitCondition, addWorkNoWait(actualWork));
 	}
 
@@ -104,7 +103,8 @@ public class SwingTestHelper {
 		waitWhile(condition, null);
 	}
 
-	private static void waitWhile(WaitCondition condition, Throwable watchedException) throws InterruptedException {
+	private static void waitWhile(WaitCondition condition, Throwable watchedException)
+			throws InterruptedException {
 
 		assertNotNull(condition);
 
@@ -115,11 +115,11 @@ public class SwingTestHelper {
 		}
 		do {
 			Thread.sleep(50);
-		} while ((timeOK = ((System.currentTimeMillis() - time) < MAX_WAIT_TIME)) && condition.keepWorking()
-				&& watchedException.getCause() == null);
+		} while ((timeOK = ((System.currentTimeMillis() - time) < MAX_WAIT_TIME))
+				&& condition.keepWorking() && watchedException.getCause() == null);
 		if (!timeOK) {
-			throw new RuntimeException("Error. Wait interrupted after " + (System.currentTimeMillis() - time)
-					+ " msec.");
+			throw new RuntimeException("Error. Wait interrupted after "
+					+ (System.currentTimeMillis() - time) + " msec.");
 		}
 		if (watchedException.getCause() != null) {
 			throw new RuntimeException(watchedException.getCause());
@@ -196,13 +196,13 @@ public class SwingTestHelper {
 		return null;
 	}
 
-	public static void clickCloseDialogButton(final Window parent, final String buttonOrActionNameName)
-			throws Exception {
+	public static void clickCloseDialogButton(final Window parent,
+			final String buttonOrActionNameName) throws Exception {
 		clickCloseDialogButton(parent, buttonOrActionNameName, false);
 	}
 
-	public static void clickCloseDialogButton(final Window parent, final String buttonOrActionNameName,
-			final boolean expectErrors) throws Exception {
+	public static void clickCloseDialogButton(final Window parent,
+			final String buttonOrActionNameName, final boolean expectErrors) throws Exception {
 		assertNotNull(parent);
 		assertTrue(parent.isVisible());
 		assertNotNull(buttonOrActionNameName);
@@ -222,8 +222,8 @@ public class SwingTestHelper {
 		if (button == null) {
 			SwingTestHelper.printChildHierarchy(parent);
 			Thread.sleep(1000);
-			fail("Button with name or action '" + buttonOrActionNameName + "' does not exists on form '"
-					+ parent.getName() + "'");
+			fail("Button with name or action '" + buttonOrActionNameName
+					+ "' does not exists on form '" + parent.getName() + "'");
 		}
 
 		assertTrue(button.isEnabled());
@@ -247,7 +247,8 @@ public class SwingTestHelper {
 		});
 	}
 
-	public static Window openDialog(final Class<? extends Window> expectedInstance, boolean mustNull) throws Exception {
+	public static Window openDialog(final Class<? extends Window> expectedInstance, boolean mustNull)
+			throws Exception {
 		assertNotNull(expectedInstance);
 		if (mustNull) {
 			assertNull(AppHelper.getInstance().searchWindow(expectedInstance));
@@ -255,17 +256,19 @@ public class SwingTestHelper {
 		return clickOpenDialogButton(null, null, null, expectedInstance);
 	}
 
-	public static Window clickOpenDialogButton(final Window parent, final String buttonName) throws Exception {
+	public static Window clickOpenDialogButton(final Window parent, final String buttonName)
+			throws Exception {
 		return clickOpenDialogButton(parent, null, buttonName, null);
 	}
 
-	public static Window clickOpenDialogButton(final Window parent, final Window expectedParent, final String buttonName)
-			throws Exception {
+	public static Window clickOpenDialogButton(final Window parent, final Window expectedParent,
+			final String buttonName) throws Exception {
 		return clickOpenDialogButton(parent, expectedParent, buttonName, null);
 	}
 
 	public static Window clickOpenDialogButton(final Window parent, final Window expectedParent,
-			final String buttonName, final Class<? extends Window> expectedInstance) throws Exception {
+			final String buttonName, final Class<? extends Window> expectedInstance)
+			throws Exception {
 
 		final Window expectedParentImpl = expectedParent == null ? parent : expectedParent;
 
@@ -284,7 +287,8 @@ public class SwingTestHelper {
 			@Override
 			public void workImpl() throws Exception {
 				if (buttonName != null && parent != null) {
-					AbstractButton button = (AbstractButton) Utils.getChildNamed(parent, buttonName);
+					AbstractButton button = (AbstractButton) Utils
+							.getChildNamed(parent, buttonName);
 					assertNotNull(button);
 					button.doClick();
 				} else {
@@ -327,8 +331,8 @@ public class SwingTestHelper {
 				Window chooserDialog = SwingTestHelper.searchAnyOpenedWindow(parent);
 				assertNotNull(chooserDialog);
 
-				JColorChooser chooser = (JColorChooser) SwingTestHelper.getReflectedFieldAccess(chooserDialog,
-						"chooserPane");
+				JColorChooser chooser = (JColorChooser) SwingTestHelper.getReflectedFieldAccess(
+						chooserDialog, "chooserPane");
 				chooser.setColor(color);
 
 				JButton button = SwingTestHelper.getButtonByActionCommand(chooserDialog, "OK");
@@ -373,7 +377,8 @@ public class SwingTestHelper {
 				JDialog chooserDialog = (JDialog) SwingTestHelper.searchAnyOpenedWindow(parent);
 				assertNotNull(chooserDialog);
 
-				JFileChooser chooser = (JFileChooser) chooserDialog.getContentPane().getComponent(0);
+				JFileChooser chooser = (JFileChooser) chooserDialog.getContentPane()
+						.getComponent(0);
 				assertNotNull(chooser);
 				chooser.setSelectedFile(file);
 				chooser.approveSelection();
@@ -395,7 +400,8 @@ public class SwingTestHelper {
 				JDialog chooserDialog = (JDialog) SwingTestHelper.searchAnyOpenedWindow(parent);
 				assertNotNull(chooserDialog);
 
-				JFileChooser chooser = (JFileChooser) chooserDialog.getContentPane().getComponent(0);
+				JFileChooser chooser = (JFileChooser) chooserDialog.getContentPane()
+						.getComponent(0);
 				assertNotNull(chooser);
 				chooser.cancelSelection();
 			}
@@ -457,16 +463,21 @@ public class SwingTestHelper {
 
 			for (int i = 0; i < children.length; ++i) {
 				Component child = children[i];
-				System.out.println(prefix + " " + child.getName()
-						+ (child instanceof AbstractButton ? " A:" + ((AbstractButton) child).getActionCommand() : "")
-						+ " = " + child);
+				System.out
+						.println(prefix
+								+ " "
+								+ child.getName()
+								+ (child instanceof AbstractButton ? " A:"
+										+ ((AbstractButton) child).getActionCommand() : "") + " = "
+								+ child);
 				printChildHierarchy(child, level + 1);
 			}
 		}
 	}
 
-	public static Object getReflectedFieldAccess(Object object, String name) throws SecurityException,
-			NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+	public static Object getReflectedFieldAccess(Object object, String name)
+			throws SecurityException, NoSuchFieldException, IllegalArgumentException,
+			IllegalAccessException {
 		Field field = object.getClass().getDeclaredField(name);
 
 		boolean returnNoAccess = false;

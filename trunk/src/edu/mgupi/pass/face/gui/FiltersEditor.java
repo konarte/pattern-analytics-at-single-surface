@@ -60,17 +60,18 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 		this.setName("filtersEditorDialog");
 		this.setMinimumSize(new Dimension(700, 500));
 		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
-		this.setTitle("Настройка фильтров");
+		this.setTitle(Messages.getString("FiltersEditor.title", ""));
 		this.setContentPane(getJContentPane());
 
 	}
 
 	public void setFilters(String title, FilterChainsaw chainsaw) throws Exception {
 		if (chainsaw == null) {
-			throw new IllegalArgumentException("Internal error. 'Processor.filters' must be not null.");
+			throw new IllegalArgumentException(
+					"Internal error. 'Processor.filters' must be not null.");
 		}
 
-		this.setTitle("Настройка фильтров " + title);
+		this.setTitle(Messages.getString("FiltersEditor.title", title));
 		getTableModel().setChainsaw(chainsaw);
 
 	}
@@ -108,7 +109,8 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 		try {
 			this.setFilters(title, filters);
 		} catch (Throwable t) {
-			AppHelper.showExceptionDialog(this, "Ошибка при установке фильтров.", t);
+			AppHelper.showExceptionDialog(this,
+					Messages.getString("FiltersEditor.err.loadFilters"), t);
 			return false;
 		}
 		return getDialogAdapter().openDialog();
@@ -188,7 +190,8 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 			gridBagConstraints5.gridy = 1;
 			jPanelSelectFilters = new JPanel();
 			jPanelSelectFilters.setLayout(new GridBagLayout());
-			jPanelSelectFilters.setBorder(BorderFactory.createTitledBorder("Выбранные фильтры"));
+			jPanelSelectFilters.setBorder(BorderFactory.createTitledBorder(Messages
+					.getString("FiltersEditor.currentFilters")));
 			jPanelSelectFilters.add(getJPanelFilters(), gridBagConstraints6);
 			jPanelSelectFilters.add(getJPanelControlButtons(), gridBagConstraints5);
 		}
@@ -211,7 +214,8 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 			gridBagConstraints3.gridy = 0;
 			jPanelEditParameters = new JPanel();
 			jPanelEditParameters.setLayout(new GridBagLayout());
-			jPanelEditParameters.setBorder(BorderFactory.createTitledBorder("Редактирование значений фильтра"));
+			jPanelEditParameters.setBorder(BorderFactory.createTitledBorder(Messages
+					.getString("FiltersEditor.filterEdit")));
 			jPanelEditParameters.add(getJPanelParameters(), gridBagConstraints3);
 		}
 		return jPanelEditParameters;
@@ -297,7 +301,7 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 	private JButton getJButtonAdd() {
 		if (jButtonAdd == null) {
 			jButtonAdd = new JButton();
-			jButtonAdd.setText("Добавить");
+			jButtonAdd.setText(Messages.getString("FiltersEditor.add"));
 			getTableModel().registerAddRowButton(jButtonAdd);
 		}
 		return jButtonAdd;
@@ -311,7 +315,7 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 	private JButton getJButtonRemove() {
 		if (jButtonRemove == null) {
 			jButtonRemove = new JButton();
-			jButtonRemove.setText("Удалить");
+			jButtonRemove.setText(Messages.getString("FiltersEditor.delete"));
 			getTableModel().registerDeleteRowButton(jButtonRemove);
 		}
 		return jButtonRemove;
@@ -325,7 +329,7 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 	private JButton getJButtonUp() {
 		if (jButtonUp == null) {
 			jButtonUp = new JButton();
-			jButtonUp.setText("Up");
+			jButtonUp.setText(Messages.getString("FiltersEditor.up"));
 			getTableModel().registerMoveRowsUpButton(jButtonUp);
 		}
 		return jButtonUp;
@@ -339,7 +343,7 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 	private JButton getJButtonDown() {
 		if (jButtonDown == null) {
 			jButtonDown = new JButton();
-			jButtonDown.setText("Down");
+			jButtonDown.setText(Messages.getString("FiltersEditor.down"));
 			getTableModel().registerMoveRowsDownButton(jButtonDown);
 		}
 		return jButtonDown;
@@ -380,7 +384,9 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 		return jScrollPaneData;
 	}
 
-	private final static String[] columns = new String[] { "№", "Фильтр" };
+	private final static String[] columns = new String[] {
+			Messages.getString("FiltersEditor.head.num"),
+			Messages.getString("FiltersEditor.head.filter") };
 
 	/**
 	 * This method initializes jTableData
@@ -437,7 +443,8 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 		@SuppressWarnings("unchecked")
 		@Override
 		protected boolean addRowImpl(int rowIdx) throws Exception {
-			LFiltersList list = (LFiltersList) AppHelper.getInstance().getDialogImpl(LFiltersList.class);
+			LFiltersList list = (LFiltersList) AppHelper.getInstance().getDialogImpl(
+					LFiltersList.class);
 			String pickClass = list.openDialog();
 			if (pickClass != null) {
 				this.getChainsaw().appendFilter(rowIdx, (Class<IFilter>) Class.forName(pickClass));
@@ -484,12 +491,14 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 
 				parent.jPanelParameters.saveModelData();
 
-				((TitledBorder) parent.jPanelEditParameters.getBorder()).setTitle(filter.name + " - параметры");
+				((TitledBorder) parent.jPanelEditParameters.getBorder()).setTitle(Messages
+						.getString("FiltersEditor.filterParams", filter.name));
 				parent.jPanelParameters.setModelData(filter.parameters);
 				parent.pack();
 
 			} else {
-				((TitledBorder) parent.jPanelEditParameters.getBorder()).setTitle("Фильтр не выбран");
+				((TitledBorder) parent.jPanelEditParameters.getBorder()).setTitle(Messages
+						.getString("FiltersEditor.filterNotSelected"));
 				parent.jPanelParameters.setModelData(null);
 			}
 
@@ -508,7 +517,8 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 
 		@Override
 		public Object getValueAt(int rowIndex, int columnIndex) {
-			return columnIndex == 0 ? String.valueOf(rowIndex + 1) : transactionalSaw.getFilterStore(rowIndex).name;
+			return columnIndex == 0 ? String.valueOf(rowIndex + 1) : transactionalSaw
+					.getFilterStore(rowIndex).name;
 		}
 
 		@Override

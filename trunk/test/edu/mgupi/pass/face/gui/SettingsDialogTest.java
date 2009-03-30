@@ -22,8 +22,6 @@ import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
 
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Utils;
-import edu.mgupi.pass.util.WaitCondition;
-import edu.mgupi.pass.util.WorkSet;
 import edu.mgupi.pass.util.Config.DeletionCheckMode;
 import edu.mgupi.pass.util.Config.DeletionMode;
 import edu.mgupi.pass.util.Config.SourceMode;
@@ -229,7 +227,8 @@ public class SettingsDialogTest {
 			}
 		}
 		{
-			JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog, DeletionMode.NO_CONFIRM.name());
+			JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog, DeletionMode.NO_CONFIRM
+					.name());
 			assertNotNull(radio);
 			radio.setSelected(true);
 		}
@@ -244,7 +243,8 @@ public class SettingsDialogTest {
 			}
 		}
 		{
-			JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog, TestTransactionMode.COMMIT_BULK.name());
+			JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog,
+					TestTransactionMode.COMMIT_BULK.name());
 			assertNotNull(radio);
 			radio.setSelected(true);
 		}
@@ -259,8 +259,8 @@ public class SettingsDialogTest {
 			}
 		}
 		{
-			JRadioButton radio = (JRadioButton) Utils
-					.getChildNamed(dialog, DeletionCheckMode.CHECK_THEN_ACQUIRE.name());
+			JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog,
+					DeletionCheckMode.CHECK_THEN_ACQUIRE.name());
 			assertNotNull(radio);
 			radio.setSelected(true);
 		}
@@ -273,7 +273,8 @@ public class SettingsDialogTest {
 
 		assertEquals(DeletionMode.NO_CONFIRM, Config.getInstance().getRowsDeleteMode());
 		assertEquals(TestTransactionMode.COMMIT_BULK, Config.getInstance().getTransactionMode());
-		assertEquals(DeletionCheckMode.CHECK_THEN_ACQUIRE, Config.getInstance().getDeletionCheckMode());
+		assertEquals(DeletionCheckMode.CHECK_THEN_ACQUIRE, Config.getInstance()
+				.getDeletionCheckMode());
 
 		assertFalse(resultButton);
 	}
@@ -307,7 +308,8 @@ public class SettingsDialogTest {
 		JComboBox combo = (JComboBox) Utils.getChildNamed(dialog, "laf");
 		assertNotNull(combo);
 
-		JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog, DeletionMode.NO_CONFIRM.name());
+		JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog, DeletionMode.NO_CONFIRM
+				.name());
 		assertNotNull(radio);
 		radio.setSelected(true);
 
@@ -315,7 +317,8 @@ public class SettingsDialogTest {
 		assertNotNull(radio);
 		radio.setSelected(true);
 
-		radio = (JRadioButton) Utils.getChildNamed(dialog, DeletionCheckMode.CHECK_THEN_ACQUIRE.name());
+		radio = (JRadioButton) Utils.getChildNamed(dialog, DeletionCheckMode.CHECK_THEN_ACQUIRE
+				.name());
 		assertNotNull(radio);
 		radio.setSelected(true);
 
@@ -326,8 +329,10 @@ public class SettingsDialogTest {
 		assertTrue(WindowsLookAndFeel.class == UIManager.getLookAndFeel().getClass());
 
 		assertEquals(DeletionMode.CONFIRM, Config.getInstance().getRowsDeleteMode());
-		assertEquals(TestTransactionMode.COMMIT_EVERY_ROW, Config.getInstance().getTransactionMode());
-		assertEquals(DeletionCheckMode.ACQUIRE_THEN_CHECK, Config.getInstance().getDeletionCheckMode());
+		assertEquals(TestTransactionMode.COMMIT_EVERY_ROW, Config.getInstance()
+				.getTransactionMode());
+		assertEquals(DeletionCheckMode.ACQUIRE_THEN_CHECK, Config.getInstance()
+				.getDeletionCheckMode());
 
 		assertFalse(resultButton);
 	}

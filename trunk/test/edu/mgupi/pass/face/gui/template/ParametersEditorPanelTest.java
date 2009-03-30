@@ -267,7 +267,8 @@ public class ParametersEditorPanelTest {
 		panel.setModelData(fullParams);
 		SwingTestHelper.showMeBackground(this.parent);
 
-		JFormattedTextField field = (JFormattedTextField) Utils.getChildNamed(panel, "p1_int_field");
+		JFormattedTextField field = (JFormattedTextField) Utils
+				.getChildNamed(panel, "p1_int_field");
 		assertNotNull(field);
 		field.setValue(99);
 		field.postActionEvent();
@@ -316,12 +317,14 @@ public class ParametersEditorPanelTest {
 		panel.setModelData(fullParams);
 		SwingTestHelper.showMeBackground(this.parent);
 
-		JFormattedTextField field3 = (JFormattedTextField) Utils.getChildNamed(panel, "p3_double_field");
+		JFormattedTextField field3 = (JFormattedTextField) Utils.getChildNamed(panel,
+				"p3_double_field");
 		assertNotNull(field3);
 		field3.setValue(99);
 		field3.postActionEvent();
 
-		JFormattedTextField field4 = (JFormattedTextField) Utils.getChildNamed(panel, "p4_double_field");
+		JFormattedTextField field4 = (JFormattedTextField) Utils.getChildNamed(panel,
+				"p4_double_field");
 		assertNotNull(field4);
 		field4.setValue(5);
 
@@ -402,7 +405,8 @@ public class ParametersEditorPanelTest {
 		panel.setModelData(params1);
 		SwingTestHelper.showMeBackground(this.parent);
 
-		JFormattedTextField fmt = (JFormattedTextField) Utils.getChildNamed(panel, "param1_int_field");
+		JFormattedTextField fmt = (JFormattedTextField) Utils.getChildNamed(panel,
+				"param1_int_field");
 		assertNotNull(fmt);
 
 		parent.setVisible(false);
@@ -425,7 +429,8 @@ public class ParametersEditorPanelTest {
 
 		// Check for skipping recreating objects if parameters are the same as previous!
 
-		JFormattedTextField newFmt = (JFormattedTextField) Utils.getChildNamed(panel, "param2_int_field");
+		JFormattedTextField newFmt = (JFormattedTextField) Utils.getChildNamed(panel,
+				"param2_int_field");
 		assertNotNull(newFmt);
 		assertTrue(fmt == newFmt);
 	}

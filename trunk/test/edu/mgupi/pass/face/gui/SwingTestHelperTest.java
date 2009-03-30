@@ -26,8 +26,6 @@ import org.junit.Test;
 
 import edu.mgupi.pass.filters.Param;
 import edu.mgupi.pass.filters.Param.ParamType;
-import edu.mgupi.pass.util.WaitCondition;
-import edu.mgupi.pass.util.WorkSet;
 
 public class SwingTestHelperTest {
 
@@ -377,7 +375,8 @@ public class SwingTestHelperTest {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					// Main idea -- I must register window through AppHelper 
-					final JDialog testDialog = (JDialog) AppHelper.getInstance().getDialogImpl(JDialog.class);
+					final JDialog testDialog = (JDialog) AppHelper.getInstance().getDialogImpl(
+							JDialog.class);
 					SwingUtilities.invokeLater(new Runnable() {
 						@Override
 						public void run() {

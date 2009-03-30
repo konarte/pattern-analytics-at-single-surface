@@ -3,10 +3,13 @@ package edu.mgupi.pass.modules;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -16,9 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.db.locuses.LFilters;
-import edu.mgupi.pass.db.locuses.LFiltersFactory;
 import edu.mgupi.pass.db.locuses.LModules;
-import edu.mgupi.pass.db.locuses.LModulesFactory;
 import edu.mgupi.pass.db.locuses.LocusAppliedFilters;
 import edu.mgupi.pass.db.locuses.LocusAppliedFiltersFactory;
 import edu.mgupi.pass.db.locuses.LocusAppliedModule;
@@ -30,6 +31,7 @@ import edu.mgupi.pass.db.locuses.Locuses;
 import edu.mgupi.pass.db.locuses.LocusesFactory;
 import edu.mgupi.pass.face.gui.AppDataStorage;
 import edu.mgupi.pass.filters.FilterChainsaw;
+import edu.mgupi.pass.filters.FilterChainsawTransactional;
 import edu.mgupi.pass.filters.FilterException;
 import edu.mgupi.pass.filters.IFilter;
 import edu.mgupi.pass.filters.ParamHelper;
@@ -39,6 +41,7 @@ import edu.mgupi.pass.filters.service.ResizeFilter;
 import edu.mgupi.pass.inputs.InputStore;
 import edu.mgupi.pass.util.AbstractCacheInitiable;
 import edu.mgupi.pass.util.CacheIFactory;
+import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Const;
 import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
@@ -106,8 +109,6 @@ public class ModuleProcessor {
 
 	private IModule module;
 
-	// private FilterChainsaw
-
 	public void close() throws PersistentException {
 
 		// ;)
@@ -137,12 +138,25 @@ public class ModuleProcessor {
 		logger.debug("ModuleProcessor closed");
 	}
 
-	private AbstractCacheInitiable<IModule> cachedModules = CacheIFactory.getSingleInstanceModules();
+	private AbstractCacheInitiable<IModule> cachedModules = CacheIFactory
+			.getSingleInstanceModules();
 
-	//new CacheInitiable<IModule>(MODE.SINGLE_INSTANCE);
-
-	public IModule setModule(Class<? extends IModule> moduleClass) throws PersistentException, ModuleException,
-			InstantiationException, IllegalAccessException, IOException {
+	/**
+	 * Set module as main processing module.
+	 * 
+	 * @param moduleClass
+	 *            class of module, we automatically instantiate this. Class must
+	 *            implements {@link IModule} interface.
+	 * @return instance of given class
+	 * 
+	 * @throws ModuleException
+	 * @throws PersistentException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
+	 * @throws IOException
+	 */
+	public IModule setModule(Class<? extends IModule> moduleClass) throws PersistentException,
+			ModuleException, InstantiationException, IllegalAccessException, IOException {
 		if (moduleClass == null) {
 			throw new IllegalArgumentException("Internal error. moduleClass must be not null.");
 		}
@@ -169,14 +183,23 @@ public class ModuleProcessor {
 		return this.module;
 	}
 
-	public void updateModule() throws InstantiationException, IllegalAccessException, IOException, ModuleException,
-			PersistentException {
+	/**
+	 * Update current module -- clearing parameters and executing
+	 * {@link IModule#analyze(BufferedImage, Locuses)}. On this step we don't
+	 * rebuild histograms, thumbnails or applying filters to original source.
+	 * 
+	 * @throws IOException
+	 * @throws ModuleException
+	 * @throws PersistentException
+	 */
+	public void updateModule() throws IOException, ModuleException, PersistentException {
 		if (lastLocus != null) {
 
 			logger.debug("Do analyze after set new module");
 
-			// Reset temporary image!
-			// Because some modules does not provide it :)
+			/*
+			 * Reset all parameters in module.
+			 */
 
 			lastLocus.setProcessed(false);
 			for (LocusModuleData param : lastLocus.getModule().getData()) {
@@ -185,82 +208,132 @@ public class ModuleProcessor {
 			lastLocus.getModule().getData().clear();
 			ANAZYLE.start();
 			try {
+				// do analyze
 				this.module.analyze(lastProcessedImage, lastLocus);
 			} finally {
 				ANAZYLE.stop();
 			}
 			lastLocus.setProcessed(true);
 
-			logger.debug("Caching parameters for instance {} : {}", this.module.getName(), lastLocus.getModule()
-					.getData());
+			logger.debug("Caching parameters for instance {} : {}", this.module.getName(),
+					lastLocus.getModule().getData());
 
 		}
 	}
-
-	//	public void setChainsaw(FilterChainsaw processingFilters) {
-	//		logger.debug("Set main filter chain {}", processingFilters);
-	//		this.processingFilters = processingFilters;
-	//	}
-	//
-	//	public void setPreprocessingChainsaw(FilterChainsaw preProcessingFilters) {
-	//		logger.debug("Set pre-processing filter chain {}", preProcessingFilters);
-	//		this.preProcessingFilters = preProcessingFilters;
-	//	}
 
 	private BufferedImage lastProcessedImage;
 	private BufferedImage lastThumbImage;
 	private BufferedImage lastHistogramImage;
 
+	/**
+	 * Return last processed (filtered) image.
+	 * 
+	 * @return instance of image with applied pre-processing and processing
+	 *         filters.
+	 */
 	public BufferedImage getLastProcessedImage() {
 		return lastProcessedImage;
 	}
 
+	/**
+	 * Return last thumbnail of image with applied pre-processing and processing
+	 * filters.
+	 * 
+	 * @return instance of thumbnail
+	 */
 	public BufferedImage getLastThumbImage() {
 		return lastThumbImage;
 	}
 
+	/**
+	 * Return last histogram image of original source.
+	 * 
+	 * @return instance of histogram image
+	 */
 	public BufferedImage getLastHistogramImage() {
 		return lastHistogramImage;
 	}
 
-	private Secundomer STORE_ORIGINAL_IMAGE = SecundomerList.registerSecundomer("Saving original image AS IS");
-	private Secundomer PREPROCESSING = SecundomerList.registerSecundomer("Pre-process image by special filter chain");
-	private Secundomer FILTERING = SecundomerList.registerSecundomer("Filter image by common filter chain");
-	private Secundomer STORE_FILTERED_IMAGE = SecundomerList.registerSecundomer("Saving filtered image as raw");
-	private Secundomer FILTERING_THUMB = SecundomerList.registerSecundomer("Filter image by internal thumb chain");
-	private Secundomer FILTERING_HISTO = SecundomerList.registerSecundomer("Filter image by internal histogram chain");
-	private Secundomer ANAZYLE = SecundomerList.registerSecundomer("Analyze image by registered module");
+	private Secundomer STORE_ORIGINAL_IMAGE = SecundomerList
+			.registerSecundomer("Saving original image AS IS");
+	private Secundomer PREPROCESSING = SecundomerList
+			.registerSecundomer("Pre-process image by special filter chain");
+	private Secundomer FILTERING = SecundomerList
+			.registerSecundomer("Filter image by common filter chain");
+	private Secundomer STORE_FILTERED_IMAGE = SecundomerList
+			.registerSecundomer("Saving filtered image as raw");
+	private Secundomer FILTERING_THUMB = SecundomerList
+			.registerSecundomer("Filter image by internal thumb chain");
+	private Secundomer FILTERING_HISTO = SecundomerList
+			.registerSecundomer("Filter image by internal histogram chain");
+	private Secundomer ANAZYLE = SecundomerList
+			.registerSecundomer("Analyze image by registered module");
 
 	private Locuses lastLocus = null;
 
-	public Locuses startProcessing(InputStore store) throws FilterException, IOException, ModuleException,
-			PersistentException {
+	/**
+	 * Start processing given source. Source image can be found in
+	 * {@link InputStore#getSourceImage()}. <br>
+	 * 
+	 * Processing is a bunch of steps:
+	 * <ol>
+	 * <li>{@link #fillLocusData(Locuses)} loads from database required values
+	 * for {@link Locuses} instance.
+	 * 
+	 * <li>Init {@link LocusSources}.
+	 * 
+	 * <li>Build histogram by source image.
+	 * 
+	 * <li>Apply pre-processing filters to image by
+	 * {@link ModuleProcessor#getPreChainsaw()}.
+	 * 
+	 * <li>Apply processing filters to pre-processed image by
+	 * {@link ModuleProcessor#getChainsaw()}.
+	 * 
+	 * <li>Creating thumbnail for that last image.
+	 * 
+	 * <li>Calling {@link IModule#analyze(BufferedImage, Locuses)} for that last
+	 * image.
+	 * 
+	 * </ol>
+	 * 
+	 * @param source
+	 *            is source for processing, must be not null
+	 * @return created and filled instance of Locus
+	 * 
+	 * @throws FilterException
+	 * @throws IOException
+	 * @throws ModuleException
+	 * @throws PersistentException
+	 */
+	public Locuses startProcessing(InputStore source) throws FilterException, IOException,
+			ModuleException, PersistentException {
 		if (this.module == null) {
 			throw new IllegalStateException("Internal error. module must be not null");
 		}
-		if (store == null) {
+		if (source == null) {
 			throw new IllegalArgumentException("Internal error. Store must be not null.");
 		}
 
-		logger.debug("Start processing for new store {}", store);
+		logger.debug("Start processing for new store {}", source);
 
 		logger.debug("Creating new locus");
 		Locuses locus = LocusesFactory.createLocuses();
-		locus.setName(store.getName());
+		locus.setName(source.getName());
 		this.fillLocusData(locus);
 
 		STORE_ORIGINAL_IMAGE.start();
 		try {
 			LocusSources lSource = LocusSourcesFactory.createLocusSources();
-			lSource.setFilename(store.getName());
-			lSource.setSourceImage(store.getFileData());
+			lSource.setFilename(source.getName());
+			lSource.setSourceImage(source.getFileData());
 			// lSource.save();
 			locus.setLocusSource(lSource);
 		} finally {
 			STORE_ORIGINAL_IMAGE.stop();
 		}
 
-		BufferedImage image = store.getSourceImage();
+		BufferedImage image = source.getSourceImage();
 
 		FILTERING_HISTO.start();
 		try {
@@ -324,15 +397,25 @@ public class ModuleProcessor {
 		lastLocus = locus;
 
 		// Cache params (for switched modules)
-		logger.debug("Caching parameters for instance {} : {}", this.module.getName(), locus.getModule().getData());
+		logger.debug("Caching parameters for instance {} : {}", this.module.getName(), locus
+				.getModule().getData());
 
 		return locus;
 	}
 
+	/**
+	 * Method must be called when you ready to save processed locus into
+	 * database. <br>
+	 * 
+	 * This method filled all temporary parameters into last processed locus.
+	 * 
+	 * @throws IOException
+	 */
 	public void applyProcessed() throws IOException {
 
 		if (lastLocus == null) {
-			throw new IllegalStateException("Internal error when applying processed module. Locus does not saved.");
+			throw new IllegalStateException(
+					"Internal error when applying processed module. Locus does not saved.");
 		}
 
 		STORE_FILTERED_IMAGE.start();
@@ -342,12 +425,16 @@ public class ModuleProcessor {
 			lastLocus.setFilteredImage(ModuleHelper.convertImageToRaw(this.lastProcessedImage));
 			lastLocus.setThumbImage(ModuleHelper.convertImageToRaw(this.lastThumbImage));
 
-			ModuleHelper.finalyzeParams(lastLocus);
+			ModuleHelper.finalyzeParams(this.lastLocus);
+
 		} finally {
 			STORE_FILTERED_IMAGE.stop();
 		}
 	}
 
+	/**
+	 * This method clear all saved values (thumbnail, histogram, etc.).
+	 */
 	public void finishProcessing() {
 		lastLocus = null;
 		lastProcessedImage = null;
@@ -362,20 +449,34 @@ public class ModuleProcessor {
 
 	}
 
-	private Secundomer LOCUS_DATA = SecundomerList.registerSecundomer("Filling locus data from database");
-	private Secundomer FILTERS_DATA = SecundomerList.registerSecundomer("Filling filters data from database");
+	private Secundomer LOCUS_DATA = SecundomerList
+			.registerSecundomer("Filling locus data from database");
+	private Secundomer FILTERS_DATA = SecundomerList
+			.registerSecundomer("Filling filters data from database");
 
-	private void fillLocusData(Locuses locus) throws PersistentException, FilterException {
+	/**
+	 * Filling locus by parameters -- what module we use and what filters we
+	 * apply.
+	 * 
+	 * @param locus
+	 * @throws PersistentException
+	 * @throws FilterException
+	 * @throws ModuleException
+	 */
+	private void fillLocusData(Locuses locus) throws PersistentException, FilterException,
+			ModuleException {
 		logger.debug("Filling data from database");
 
 		LOCUS_DATA.start();
 		try {
 
-			String codename = module.getClass().getName();
-			LModules lModule = LModulesFactory.loadLModulesByQuery("codename = '" + codename + "'", null);
-			if (lModule == null) {
-				throw new FilterException("Unexpected error. Unable to find properly registed module " + codename);
-			}
+			//			String codename = module.getClass().getName();
+			//			LModules lModule = LModulesFactory.loadLModulesByQuery("codename = '" + codename + "'", null);
+			//			if (lModule == null) {
+			//				throw new FilterException("Unexpected error. Unable to find properly registed module " + codename);
+			//			}
+
+			LModules lModule = AppDataStorage.getInstance().getModuleByClass(module.getClass());
 			LocusAppliedModule module = LocusAppliedModuleFactory.createLocusAppliedModule();
 			module.setModule(lModule);
 			locus.setModule(module);
@@ -392,17 +493,31 @@ public class ModuleProcessor {
 
 			List<LocusAppliedFilters> lFilters = locus.getFilters();
 
+			for (IFilter filter : this.preProcessingChainsaw.getFilters()) {
+				LocusAppliedFilters locusFilter = LocusAppliedFiltersFactory
+						.createLocusAppliedFilters();
+				LFilters lFilter = AppDataStorage.getInstance().getServiceFilterByClass(
+						filter.getClass());
+
+				locusFilter.setFilter(lFilter);
+
+				lFilters.add(locusFilter);
+			}
+
 			for (IFilter filter : this.processingChainsaw.getFilters()) {
-				LocusAppliedFilters locusFilter = LocusAppliedFiltersFactory.createLocusAppliedFilters();
+				LocusAppliedFilters locusFilter = LocusAppliedFiltersFactory
+						.createLocusAppliedFilters();
 				//locusFilter.setOptions(ParamHelper.convertParamsToJSON(filter));
 
-				String codename = filter.getClass().getName();
-				LFilters dbFilter = LFiltersFactory.loadLFiltersByQuery("codename = '" + codename + "'", null);
-				if (dbFilter == null) {
-					throw new FilterException("Unexpected error. Unable to find properly registed filter " + codename);
-				}
+				//				String codename = filter.getClass().getName();
+				//				LFilters dbFilter = LFiltersFactory.loadLFiltersByQuery("codename = '" + codename + "'", null);
+				//				if (dbFilter == null) {
+				//					throw new FilterException("Unexpected error. Unable to find properly registed filter " + codename);
+				//				}
 
-				locusFilter.setFilter(dbFilter);
+				LFilters lFilter = AppDataStorage.getInstance().getFilterByClass(filter.getClass());
+
+				locusFilter.setFilter(lFilter);
 				// locusFilter.save();
 
 				lFilters.add(locusFilter);
@@ -442,34 +557,38 @@ public class ModuleProcessor {
 
 	private SimpleDateFormat fmt = new SimpleDateFormat("dd.MM.yyy HH:mm:ss");
 
-	public void saveSettingsToFile(File file) throws FileNotFoundException {
+	public void saveSettingsToFile(File file) throws FileNotFoundException,
+			UnsupportedEncodingException {
 		if (this.module == null) {
 			throw new IllegalStateException("Internal error. Module does not registered yet.");
 		}
 
 		if (file == null) {
-			throw new IllegalArgumentException("Internal error. Input variable 'file' must be not null.");
+			throw new IllegalArgumentException(
+					"Internal error. Input variable 'file' must be not null.");
 		}
 
 		logger.debug("Saving settings to file " + file.getAbsolutePath());
 
-		PrintWriter writer = new PrintWriter(file);
+		PrintStream printer = new PrintStream(new FileOutputStream(file, false), false, Config
+				.getInstance().getDefaultEncoding());
 		try {
-			writer.write("# " + Const.PROGRAM_NAME_FULL + "\n");
-			writer.write("# Module Definiion File\n");
-			writer.write("# " + file.getName() + "\n");
-			writer.write("# " + fmt.format(new Date()) + "\n\n");
+			printer.println("# " + Const.PROGRAM_NAME_FULL);
+			printer.println("# Module Definiion File");
+			printer.println("# " + file.getName());
+			printer.println("# " + fmt.format(new Date()));
+			printer.println();
 
-			writer.write("module=" + this.module.getClass().getName() + "=");
-			writer.write(ParamHelper.convertParamsToJSON(this.module.getParams()));
-			writer.write("\n");
+			printer.print("module=" + this.module.getClass().getName() + "=");
+			printer.print(ParamHelper.convertParamsToJSON(this.module.getParams()));
+			printer.println();
 			for (IFilter filter : this.processingChainsaw.getFilters()) {
-				writer.write(filter.getClass().getName() + "=");
-				writer.write(ParamHelper.convertParamsToJSON(filter));
-				writer.write("\n");
+				printer.print(filter.getClass().getName() + "=");
+				printer.print(ParamHelper.convertParamsToJSON(filter));
+				printer.println();
 			}
 		} finally {
-			writer.close();
+			printer.close();
 		}
 	}
 
@@ -481,12 +600,18 @@ public class ModuleProcessor {
 		}
 
 		if (file == null) {
-			throw new IllegalArgumentException("Internal error. Input variable 'file' must be not null.");
+			throw new IllegalArgumentException(
+					"Internal error. Input variable 'file' must be not null.");
 		}
 
 		logger.debug("Loading settings from file " + file.getAbsolutePath());
 
-		BufferedReader reader = new BufferedReader(new FileReader(file));
+		FilterChainsawTransactional currentFilters = new FilterChainsawTransactional(
+				this.processingChainsaw);
+		IModule currentModule = this.module;
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file),
+				Config.getInstance().getDefaultEncoding()));
 		try {
 			this.processingChainsaw.removeAllFilters();
 
@@ -505,7 +630,8 @@ public class ModuleProcessor {
 				}
 				if (line.startsWith("module=")) {
 					if (moduleSet) {
-						throw new Exception("Line " + idx + ". File contains more than one module. "
+						throw new Exception("Line " + idx
+								+ ". File contains more than one module. "
 								+ this.module.getClass().getName() + " already set up.");
 					}
 					String class_ = line.substring("module=".length());
@@ -524,18 +650,25 @@ public class ModuleProcessor {
 				} else {
 					int pos = line.indexOf("=");
 					if (pos < 0) {
-						throw new Exception("Line " + idx + ". Illegal line. Can't find '=' symbol.");
+						throw new Exception("Line " + idx
+								+ ". Illegal line. Can't find '=' symbol.");
 					}
 					String filterName = line.substring(0, pos);
 					String params = line.substring(pos + 1);
 
-					IFilter filter = this.processingChainsaw.appendFilter((Class<? extends IFilter>) Class
-							.forName(filterName));
+					IFilter filter = this.processingChainsaw
+							.appendFilter((Class<? extends IFilter>) Class.forName(filterName));
 					ParamHelper.fillParametersFromJSON(filter, params);
 
 				}
 			}
-
+		} catch (Exception e) {
+			// Restore filters!
+			currentFilters.commitChanges();
+			if (currentModule != null) {
+				this.setModule(currentModule.getClass());
+			}
+			throw e;
 		} finally {
 			reader.close();
 		}

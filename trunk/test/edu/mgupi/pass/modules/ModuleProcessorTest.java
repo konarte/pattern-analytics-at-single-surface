@@ -48,7 +48,8 @@ public class ModuleProcessorTest {
 
 	@Test
 	public void testCommonWork() throws Exception {
-		PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
+		PersistentTransaction transaction = PassPersistentManager.instance().getSession()
+				.beginTransaction();
 		TestInputImpl source = new TestInputImpl();
 		source.init();
 		try {
@@ -75,7 +76,8 @@ public class ModuleProcessorTest {
 				IModule firstModule = processor.getModule();
 
 				new File("tmp").mkdir();
-				ImageIO.write(processor.getLastProcessedImage(), "PNG", new File("tmp/module-test-processed.png"));
+				ImageIO.write(processor.getLastProcessedImage(), "PNG", new File(
+						"tmp/module-test-processed.png"));
 
 				processor.setModule(SimpleMatrixModule.class);
 				assertNotNull(ModuleHelper.getTemporaryModuleImage(myLocus));
@@ -115,7 +117,7 @@ public class ModuleProcessorTest {
 
 		} finally {
 			source.close();
-			
+
 			transaction.rollback();
 			PassPersistentManager.instance().disposePersistentManager();
 		}
@@ -125,7 +127,8 @@ public class ModuleProcessorTest {
 
 	@Test
 	public void testPreprocessingWork() throws Exception {
-		PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
+		PersistentTransaction transaction = PassPersistentManager.instance().getSession()
+				.beginTransaction();
 		TestInputImpl source = new TestInputImpl();
 		source.init();
 		try {
@@ -137,7 +140,8 @@ public class ModuleProcessorTest {
 			resize.getWIDTH().setValue(1024);
 			resize.getHEIGHT().setValue(1024);
 
-			GrayScaleFilter gray = (GrayScaleFilter) preprocessingSaw.appendFilter(GrayScaleFilter.class);
+			GrayScaleFilter gray = (GrayScaleFilter) preprocessingSaw
+					.appendFilter(GrayScaleFilter.class);
 
 			assertTrue(resize == preprocessingSaw.getFilter(0));
 			assertTrue(gray == preprocessingSaw.getFilter(1));
@@ -163,7 +167,8 @@ public class ModuleProcessorTest {
 				IModule firstModule = processor.getModule();
 
 				new File("tmp").mkdir();
-				ImageIO.write(processor.getLastProcessedImage(), "PNG", new File("tmp/module-test-processed-pre.png"));
+				ImageIO.write(processor.getLastProcessedImage(), "PNG", new File(
+						"tmp/module-test-processed-pre.png"));
 
 				processor.setModule(SimpleMatrixModule.class);
 				assertNotNull(ModuleHelper.getTemporaryModuleImage(myLocus));
@@ -201,7 +206,8 @@ public class ModuleProcessorTest {
 
 	@Test
 	public void testEmptyFilters() throws Exception {
-		PersistentTransaction transaction = PassPersistentManager.instance().getSession().beginTransaction();
+		PersistentTransaction transaction = PassPersistentManager.instance().getSession()
+				.beginTransaction();
 		TestInputImpl source = new TestInputImpl();
 		source.init();
 		try {

@@ -75,8 +75,8 @@ public class DefectTypes implements Serializable {
 	
 	@Column(name="IdDefectType", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D31204C98AB9608FC9")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31204C98AB9608FC9", strategy="native")	
+	@GeneratedValue(generator="V0A1070D31205627A67703175")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31205627A67703175", strategy="native")	
 	private int idDefectType;
 	
 	@Column(name="Name", nullable=false, length=255)	
@@ -123,7 +123,7 @@ public class DefectTypes implements Serializable {
 	 * Изображение дефекта в виде картинки. 
 	 * Картинка должна быть стандартизированного размера. 256x256 пикселей.
 	 * 
-	 * Формат хранения -- PNG
+	 * Формат хранения -- JPG
 	 */
 	public void setDefectImage(byte[] value) {
 		this.defectImage = value;
@@ -133,7 +133,7 @@ public class DefectTypes implements Serializable {
 	 * Изображение дефекта в виде картинки. 
 	 * Картинка должна быть стандартизированного размера. 256x256 пикселей.
 	 * 
-	 * Формат хранения -- PNG
+	 * Формат хранения -- JPG
 	 */
 	public byte[] getDefectImage() {
 		return defectImage;

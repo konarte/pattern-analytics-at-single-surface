@@ -23,12 +23,14 @@ public class LFiltersDetachedCriteria extends AbstractORMDetachedCriteria {
 	public final IntegerExpression idLFilter;
 	public final StringExpression name;
 	public final StringExpression codename;
+	public final BooleanExpression serviceFilter;
 	
 	public LFiltersDetachedCriteria() {
 		super(edu.mgupi.pass.db.locuses.LFilters.class, edu.mgupi.pass.db.locuses.LFiltersCriteria.class);
 		idLFilter = new IntegerExpression("idLFilter", this.getDetachedCriteria());
 		name = new StringExpression("name", this.getDetachedCriteria());
 		codename = new StringExpression("codename", this.getDetachedCriteria());
+		serviceFilter = new BooleanExpression("serviceFilter", this.getDetachedCriteria());
 	}
 	
 	public LFiltersDetachedCriteria(DetachedCriteria aDetachedCriteria) {
@@ -36,6 +38,7 @@ public class LFiltersDetachedCriteria extends AbstractORMDetachedCriteria {
 		idLFilter = new IntegerExpression("idLFilter", this.getDetachedCriteria());
 		name = new StringExpression("name", this.getDetachedCriteria());
 		codename = new StringExpression("codename", this.getDetachedCriteria());
+		serviceFilter = new BooleanExpression("serviceFilter", this.getDetachedCriteria());
 	}
 	
 	public LFilters uniqueLFilters(PersistentSession session) {

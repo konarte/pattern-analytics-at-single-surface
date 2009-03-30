@@ -109,9 +109,9 @@ public class ParametersEditorPanel extends JPanel {
 		jPanelPlace.removeAll();
 
 		// If received no parameters
-		if (editableParameters == null) {
+		if (editableParameters == null || editableParameters.size() == 0) {
 			JLabel label = new JLabel();
-			label.setText("Параметры отсутствуют");
+			label.setText(Messages.getString("ParametersEditorPanel.noParameters"));
 			label.setName("noparams");
 			jPanelPlace.add(label);
 			return;
@@ -148,9 +148,10 @@ public class ParametersEditorPanel extends JPanel {
 			if (param.isMultiple()) {
 
 				if (!(type == ParamType.STRING || type == ParamType.DOUBLE || type == ParamType.INT)) {
-					throw new IllegalArgumentException("Internal error. Unable to properly render parameter '" + name
-							+ "' with type " + type
-							+ ". Parameter marked as multiple. Please, consult with developers.");
+					throw new IllegalArgumentException(
+							"Internal error. Unable to properly render parameter '" + name
+									+ "' with type " + type
+									+ ". Unknown type. Please, consult with developers.");
 				}
 
 				JComboBox comboBox = new JComboBox(param.getVisual_values());
@@ -166,10 +167,11 @@ public class ParametersEditorPanel extends JPanel {
 				controlComponents.put(param, field);
 			} else if (type == ParamType.INT) {
 
-				if (param.getLow_border() != Integer.MIN_VALUE && param.getHi_border() != Integer.MAX_VALUE) {
+				if (param.getLow_border() != Integer.MIN_VALUE
+						&& param.getHi_border() != Integer.MAX_VALUE) {
 
-					SpinnerModel model = new SpinnerNumberModel(param.getLow_border(), param.getLow_border(), param
-							.getHi_border(), 1);
+					SpinnerModel model = new SpinnerNumberModel(param.getLow_border(), param
+							.getLow_border(), param.getHi_border(), 1);
 					JSpinner spinner = new JSpinner(model);
 					spinner.setName(name + "_spinner");
 
@@ -177,7 +179,8 @@ public class ParametersEditorPanel extends JPanel {
 					controlComponents.put(param, spinner);
 
 				} else {
-					JFormattedTextField field = new JFormattedTextField(NumberFormat.getIntegerInstance());
+					JFormattedTextField field = new JFormattedTextField(NumberFormat
+							.getIntegerInstance());
 					field.setName(param.getName() + "_int_field");
 
 					jPanelPlace.add(field, topGrid);
@@ -210,7 +213,9 @@ public class ParametersEditorPanel extends JPanel {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						Color selectedValue = JColorChooser.showDialog(ParametersEditorPanel.this,
-								"Выбор цвета для параметра " + name, selectedColors.get(param));
+								Messages.getString("ParametersEditorPanel.title.pickColor", name),
+								selectedColors.get(param));
+
 						if (selectedValue != null) {
 							selectedColors.put(param, selectedValue);
 							colorSample.setBackground(selectedColors.get(param));
@@ -239,8 +244,10 @@ public class ParametersEditorPanel extends JPanel {
 				controlComponents.put(param, colorSample);
 
 			} else {
-				throw new IllegalArgumentException("Internal error. Unable to properly render parameter '" + name
-						+ "' with type " + type + ". Unknown type. Please, consult with developers.");
+				throw new IllegalArgumentException(
+						"Internal error. Unable to properly render parameter '" + name
+								+ "' with type " + type
+								+ ". Unknown type. Please, consult with developers.");
 			}
 			index++;
 		}
@@ -315,8 +322,9 @@ public class ParametersEditorPanel extends JPanel {
 				selectedColors.put(param, color);
 			} else {
 				throw new IllegalArgumentException(
-						"Internal error. Unable to properly set default value to parameter '" + param.getName()
-								+ "' with type " + type + ". Unknown type. Please, consult with developers.");
+						"Internal error. Unable to properly set default value to parameter '"
+								+ param.getName() + "' with type " + type
+								+ ". Unknown type. Please, consult with developers.");
 			}
 		}
 	}
@@ -339,7 +347,9 @@ public class ParametersEditorPanel extends JPanel {
 
 			try {
 				if (param.isMultiple()) {
-					param.setValue(param.getAllowed_values()[((JComboBox) comp).getSelectedIndex()]);
+					param
+							.setValue(param.getAllowed_values()[((JComboBox) comp)
+									.getSelectedIndex()]);
 				} else if (type == ParamType.STRING) {
 					param.setValue(((JTextField) comp).getText());
 				} else if (type == ParamType.INT) {
@@ -350,7 +360,8 @@ public class ParametersEditorPanel extends JPanel {
 					} else {
 						throw new IllegalArgumentException(
 								"Internal error. Unable to properly cast stored component for parameter '"
-										+ param.getName() + "' with component class " + comp.getClass()
+										+ param.getName() + "' with component class "
+										+ comp.getClass()
 										+ ". Unknown class. Please, consult with developers.");
 					}
 				} else if (type == ParamType.DOUBLE) {
@@ -359,11 +370,13 @@ public class ParametersEditorPanel extends JPanel {
 					param.setValue(selectedColors.get(param));
 				} else {
 					throw new IllegalArgumentException(
-							"Internal error. Unable to properly set default value to parameter '" + param.getName()
-									+ "' with type " + type + ". Unknown type. Please, consult with developers.");
+							"Internal error. Unable to properly set default value to parameter '"
+									+ param.getName() + "' with type " + type
+									+ ". Unknown type. Please, consult with developers.");
 				}
 			} catch (IllegalParameterValueException ive) {
-				throw new IllegalParameterValueException("Error when applying parameter '" + param.getName() + "'", ive);
+				throw new IllegalParameterValueException("Error when applying parameter '"
+						+ param.getName() + "'", ive);
 			}
 		}
 

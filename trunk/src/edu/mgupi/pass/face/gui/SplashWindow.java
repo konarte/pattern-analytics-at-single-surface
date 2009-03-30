@@ -65,7 +65,9 @@ public class SplashWindow extends JFrame {
 	private void initialize(String defaultPath) throws IOException {
 		this.setResizable(false);
 		this.setName("splashFrame");
+		this.setTitle(Messages.getString("SplashWindow.title"));
 		this.setBounds(new Rectangle(0, 0, 450, 400));
+		this.setIconImage(AppHelper.getInstance().getWindowIcon());
 
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.setContentPane(getJContentPane());
@@ -75,10 +77,10 @@ public class SplashWindow extends JFrame {
 			String images[] = Utils.listFilesFromJAR(Const.SPLASH_IMAGE_PLACE_DIR, null);
 			if (images != null && images.length > 0) {
 				defaultPath = images[new Random().nextInt(images.length)];
-				logger.debug("Using random image: " + defaultPath);
+				logger.debug("Using random image splash: " + defaultPath);
 			}
 		} else {
-			logger.debug("Using given image: " + defaultPath);
+			logger.debug("Using given image splash: " + defaultPath);
 		}
 
 		BufferedImage image = null;
@@ -92,7 +94,8 @@ public class SplashWindow extends JFrame {
 		this.jPanelSplash.setImage(image);
 
 		Point point = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
-		this.setLocation((int) point.getX() - this.getWidth() / 2, (int) point.getY() - this.getHeight() / 2);
+		this.setLocation((int) point.getX() - this.getWidth() / 2, (int) point.getY()
+				- this.getHeight() / 2);
 	}
 
 	/**
@@ -104,7 +107,7 @@ public class SplashWindow extends JFrame {
 		if (jContentPane == null) {
 			jContentPane = new JPanel(true);
 			jContentPane.setLayout(new BorderLayout());
-			jContentPane.setToolTipText("Заставка со слоупоками");
+			jContentPane.setToolTipText(Messages.getString("SplashWindow.tooltip"));
 			jContentPane.setBorder(BorderFactory.createLineBorder(Color.gray, 1));
 			jContentPane.add(getJPanelSplash(), BorderLayout.CENTER);
 		}
@@ -148,7 +151,7 @@ public class SplashWindow extends JFrame {
 			gridBagConstraints1.insets = new Insets(5, 5, 5, 5);
 			gridBagConstraints1.gridy = 3;
 			jLabelInfo = new JLabel();
-			jLabelInfo.setText("Загрузка...");
+			jLabelInfo.setText(Messages.getString("SplashWindow.loading"));
 			jLabelInfo.setName("title");
 
 			jPanelSplash = new ImagePanel();

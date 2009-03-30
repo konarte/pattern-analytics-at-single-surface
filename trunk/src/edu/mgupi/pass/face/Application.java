@@ -41,8 +41,8 @@ public class Application {
 		// Not allowed for any other instances
 	}
 
-	private void changeLookAndFeel(String newLookAndFeel) throws ClassNotFoundException, InstantiationException,
-			IllegalAccessException, UnsupportedLookAndFeelException {
+	private void changeLookAndFeel(String newLookAndFeel) throws ClassNotFoundException,
+			InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
 
 		logger.debug("Found look and feel: " + newLookAndFeel);
 
@@ -67,6 +67,35 @@ public class Application {
 
 	}
 
+	private static volatile boolean restartAvailable = false;
+	private static volatile boolean restartRequired = false;
+
+	/**
+	 * Restart availably only if we launched through packed jar! <br>
+	 * 
+	 * @return true is restart can be done
+	 */
+	public static boolean isRestartAvailable() {
+		return restartAvailable;
+	}
+
+	/**
+	 * If restart available, then settings this method will restart program
+	 * (start new process after closing this).
+	 */
+	public static void enqueRestart() {
+		restartRequired = true;
+	}
+
+	/**
+	 * Is restart enqueued?
+	 * 
+	 * @return true if restart required.
+	 */
+	public static boolean isRestartRequired() {
+		return restartRequired;
+	}
+
 	// Name for file-lock
 	private final static String LOCK_FILE = "app.lock";
 
@@ -76,15 +105,21 @@ public class Application {
 	private void run() {
 
 		Secundomer applicationRun = SecundomerList.registerSecundomer("Application run");
-		final Secundomer applicationTotal = SecundomerList.registerSecundomer("Application total work");
+		final Secundomer applicationTotal = SecundomerList
+				.registerSecundomer("Application total work");
 
 		applicationRun.start();
 		applicationTotal.start();
 
 		// Attempt to lock file
 		try {
-			channel = new FileOutputStream(LOCK_FILE, false).getChannel();
+			File file = new File(LOCK_FILE);
+			channel = new FileOutputStream(file, false).getChannel();
 			lock = channel.tryLock();
+
+			restartAvailable = Utils.isWeLoadedFromJar()
+					&& new File(Const.DEFAULT_PACKED_JAR_NAME).exists();
+
 		} catch (Exception e) {
 			logger.error("Error when try to lock file. At this point we continue work.", e);
 		}
@@ -121,7 +156,17 @@ public class Application {
 					logger.error("Error when closing Hibernate.", e);
 				}
 
-				logger.info("Shutdown " + Const.PROGRAM_NAME_FULL);
+				try {
+					if (restartAvailable && restartRequired) {
+						logger.info("Restart {}.", Const.PROGRAM_NAME_FULL);
+						Runtime.getRuntime().exec("java -jar " + Const.DEFAULT_PACKED_JAR_NAME);
+					} else {
+						logger.info("Shutdown {}.", Const.PROGRAM_NAME_FULL);
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
 			}
 		}));
 
@@ -147,11 +192,12 @@ public class Application {
 			 */
 			try {
 				splash = new SplashWindow(Const.SPLASH_IMAGE_PATH);
-				splash.setSplashText("Загрузка...");
+				splash.setSplashText(Messages.getString("Application.mess.loading"));
 				splash.setVisible(true);
 			} catch (Exception e) {
 				applicationRun.stop();
-				AppHelper.showExceptionDialog(null, "Ошибка при инициализации приложения.", e);
+				AppHelper.showExceptionDialog(null, Messages.getString("Application.err.loading"),
+						e);
 				return; //
 			}
 
@@ -161,25 +207,26 @@ public class Application {
 			try {
 				this.changeLookAndFeel(newLookAndFeel);
 			} catch (Exception e) {
-				AppHelper.showExceptionDialog(null, "Ошибка при попытке применить стиль " + newLookAndFeel + ".", e);
+				AppHelper.showExceptionDialog(null, Messages.getString("Application.err.laf",
+						newLookAndFeel), e);
 			}
 
 			// We want to make good impression, isn't it?
 			if (channel != null && lock == null) {
-				AppHelper.showErrorDialog(null,
-						"Экземпляр приложения уже запущен. Пожалуйста, закройте предыдущий экземпляр.",
-						"Ошибка при запуске");
+				AppHelper.showErrorDialog(null, Messages
+						.getString("Application.err.alreadyStarted"), Messages
+						.getString("Application.title.alreadyStarted"));
 				System.exit(0);
 			}
 
 			// Hibernating...
-			splash.setSplashText("Подключение и инициализация БД...");
+			splash.setSplashText(Messages.getString("Application.mess.initDb"));
 
 			try {
 				logger.info("Initializing Hibernate...");
 				PassPersistentManager.instance();
 
-				splash.setSplashText("Загрузка приложения...");
+				splash.setSplashText(Messages.getString("Application.mess.loadingApp"));
 
 				// Well, initialization
 				MainFrame frame = (MainFrame) AppHelper.getInstance().getFrameImpl(MainFrame.class);
@@ -190,7 +237,8 @@ public class Application {
 				frame.setVisible(true);
 			} catch (Throwable t) {
 				applicationRun.stop();
-				AppHelper.showExceptionDialog(null, "Ошибка при загрузке приложения.", t);
+				AppHelper.showExceptionDialog(null, Messages
+						.getString("Application.err.loadingApp"), t);
 				return; //
 			}
 		} finally {
@@ -211,11 +259,21 @@ public class Application {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		logger.info("Starting " + Const.PROGRAM_NAME_FULL);
+		/*
+		 * This is normally safe.
+		 * 
+		 * Java does not initialize static classes and methods before it's been
+		 * needed.
+		 */
+
+		logger.info("Starting {}.", Const.PROGRAM_NAME_FULL);
+
+		AppHelper.setLocale(Config.getInstance().getCurrentLocale());
+
 		try {
 			new Application().run();
 		} catch (Throwable t) {
-			AppHelper.showExceptionDialog(null, "Критическая ошибка при запуске приложения.", t);
+			AppHelper.showExceptionDialog(null, Messages.getString("Application.err.critical"), t);
 		}
 	}
 }
