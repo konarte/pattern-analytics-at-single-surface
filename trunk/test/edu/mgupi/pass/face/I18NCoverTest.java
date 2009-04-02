@@ -40,6 +40,7 @@ public class I18NCoverTest {
 
 	private final static String ALLOWED_IDENTICALLY_VALUES[] = new String[] { "ID", "OK", "№" };
 
+	private final static String BEGIN_FULL_DEF = "Messages.getString(\"";
 	private final static String BEGIN_DEF = "getString(\"";
 	private final static String END_DEF = "\"";
 
@@ -49,18 +50,35 @@ public class I18NCoverTest {
 		Collection<File> files = Utils.listFiles(source, ".java");
 
 		Map<String, Collection<String>> checkingResources = new HashMap<String, Collection<String>>();
-		Map<String, String> bundleMap = new HashMap<String, String>();
+		//Map<String, String> bundleMap = new HashMap<String, String>();
 
 		for (File file : files) {
+			System.out.println(" ================== " + file);
 			Collection<String> lines = Utils.loadFromFile(file);
 
 			String fileName = null;
+			String prevLine = null;
+
 			Collection<String> keys = new ArrayList<String>();
 			for (String line : lines) {
-				int startKey = line.indexOf(BEGIN_DEF
-						+ file.getName().substring(0, file.getName().indexOf(".")));
+				//				int startKey = line.indexOf(BEGIN_DEF
+				//						+ file.getName().substring(0, file.getName().indexOf(".")));
+				int startKey = line.indexOf(BEGIN_DEF);
 				if (startKey < 0) {
 					continue; //
+				}
+
+				int startFullKey = line.indexOf(BEGIN_FULL_DEF);
+
+				if (startFullKey < 0) {
+					if (prevLine == null) {
+						continue; //
+					}
+					String fullLine = prevLine + line;
+					startFullKey = fullLine.indexOf(BEGIN_FULL_DEF);
+					if (startFullKey < 0) {
+						continue; //
+					}
 				}
 
 				int endKey = line.indexOf(END_DEF, startKey + BEGIN_DEF.length() + 1);
@@ -81,13 +99,17 @@ public class I18NCoverTest {
 				}
 
 				fileName = path.substring(pathPos + "src/".length());
-				String bundleName = fileName.substring(0, fileName.lastIndexOf("/")) + ".messages";
+				//				String bundleName = fileName.substring(0, fileName.lastIndexOf("/")) + ".messages";
 
 				fileName = Utils.replaceAll(fileName, "/", ".");
-				bundleName = Utils.replaceAll(bundleName, "/", ".");
-				bundleMap.put(fileName, bundleName);
+				fileName = fileName.substring(0, fileName.lastIndexOf("."));
+				//				bundleName = Utils.replaceAll(bundleName, "/", ".");
+				//				bundleMap.put(fileName, bundleName);
 
+				System.out.println("CHECK " + key);
 				keys.add(key);
+
+				prevLine = line;
 
 			}
 
@@ -100,13 +122,21 @@ public class I18NCoverTest {
 
 		Map<Locale, Map<String, String>> resourceMap = new HashMap<Locale, Map<String, String>>();
 
-		for (SupportedLocale locale : SupportedLocale.values()) {
-			AppHelper.setLocale(locale);
+		for (SupportedLocale supportedLocale : SupportedLocale.values()) {
+			if (!AppHelper.setLocale(supportedLocale)) {
+				System.err.println("Skipping unknown locale " + supportedLocale.name());
+				continue; //
+			}
 			System.out.println("Processing locale: " + Locale.getDefault());
+
+			Locale locale = Locale.getDefault();
 
 			Map<String, String> currentValues = new HashMap<String, String>();
 			for (String clazz_ : checkingResources.keySet()) {
-				String bndl = bundleMap.get(clazz_);
+
+				Class<?> clazzDef_ = Class.forName(clazz_);
+
+				String bndl = clazzDef_.getPackage().getName() + ".messages";
 				assertNotNull(bndl);
 				ResourceBundle bundle = ResourceBundle.getBundle(bndl, Locale.getDefault());
 
@@ -118,6 +148,7 @@ public class I18NCoverTest {
 					try {
 						String res = bundle.getString(link);
 						assertNotNull(res);
+
 						tmpValues.put(bndl + "@" + link, res);
 					} catch (MissingResourceException mre) {
 						fail("Unable to find resource " + link + " in bundle " + bndl
@@ -165,7 +196,9 @@ public class I18NCoverTest {
 				currentValues.putAll(tmpValues);
 			}
 
-			resourceMap.put(Locale.getDefault(), currentValues);
+			if (!resourceMap.containsKey(locale)) {
+				resourceMap.put(locale, currentValues);
+			}
 		}
 		//
 		//		int pos = 0;

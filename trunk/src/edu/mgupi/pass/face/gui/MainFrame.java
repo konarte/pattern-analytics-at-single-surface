@@ -58,6 +58,14 @@ import edu.mgupi.pass.db.locuses.LModules;
 import edu.mgupi.pass.db.locuses.Locuses;
 import edu.mgupi.pass.face.Application;
 import edu.mgupi.pass.face.IProgress;
+import edu.mgupi.pass.face.gui.forms.DefectClassesRecord;
+import edu.mgupi.pass.face.gui.forms.DefectClassesTable;
+import edu.mgupi.pass.face.gui.forms.DefectTypesRecord;
+import edu.mgupi.pass.face.gui.forms.DefectTypesTable;
+import edu.mgupi.pass.face.gui.forms.SurfaceClassesRecord;
+import edu.mgupi.pass.face.gui.forms.SurfaceClassesTable;
+import edu.mgupi.pass.face.gui.forms.SurfaceTypesRecord;
+import edu.mgupi.pass.face.gui.forms.SurfaceTypesTable;
 import edu.mgupi.pass.face.gui.template.ImageFrameTemplate;
 import edu.mgupi.pass.face.gui.template.ImagePanel;
 import edu.mgupi.pass.filters.FilterChainsaw;
@@ -155,13 +163,16 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 	}
 
 	public void preCache() throws Exception {
-		AppHelper.getInstance().getDialogImpl(SettingsDialog.class);
+		AppHelper.getInstance().getDialogImpl(SettingsWindow.class);
 		AppHelper.getInstance().getDialogImpl(AboutDialog.class);
 		AppHelper.getInstance().getDialogImpl(ParametersEditor.class);
 		AppHelper.getInstance().getDialogImpl(FiltersEditor.class);
 		AppHelper.getInstance().getDialogImpl(LFiltersList.class);
 		AppHelper.getInstance().getDialogImpl(LModulesList.class);
 
+		/*
+		 * Forms precaching
+		 */
 		AppHelper.getInstance().getDialogImpl(DefectClassesTable.class);
 		AppHelper.getInstance().getDialogImpl(DefectClassesRecord.class);
 
@@ -1912,8 +1923,8 @@ public class MainFrame extends JFrame implements IProgress, ActionListener {
 			}
 		} else if (action == Actions.SETTINGS) {
 			// Edit settings
-			SettingsDialog settings = (SettingsDialog) AppHelper.getInstance().getDialog(
-					SettingsDialog.class);
+			SettingsWindow settings = (SettingsWindow) AppHelper.getInstance().getDialog(
+					SettingsWindow.class);
 			if (settings != null) {
 				if (settings.openDialog()) {
 					this.restartProcessingBySource();

@@ -22,8 +22,9 @@ import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.face.Application;
 import edu.mgupi.pass.face.gui.AppHelper;
+import edu.mgupi.pass.face.gui.LoginWindow;
 import edu.mgupi.pass.face.gui.MainFrame;
-import edu.mgupi.pass.face.gui.SettingsDialog;
+import edu.mgupi.pass.face.gui.SettingsWindow;
 import edu.mgupi.pass.face.gui.template.ImagePanel;
 import edu.mgupi.pass.modules.ModuleProcessor;
 
@@ -133,9 +134,11 @@ public class Config {
 	 * 
 	 * @author raidan
 	 * 
+	 * @see AppHelper#setLocale(SupportedLocale)
+	 * 
 	 */
 	public static enum SupportedLocale {
-		RUSSIAN("Русский язык"), ENGLISH("English language");
+		RUSSIAN("Русский"), ENGLISH("English");
 		private String title;
 
 		private SupportedLocale(String title) {
@@ -195,22 +198,23 @@ public class Config {
 	}
 
 	/**
-	 * Special method for set up current instance as debug. <br>
+	 * Special method for set up current instance as virtual, for debug. <br>
 	 * 
-	 * Debug means, that we don't load properties from file and do not save it.
-	 * All changed values will be store in memory and disappear after program
-	 * end. <br>
+	 * Virtual means, that we don't load properties from file and do not save
+	 * it. All changed values will be store in memory and disappear after
+	 * program end. <br>
 	 * 
 	 * Method must use by tests.
 	 */
-	public void setDebugInstance() {
-		this.readOnly = true;
+	public void setDebugVirualMode() {
+		this.virualMode = true;
 	}
 
-	private boolean readOnly = false;
+	private boolean virualMode = false;
 	private final static String DEFAULT_COMMON_CONFIG_NAME = "config.ini";
 	private Configuration currentConfigInstance;
 	private Configuration commonConfigInstance;
+	private Configuration connectConfigInstance;
 	private FileConfiguration configInstance;
 
 	@SuppressWarnings("deprecation")
@@ -233,6 +237,7 @@ public class Config {
 
 			currentConfigInstance = configInstance.subset("current");
 			commonConfigInstance = configInstance.subset("common");
+			connectConfigInstance = configInstance.subset("connection");
 
 		} catch (ConfigurationException e) {
 			throw new RuntimeException(e);
@@ -241,11 +246,16 @@ public class Config {
 
 	private final static String PARAM_CURRENT_SOURCE_MODE = "sourceMode";
 	private final static String PARAM_CURRENT_BACKGROUND = "imageBackground";
+
 	private final static String PARAM_LOOK_AND_FEEL = "lookAndFeel";
 	private final static String PARAM_LOCALE = "locale";
 	private final static String PARAM_ROWS_DELETE_MODE = "rowsDeleteMode";
 	private final static String PARAM_TRANSACTION_MODE = "transactionMode";
 	private final static String PARAM_DATA_DELETION_CHECK = "dataDeletionCheck";
+
+	private final static String PARAM_CONNECTION_URL = "url";
+	private final static String PARAM_CONNECTION_LOGIN = "login";
+	private final static String PARAM_CONNECTION_PASSWORD = "password";
 
 	private SourceMode currentSourceMode = null;
 
@@ -259,6 +269,11 @@ public class Config {
 			return currentSourceMode;
 		}
 		final SourceMode default_ = SourceMode.LEFT_TOP;
+
+		if (this.virualMode) {
+			return default_;
+		}
+
 		try {
 			currentSourceMode = SourceMode.valueOf(this.currentConfigInstance.getString(
 					PARAM_CURRENT_SOURCE_MODE, default_.name()));
@@ -280,10 +295,17 @@ public class Config {
 			return currentColor;
 		}
 		final Color default_ = Color.WHITE;
+
+		if (this.virualMode) {
+			return default_;
+		}
+
 		currentColor = new Color(this.currentConfigInstance.getInt(PARAM_CURRENT_BACKGROUND,
 				default_.getRGB()));
 		return currentColor;
 	}
+
+	private String currentLaF = null;
 
 	/**
 	 * Return Look and Feel.
@@ -291,7 +313,17 @@ public class Config {
 	 * @return current {@link LookAndFeel} classname.
 	 */
 	public String getLookAndFeel() {
+
+		if (currentLaF != null) {
+			return currentLaF;
+		}
+
 		final String default_ = UIManager.getSystemLookAndFeelClassName();
+
+		if (this.virualMode) {
+			return default_;
+		}
+
 		return this.commonConfigInstance.getString(PARAM_LOOK_AND_FEEL, default_);
 	}
 
@@ -307,6 +339,11 @@ public class Config {
 			return currentRowsDeletionMode;
 		}
 		final DeletionMode default_ = DeletionMode.CONFIRM;
+
+		if (this.virualMode) {
+			return default_;
+		}
+
 		try {
 			currentRowsDeletionMode = DeletionMode.valueOf(this.commonConfigInstance.getString(
 					PARAM_ROWS_DELETE_MODE, default_.name()));
@@ -332,6 +369,11 @@ public class Config {
 			return currentTransactionMode;
 		}
 		final TestTransactionMode default_ = TestTransactionMode.COMMIT_EVERY_ROW;
+
+		if (this.virualMode) {
+			return default_;
+		}
+
 		try {
 			currentTransactionMode = TestTransactionMode.valueOf(this.commonConfigInstance
 					.getString(PARAM_TRANSACTION_MODE, default_.name()));
@@ -355,6 +397,11 @@ public class Config {
 			return currentDeletionCheckMode;
 		}
 		final DeletionCheckMode default_ = DeletionCheckMode.ACQUIRE_THEN_CHECK;
+
+		if (this.virualMode) {
+			return default_;
+		}
+
 		try {
 			currentDeletionCheckMode = DeletionCheckMode.valueOf(this.commonConfigInstance
 					.getString(PARAM_DATA_DELETION_CHECK, default_.name()));
@@ -380,7 +427,7 @@ public class Config {
 	/**
 	 * Return current locale from supported list. <br>
 	 * 
-	 * Usually used by {@link SettingsDialog} and {@link Application}.
+	 * Usually used by {@link SettingsWindow} and {@link Application}.
 	 * 
 	 * @return locale
 	 */
@@ -390,6 +437,11 @@ public class Config {
 		}
 		final SupportedLocale default_ = Locale.getDefault().equals(Const.LOCALE_RU) ? SupportedLocale.RUSSIAN
 				: SupportedLocale.ENGLISH;
+
+		if (this.virualMode) {
+			return default_;
+		}
+
 		try {
 			currentLocale = SupportedLocale.valueOf(this.commonConfigInstance.getString(
 					PARAM_LOCALE, default_.name()));
@@ -397,6 +449,81 @@ public class Config {
 		} catch (IllegalArgumentException iae) {
 			return default_;
 		}
+	}
+
+	private String currentURL;
+
+	/**
+	 * Return URL for connect to database. <br>
+	 * 
+	 * @return URL string like "jdbc:mysql://localhost:3306/pass_db"
+	 */
+	public String getURL() {
+		if (currentURL != null) {
+			return currentURL;
+		}
+		final String default_ = "jdbc:mysql://localhost:3306/pass_db";
+
+		if (this.virualMode) {
+			return default_;
+		}
+
+		currentURL = this.connectConfigInstance.getString(PARAM_CONNECTION_URL, default_);
+		return currentURL;
+	}
+
+	private String currentLogin;
+
+	/**
+	 * Return login (username) for connect to database. <br>
+	 * 
+	 * @return login
+	 */
+	public String getLogin() {
+		if (currentLogin != null) {
+			return currentLogin;
+		}
+		final String default_ = "pass";
+
+		if (this.virualMode) {
+			return default_;
+		}
+
+		currentLogin = this.connectConfigInstance.getString(PARAM_CONNECTION_LOGIN, default_);
+		currentLogin = Utils.replaceAll(currentLogin, "'", "");
+		currentLogin = Utils.replaceAll(currentLogin, ";", "");
+		return currentLogin;
+	}
+
+	/**
+	 * Return password state.
+	 * 
+	 * @return true is password saved in settings, false if not
+	 */
+	public boolean hasSavedPassword() {
+		return currentPassword != null;
+	}
+
+	private String currentPassword;
+
+	/**
+	 * Return password for connect to database. <br>
+	 * 
+	 * @return password if user allow to save password in settings or null, if
+	 *         password manual entered and don't saved
+	 */
+	public String getPassword() {
+		if (currentPassword != null) {
+			return currentPassword;
+		}
+		final String default_ = null;
+
+		if (this.virualMode) {
+			return default_;
+		}
+
+		currentPassword = this.connectConfigInstance.getString(PARAM_CONNECTION_PASSWORD, default_);
+		return currentPassword;
 	}
 
 	/**
@@ -442,7 +569,11 @@ public class Config {
 	 */
 	public boolean setLookAndFeel(String value) throws ClassNotFoundException,
 			InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
-		if (this.setCommonParameterImpl(PARAM_LOOK_AND_FEEL, this.getLookAndFeel(), value)) {
+		boolean res = this
+				.setCommonParameterImpl(PARAM_LOOK_AND_FEEL, this.getLookAndFeel(), value);
+
+		currentLaF = value;
+		if (res || !UIManager.getLookAndFeel().getClass().getName().equals(value)) {
 			AppHelper.getInstance().updateUI(value);
 			return true;
 		} else {
@@ -506,7 +637,8 @@ public class Config {
 	 * Set new {@link Locale}. Do not forget, that we must restart application
 	 * for apply changes. <br>
 	 * 
-	 * <b>This method does not change locale in runtime, this is too dangerous.</b>
+	 * <b>This method does not change locale in runtime, this is too
+	 * dangerous.</b>
 	 * 
 	 * @param value
 	 *            new {@link SupportedLocale}
@@ -520,14 +652,61 @@ public class Config {
 		return res;
 	}
 
-	private boolean setParameterImpl(Configuration config, String paramName, Object oldValue,
-			Object newValue) {
-		if (Utils.equals(newValue, oldValue)) {
-			return false;
-		} else {
-			config.setProperty(paramName, newValue);
-			return true;
+	/**
+	 * Set new URL for connection to database.
+	 * 
+	 * @param value
+	 *            new URL string like "jdbc:mysql://localhost:3306/pass_db"
+	 * @return true if values changed, false if this is equals to previous
+	 */
+	public boolean setURL(String value) {
+		if (value != null) {
+			value = value.trim();
 		}
+		boolean res = this.setConnectParameterImpl(PARAM_CONNECTION_URL, this.currentURL, value);
+		this.currentURL = value;
+		return res;
+	}
+
+	/**
+	 * Set new login for connection to database. <br>
+	 * 
+	 * Actually, sets up only in login window.
+	 * 
+	 * @param value
+	 *            new login
+	 * @return true if values changed, false if this is equals to previous
+	 * 
+	 * @see LoginWindow
+	 */
+	public boolean setLogin(String value) {
+		if (value != null) {
+			value = value.trim();
+		}
+		value = Utils.replaceAll(value, "'", "");
+		value = Utils.replaceAll(value, ";", "");
+		boolean res = this
+				.setConnectParameterImpl(PARAM_CONNECTION_LOGIN, this.currentLogin, value);
+		this.currentLogin = value;
+		return res;
+	}
+
+	/**
+	 * Set new password for connection to database. <br>
+	 * 
+	 * Actually, sets up only in login window.
+	 * 
+	 * @param value
+	 *            new password
+	 * @return true if values changed, false if this is equals to previous
+	 * 
+	 * @see LoginWindow
+	 */
+	public boolean setPassword(String value) {
+		boolean res = this.setConnectParameterImpl(PARAM_CONNECTION_PASSWORD, this.currentPassword,
+				value);
+		this.currentPassword = value;
+		return res;
 	}
 
 	private boolean setCurrentParameterImpl(String paramName, Object oldValue, Object newValue) {
@@ -536,6 +715,20 @@ public class Config {
 
 	private boolean setCommonParameterImpl(String paramName, Object oldValue, Object newValue) {
 		return this.setParameterImpl(this.commonConfigInstance, paramName, oldValue, newValue);
+	}
+
+	private boolean setConnectParameterImpl(String paramName, Object oldValue, Object newValue) {
+		return this.setParameterImpl(this.connectConfigInstance, paramName, oldValue, newValue);
+	}
+
+	private boolean setParameterImpl(Configuration config, String paramName, Object oldValue,
+			Object newValue) {
+		if (newValue == null) {
+			config.clearProperty(paramName);
+		} else {
+			config.setProperty(paramName, newValue);
+		}
+		return !Utils.equals(newValue, oldValue);
 	}
 
 	/**
@@ -558,7 +751,7 @@ public class Config {
 	 *            instance of saving window
 	 */
 	public void storeWindowPosition(Window window) {
-		if (readOnly) {
+		if (virualMode) {
 			return;
 		}
 
@@ -595,7 +788,7 @@ public class Config {
 	 * @param checkBoxes
 	 */
 	public void storeWindowCheckBoxes(Window window, JCheckBox... checkBoxes) {
-		if (readOnly) {
+		if (virualMode) {
 			return;
 		}
 
@@ -626,7 +819,7 @@ public class Config {
 	 */
 	public void loadWindowPosition(Window window) {
 
-		if (readOnly) {
+		if (virualMode) {
 			return;
 		}
 
@@ -668,7 +861,7 @@ public class Config {
 	 */
 	@SuppressWarnings("unchecked")
 	public void loadWindowCheckBoxes(Window window) {
-		if (readOnly) {
+		if (virualMode) {
 			return;
 		}
 
@@ -702,7 +895,7 @@ public class Config {
 	 * @throws ConfigurationException
 	 */
 	public void saveCommonConfig() throws ConfigurationException {
-		if (readOnly) {
+		if (virualMode) {
 			return;
 		}
 

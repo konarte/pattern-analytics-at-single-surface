@@ -29,12 +29,12 @@ import edu.mgupi.pass.util.Config.TestTransactionMode;
 
 public class SettingsDialogTest {
 
-	private SettingsDialog dialog = null;
+	private SettingsWindow dialog = null;
 
 	@Before
 	public void setUp() throws Exception {
-		Config.getInstance().setDebugInstance();
-		dialog = (SettingsDialog) AppHelper.getInstance().getDialogImpl(SettingsDialog.class);
+		Config.getInstance().setDebugVirualMode();
+		dialog = (SettingsWindow) AppHelper.getInstance().getDialogImpl(SettingsWindow.class);
 	}
 
 	@After
@@ -59,7 +59,7 @@ public class SettingsDialogTest {
 		JTabbedPane tabbed = (JTabbedPane) Utils.getChildNamed(dialog, "settingsPane");
 		assertNotNull(tabbed);
 		tabbed.setSelectedComponent(Utils.getChildNamed(dialog, "settingsCurrent"));
-
+		
 		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
@@ -324,6 +324,7 @@ public class SettingsDialogTest {
 
 		combo.setSelectedItem(new MotifLookAndFeel().getName());
 
+		
 		SwingTestHelper.clickCloseDialogButton(dialog, "cancel");
 
 		assertTrue(WindowsLookAndFeel.class == UIManager.getLookAndFeel().getClass());
@@ -337,4 +338,8 @@ public class SettingsDialogTest {
 		assertFalse(resultButton);
 	}
 
+	
+	public void testShow() throws Exception {
+		dialog.openDialog();
+	}
 }

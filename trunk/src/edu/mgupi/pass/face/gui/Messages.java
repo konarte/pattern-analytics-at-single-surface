@@ -33,6 +33,7 @@ public class Messages {
 
 			if (!Const.PRODUCTION_MODE) {
 				AppHelper.showErrorDialog(null, "Не найден ресурс '" + key + "'.");
+				throw e;
 			}
 			return '!' + key + '!';
 		}

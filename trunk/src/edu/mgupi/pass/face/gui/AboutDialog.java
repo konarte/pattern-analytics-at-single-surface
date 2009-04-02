@@ -1,3 +1,9 @@
+/*
+ * Pattern Analytics at Single Surface
+ * 
+ * @(#)AboutDialog.java 1.0 16.03.2009
+ */
+
 package edu.mgupi.pass.face.gui;
 
 import java.awt.BorderLayout;
@@ -50,7 +56,7 @@ public class AboutDialog extends JDialog {
 
 	private JPanel jContentPane = null;
 	private JPanel jPanelButtons = null;
-	private JButton jButtonCancel = null;
+	private JButton jButtonClose = null;
 	private JPanel jPanelData = null;
 	private JLabel jLabelProgramTitle = null;
 
@@ -63,7 +69,7 @@ public class AboutDialog extends JDialog {
 	}
 
 	public void showDialog() {
-		getDialogAdapter().showDialogCancelOnly();
+		getDialogAdapter().openDialog();
 	}
 
 	/**
@@ -104,7 +110,7 @@ public class AboutDialog extends JDialog {
 		if (jPanelButtons == null) {
 			jPanelButtons = new JPanel();
 			jPanelButtons.setLayout(new FlowLayout());
-			jPanelButtons.add(getJButtonCancel(), null);
+			jPanelButtons.add(getJButtonClose(), null);
 		}
 		return jPanelButtons;
 	}
@@ -116,7 +122,7 @@ public class AboutDialog extends JDialog {
 			return myDialogAdapter;
 		}
 
-		myDialogAdapter = new AbstractDialogAdapter(this, true) {
+		myDialogAdapter = new AbstractDialogAdapter(this) {
 			@Override
 			protected void cancelImpl() throws Exception {
 				// do nothing
@@ -155,15 +161,15 @@ public class AboutDialog extends JDialog {
 	 * 
 	 * @return javax.swing.JButton
 	 */
-	private JButton getJButtonCancel() {
-		if (jButtonCancel == null) {
-			jButtonCancel = new JButton();
-			jButtonCancel.setHorizontalAlignment(SwingConstants.CENTER);
-			jButtonCancel.setText("cancel");
-			getDialogAdapter().registerCancelButton(jButtonCancel);
+	private JButton getJButtonClose() {
+		if (jButtonClose == null) {
+			jButtonClose = new JButton();
+			jButtonClose.setHorizontalAlignment(SwingConstants.CENTER);
+			jButtonClose.setText("OK");
+			getDialogAdapter().registerOKButton(jButtonClose);
 
 		}
-		return jButtonCancel;
+		return jButtonClose;
 	}
 
 	private JLabel jLabelAuthor = null;

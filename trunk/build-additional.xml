@@ -66,6 +66,7 @@ libraries=</echo>
 	<property name="basicJar" value="pattern-analytics.jar" />
 
 	<target name="packJar">
+		<delete dir="target" failonerror="false" />
 
 		<sync todir="target/lib" includeEmptyDirs="true">
 			<fileset dir="lib/">

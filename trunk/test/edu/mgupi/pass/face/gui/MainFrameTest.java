@@ -39,7 +39,7 @@ public class MainFrameTest {
 
 	@Before
 	public void setUp() throws Exception {
-		Config.getInstance().setDebugInstance();
+		Config.getInstance().setDebugVirualMode();
 
 		frame = (MainFrame) AppHelper.getInstance().getFrameImpl(MainFrame.class);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -112,28 +112,20 @@ public class MainFrameTest {
 		assertNotNull(tabbed);
 
 		infoLabel.setText("");
+		tabbed.setSelectedIndex(1);
 		tabbed.setSelectedIndex(0);
 		tabbed.repaint();
-		SwingTestHelper.waitWhile(new WaitCondition() {
-			@Override
-			public boolean keepWorking() {
-				return !infoLabel.getText().equals("");
-			}
-		});
+		Thread.sleep(500);
+		assertFalse(infoLabel.getText().equals(""));
 
-		final String oldLabel = infoLabel.getText();
-
+		String oldLabel = infoLabel.getText();
 		infoLabel.setText("");
 		tabbed.setSelectedIndex(1);
 		tabbed.repaint();
-		SwingTestHelper.waitWhile(new WaitCondition() {
-			@Override
-			public boolean keepWorking() {
-				return !infoLabel.getText().equals(oldLabel);
-			}
-		});
+		Thread.sleep(500);
+		assertFalse(infoLabel.getText().equals(oldLabel));
 
-		final String oldLabel2 = infoLabel.getText();
+		String oldLabel2 = infoLabel.getText();
 
 		frame.mainModuleProcessor.getChainsaw().removeAllFilters();
 		frame.filtersModel.updateFiltersImpl();
@@ -142,12 +134,8 @@ public class MainFrameTest {
 		infoLabel.setText("");
 		tabbed.setSelectedIndex(1);
 		tabbed.repaint();
-		SwingTestHelper.waitWhile(new WaitCondition() {
-			@Override
-			public boolean keepWorking() {
-				return !infoLabel.getText().equals(oldLabel2);
-			}
-		});
+		Thread.sleep(500);
+		assertFalse(infoLabel.getText().equals(oldLabel2));
 
 		final JCheckBox scaleButton = (JCheckBox) Utils.getChildNamed(frame,
 				Config.DEFAULT_SCALE_BUTTON_NAME);
@@ -233,10 +221,10 @@ public class MainFrameTest {
 	public void testSettings() throws Exception {
 
 		SwingTestHelper.clickOpenDialogButton(frame, null, MainFrame.Actions.SETTINGS.name(),
-				SettingsDialog.class);
+				SettingsWindow.class);
 
-		SwingTestHelper.clickCloseDialogButton((SettingsDialog) AppHelper.getInstance()
-				.searchWindow(SettingsDialog.class), "cancel");
+		SwingTestHelper.clickCloseDialogButton((SettingsWindow) AppHelper.getInstance()
+				.searchWindow(SettingsWindow.class), "cancel");
 
 	}
 
