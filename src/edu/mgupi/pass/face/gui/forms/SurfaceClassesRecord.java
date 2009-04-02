@@ -1,4 +1,4 @@
-package edu.mgupi.pass.face.gui;
+package edu.mgupi.pass.face.gui.forms;
 
 import java.awt.Frame;
 import java.awt.GridBagLayout;

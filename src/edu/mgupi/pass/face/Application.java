@@ -3,20 +3,26 @@ package edu.mgupi.pass.face;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.sql.SQLException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import org.hibernate.cfg.Configuration;
+import org.hibernate.exception.GenericJDBCException;
 import org.orm.PersistentException;
+import org.orm.cfg.JDBCConnectionSetting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.mgupi.pass.db.surfaces.PassPersistentManager;
 import edu.mgupi.pass.face.gui.AppHelper;
+import edu.mgupi.pass.face.gui.LoginWindow;
 import edu.mgupi.pass.face.gui.MainFrame;
 import edu.mgupi.pass.face.gui.SplashWindow;
 import edu.mgupi.pass.util.CacheIFactory;
@@ -102,11 +108,121 @@ public class Application {
 	private FileChannel channel;
 	private FileLock lock;
 
-	private void run() {
+	/**
+	 * Actions we do after application shutdown.
+	 */
+	private void onShutdownImpl() {
+		applicationTotal.stop();
+		SecundomerList.printToDebugLogger(logger);
 
-		Secundomer applicationRun = SecundomerList.registerSecundomer("Application run");
-		final Secundomer applicationTotal = SecundomerList
-				.registerSecundomer("Application total work");
+		CacheIFactory.close();
+		try {
+			if (lock != null) {
+				lock.release();
+				lock = null;
+			}
+			if (channel != null) {
+				channel.close();
+				channel = null;
+			}
+			new File(LOCK_FILE).delete();
+		} catch (IOException e) {
+			logger.error("Error when releasing file lock.", e);
+		}
+
+		try {
+			PassPersistentManager.instance().disposePersistentManager();
+		} catch (PersistentException e) {
+			logger.error("Error when closing Hibernate.", e);
+		}
+
+		try {
+			if (restartAvailable && restartRequired) {
+				logger.info("Restart {}.", Const.PROGRAM_NAME_FULL);
+				Runtime.getRuntime().exec("java -jar " + Const.DEFAULT_PACKED_JAR_NAME);
+			} else {
+				logger.info("Shutdown {}.", Const.PROGRAM_NAME_FULL);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Loading settings for login to database. We read them from {@link Config},
+	 * if something missed (password, for example) -- we show dialog where user
+	 * can input there settings.
+	 * 
+	 * @return true if login was success, false if user click 'Cancel'.
+	 *         Actually, we can't allow skipping login to real MySQL database.
+	 *         But we don't check that database correct (for this is really PASS
+	 *         database)
+	 * @throws PersistentException
+	 * @throws SQLException
+	 */
+	private boolean loginImpl() throws PersistentException, SQLException {
+
+		LoginWindow loginDialog = null;
+
+		JDBCConnectionSetting settings = new JDBCConnectionSetting();
+		Configuration config = new Configuration().configure("ormmapping/Pass.cfg.xml");
+
+		settings.setDialect(config.getProperty("dialect"));
+		settings.setDriverClass(config.getProperty("connection.driver_class"));
+
+		try {
+			String password = Config.getInstance().getPassword();
+			do {
+				String url = Config.getInstance().getURL();
+				String login = Config.getInstance().getLogin();
+
+				logger.debug("Try to connect to " + url + ", login = " + login);
+
+				if (url != null && !url.isEmpty() && login != null && !login.isEmpty()
+						&& password != null) {
+
+					settings.setConnectionURL(url);
+					settings.setUserName(login);
+					settings.setPassword(password);
+
+					PassPersistentManager.setJDBCConnectionSetting(settings);
+
+					try {
+						PassPersistentManager.instance().getSession().connection().isClosed();
+						logger.debug("Database connected.");
+						return true;
+					} catch (GenericJDBCException jdbcE) {
+						AppHelper.showExceptionDialog(null, Messages.getString(
+								"Application.err.notConnected", url, login), jdbcE);
+						PassPersistentManager.instance().disposePersistentManager();
+					}
+
+				}
+
+				if (loginDialog == null) {
+					loginDialog = new LoginWindow(null);
+				}
+				if (!loginDialog.openDialog()) {
+					return false;
+				}
+
+				logger.debug("Next attempt to login...");
+				password = new String(loginDialog.getPassword());
+
+			} while (true);
+		} finally {
+			if (loginDialog != null) {
+				loginDialog.setVisible(false);
+				loginDialog.dispose();
+			}
+		}
+	}
+
+	private Secundomer applicationRun = SecundomerList.registerSecundomer("Application run");
+	private Secundomer applicationTotal = SecundomerList
+			.registerSecundomer("Application total work");
+
+	private void run() {
 
 		applicationRun.start();
 		applicationTotal.start();
@@ -132,46 +248,21 @@ public class Application {
 		 */
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 			public void run() {
-				applicationTotal.stop();
-				SecundomerList.printToDebugLogger(logger);
-
-				CacheIFactory.close();
-				try {
-					if (lock != null) {
-						lock.release();
-						lock = null;
-					}
-					if (channel != null) {
-						channel.close();
-						channel = null;
-					}
-					new File(LOCK_FILE).delete();
-				} catch (IOException e) {
-					logger.error("Error when releasing file lock.", e);
-				}
-
-				try {
-					PassPersistentManager.instance().disposePersistentManager();
-				} catch (PersistentException e) {
-					logger.error("Error when closing Hibernate.", e);
-				}
-
-				try {
-					if (restartAvailable && restartRequired) {
-						logger.info("Restart {}.", Const.PROGRAM_NAME_FULL);
-						Runtime.getRuntime().exec("java -jar " + Const.DEFAULT_PACKED_JAR_NAME);
-					} else {
-						logger.info("Shutdown {}.", Const.PROGRAM_NAME_FULL);
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-
+				Application.this.onShutdownImpl();
 			}
 		}));
 
 		SplashWindow splash = null;
 		try {
+			
+			String newLookAndFeel = Config.getInstance().getLookAndFeel();
+
+			try {
+				this.changeLookAndFeel(newLookAndFeel);
+			} catch (Exception e) {
+				AppHelper.showExceptionDialog(null, Messages.getString("Application.err.laf",
+						newLookAndFeel), e);
+			}
 
 			byte[] iconData = null;
 			try {
@@ -198,31 +289,30 @@ public class Application {
 				applicationRun.stop();
 				AppHelper.showExceptionDialog(null, Messages.getString("Application.err.loading"),
 						e);
-				return; //
+
+				System.exit(1); // Error exit
 			}
 
-			// We do not change local
-			String newLookAndFeel = Config.getInstance().getLookAndFeel();
-
-			try {
-				this.changeLookAndFeel(newLookAndFeel);
-			} catch (Exception e) {
-				AppHelper.showExceptionDialog(null, Messages.getString("Application.err.laf",
-						newLookAndFeel), e);
-			}
 
 			// We want to make good impression, isn't it?
 			if (channel != null && lock == null) {
 				AppHelper.showErrorDialog(null, Messages
 						.getString("Application.err.alreadyStarted"), Messages
 						.getString("Application.title.alreadyStarted"));
-				System.exit(0);
+
+				System.exit(1); // Error exit
 			}
 
-			// Hibernating...
-			splash.setSplashText(Messages.getString("Application.mess.initDb"));
-
 			try {
+
+				// Hibernating...
+				splash.setSplashText(Messages.getString("Application.mess.initDb"));
+
+				if (!this.loginImpl()) {
+					logger.debug("User cancelled login.");
+					System.exit(0); // Normal exit
+				}
+
 				logger.info("Initializing Hibernate...");
 				PassPersistentManager.instance();
 
@@ -237,9 +327,15 @@ public class Application {
 				frame.setVisible(true);
 			} catch (Throwable t) {
 				applicationRun.stop();
+
+				if (t.getClass() == InvocationTargetException.class && t.getCause() != null) {
+					t = t.getCause();
+				}
+
 				AppHelper.showExceptionDialog(null, Messages
 						.getString("Application.err.loadingApp"), t);
-				return; //
+
+				System.exit(1); // Error exit
 			}
 		} finally {
 			if (splash != null) {
@@ -272,8 +368,11 @@ public class Application {
 
 		try {
 			new Application().run();
-		} catch (Throwable t) {
+		} catch (final Throwable t) {
 			AppHelper.showExceptionDialog(null, Messages.getString("Application.err.critical"), t);
+			logger.error("Error when loading application. Exit.");
+
+			System.exit(1); // Error exit
 		}
 	}
 }

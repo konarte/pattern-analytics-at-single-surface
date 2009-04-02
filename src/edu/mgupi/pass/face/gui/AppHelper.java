@@ -6,7 +6,9 @@ import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
+import java.awt.GridBagConstraints;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -141,17 +143,22 @@ public class AppHelper {
 	 * Set supported locale, change {@link Locale#setDefault(Locale)}. <br>
 	 * 
 	 * <b>Do not call this method when frames or dialogs are loaded!</b> <br>
-	 * <b>The only way to safe change locale is call it before any initialization.</b>
+	 * <b>The only way to safe change locale is call it before any
+	 * initialization.</b>
 	 * 
 	 * @param locale
+	 * @return true is locale successfully changed, false if it is unknown.
 	 */
-	public static void setLocale(SupportedLocale locale) {
+	public static boolean setLocale(SupportedLocale locale) {
 		if (locale == SupportedLocale.ENGLISH) {
 			Locale.setDefault(Locale.ENGLISH);
+			return true;
 		} else if (locale == SupportedLocale.RUSSIAN) {
 			Locale.setDefault(Const.LOCALE_RU);
+			return true;
 		} else {
 			logger.error("Unknown locale type {}. Using default {}.", locale, Locale.getDefault());
+			return false;
 		}
 	}
 
@@ -586,7 +593,6 @@ public class AppHelper {
 
 		JOptionPane.showMessageDialog(parent, panel, Messages.getString("AppHelper.title.error"),
 				JOptionPane.ERROR_MESSAGE);
-
 		try {
 			out.close();
 		} catch (IOException io) {
@@ -640,4 +646,97 @@ public class AppHelper {
 				Messages.getString("AppHelper.requiredFieldTitle"));
 	}
 
+	/**
+	 * 
+	 * Show info dialog to user. Automatically print info message.
+	 * 
+	 * @param parent
+	 *            window
+	 * @param message
+	 *            information message
+	 */
+	public static void showInfoDialog(Component parent, String message) {
+		logger.info(message);
+		JOptionPane.showMessageDialog(parent, Utils.splitStingBySlices(message, 100, "\n"),
+				Messages.getString("AppHelper.title.info"), JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	/**
+	 * 
+	 * Show warning dialog to user. Automatically print warn message.
+	 * 
+	 * @param parent
+	 *            window
+	 * @param message
+	 *            information message
+	 */
+	public static void showWarnDialog(Component parent, String message) {
+		logger.warn(message);
+		JOptionPane.showMessageDialog(parent, Utils.splitStingBySlices(message, 100, "\n"),
+				Messages.getString("AppHelper.title.warn"), JOptionPane.WARNING_MESSAGE);
+	}
+
+	/**
+	 * 
+	 * Show warning dialog to user. Automatically print warn message.
+	 * 
+	 * @param parent
+	 *            window
+	 * @param message
+	 *            information message
+	 * @return true if user confirm that, false if not
+	 */
+	public static boolean showConfirmDialog(Component parent, String message) {
+		return JOptionPane.showConfirmDialog(parent, Utils.splitStingBySlices(message, 100, "\n"),
+				Messages.getString("AppHelper.title.confirm"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+	}
+
+	public static GridBagConstraints getJBCForm(int gridX, int gridY) {
+		return getJBCForm(gridX, gridY, 1, false);
+	}
+
+	public static GridBagConstraints getJBCForm(int gridX, int gridY, boolean fillX) {
+		return getJBCForm(gridX, gridY, 1, fillX);
+	}
+
+	public static GridBagConstraints getJBCForm(int gridX, int gridY, int gridWidth, boolean fillX) {
+		GridBagConstraints jbc = new GridBagConstraints();
+
+		jbc.gridx = gridX;
+		jbc.gridy = gridY;
+
+		jbc.gridwidth = gridWidth;
+
+		jbc.anchor = (gridX == 0 && gridWidth == 1) ? GridBagConstraints.EAST
+				: GridBagConstraints.WEST;
+		jbc.insets = new Insets(0, 0, 5, 5);
+		//jbc.weightx = gridX == 0 ? 0 : 1;
+		jbc.weightx = (gridX > 0 || gridWidth > 1) && fillX ? 1 : 0;
+		jbc.fill = gridX > 0 && fillX ? GridBagConstraints.HORIZONTAL : GridBagConstraints.NONE;
+
+		return jbc;
+	}
+
+	public static GridBagConstraints getJBCBorderPanel(int gridY, boolean fillY) {
+		GridBagConstraints jbc = new GridBagConstraints();
+		jbc.anchor = GridBagConstraints.NORTHWEST;
+		jbc.fill = GridBagConstraints.HORIZONTAL;
+		jbc.weightx = 1;
+		jbc.weighty = fillY ? 1 : 0;
+		jbc.gridx = 0;
+		jbc.gridy = gridY;
+		return jbc;
+	}
+
+	public static GridBagConstraints getJBCInBorderPanel() {
+		GridBagConstraints jbc = new GridBagConstraints();
+		jbc.fill = GridBagConstraints.NONE;
+		jbc.anchor = GridBagConstraints.WEST;
+		jbc.weightx = 1;
+		jbc.weighty = 1;
+		jbc.gridx = 0;
+		jbc.gridy = 0;
+		jbc.insets = new Insets(0, 5, 0, 5);
+		return jbc;
+	}
 }

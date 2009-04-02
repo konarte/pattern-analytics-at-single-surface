@@ -117,6 +117,12 @@ public class SwingTestHelper {
 			Thread.sleep(50);
 		} while ((timeOK = ((System.currentTimeMillis() - time) < MAX_WAIT_TIME))
 				&& condition.keepWorking() && watchedException.getCause() == null);
+
+		//		while ((timeOK = ((System.currentTimeMillis() - time) < MAX_WAIT_TIME))
+		//				&& condition.keepWorking() && watchedException.getCause() == null) {
+		//			Thread.sleep(50);
+		//		}
+
 		if (!timeOK) {
 			throw new RuntimeException("Error. Wait interrupted after "
 					+ (System.currentTimeMillis() - time) + " msec.");

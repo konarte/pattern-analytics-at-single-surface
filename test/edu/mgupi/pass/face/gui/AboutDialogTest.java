@@ -66,7 +66,7 @@ public class AboutDialogTest {
 
 		// OK button must close dialog!
 
-		SwingTestHelper.clickCloseDialogButton(dialog, "cancel");
+		SwingTestHelper.clickCloseDialogButton(dialog, "OK");
 
 	}
 

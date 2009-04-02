@@ -66,66 +66,31 @@ public abstract class TableEditorTemplate extends JDialog {
 	private JButton jButtonRemove = null;
 	private JButton jButtonEdit = null;
 
-	private AbstractDialogAdapter getDialogAdapter() {
-		if (dialogAdapter != null) {
-			return dialogAdapter;
+	protected AbstractDialogAdapter getDialogAdapter() {
+		if (dialogAdapter == null) {
+
+			dialogAdapter = new AbstractDialogAdapter(this, getTableModel()) {
+
+				@Override
+				protected void cancelImpl() throws Exception {
+				}
+
+				@Override
+				protected void openDialogImpl() throws Exception {
+				}
+
+				@Override
+				protected boolean saveImpl() throws Exception {
+					return false;
+				}
+
+			};
 		}
-
-		dialogAdapter = new AbstractDialogAdapter(this, getTableModel()) {
-
-			@Override
-			protected void cancelImpl() throws Exception {
-				//				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
-				//					Transaction transaction = PassPersistentManager.instance().getSession().getTransaction();
-				//					if (transaction.isActive()) {
-				//						logger.trace("Rollback MAIN transaction {}.", transaction);
-				//						transaction.rollback();
-				//					}
-				//				}
-			}
-
-			@Override
-			protected void openDialogImpl() throws Exception {
-				//				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
-				//					PassPersistentManager.instance().getSession().beginTransaction();
-				//					logger.trace("Begin MAIN transaction {}.", PassPersistentManager.instance().getSession()
-				//							.getTransaction());
-				//				}
-			}
-
-			@Override
-			protected boolean saveImpl() throws Exception {
-				//				if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_BULK) {
-				//					Transaction transaction = PassPersistentManager.instance().getSession().getTransaction();
-				//					if (transaction.isActive()) {
-				//						//						PassPersistentManager.instance().getSession().flush();
-				//						logger.trace("Commit MAIN transaction {}.", transaction);
-				//						transaction.commit();
-				//					}
-				//					return true;
-				//				}
-				//				return false;
-				return false;
-			}
-
-		};
 
 		return dialogAdapter;
 	}
 
 	public boolean openDialog() {
-		//		TransactionMode mode = null;
-		//		try {
-		//			mode = Config.getInstance().getTransactionMode();
-		//		} catch (PersistentException pe) {
-		//			AppHelper.showExceptionDialog(this, "Ошибка при получении текущего режима транзакций", pe);
-		//		}
-		//		if (mode == TransactionMode.COMMIT_BULK) {
-		//			return getDialogAdapter().openDialog();
-		//		} else {
-		//			getDialogAdapter().showDialogCancelOnly();
-		//			return false;
-		//		}
 		getDialogAdapter().showDialogCancelOnly();
 		return false;
 	}

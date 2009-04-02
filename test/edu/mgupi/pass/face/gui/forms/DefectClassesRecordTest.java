@@ -1,8 +1,11 @@
-package edu.mgupi.pass.face.gui;
+package edu.mgupi.pass.face.gui.forms;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import edu.mgupi.pass.face.gui.SwingTestHelper;
+import edu.mgupi.pass.face.gui.forms.DefectClassesRecord;
 
 public class DefectClassesRecordTest {
 

@@ -82,6 +82,9 @@ public class LFiltersList extends JDialog {
 							getDataColumnIndex()));
 					return true;
 				} else {
+					AppHelper.showWarnDialog(LFiltersList.this, Messages
+							.getString("LFiltersList.selectRequered"));
+
 					return false;
 				}
 			}

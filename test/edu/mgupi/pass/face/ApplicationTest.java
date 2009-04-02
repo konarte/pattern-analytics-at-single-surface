@@ -11,6 +11,7 @@ import edu.mgupi.pass.face.gui.MainFrame;
 import edu.mgupi.pass.face.gui.SwingTestHelper;
 import edu.mgupi.pass.face.gui.WaitCondition;
 import edu.mgupi.pass.face.gui.WorkSet;
+import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
 
@@ -18,6 +19,8 @@ public class ApplicationTest {
 
 	@Before
 	public void setUp() throws Exception {
+		Config.getInstance().setDebugVirualMode();
+		Config.getInstance().setPassword("adesroot");
 	}
 
 	@After

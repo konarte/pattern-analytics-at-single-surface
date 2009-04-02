@@ -1,4 +1,4 @@
-package edu.mgupi.pass.face.gui;
+package edu.mgupi.pass.face.gui.forms;
 
 import java.io.File;
 
@@ -8,13 +8,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.mgupi.pass.face.gui.AppHelper;
+import edu.mgupi.pass.face.gui.SwingTestHelper;
+import edu.mgupi.pass.face.gui.forms.DefectTypesRecord;
 import edu.mgupi.pass.util.Config;
 
 public class DefectTypesRecordTest {
 
 	@Before
 	public void setUp() throws Exception {
-		Config.getInstance().setDebugInstance();
+		Config.getInstance().setDebugVirualMode();
 	}
 
 	@After

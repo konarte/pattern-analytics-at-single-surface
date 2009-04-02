@@ -7,7 +7,6 @@ import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -110,12 +109,16 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IWindow
 
 				@Override
 				protected void cancelImpl() throws Exception {
+//					PassPersistentManager.instance().getSession().lock(workObject, LockMode.NONE);
 					logger.trace("Do cancel for {}.", workObject);
 				}
 
 				@Override
 				protected void openDialogImpl() throws Exception {
-					// Do nothing
+					/*
+					 * No, we use optimistic locking ;)
+					 */
+//					PassPersistentManager.instance().getSession().lock(workObject, LockMode.WRITE);
 				}
 
 				@Override
@@ -504,10 +507,10 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IWindow
 		return jButtonCancel;
 	}
 
-	private int gridy = 0;
+	private int gridY = 0;
 
 	protected int getNextComponentGridY() {
-		return this.gridy++;
+		return this.gridY++;
 	}
 
 	protected void putRequiredComponentPair(JPanel place, String label, JTextComponent component) {
@@ -528,25 +531,9 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IWindow
 
 	protected JLabel putComponentPair(JPanel place, String label, Component component) {
 
-		GridBagConstraints gridBagConstraintsComp = new GridBagConstraints();
-		gridBagConstraintsComp.gridx = 1;
-		gridBagConstraintsComp.anchor = GridBagConstraints.WEST;
-		gridBagConstraintsComp.insets = new Insets(0, 0, 0, 5);
-		gridBagConstraintsComp.gridy = gridy;
-		gridBagConstraintsComp.fill = GridBagConstraints.HORIZONTAL;
-		gridBagConstraintsComp.weightx = 1.0D;
-
-		GridBagConstraints gridBagConstraintsLab = new GridBagConstraints();
-		gridBagConstraintsLab.gridx = 0;
-		gridBagConstraintsLab.anchor = GridBagConstraints.EAST;
-		gridBagConstraintsLab.fill = GridBagConstraints.NONE;
-		gridBagConstraintsLab.weightx = 0.0D;
-		gridBagConstraintsLab.insets = new Insets(5, 5, 5, 5);
-		gridBagConstraintsLab.gridy = gridy;
-
 		JLabel jLabel = new JLabel(label + ":");
-		place.add(jLabel, gridBagConstraintsLab);
-		place.add(component, gridBagConstraintsComp);
+		place.add(jLabel, AppHelper.getJBCForm(0, gridY));
+		place.add(component, AppHelper.getJBCForm(1, gridY, true));
 
 		if (component instanceof JComboBox) {
 			JComboBox combo = (JComboBox) component;
@@ -555,7 +542,7 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IWindow
 			}
 		}
 
-		gridy++;
+		gridY++;
 
 		return jLabel;
 	}

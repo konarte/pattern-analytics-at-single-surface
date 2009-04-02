@@ -9,7 +9,6 @@ import java.awt.event.WindowEvent;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
@@ -326,12 +325,7 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 			}
 
 			if (saveRequired && !setOK) {
-				logger.debug("Dialog '{}' wait for successfully saving event.", owner.getTitle());
-
-				JOptionPane.showMessageDialog(this.owner, Messages
-						.getString("AbstractDialogAdapter.selectRequered"), Messages
-						.getString("AbstractDialogAdapter.title.selectRequered"),
-						JOptionPane.WARNING_MESSAGE);
+				logger.debug("Dialog '{}' wait for successfully saving event. Now cancel.", owner.getTitle());
 			} else {
 
 				logger.debug("Dialog '{}' done job. After save is {}.", owner.getTitle(), setOK);

@@ -88,7 +88,7 @@ public class TableEditorTemplateTest {
 		button.setName(MY_SAMPLE_NAME);
 		parentFrame.add(button);
 
-		Config.getInstance().setDebugInstance();
+		Config.getInstance().setDebugVirualMode();
 		removeAllData();
 
 	}

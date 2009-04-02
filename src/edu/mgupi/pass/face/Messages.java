@@ -11,7 +11,6 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import edu.mgupi.pass.face.gui.AppHelper;
-import edu.mgupi.pass.util.Const;
 
 public class Messages {
 	private static final String BUNDLE_NAME = "edu.mgupi.pass.face.messages";
@@ -26,11 +25,8 @@ public class Messages {
 			return RESOURCE_BUNDLE.getString(key);
 		} catch (MissingResourceException e) {
 
-			if (!Const.PRODUCTION_MODE) {
-				AppHelper.showErrorDialog(null, "Не найден ресурс '" + key + "'.");
-			}
-
-			return '!' + key + '!';
+			AppHelper.showErrorDialog(null, "Не найден ресурс '" + key + "'.");
+			throw e;
 		}
 	}
 	
