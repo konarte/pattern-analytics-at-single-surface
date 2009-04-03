@@ -1,13 +1,13 @@
-*03.04.2009  3:52:59,60* 
+*03.04.2009  7:54:41,51* 
 {{{ 
 Gathering information... Version info
 Gathering information... Common project info
 Gathering information... Java code revision
-Done in 0.25 sec
+Done in 0.359 sec
 
  ========== Version info ========== 
 VERSION: 0.1.R3.I18N
-  BUILD: 7365
+  BUILD: 7366
 
  ========== Common project info ========== 
                 Total .java files: 143
@@ -31,7 +31,7 @@ Total .properties non empty lines: 547
               Abstract classes: 3
                     Interfaces: 10
            Number of EJB beans: 0
-        Number of Test classes: 0
+        Number of Test classes: 46
     Average lines per one file: 126
          Max lines in one file: 1529 in edu.mgupi.pass.face.gui.MainFrame
          Min lines in one file: 6 in edu.mgupi.pass.util.IRefreshable
