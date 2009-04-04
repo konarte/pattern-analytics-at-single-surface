@@ -9,7 +9,7 @@
 
 Для хранения работы со схемой БД (и ORM-маппингом) будет использоваться продукт *Visual Paradigm for UML 6.4* (см. [http://www.visual-paradigm.com/product/vpuml/ Visual Paradigm for UML]).
 
-Кодирование будет выполнять в *Eclispe 3.4 Ganymede* (см. [http://www.eclipse.org/downloads/ Eclipse downloads]).
+Кодирование будем выполнять в *Eclispe 3.4 Ganymede* (см. [http://www.eclipse.org/downloads/ Eclipse downloads]).
 
 Предварительные фильтры изображения должны настраиваться в виде подключаемых модулей обработки – пользователь должен сам указать, в каком порядке и с какими параметрами эти фильтры будут применяться.
 
