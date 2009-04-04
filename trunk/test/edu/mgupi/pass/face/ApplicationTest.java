@@ -10,7 +10,6 @@ import edu.mgupi.pass.face.gui.AppHelper;
 import edu.mgupi.pass.face.gui.MainFrame;
 import edu.mgupi.pass.face.gui.SwingTestHelper;
 import edu.mgupi.pass.face.gui.WaitCondition;
-import edu.mgupi.pass.face.gui.WorkSet;
 import edu.mgupi.pass.util.Config;
 import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
@@ -32,11 +31,16 @@ public class ApplicationTest {
 		Secundomer sec = SecundomerList.registerSecundomer("Application Load Time");
 
 		sec.start();
-		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
-			public void workImpl() throws Exception {
+
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
 				Application.main(null);
 			}
-		}, new WaitCondition() {
+		});
+		t.start();
+		
+		SwingTestHelper.waitWhile(new WaitCondition() {
 			public boolean keepWorking() {
 				Window expectedWindow = AppHelper.getInstance().searchWindow(MainFrame.class);
 				return expectedWindow == null || expectedWindow.isVisible() == false;

@@ -60,7 +60,6 @@ public class SettingsWindow extends JDialog implements ActionListener {
 
 	private final static Logger logger = LoggerFactory.getLogger(SettingsWindow.class); // @jve:decl-index=0:
 
-	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
 	private JPanel jPanelButtons = null;
 	private JButton jButtonOK = null;
@@ -459,7 +458,6 @@ public class SettingsWindow extends JDialog implements ActionListener {
 				/**
 				 * 
 				 */
-				private static final long serialVersionUID = 1L;
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -554,11 +552,13 @@ public class SettingsWindow extends JDialog implements ActionListener {
 
 			jPanelInterfacePlace = new JPanel();
 			jPanelInterfacePlace.setLayout(new GridBagLayout());
-			jPanelInterfacePlace.add(jLabelLaF, AppHelper.getJBCForm(0, 0));
-			jPanelInterfacePlace.add(getJComboBoxLaF(), AppHelper.getJBCForm(1, 0));
 
 			setUpComboBox(SupportedLocale.values(), Messages.getString("SettingsWindow.locale"),
-					jPanelInterfacePlace, 1);
+					jPanelInterfacePlace, 0);
+
+			jPanelInterfacePlace.add(jLabelLaF, AppHelper.getJBCForm(0, 1));
+			jPanelInterfacePlace.add(getJComboBoxLaF(), AppHelper.getJBCForm(1, 1));
+
 		}
 		return jPanelInterfacePlace;
 	}
@@ -911,18 +911,26 @@ public class SettingsWindow extends JDialog implements ActionListener {
 	 */
 
 	public void actionPerformed(ActionEvent e) {
+
+		System.out.println("ACTION PERFORMED FOR " + e);
+
 		if (e.getSource() instanceof JComboBox) {
 			JComboBox box = (JComboBox) e.getSource();
 			Enum<?> enum_ = (Enum<?>) box.getSelectedItem();
 			if (enum_ != null) {
 				logger.debug("Set value " + enum_.name() + " for " + enum_.getClass());
 				selectedValues.put(enum_.getClass(), enum_);
+			} else {
+				logger.debug("Unable to set value for " + box.getName());
 			}
 		} else if (e.getSource() instanceof JRadioButton) {
-			Enum<?> enum_ = this.cachedEnums.get(e.getSource());
+			JRadioButton radio = (JRadioButton) e.getSource();
+			Enum<?> enum_ = this.cachedEnums.get(radio);
 			if (enum_ != null) {
 				logger.debug("Set value " + enum_.name() + " for " + enum_.getClass());
 				selectedValues.put(enum_.getClass(), enum_);
+			} else {
+				logger.debug("Unable to set value for " + radio.getName());
 			}
 		} else if (e.getSource() == jButtonPasswordChange) {
 			this.changePassowrdImpl();
@@ -945,15 +953,17 @@ public class SettingsWindow extends JDialog implements ActionListener {
 		JRadioButton radio = cachedButtons.get(value);
 		if (radio != null) {
 			radio.setSelected(true);
-		} else {
-			JComboBox combo = cachedCombos.get(value.getClass());
-			if (combo != null) {
-				combo.setSelectedItem(value);
-			} else {
-				AppHelper.showErrorDialog(this, Messages.getString(
-						"SettingsWindow.err.enumRecipient", value.getClass()));
-			}
+			return;
 		}
+
+		JComboBox combo = cachedCombos.get(value.getClass());
+		if (combo != null) {
+			combo.setSelectedItem(value);
+			return;
+		}
+
+		AppHelper.showErrorDialog(this, Messages.getString("SettingsWindow.err.enumRecipient",
+				value.getClass()));
 
 	}
 

@@ -13,7 +13,6 @@ public class JTableReadOnly extends JTable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Default constructor with data.

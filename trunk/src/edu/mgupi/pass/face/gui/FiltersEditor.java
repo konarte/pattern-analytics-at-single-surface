@@ -33,7 +33,6 @@ import edu.mgupi.pass.filters.FilterChainsawTransactional.FilterStore;
 public class FiltersEditor extends JDialog /* implements ActionListener */{
 	private final static Logger logger = LoggerFactory.getLogger(FiltersEditor.class); //  @jve:decl-index=0:
 
-	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
 	private JPanel jPanelSelectFilters = null;
 	private JPanel jPanelEditParameters = null;
@@ -404,9 +403,7 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 		return jTableData;
 	}
 
-	static class MyTableModel extends AbstractEditorTableModel {
-
-		private static final long serialVersionUID = 1L;
+	private static class MyTableModel extends AbstractEditorTableModel {
 
 		private FiltersEditor parent;
 
@@ -429,10 +426,12 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 			return transactionalSaw;
 		}
 
+		@Override
 		protected void onOpenImpl() throws Exception {
 			//
 		}
 
+		@Override
 		protected void onCloseImpl() throws Exception {
 			if (this.transactionalSaw != null) {
 				this.transactionalSaw.close();
@@ -443,7 +442,7 @@ public class FiltersEditor extends JDialog /* implements ActionListener */{
 		@SuppressWarnings("unchecked")
 		@Override
 		protected boolean addRowImpl(int rowIdx) throws Exception {
-			LFiltersList list = (LFiltersList) AppHelper.getInstance().getDialogImpl(
+			LFiltersList list = (LFiltersList) AppHelper.getInstance().getDialogImpl(null,
 					LFiltersList.class);
 			String pickClass = list.openDialog();
 			if (pickClass != null) {

@@ -1,6 +1,7 @@
 /*
  * Pattern Analytics at Single Surface
- * @(#)LoginDialogTest.java	1.0 02.04.2009
+ * 
+ * @(#)LoginDialogTest.java 1.0 02.04.2009
  */
 
 package edu.mgupi.pass.face.gui;
@@ -22,7 +23,7 @@ public class LoginDialogTest {
 	@Test
 	public void testLoginDialog() throws Exception {
 		LoginWindow login = new LoginWindow(null);
-		
+
 		SwingTestHelper.showMeBackground(login);
 	}
 

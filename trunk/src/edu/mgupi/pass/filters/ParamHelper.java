@@ -86,9 +86,6 @@ public class ParamHelper {
 			return paramMap;
 		}
 		Collection<Param> paramList = parameters;
-		if (paramList == null) {
-			return paramMap;
-		}
 
 		for (Param param : paramList) {
 			paramMap.put(param.getName(), param.getStringValue());

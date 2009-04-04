@@ -16,11 +16,6 @@ import edu.mgupi.pass.util.Config.DeletionCheckMode;
 public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel {
 	private final static Logger logger = LoggerFactory.getLogger(CommonEditorTableModel.class);
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4443849886815253825L;
-
 	private Class<? extends RecordEditorTemplate<T>> recordEditorClass = null;
 
 	public CommonEditorTableModel(JTable owner,
@@ -32,23 +27,24 @@ public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel
 		this.recordEditorClass = recordEditorClass;
 	}
 
-	protected String[] columns = getColumns();
-	protected List<T> data = null;
+	private String[] columns = getColumns();
+	private List<T> data = new ArrayList<T>();
 
 	@Override
 	protected void onOpenImpl() throws Exception {
-		data = this.getDataImpl();
-		if (data == null) {
-
-			logger.trace("Received null data during open model.");
-
-			data = new ArrayList<T>();
+		data.clear();
+		List<T> implData = this.getDataImpl();
+		if (implData != null) {
+			logger.trace("Received data during open model: {} rows.", data.size());
+			data.addAll(implData);
 		} else {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Received data during open model: {} rows.", data.size());
-			}
+			logger.trace("Received null data during open model.");
 		}
 		super.fireTableDataChanged();
+	}
+
+	public T getRowAt(int index) {
+		return data.get(index);
 	}
 
 	protected abstract List<T> getDataImpl() throws Exception;
@@ -57,10 +53,8 @@ public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel
 
 	@Override
 	protected void onCloseImpl() throws Exception {
-		if (data != null) {
-			data.clear();
-		}
-		data = null;
+		data.clear();
+		super.fireTableDataChanged();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -73,7 +67,7 @@ public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel
 		}
 
 		RecordEditorTemplate<T> dialog = (RecordEditorTemplate<T>) AppHelper.getInstance()
-				.getDialogImpl(recordEditorClass);
+				.getDialogImpl(null, recordEditorClass);
 		T added = dialog.addRecord(createInstanceImpl());
 		if (added != null) {
 
@@ -81,12 +75,12 @@ public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel
 
 			data.add(rowIdx, added);
 			return true;
-		} else {
-
-			logger.trace("Does not added. Return false.");
-
-			return false;
 		}
+
+		logger.trace("Does not added. Return false.");
+
+		return false;
+
 	}
 
 	protected abstract T createInstanceImpl();
@@ -103,7 +97,7 @@ public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel
 		logger.trace("Try to delete {} rows.", rowIdx.length);
 
 		RecordEditorTemplate<T> dialog = (RecordEditorTemplate<T>) AppHelper.getInstance()
-				.getDialogImpl(recordEditorClass);
+				.getDialogImpl(null, recordEditorClass);
 
 		Collection<T> rows = data.subList(rowIdx[0], rowIdx[rowIdx.length - 1] + 1);
 		boolean deleted = dialog
@@ -120,13 +114,14 @@ public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel
 			// ConcurrentModification thrown
 			//data.removeAll(rows);
 			return true;
-		} else {
-			logger.trace("Does not deleted. Return false.");
-			return false;
 		}
+
+		logger.trace("Does not deleted. Return false.");
+		return false;
 
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	protected boolean allowDeleteRows(int rows[]) throws Exception {
 		boolean allow = true;
@@ -138,7 +133,7 @@ public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel
 		if (allow && Config.getInstance().getDeletionCheckMode() != DeletionCheckMode.NO_CHECK) {
 			Collection<T> rowList = data.subList(rows[0], rows[rows.length - 1] + 1);
 			RecordEditorTemplate<T> dialog = (RecordEditorTemplate<T>) AppHelper.getInstance()
-					.getDialogImpl(recordEditorClass);
+					.getDialogImpl(null, recordEditorClass);
 
 			allow = dialog.isDeleteAllowed(rowList);
 
@@ -161,16 +156,16 @@ public abstract class CommonEditorTableModel<T> extends AbstractEditorTableModel
 		}
 
 		RecordEditorTemplate<T> dialog = (RecordEditorTemplate<T>) AppHelper.getInstance()
-				.getDialogImpl(recordEditorClass);
+				.getDialogImpl(null, recordEditorClass);
 		boolean edited = dialog.editRecord(data.get(rowIdx));
 		if (edited) {
 			logger.trace("Successfully edited. Edited object: {}.", edited);
 
 			return true;
-		} else {
-			logger.trace("Does not edited. Return false.");
-			return false;
 		}
+
+		logger.trace("Does not edited. Return false.");
+		return false;
 
 	}
 

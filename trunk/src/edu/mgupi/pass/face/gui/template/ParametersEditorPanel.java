@@ -43,7 +43,6 @@ import edu.mgupi.pass.filters.Param.ParamType;
 public class ParametersEditorPanel extends JPanel {
 
 	private final static Logger logger = LoggerFactory.getLogger(ParametersEditorPanel.class);
-	private static final long serialVersionUID = 1L;
 
 	/**
 	 * This is the default constructor
@@ -208,7 +207,6 @@ public class ParametersEditorPanel extends JPanel {
 					/**
 					 * 
 					 */
-					private static final long serialVersionUID = 1L;
 
 					@Override
 					public void actionPerformed(ActionEvent e) {

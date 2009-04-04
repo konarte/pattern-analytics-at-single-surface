@@ -10,8 +10,8 @@ import java.sql.SQLException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 import org.hibernate.cfg.Configuration;
 import org.hibernate.exception.GenericJDBCException;
@@ -39,74 +39,115 @@ import edu.mgupi.pass.util.Utils;
  * @author raidan
  * 
  */
-public class Application {
+public class Application implements Runnable {
 
 	private final static Logger logger = LoggerFactory.getLogger(Application.class);
-
-	private Application() {
-		// Not allowed for any other instances
-	}
-
-	private void changeLookAndFeel(String newLookAndFeel) throws ClassNotFoundException,
-			InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
-
-		logger.debug("Found look and feel: " + newLookAndFeel);
-
-		if (newLookAndFeel == null) {
-			return;
-		}
-
-		try {
-
-			UIManager.setLookAndFeel(newLookAndFeel);
-		} catch (Exception e) {
-			/*
-			 * If not found -- we don't care ^_^.
-			 * 
-			 * OK, choose cross-platform LaF.
-			 */
-			logger.debug("Applying stardard look and feel by exception ({})", UIManager
-					.getCrossPlatformLookAndFeelClassName());
-
-			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-		}
-
-	}
-
-	private static volatile boolean restartAvailable = false;
-	private static volatile boolean restartRequired = false;
-
-	/**
-	 * Restart availably only if we launched through packed jar! <br>
-	 * 
-	 * @return true is restart can be done
-	 */
-	public static boolean isRestartAvailable() {
-		return restartAvailable;
-	}
-
-	/**
-	 * If restart available, then settings this method will restart program
-	 * (start new process after closing this).
-	 */
-	public static void enqueRestart() {
-		restartRequired = true;
-	}
-
-	/**
-	 * Is restart enqueued?
-	 * 
-	 * @return true if restart required.
-	 */
-	public static boolean isRestartRequired() {
-		return restartRequired;
-	}
 
 	// Name for file-lock
 	private final static String LOCK_FILE = "app.lock";
 
 	private FileChannel channel;
 	private FileLock lock;
+
+	private SplashWindow splash = null;
+
+	/**
+	 * Default constructor.
+	 */
+	private Application() {
+
+		applicationRun.start();
+		applicationTotal.start();
+
+		/*
+		 * This is pretty safe.
+		 * 
+		 * Java does not initialize static classes and methods before it's been
+		 * needed.
+		 */
+		AppHelper.setLocale(Config.getInstance().getCurrentLocale());
+
+		// Attempt to lock file
+		try {
+			File file = new File(LOCK_FILE);
+			channel = new FileOutputStream(file, false).getChannel();
+			lock = channel.tryLock();
+
+			restartAvailable = Utils.isWeLoadedFromJar()
+					&& new File(Const.DEFAULT_PACKED_JAR_NAME).exists();
+
+		} catch (Exception e) {
+			logger.error("Error when try to lock file. At this point we continue work.", e);
+		}
+
+		/*
+		 * Shutdown hook will automatically close locked channel (if it was
+		 * locked).
+		 * 
+		 * Then display some additional debug info.
+		 */
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+			public void run() {
+				Application.this.onShutdownImpl();
+			}
+		}));
+
+		String newLookAndFeel = Config.getInstance().getLookAndFeel();
+		try {
+			logger.debug("Found look and feel: " + newLookAndFeel);
+
+			try {
+				UIManager.setLookAndFeel(newLookAndFeel);
+			} catch (Exception e) {
+				/*
+				 * If not found -- we don't care ^_^.
+				 * 
+				 * OK, choose cross-platform LaF.
+				 */
+				logger.debug("Applying stardard look and feel by exception ({})", UIManager
+						.getCrossPlatformLookAndFeelClassName());
+
+				UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+			}
+
+		} catch (Exception e) {
+			AppHelper.showExceptionDialog(null, Messages.getString("Application.err.laf",
+					newLookAndFeel), e);
+		}
+
+		/*
+		 * Open splash window.
+		 * 
+		 * Splash is not a toy -- loading took's at list 2-3 seconds!
+		 * 
+		 * Big time is initializing Hibernate, but loading and filling data by
+		 * all caches took some time too.
+		 */
+		try {
+			SwingUtilities.invokeAndWait(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						splash = new SplashWindow(Const.SPLASH_IMAGE_PATH);
+						splash.setSplashText(Messages.getString("Application.mess.loading"));
+						splash.setVisible(true);
+					} catch (Exception e) {
+						logger.error("Unable to create splash window", e);
+						if (splash != null) {
+							splash.dispose();
+							splash = null;
+						}
+					}
+				}
+			});
+		} catch (Exception e) {
+			logger.error("Unable to create splash window", e);
+			if (splash != null) {
+				splash.dispose();
+				splash = null;
+			}
+		}
+	}
 
 	/**
 	 * Actions we do after application shutdown.
@@ -146,6 +187,35 @@ public class Application {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private static volatile boolean restartAvailable = false;
+	private static volatile boolean restartRequired = false;
+
+	/**
+	 * Restart availably only if we launched through packed jar! <br>
+	 * 
+	 * @return true is restart can be done
+	 */
+	public static boolean isRestartAvailable() {
+		return restartAvailable;
+	}
+
+	/**
+	 * If restart available, then settings this method will restart program
+	 * (start new process after closing this).
+	 */
+	public static void enqueRestart() {
+		restartRequired = true;
+	}
+
+	/**
+	 * Is restart enqueued?
+	 * 
+	 * @return true if restart required.
+	 */
+	public static boolean isRestartRequired() {
+		return restartRequired;
 	}
 
 	/**
@@ -218,135 +288,87 @@ public class Application {
 		}
 	}
 
+	private void setSplashText(String message) {
+		if (splash != null) {
+			splash.setSplashText(message);
+		}
+	}
+
 	private Secundomer applicationRun = SecundomerList.registerSecundomer("Application run");
 	private Secundomer applicationTotal = SecundomerList
 			.registerSecundomer("Application total work");
 
-	private void run() {
-
-		applicationRun.start();
-		applicationTotal.start();
-
-		// Attempt to lock file
+	public void run() {
 		try {
-			File file = new File(LOCK_FILE);
-			channel = new FileOutputStream(file, false).getChannel();
-			lock = channel.tryLock();
-
-			restartAvailable = Utils.isWeLoadedFromJar()
-					&& new File(Const.DEFAULT_PACKED_JAR_NAME).exists();
-
-		} catch (Exception e) {
-			logger.error("Error when try to lock file. At this point we continue work.", e);
-		}
-
-		/*
-		 * Shutdown hook will automatically close locked channel (if it was
-		 * locked).
-		 * 
-		 * Then display some additional debug info.
-		 */
-		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-			public void run() {
-				Application.this.onShutdownImpl();
-			}
-		}));
-
-		SplashWindow splash = null;
-		try {
-			
-			String newLookAndFeel = Config.getInstance().getLookAndFeel();
 
 			try {
-				this.changeLookAndFeel(newLookAndFeel);
-			} catch (Exception e) {
-				AppHelper.showExceptionDialog(null, Messages.getString("Application.err.laf",
-						newLookAndFeel), e);
-			}
-
-			byte[] iconData = null;
-			try {
-				iconData = Utils.loadFromResource(Const.FORM_ICON_IMAGE_PATH);
-				ImageIcon icon = new ImageIcon(iconData);
-				AppHelper.getInstance().setWindowsIcon(icon.getImage());
-			} catch (IOException io) {
-				logger.error("Error when setting image icon.", io);
-			}
-
-			/*
-			 * Open splash window.
-			 * 
-			 * Splash is not a toy -- loading took's at list 2-3 seconds!
-			 * 
-			 * Big time is initializing Hibernate, but loading and filling data
-			 * by all caches took some time too.
-			 */
-			try {
-				splash = new SplashWindow(Const.SPLASH_IMAGE_PATH);
-				splash.setSplashText(Messages.getString("Application.mess.loading"));
-				splash.setVisible(true);
-			} catch (Exception e) {
-				applicationRun.stop();
-				AppHelper.showExceptionDialog(null, Messages.getString("Application.err.loading"),
-						e);
-
-				System.exit(1); // Error exit
-			}
-
-
-			// We want to make good impression, isn't it?
-			if (channel != null && lock == null) {
-				AppHelper.showErrorDialog(null, Messages
-						.getString("Application.err.alreadyStarted"), Messages
-						.getString("Application.title.alreadyStarted"));
-
-				System.exit(1); // Error exit
-			}
-
-			try {
-
-				// Hibernating...
-				splash.setSplashText(Messages.getString("Application.mess.initDb"));
-
-				if (!this.loginImpl()) {
-					logger.debug("User cancelled login.");
-					System.exit(0); // Normal exit
+				byte[] iconData = null;
+				try {
+					iconData = Utils.loadFromResource(Const.FORM_ICON_IMAGE_PATH);
+					ImageIcon icon = new ImageIcon(iconData);
+					AppHelper.getInstance().setWindowsIcon(icon.getImage());
+				} catch (IOException io) {
+					logger.error("Error when setting image icon.", io);
 				}
 
-				logger.info("Initializing Hibernate...");
-				PassPersistentManager.instance();
+				// We want to make good impression, isn't it?
+				if (channel != null && lock == null) {
+					AppHelper.showErrorDialog(null, Messages
+							.getString("Application.err.alreadyStarted"), Messages
+							.getString("Application.title.alreadyStarted"));
 
-				splash.setSplashText(Messages.getString("Application.mess.loadingApp"));
-
-				// Well, initialization
-				MainFrame frame = (MainFrame) AppHelper.getInstance().getFrameImpl(MainFrame.class);
-				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-				// Caching all using windows -- this is good and fast (about 200-300 msec diff)
-				frame.preCache();
-				frame.setVisible(true);
-			} catch (Throwable t) {
-				applicationRun.stop();
-
-				if (t.getClass() == InvocationTargetException.class && t.getCause() != null) {
-					t = t.getCause();
+					System.exit(1); // Error exit
 				}
 
-				AppHelper.showExceptionDialog(null, Messages
-						.getString("Application.err.loadingApp"), t);
+				try {
 
-				System.exit(1); // Error exit
+					// Hibernating...
+					setSplashText(Messages.getString("Application.mess.initDb"));
+
+					logger.info("Initializing Hibernate...");
+					if (!this.loginImpl()) {
+						logger.debug("User cancelled login.");
+						System.exit(0); // Normal exit
+					}
+
+					setSplashText(Messages.getString("Application.mess.loadingApp"));
+
+					// Well, initialization
+					final MainFrame frame = (MainFrame) AppHelper.getInstance().getFrameImpl(null,
+							MainFrame.class);
+					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+					// Caching all using windows -- this is good and fast (about 200-300 msec diff)
+					frame.preCache();
+					frame.setVisible(true);
+					logger.info("Application ready...");
+
+				} catch (Throwable t) {
+					applicationRun.stop();
+
+					if (t.getClass() == InvocationTargetException.class && t.getCause() != null) {
+						t = t.getCause();
+					}
+
+					AppHelper.showExceptionDialog(null, Messages
+							.getString("Application.err.loadingApp"), t);
+
+					System.exit(1); // Error exit
+				}
+			} finally {
+				if (splash != null) {
+					splash.setVisible(false);
+					splash.dispose();
+				}
+				applicationRun.stop();
 			}
-		} finally {
-			if (splash != null) {
-				splash.setVisible(false);
-				splash.dispose();
-			}
-			applicationRun.stop();
+
+		} catch (final Throwable t) {
+			AppHelper.showExceptionDialog(null, Messages.getString("Application.err.critical"), t);
+			logger.error("Error when loading application. Exit.");
+
+			System.exit(1); // Error exit
 		}
-
-		logger.info("Application ready...");
-
 	}
 
 	/**
@@ -355,24 +377,8 @@ public class Application {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		/*
-		 * This is normally safe.
-		 * 
-		 * Java does not initialize static classes and methods before it's been
-		 * needed.
-		 */
-
 		logger.info("Starting {}.", Const.PROGRAM_NAME_FULL);
+		SwingUtilities.invokeLater(new Application());
 
-		AppHelper.setLocale(Config.getInstance().getCurrentLocale());
-
-		try {
-			new Application().run();
-		} catch (final Throwable t) {
-			AppHelper.showExceptionDialog(null, Messages.getString("Application.err.critical"), t);
-			logger.error("Error when loading application. Exit.");
-
-			System.exit(1); // Error exit
-		}
 	}
 }

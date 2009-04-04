@@ -44,6 +44,7 @@ public class ResizeFilter implements IFilter {
 		return params;
 	}
 
+	@Override
 	public String toString() {
 		return this.getName() + " (" + WIDTH.getValue() + "x" + HEIGHT.getValue() + " by "
 				+ INTERPOLATION_METHOD.getValue() + ")";

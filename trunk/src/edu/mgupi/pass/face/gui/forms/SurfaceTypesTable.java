@@ -1,7 +1,6 @@
 package edu.mgupi.pass.face.gui.forms;
 
 import java.awt.Frame;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -12,26 +11,26 @@ import edu.mgupi.pass.db.surfaces.SurfaceTypes;
 import edu.mgupi.pass.db.surfaces.SurfaceTypesFactory;
 import edu.mgupi.pass.face.gui.template.AbstractEditorTableModel;
 import edu.mgupi.pass.face.gui.template.CommonEditorTableModel;
-import edu.mgupi.pass.face.gui.template.TableEditorTemplate;
+import edu.mgupi.pass.face.gui.template.TableViewerTemplate;
 
-public class SurfaceTypesTable extends TableEditorTemplate {
+public class SurfaceTypesTable extends TableViewerTemplate<SurfaceTypes> {
 
 	/**
+	 * Default constructor.
+	 * 
+	 * @param owner
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
-
 	public SurfaceTypesTable(Frame owner) {
 		super(owner, "surfaceTypesTable", Messages.getString("SurfaceTypesTable.title"));
 	}
 
-	private AbstractEditorTableModel tableModel = null;
+	private CommonEditorTableModel<SurfaceTypes> tableModel = null;
 
 	@Override
-	protected AbstractEditorTableModel getTableModelImpl(JTable owner) {
+	protected CommonEditorTableModel<SurfaceTypes> getTableModelImpl(JTable owner) {
 		if (tableModel == null) {
 			tableModel = new CommonEditorTableModel<SurfaceTypes>(owner, SurfaceTypesRecord.class) {
-				private static final long serialVersionUID = 1L;
 
 				@Override
 				protected SurfaceTypes createInstanceImpl() {
@@ -48,15 +47,12 @@ public class SurfaceTypesTable extends TableEditorTemplate {
 
 				@Override
 				protected List<SurfaceTypes> getDataImpl() throws Exception {
-					List<SurfaceTypes> types = new ArrayList<SurfaceTypes>();
-					types.addAll(Arrays.asList(SurfaceTypesFactory.listSurfaceTypesByQuery(null,
-							null)));
-					return types;
+					return Arrays.asList(SurfaceTypesFactory.listSurfaceTypesByQuery(null, null));
 				}
 
 				@Override
 				public Object getValueAt(int rowIndex, int columnIndex) {
-					SurfaceTypes surface = data.get(rowIndex);
+					SurfaceTypes surface = super.getRowAt(rowIndex);
 					switch (columnIndex) {
 					case 0:
 						return surface.getIdSurfaceType();

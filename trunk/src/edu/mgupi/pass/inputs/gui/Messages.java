@@ -24,7 +24,7 @@ public class Messages {
 		try {
 			return RESOURCE_BUNDLE.getString(key);
 		} catch (MissingResourceException e) {
-			
+
 			AppHelper.showErrorDialog(null, "Не найден ресурс '" + key + "'.");
 			throw e;
 		}

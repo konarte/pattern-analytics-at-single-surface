@@ -1,41 +1,41 @@
-*03.04.2009  7:54:41,51* 
+*04.04.2009 15:15:46,57* 
 {{{ 
 Gathering information... Version info
 Gathering information... Common project info
 Gathering information... Java code revision
-Done in 0.359 sec
+Done in 0.5 sec
 
  ========== Version info ========== 
 VERSION: 0.1.R3.I18N
-  BUILD: 7366
+  BUILD: 7894
 
  ========== Common project info ========== 
-                Total .java files: 143
-           Total .java files size: 762.58496 Kb
-                Total .java lines: 26618
-      Total .java non empty lines: 21889
+                Total .java files: 163
+           Total .java files size: 815.8262 Kb
+                Total .java lines: 28591
+      Total .java non empty lines: 23476
           Total .properties files: 15
-     Total .properties files size: 58.854492 Kb
-          Total .properties lines: 621
-Total .properties non empty lines: 547
+     Total .properties files size: 67.66797 Kb
+          Total .properties lines: 807
+Total .properties non empty lines: 668
                  Total .xml files: 1
             Total .xml files size: 1.5449219 Kb
                  Total .xml lines: 34
        Total .xml non empty lines: 31
 
  ========== Java code revision ========== 
-       Total java source lines: 18139
-           Total comment lines: 3750
-          Total classes loaded: 159
-                       Classes: 146
+       Total java source lines: 19539
+           Total comment lines: 3937
+          Total classes loaded: 172
+                       Classes: 159
               Abstract classes: 3
                     Interfaces: 10
            Number of EJB beans: 0
         Number of Test classes: 46
-    Average lines per one file: 126
-         Max lines in one file: 1529 in edu.mgupi.pass.face.gui.MainFrame
-         Min lines in one file: 6 in edu.mgupi.pass.util.IRefreshable
+    Average lines per one file: 119
+         Max lines in one file: 902 in edu.mgupi.pass.face.gui.MainFrameDesign
+         Min lines in one file: 6 in edu.mgupi.pass.filters.NoSuchParamException
 Distribution (number of lines): 0..100 LINES      101..300 LINES    301..500 LINES    501..1000 LINES   1001..2000 LINES   > 2000 LINES     
-  Number of lines (% of lines): 3473  (19.15%)    7429  (40.96%)    3100  (17.1%)     2608  (14.38%)    1529  (8.43%)     0     (0.0%)      
-  Number of files (% of files): 88    (61.54%)    42    (29.38%)    8     (5.6%)      4     (2.8%)      1     (0.7%)      0     (0.0%)      
+  Number of lines (% of lines): 4087  (20.92%)    7988  (40.89%)    3241  (16.59%)    4223  (21.62%)    0     (0.0%)      0     (0.0%)      
+  Number of files (% of files): 103   (63.2%)     46    (28.23%)    8     (4.91%)     6     (3.69%)     0     (0.0%)      0     (0.0%)      
 }}}} 

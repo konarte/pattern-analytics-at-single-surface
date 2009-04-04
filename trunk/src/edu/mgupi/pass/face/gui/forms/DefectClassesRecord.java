@@ -18,11 +18,9 @@ import edu.mgupi.pass.face.gui.template.RecordEditorTemplate;
 
 public class DefectClassesRecord extends RecordEditorTemplate<DefectClasses> {
 
-	private static final long serialVersionUID = 1L;
-
 	public DefectClassesRecord(Frame owner) {
 		super(owner, "defectClassesRecordDialog", Messages.getString("DefectClassesRecord.title"));
-		super.setFormPanelData(getFormPanel());
+		super.setFormPanel(getFormPanel());
 	}
 
 	@Override
@@ -74,7 +72,7 @@ public class DefectClassesRecord extends RecordEditorTemplate<DefectClasses> {
 	}
 
 	@Override
-	protected void saveFormToObjectImpl(DefectClasses object) throws Exception {
+	protected void putFormToObjectImpl(DefectClasses object) throws Exception {
 		object.setName(jTextFieldNameValue.getText());
 	}
 

@@ -87,7 +87,7 @@ public class AppHelperTest {
 		assertNotNull(splash);
 		assertNotNull(AppHelper.getInstance().searchWindow(SplashWindow.class));
 
-		assertTrue(splash == AppHelper.getInstance().getFrameImpl(SplashWindow.class));
+		assertTrue(splash == AppHelper.getInstance().getFrameImpl(null, SplashWindow.class));
 
 		splash.setVisible(false);
 		splash.dispose();
@@ -101,7 +101,7 @@ public class AppHelperTest {
 		splash = (SplashWindow) SwingTestHelper.openDialog(SplashWindow.class, true);
 
 		assertNotNull(splash);
-		assertTrue(splash == AppHelper.getInstance().getFrameImpl(SplashWindow.class));
+		assertTrue(splash == AppHelper.getInstance().getFrameImpl(null, SplashWindow.class));
 
 		Window about = SwingTestHelper.openDialog(AboutDialog.class, true);
 		assertNotNull(about);
@@ -125,7 +125,8 @@ public class AppHelperTest {
 		assertNotNull(splash);
 		assertFalse(splash == mySplash);
 
-		SwingTestHelper.showMeBackground(AppHelper.getInstance().getDialogImpl(AboutDialog.class));
+		SwingTestHelper.showMeBackground(AppHelper.getInstance().getDialogImpl(null,
+				AboutDialog.class));
 		AboutDialog about = (AboutDialog) AppHelper.getInstance().searchWindow(AboutDialog.class);
 		assertNotNull(about);
 		about.setVisible(false);
@@ -337,7 +338,7 @@ public class AppHelperTest {
 					Collection<Component> componentList = new ArrayList<Component>();
 					for (int idx = 0; idx < 10; idx++) {
 						Component comp = new Component() {
-							private static final long serialVersionUID = 1L;
+
 						};
 						componentList.add(comp);
 						AppHelper.getInstance().registerAdditionalComponent(comp);
@@ -386,7 +387,7 @@ public class AppHelperTest {
 				public void run() {
 					for (int idx = 0; idx < INTERNAL_COUNT; idx++) {
 						try {
-							AppHelper.getInstance().getWindowImpl(Window.class, idx % 2 == 0);
+							AppHelper.getInstance().getWindowImpl(null, Window.class, idx % 2 == 0);
 						} catch (Exception e1) {
 							e1.printStackTrace();
 						}
@@ -421,7 +422,6 @@ public class AppHelperTest {
 		/**
 		 * 
 		 */
-		private static final long serialVersionUID = 1L;
 
 		public MyFrame() {
 			super();
@@ -430,6 +430,7 @@ public class AppHelperTest {
 
 		protected int repaintCount = 0;
 
+		@Override
 		public void repaint() {
 			super.repaint();
 			this.repaintCount++;
@@ -444,10 +445,10 @@ public class AppHelperTest {
 		/**
 		 * 
 		 */
-		private static final long serialVersionUID = 1L;
 
 		protected int repaintCount = 0;
 
+		@Override
 		public void repaint() {
 			super.repaint();
 			this.repaintCount++;

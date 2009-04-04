@@ -14,6 +14,7 @@ public class TestMyFilter implements IFilter, IInitiable {
 
 	private final static Logger logger = LoggerFactory.getLogger(TestMyFilter.class);
 
+	@Override
 	protected void finalize() throws Throwable {
 		if (!done) {
 			System.err.println("Method 'close' does not called for " + this);

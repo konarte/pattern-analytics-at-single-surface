@@ -40,10 +40,6 @@ public class SensorsCriteria extends AbstractORMCriteria {
 		return new SensorTypesCriteria(createCriteria("sensorType"));
 	}
 	
-	public edu.mgupi.pass.db.surfaces.MaterialsCriteria createSensorMaterialCriteria() {
-		return new edu.mgupi.pass.db.surfaces.MaterialsCriteria(createCriteria("sensorMaterial"));
-	}
-	
 	public Sensors uniqueSensors() {
 		return (Sensors) super.uniqueResult();
 	}

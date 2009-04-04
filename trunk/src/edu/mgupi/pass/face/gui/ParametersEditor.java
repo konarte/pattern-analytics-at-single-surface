@@ -24,7 +24,6 @@ public class ParametersEditor extends JDialog implements ActionListener {
 
 	Logger logger = LoggerFactory.getLogger(ParametersEditor.class);
 
-	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
 	private ParametersEditorPanel jPanelParams = null;
 	private JPanel jPanelButtons = null;

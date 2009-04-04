@@ -37,6 +37,7 @@ public class RescaleFilter implements IFilter {
 		return params;
 	}
 
+	@Override
 	public String toString() {
 		return this.getName() + " (B " + BRIGHTNESS.getValue() + ", C " + CONTRAST.getValue() + ")";
 	}

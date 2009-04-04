@@ -35,10 +35,11 @@ public class Utils {
 		if (o1 == null && o2 == null) {
 			return true;
 		}
-		if ((o1 == null && o2 != null) || (o1 != null && o2 == null)) {
-			return false;
+		if (o1 != null) {
+			return o1.equals(o2);
 		}
-		return o1.equals(o2);
+
+		return false;
 	}
 
 	public static String splitStingBySlices(String text, int maximumCols, String delimiter) {
@@ -91,9 +92,10 @@ public class Utils {
 		URL url = Utils.class.getProtectionDomain().getCodeSource().getLocation();
 		if (url != null && url.getPath().endsWith(".jar")) {
 			return true;
-		} else {
-			return false;
 		}
+
+		return false;
+
 	}
 
 	/**
@@ -113,7 +115,12 @@ public class Utils {
 		}
 
 		URL url = Utils.class.getProtectionDomain().getCodeSource().getLocation();
-		if (url != null && url.getPath().endsWith(".jar")) {
+
+		if (url == null) {
+			return null;
+		}
+
+		if (url.getPath().endsWith(".jar")) {
 
 			path = Utils.replaceAll(path, "\\", "/");
 			if (!path.endsWith("/")) {
@@ -145,21 +152,22 @@ public class Utils {
 			}
 
 			return fileNames.toArray(new String[fileNames.size()]);
-		} else {
-			File dir = new File(url.getPath() + path);
-			if (!dir.isDirectory()) {
-				throw new IOException("Path '" + path + "' is not directory. Unable to load list.");
-			}
-			File files[] = dir.listFiles();
-			Collection<String> fileNames = new ArrayList<String>();
-			for (File file : files) {
-				String fullPath = Utils.replaceAll(file.getCanonicalPath(), "\\", "/");
-				if (extension == null || fullPath.endsWith(extension)) {
-					fileNames.add(fullPath.substring(fullPath.lastIndexOf(path)));
-				}
-			}
-			return fileNames.toArray(new String[fileNames.size()]);
 		}
+
+		File dir = new File(url.getPath() + path);
+		if (!dir.isDirectory()) {
+			throw new IOException("Path '" + path + "' is not directory. Unable to load list.");
+		}
+		File files[] = dir.listFiles();
+		Collection<String> fileNames = new ArrayList<String>();
+		for (File file : files) {
+			String fullPath = Utils.replaceAll(file.getCanonicalPath(), "\\", "/");
+			if (extension == null || fullPath.endsWith(extension)) {
+				fileNames.add(fullPath.substring(fullPath.lastIndexOf(path)));
+			}
+		}
+		return fileNames.toArray(new String[fileNames.size()]);
+
 	}
 
 	/**

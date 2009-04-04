@@ -22,7 +22,6 @@ import edu.mgupi.pass.face.gui.template.JTableReadOnly;
 
 public class LFiltersList extends JDialog {
 
-	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
 	private JPanel jPanelButtons = null;
 	private JScrollPane jScrollPaneData = null;
@@ -81,12 +80,13 @@ public class LFiltersList extends JDialog {
 					selectedClass = (String) (jTableData.getModel().getValueAt(index,
 							getDataColumnIndex()));
 					return true;
-				} else {
-					AppHelper.showWarnDialog(LFiltersList.this, Messages
-							.getString("LFiltersList.selectRequered"));
-
-					return false;
 				}
+
+				AppHelper.showWarnDialog(LFiltersList.this, Messages
+						.getString("LFiltersList.selectRequered"));
+
+				return false;
+
 			}
 
 		};
@@ -156,6 +156,7 @@ public class LFiltersList extends JDialog {
 
 			jTableData = this.getTableDataImpl();
 			jTableData.addMouseListener(new MouseAdapter() {
+				@Override
 				public void mouseClicked(MouseEvent e) {
 					if (e.getClickCount() == 2) {
 						getDialogAdapter().save();

@@ -37,7 +37,6 @@ public class SplashWindow extends JFrame {
 
 	private final static Logger logger = LoggerFactory.getLogger(SplashWindow.class);
 
-	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
 	private ImagePanel jPanelSplash = null;
 	private JLabel jLabelInfo = null;
@@ -165,6 +164,7 @@ public class SplashWindow extends JFrame {
 
 	public void setSplashText(String text) {
 		this.jLabelInfo.setText(text);
+		this.paintComponents(this.getGraphics());
 	}
 
 } // @jve:decl-index=0:visual-constraint="10,10"

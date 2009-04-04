@@ -71,8 +71,8 @@ public class Sensors implements Serializable {
 	
 	@Column(name="IdSensor", nullable=false)	
 	@Id	
-	@GeneratedValue(generator="V0A1070D31205627A73303181")	
-	@org.hibernate.annotations.GenericGenerator(name="V0A1070D31205627A73303181", strategy="native")	
+	@GeneratedValue(generator="V0A1070D312070BAEDCF0E733")	
+	@org.hibernate.annotations.GenericGenerator(name="V0A1070D312070BAEDCF0E733", strategy="native")	
 	private int idSensor;
 	
 	@Column(name="Name", nullable=false, length=255)	
@@ -83,12 +83,6 @@ public class Sensors implements Serializable {
 	@JoinColumns({ @JoinColumn(name="SensorTypesIdSensorType") })	
 	@Basic(fetch=FetchType.LAZY)	
 	private edu.mgupi.pass.db.sensors.SensorTypes sensorType;
-	
-	@OneToOne(targetEntity=edu.mgupi.pass.db.surfaces.Materials.class)	
-	@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.LOCK})	
-	@JoinColumns({ @JoinColumn(name="MaterialsIdSurfaceMaterial") })	
-	@Basic(fetch=FetchType.LAZY)	
-	private edu.mgupi.pass.db.surfaces.Materials sensorMaterial;
 	
 	private void setIdSensor(int value) {
 		this.idSensor = value;
@@ -122,14 +116,6 @@ public class Sensors implements Serializable {
 	
 	public edu.mgupi.pass.db.sensors.SensorTypes getSensorType() {
 		return sensorType;
-	}
-	
-	public void setSensorMaterial(edu.mgupi.pass.db.surfaces.Materials value) {
-		this.sensorMaterial = value;
-	}
-	
-	public edu.mgupi.pass.db.surfaces.Materials getSensorMaterial() {
-		return sensorMaterial;
 	}
 	
 	public String toString() {

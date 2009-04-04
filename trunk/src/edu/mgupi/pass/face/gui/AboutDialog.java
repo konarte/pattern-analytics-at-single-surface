@@ -8,7 +8,6 @@ package edu.mgupi.pass.face.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -18,7 +17,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -52,7 +50,6 @@ public class AboutDialog extends JDialog {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
 
 	private JPanel jContentPane = null;
 	private JPanel jPanelButtons = null;
@@ -216,20 +213,18 @@ public class AboutDialog extends JDialog {
 			// Clicking on HTTP link
 			// Direct to internet page with our project 
 			jLabelLink.addMouseListener(new MouseAdapter() {
+				@Override
 				public void mouseClicked(MouseEvent e) {
-					try {
-						Desktop.getDesktop().browse(new URI(Const.WEB_PROJECT_PAGE));
-					} catch (Exception e1) {
-						AppHelper.showExceptionDialog(AboutDialog.this, Messages.getString(
-								"AboutDialog.err.openLink", Const.WEB_PROJECT_PAGE), e1);
-					}
+					AppHelper.openLink(Const.WEB_PROJECT_PAGE);
 				}
 
+				@Override
 				// Cursor with hand-point
 				public void mouseEntered(MouseEvent e) {
 					jLabelLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 				}
 
+				@Override
 				public void mouseReleased(MouseEvent e) {
 					jLabelLink.setCursor(Cursor.getDefaultCursor());
 				}

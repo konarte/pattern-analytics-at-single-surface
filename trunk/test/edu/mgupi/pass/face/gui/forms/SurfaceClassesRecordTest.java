@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.mgupi.pass.face.gui.SwingTestHelper;
-import edu.mgupi.pass.face.gui.forms.SurfaceClassesRecord;
 
 public class SurfaceClassesRecordTest {
 

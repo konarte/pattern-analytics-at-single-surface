@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.mgupi.pass.face.gui.AppHelper;
+import edu.mgupi.pass.util.MessagesImpl;
 import edu.mgupi.pass.util.Utils;
 import edu.mgupi.pass.util.Config.SupportedLocale;
 
@@ -57,12 +58,10 @@ public class I18NCoverTest {
 			Collection<String> lines = Utils.loadFromFile(file);
 
 			String fileName = null;
-			String prevLine = null;
+			String prevousLine = null;
 
 			Collection<String> keys = new ArrayList<String>();
 			for (String line : lines) {
-				//				int startKey = line.indexOf(BEGIN_DEF
-				//						+ file.getName().substring(0, file.getName().indexOf(".")));
 				int startKey = line.indexOf(BEGIN_DEF);
 				if (startKey < 0) {
 					continue; //
@@ -71,10 +70,10 @@ public class I18NCoverTest {
 				int startFullKey = line.indexOf(BEGIN_FULL_DEF);
 
 				if (startFullKey < 0) {
-					if (prevLine == null) {
+					if (prevousLine == null) {
 						continue; //
 					}
-					String fullLine = prevLine + line;
+					String fullLine = prevousLine + line;
 					startFullKey = fullLine.indexOf(BEGIN_FULL_DEF);
 					if (startFullKey < 0) {
 						continue; //
@@ -89,8 +88,6 @@ public class I18NCoverTest {
 
 				String key = line.substring(startKey + BEGIN_DEF.length(), endKey);
 
-				//				System.out.println("Found link: " + key);
-
 				String path = Utils.replaceAll(file.getAbsolutePath(), "\\", "/");
 				int pathPos = path.indexOf("src/edu/mgupi/pass");
 
@@ -98,19 +95,19 @@ public class I18NCoverTest {
 					continue; //
 				}
 
-				fileName = path.substring(pathPos + "src/".length());
-				//				String bundleName = fileName.substring(0, fileName.lastIndexOf("/")) + ".messages";
-
-				fileName = Utils.replaceAll(fileName, "/", ".");
+				fileName = Utils.replaceAll(path.substring(pathPos + "src/".length()), "/", ".");
 				fileName = fileName.substring(0, fileName.lastIndexOf("."));
-				//				bundleName = Utils.replaceAll(bundleName, "/", ".");
-				//				bundleMap.put(fileName, bundleName);
 
 				System.out.println("CHECK " + key);
 				keys.add(key);
 
-				prevLine = line;
+				if (key.startsWith(MessagesImpl.KEY_PREFIX)) {
+					System.out.println("CHECK KEY-LINK " + key);
+					String key2 = key.substring(MessagesImpl.KEY_PREFIX.length());
+					keys.add(key2);
+				}
 
+				prevousLine = line;
 			}
 
 			if (fileName != null) {
@@ -143,8 +140,6 @@ public class I18NCoverTest {
 				Map<String, String> tmpValues = new HashMap<String, String>();
 				for (String link : checkingResources.get(clazz_)) {
 
-					//					System.out.println("check key " + link + " for " + bndl);
-					//
 					try {
 						String res = bundle.getString(link);
 						assertNotNull(res);
@@ -168,7 +163,16 @@ public class I18NCoverTest {
 
 						String currentFound = tmpValues.get(key);
 						assertNotNull(currentFound);
-						if (found.equals(currentFound)) {
+
+						if (currentFound.startsWith(MessagesImpl.KEY_PREFIX)) {
+							assertTrue("Resource marked as \"key:\": " + key + " in locale "
+									+ checkedLocale + " is " + currentFound + ", but in locale "
+									+ locale + " it does not equals (" + found
+									+ "). Key resources must be equals!", found
+									.equals(currentFound));
+
+						} else if (found.equals(currentFound)) {
+
 							boolean allow = false;
 							for (String allowedIdent : ALLOWED_IDENTICALLY_VALUES) {
 								if (found.equals(allowedIdent)) {
@@ -200,33 +204,6 @@ public class I18NCoverTest {
 				resourceMap.put(locale, currentValues);
 			}
 		}
-		//
-		//		int pos = 0;
-		//		Locale.setDefault(Const.LOCALE_RU);
-		//		for (String file : checkingResources.keySet()) {
-		//			String bndl = bundleMap.get(file);
-		//			assertNotNull(bndl);
-		//
-		//			ResourceBundle bundle = ResourceBundle.getBundle(bndl);
-		//			boolean allEquals = true;
-		//			for (String key : checkingResources.get(file)) {
-		//				String res = bundle.getString(key);
-		//				assertNotNull(res);
-		//
-		//				String previous = loadedResources.get(pos++);
-		//				assertNotNull(previous);
-		//
-		//				if (!res.equals(previous)) {
-		//					allEquals = false;
-		//				} else {
-		//					System.err.println("Found equals resources: bundle " + bndl + ", class " + file
-		//							+ ", key = " + key + ", value = " + res);
-		//				}
-		//			}
-		//
-		//			assertFalse("All resources in class " + file + " locale identically to each other.",
-		//					allEquals);
-		//		}
 
 	}
 }

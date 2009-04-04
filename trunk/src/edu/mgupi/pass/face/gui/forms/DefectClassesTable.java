@@ -1,7 +1,6 @@
 package edu.mgupi.pass.face.gui.forms;
 
 import java.awt.Frame;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -12,26 +11,25 @@ import edu.mgupi.pass.db.defects.DefectClasses;
 import edu.mgupi.pass.db.defects.DefectClassesFactory;
 import edu.mgupi.pass.face.gui.template.AbstractEditorTableModel;
 import edu.mgupi.pass.face.gui.template.CommonEditorTableModel;
-import edu.mgupi.pass.face.gui.template.TableEditorTemplate;
+import edu.mgupi.pass.face.gui.template.TableViewerTemplate;
 
-public class DefectClassesTable extends TableEditorTemplate {
+public class DefectClassesTable extends TableViewerTemplate<DefectClasses> {
 
 	/**
+	 * Default constructor.
 	 * 
+	 * @param owner
 	 */
-	private static final long serialVersionUID = 1L;
-
 	public DefectClassesTable(Frame owner) {
 		super(owner, "defectClassesTable", Messages.getString("DefectClassesTable.title"));
 	}
 
-	private AbstractEditorTableModel tableModel = null;
+	private CommonEditorTableModel<DefectClasses> tableModel = null;
 
 	@Override
-	protected AbstractEditorTableModel getTableModelImpl(JTable owner) {
+	protected CommonEditorTableModel<DefectClasses> getTableModelImpl(JTable owner) {
 		if (tableModel == null) {
 			tableModel = new CommonEditorTableModel<DefectClasses>(owner, DefectClassesRecord.class) {
-				private static final long serialVersionUID = 1L;
 
 				@Override
 				protected DefectClasses createInstanceImpl() {
@@ -40,21 +38,18 @@ public class DefectClassesTable extends TableEditorTemplate {
 
 				@Override
 				protected String[] getColumns() {
-					return new String[] { Messages.getString("DefectClassesTable.id"),
-							Messages.getString("DefectClassesTable.name") };
+					return new String[] { Messages.getString("DefectClassesTable.head.id"),
+							Messages.getString("DefectClassesTable.head.name") };
 				}
 
 				@Override
 				protected List<DefectClasses> getDataImpl() throws Exception {
-					List<DefectClasses> classes = new ArrayList<DefectClasses>();
-					classes.addAll(Arrays.asList(DefectClassesFactory.listDefectClassesByQuery(
-							null, null)));
-					return classes;
+					return Arrays.asList(DefectClassesFactory.listDefectClassesByQuery(null, null));
 				}
 
 				@Override
 				public Object getValueAt(int rowIndex, int columnIndex) {
-					DefectClasses defect = data.get(rowIndex);
+					DefectClasses defect = super.getRowAt(rowIndex);
 					return columnIndex == 0 ? defect.getIdDefectClass() : defect.getName();
 				}
 			};

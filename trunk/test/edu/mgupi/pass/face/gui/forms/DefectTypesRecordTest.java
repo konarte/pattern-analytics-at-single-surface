@@ -10,7 +10,6 @@ import org.junit.Test;
 
 import edu.mgupi.pass.face.gui.AppHelper;
 import edu.mgupi.pass.face.gui.SwingTestHelper;
-import edu.mgupi.pass.face.gui.forms.DefectTypesRecord;
 import edu.mgupi.pass.util.Config;
 
 public class DefectTypesRecordTest {
@@ -29,7 +28,7 @@ public class DefectTypesRecordTest {
 	public void testOpen() throws Exception {
 
 		DefectTypesRecord dtf = (DefectTypesRecord) AppHelper.getInstance().getDialogImpl(
-				DefectTypesRecord.class);
+				null,DefectTypesRecord.class);
 		AppHelper.getInstance().updateUI(javax.swing.UIManager.getSystemLookAndFeelClassName());
 		//		AppHelper.getInstance().updateUI(com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel.class.getName());
 		//		AppHelper.getInstance().updateUI(com.sun.java.swing.plaf.motif.MotifLookAndFeel.class.getName());

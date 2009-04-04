@@ -227,10 +227,12 @@ public class Param implements Cloneable {
 		}
 	}
 
+	@Override
 	public String toString() {
 		return this.title + " (" + this.name + ")";
 	}
 
+	@Override
 	public Object clone() throws CloneNotSupportedException {
 		Param cloned = (Param) super.clone();
 

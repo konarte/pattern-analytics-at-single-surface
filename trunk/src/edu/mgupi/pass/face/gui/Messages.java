@@ -7,10 +7,9 @@
 package edu.mgupi.pass.face.gui;
 
 import java.text.MessageFormat;
-import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import edu.mgupi.pass.util.Const;
+import edu.mgupi.pass.util.MessagesImpl;
 
 /**
  * Multi-language support class.
@@ -27,16 +26,7 @@ public class Messages {
 	}
 
 	public static String getString(String key) {
-		try {
-			return RESOURCE_BUNDLE.getString(key);
-		} catch (MissingResourceException e) {
-
-			if (!Const.PRODUCTION_MODE) {
-				AppHelper.showErrorDialog(null, "Не найден ресурс '" + key + "'.");
-				throw e;
-			}
-			return '!' + key + '!';
-		}
+		return MessagesImpl.getString(RESOURCE_BUNDLE, key);
 	}
 
 	public static String getString(String key, Object... arguments) {

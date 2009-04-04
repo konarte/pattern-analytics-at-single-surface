@@ -19,7 +19,6 @@ import edu.mgupi.pass.db.defects.DefectTypes;
 import edu.mgupi.pass.db.defects.DefectTypesCriteria;
 import edu.mgupi.pass.db.defects.Defects;
 import edu.mgupi.pass.db.defects.DefectsCriteria;
-import edu.mgupi.pass.face.gui.template.DefectClassesComboBox;
 import edu.mgupi.pass.face.gui.template.ParametersEditorPanel;
 import edu.mgupi.pass.face.gui.template.RecordEditorTemplate;
 import edu.mgupi.pass.face.gui.template.RecordFormWithImageTemplate;
@@ -29,11 +28,9 @@ public class DefectTypesRecord extends RecordEditorTemplate<DefectTypes> {
 
 	//private final static Logger logger = LoggerFactory.getLogger(DefectTypesRecord.class);
 
-	private static final long serialVersionUID = 1L;
-
 	public DefectTypesRecord(Frame owner) {
 		super(owner, "defectTypesRecordDialog", Messages.getString("DefectTypesRecord.title"));
-		super.setFormPanelData(getFormPanel());
+		super.setFormPanel(getFormPanel());
 	}
 
 	@Override
@@ -78,11 +75,7 @@ public class DefectTypesRecord extends RecordEditorTemplate<DefectTypes> {
 		jLabelIDValue.setText(String.valueOf(object.getIdDefectType()));
 		jTextFieldNameValue.setText(name);
 
-		if (defectClass != null) {
-			jComboBoxClassValue.setSelectedItem(defectClass);
-		} else {
-			jComboBoxClassValue.setSelectedIndex(0);
-		}
+		jComboBoxClassValue.setValue(defectClass);
 
 		formPanel.setImageRaw(image);
 
@@ -97,16 +90,16 @@ public class DefectTypesRecord extends RecordEditorTemplate<DefectTypes> {
 	}
 
 	@Override
-	protected void saveFormToObjectImpl(DefectTypes object) throws Exception {
+	protected void putFormToObjectImpl(DefectTypes object) throws Exception {
 		object.setName(jTextFieldNameValue.getText());
-		object.setDefectClass((DefectClasses) jComboBoxClassValue.getSelectedItem());
+		object.setDefectClass(jComboBoxClassValue.getValue());
 		object.setDefectImage(formPanel.getRawImage());
 	}
 
 	private JPanel jPanelPlace = null;
 	private JLabel jLabelIDValue = null;
 	private JTextField jTextFieldNameValue = null;
-	private DefectClassesComboBox jComboBoxClassValue = null;
+	private ComboBoxDefectClasses jComboBoxClassValue = null;
 	private ParametersEditorPanel parametersEditorPanel = null;
 
 	private RecordFormWithImageTemplate formPanel = null;
@@ -132,7 +125,7 @@ public class DefectTypesRecord extends RecordEditorTemplate<DefectTypes> {
 
 			jLabelIDValue = new JLabel("0");
 			jTextFieldNameValue = new JTextField();
-			jComboBoxClassValue = new DefectClassesComboBox();
+			jComboBoxClassValue = new ComboBoxDefectClasses();
 
 			super.putComponentPair(jPanelPlace, Messages.getString("DefectTypesRecord.id"),
 					jLabelIDValue);

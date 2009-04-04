@@ -18,10 +18,6 @@ public class FilterChainsawTransactional extends FilterChainsaw {
 	public FilterChainsawTransactional(FilterChainsaw source) {
 		super(source.getCurrentMode());
 
-		if (source == null) {
-			throw new IllegalArgumentException("Internal error. 'source' must be not null.");
-		}
-
 		logger.trace("CREATE");
 		this.source = source;
 		this.filterList.addAll(source.getFilters());
@@ -29,6 +25,7 @@ public class FilterChainsawTransactional extends FilterChainsaw {
 		this.precacheFilters();
 	}
 
+	@Override
 	public void close() {
 		super.close();
 
@@ -181,6 +178,7 @@ public class FilterChainsawTransactional extends FilterChainsaw {
 		public String name;
 		public Collection<Param> parameters = EMPTY;
 
+		@Override
 		public String toString() {
 			return name;
 		}

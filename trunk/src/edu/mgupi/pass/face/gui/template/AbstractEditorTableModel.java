@@ -55,7 +55,6 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
 
 	protected JTable owner = null;
 
@@ -86,6 +85,7 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		 * If you do double-click -- we call 'edit' method.
 		 */
 		this.owner.addMouseListener(new MouseAdapter() {
+			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
 					AbstractEditorTableModel.this.editRow();
@@ -130,6 +130,24 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		col.setCellRenderer(cellr);
 	}
 
+	private boolean addOnly = false;
+
+	/**
+	 * Set special mode of table -- user can only add record
+	 */
+	public void setAddOnlyMode() {
+
+		logger.debug("Set mode as 'addOnly' for {}.", this);
+
+		this.addOnly = true;
+		if (this.editButton != null) {
+			this.editButton.setVisible(false);
+		}
+		if (this.deleteButton != null) {
+			this.deleteButton.setVisible(false);
+		}
+	}
+
 	private JButton editButton;
 
 	/**
@@ -149,6 +167,11 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 
 		if (button == null) {
 			throw new IllegalStateException("Internal error. Parameter 'button' must be not null.");
+		}
+
+		if (addOnly) {
+			button.setVisible(false);
+			return;
 		}
 
 		this.editButton = button;
@@ -258,9 +281,79 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 			throw new IllegalStateException("'deleteButton' button already registered ("
 					+ deleteButton.getText() + ").");
 		}
+
+		if (button == null) {
+			throw new IllegalStateException("Internal error. Parameter 'button' must be not null.");
+		}
+
+		if (addOnly) {
+			button.setVisible(false);
+			return;
+		}
+
 		this.deleteButton = button;
 		button.setActionCommand("delete");
 		button.setName("delete");
+		Utils.addCheckedListener(button, this);
+	}
+
+	private JButton searchButton;
+
+	/**
+	 * Register 'SearchRows' button on dialog. Clicking this button will provide
+	 * 'search' event. <br>
+	 * 
+	 * Be carefully, setting this button change rules of interface work -- we do
+	 * not call {@link #onWindowOpen()} when window has open and do not call
+	 * {@link #onWindowClose()} when windows has close! We call it only after
+	 * user clicking on this or {@link #registerResetSearchButton(JButton)}
+	 * button!
+	 * 
+	 * @param button
+	 *            instance of button, required
+	 * 
+	 * @see #searchRows()
+	 */
+	public void registerSearchRowsButton(JButton button) {
+		if (searchButton != null) {
+			throw new IllegalStateException("'searchButton' button already registered ("
+					+ searchButton.getText() + ").");
+		}
+
+		if (button == null) {
+			throw new IllegalStateException("Internal error. Parameter 'button' must be not null.");
+		}
+
+		this.searchButton = button;
+		button.setActionCommand("search");
+		button.setName("search");
+		Utils.addCheckedListener(button, this);
+	}
+
+	private JButton resetSearchButton;
+
+	/**
+	 * Register 'ResetSearch' button on dialog. Clicking this button will
+	 * provide 'resetSearch' event. <br>
+	 * 
+	 * @param button
+	 *            instance of button, required
+	 * 
+	 * @see #resetSearch()
+	 */
+	public void registerResetSearchButton(JButton button) {
+		if (resetSearchButton != null) {
+			throw new IllegalStateException("'resetSearchButton' button already registered ("
+					+ searchButton.getText() + ").");
+		}
+
+		if (button == null) {
+			throw new IllegalStateException("Internal error. Parameter 'button' must be not null.");
+		}
+
+		this.resetSearchButton = button;
+		button.setActionCommand("resetSearch");
+		button.setName("resetSearch");
 		Utils.addCheckedListener(button, this);
 	}
 
@@ -288,6 +381,12 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		} else if (command.equals("edit")) {
 			logger.trace("Execution 'editRow' command.");
 			this.editRow();
+		} else if (command.equals("search")) {
+			logger.trace("Execution 'searchRows' command.");
+			this.searchRows();
+		} else if (command.equals("resetSearch")) {
+			logger.trace("Execution 'resetSearch' command.");
+			this.resetSearch();
 		}
 	}
 
@@ -384,6 +483,11 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 	 */
 	public void deleteRows() {
 
+		if (this.addOnly) {
+			logger.trace("Cancel removing row. Mode is addOnly.");
+			return;
+		}
+
 		int currentRow = this.owner.getSelectedRow();
 
 		logger.trace("Removing row {}.", currentRow);
@@ -474,6 +578,12 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 	 * @see #editRowImpl(int)
 	 */
 	public void editRow() {
+
+		if (this.addOnly) {
+			logger.trace("Cancel changin row. Mode is addOnly.");
+			return;
+		}
+
 		if (this.owner.getSelectedRowCount() != 1) {
 			return;
 		}
@@ -580,21 +690,65 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 		}
 	}
 
+	/**
+	 * Method called when user pressed 'SearchRows' button. We immediately call
+	 * {@link #onOpenImpl()} (and do not this on actual window open).
+	 */
+	public void searchRows() {
+		try {
+			this.onCloseImpl();
+			this.onOpenImpl();
+
+			if (this.getRowCount() > 0) {
+				owner.setRowSelectionInterval(0, 0);
+			}
+		} catch (Throwable t) {
+			AppHelper.showExceptionDialog(this.owner, Messages
+					.getString("AbstractEditorTableModel.err.searchRows"), t);
+			return;
+		}
+	}
+
+	/**
+	 * Method called when user pressed 'ResetSearch' button. We immediately call
+	 * {@link #onCloseImpl()}.
+	 */
+	public void resetSearch() {
+		try {
+			this.onCloseImpl();
+		} catch (Throwable t) {
+			AppHelper.showExceptionDialog(this.owner, Messages
+					.getString("AbstractEditorTableModel.err.searchRows"), t);
+			return;
+		}
+	}
+
 	private int lastRowCount = 0;
 	private int lastRowSelected = -1;
 
 	/**
 	 * Method open will be called by {@link AbstractDialogAdapter}, if you
-	 * attach to its constructor instance of this class.
+	 * attach to its constructor instance of this class. <br>
 	 * 
-	 * Method open retrieves data from database, do some stuff.
+	 * Method open retrieves data from database, do some stuff. <br>
 	 * 
-	 * We use them to select previously selected row :)
+	 * We use them to select previously selected row :) <br>
+	 * 
+	 * Method immediately returns control and do not work if called
+	 * {@link #registerSearchRowsButton(JButton)} before.
 	 * 
 	 * @throws Exception
 	 * @see #onOpenImpl()
 	 */
-	public void onOpenWindow() throws Exception {
+	public void onWindowOpen() throws Exception {
+
+		if (this.searchButton != null) {
+			logger.trace("Do not call 'onWindowOpen', cause 'searchButton' registered. "
+					+ "We call this method only after pressing 'searchButton'.");
+
+			return;
+		}
+
 		this.onOpenImpl();
 
 		int rowCount = this.getRowCount();
@@ -619,7 +773,14 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 	 * @throws Exception
 	 * @see #onCloseImpl()
 	 */
-	public void onCloseWindow() throws Exception {
+	public void onWindowClose() throws Exception {
+
+		if (this.searchButton != null) {
+			logger.trace("Do not call 'onWindowClose', cause 'SearchButton' registered. "
+					+ "We call this method only after pressing 'SearchButton' or 'ResetSearch'.");
+
+			return;
+		}
 
 		// We use lastRowCount for reopen interface on previously selected row
 		lastRowCount = this.getRowCount();
@@ -696,6 +857,7 @@ public abstract class AbstractEditorTableModel extends AbstractTableModel implem
 	 */
 	protected abstract boolean moveRowsDownImpl(int[] selectedRows) throws Exception;
 
+	@Override
 	// Standard method for displaying column on position
 	public abstract String getColumnName(int column);
 

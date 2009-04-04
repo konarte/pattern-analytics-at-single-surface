@@ -18,7 +18,7 @@ public class MainFramePreCacheTest {
 	public void setUp() throws Exception {
 		Config.getInstance().setDebugVirualMode();
 
-		frame = (MainFrame) AppHelper.getInstance().getFrameImpl(MainFrame.class);
+		frame = (MainFrame) AppHelper.getInstance().getFrameImpl(null,MainFrame.class);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 

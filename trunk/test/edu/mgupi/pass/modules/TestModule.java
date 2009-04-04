@@ -32,6 +32,7 @@ import edu.mgupi.pass.util.IInitiable;
  */
 public class TestModule implements IModule, IInitiable {
 
+	@Override
 	protected void finalize() throws Throwable {
 		logger.debug("Checking properly finalyzed method");
 		if (!close) {
@@ -171,13 +172,7 @@ public class TestModule implements IModule, IInitiable {
 			throw new RuntimeException(e);
 		}
 
-		if (Arrays.equals(param_g1.getParamData(), param_g2.getParamData())) {
-			return 1;
-		} else {
-			return 0;
-		}
-
-		// return false;
+		return Arrays.equals(param_g1.getParamData(), param_g2.getParamData()) ? 1 : 0;
 	}
 
 	public Param getTEST_PARAM1() {

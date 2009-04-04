@@ -23,8 +23,11 @@ public class ImageControlAdapter implements ActionListener, PropertyChangeListen
 
 	private ImagePanel imagePanel;
 
-	public ImageControlAdapter(ImagePanel panel) {
+	private boolean readOnly = false;
+
+	public ImageControlAdapter(ImagePanel panel, boolean readOnly) {
 		this.imagePanel = panel;
+		this.readOnly = readOnly;
 
 		this.imagePanel.addPropertyChangeListener(ImagePanel.RPOPERTY_NAME, this);
 
@@ -69,7 +72,7 @@ public class ImageControlAdapter implements ActionListener, PropertyChangeListen
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		if (ImagePanel.RPOPERTY_NAME.equals(evt.getPropertyName())) {
-			if (this.resetButton != null) {
+			if (this.resetButton != null && !this.readOnly) {
 				this.resetButton.setEnabled(evt.getNewValue() != null);
 			}
 		}
@@ -93,11 +96,18 @@ public class ImageControlAdapter implements ActionListener, PropertyChangeListen
 					+ loadButton.getText() + ").");
 		}
 
+		if (button == null) {
+			throw new IllegalArgumentException("Internal error. 'button' must be not null.");
+		}
+
 		this.loadButton = button;
 
 		button.setActionCommand("load");
 		button.addActionListener(this);
 
+		if (this.readOnly) {
+			button.setEnabled(false);
+		}
 	}
 
 	private JButton resetButton;
@@ -116,12 +126,19 @@ public class ImageControlAdapter implements ActionListener, PropertyChangeListen
 					+ resetButton.getText() + ").");
 		}
 
+		if (button == null) {
+			throw new IllegalArgumentException("Internal error. 'button' must be not null.");
+		}
+
 		this.resetButton = button;
 		button.setActionCommand("reset");
 
 		button.addActionListener(this);
 		button.setEnabled(this.imagePanel.getImage() != null);
 
+		if (this.readOnly) {
+			button.setEnabled(false);
+		}
 	}
 
 }

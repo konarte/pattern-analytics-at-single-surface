@@ -4,18 +4,22 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
-public abstract class TableEditorTemplate extends JDialog {
+public abstract class TableViewerTemplate<T> extends JDialog {
 
 	//private final static Logger logger = LoggerFactory.getLogger(TableEditorTemplate.class); //  @jve:decl-index=0:
 
-	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
 
 	/**
@@ -23,25 +27,33 @@ public abstract class TableEditorTemplate extends JDialog {
 	 * @param name
 	 * @param title
 	 */
-	public TableEditorTemplate(Frame owner, String name, String title) {
+	public TableViewerTemplate(Frame owner, String name, String title) {
 		super(owner, true);
 		setName(name);
 		setTitle(title);
 		initialize();
 	}
 
-	private AbstractEditorTableModel tableModel = null;
+	private CommonEditorTableModel<T> tableModel = null;
 
-	private AbstractEditorTableModel getTableModel() {
+	protected CommonEditorTableModel<T> getTableModel() {
 		if (tableModel == null) {
 			tableModel = this.getTableModelImpl(getJTableData());
 		}
 		return tableModel;
 	}
 
-	protected abstract AbstractEditorTableModel getTableModelImpl(JTable owner);
+	protected abstract CommonEditorTableModel<T> getTableModelImpl(JTable owner);
 
 	protected abstract void tablePostInit(JTable owner);
+
+	protected void setFiltersPanel(JPanel panelData) {
+
+		if (panelData != null && this.jPanelFilters == null) {
+			getJPanelFilters().add(panelData, BorderLayout.WEST);
+			jContentPane.add(getJPanelFilters(), BorderLayout.NORTH);
+		}
+	}
 
 	/**
 	 * This method initializes this
@@ -65,6 +77,12 @@ public abstract class TableEditorTemplate extends JDialog {
 	private JButton jButtonAdd = null;
 	private JButton jButtonRemove = null;
 	private JButton jButtonEdit = null;
+	private JPanel jPanelFilters = null;
+	private JButton jButtonSearchFiltered = null;
+	private JPanel jPanelFiltersButtons = null;
+	private JButton jButtonResetFiltered = null;
+
+	protected T selectedObject = null;
 
 	protected AbstractDialogAdapter getDialogAdapter() {
 		if (dialogAdapter == null) {
@@ -73,6 +91,7 @@ public abstract class TableEditorTemplate extends JDialog {
 
 				@Override
 				protected void cancelImpl() throws Exception {
+					selectedObject = null;
 				}
 
 				@Override
@@ -81,6 +100,14 @@ public abstract class TableEditorTemplate extends JDialog {
 
 				@Override
 				protected boolean saveImpl() throws Exception {
+
+					selectedObject = null;
+
+					int row = jTableData.getSelectedRow();
+					if (row != -1) {
+						selectedObject = tableModel.getRowAt(row);
+					}
+
 					return false;
 				}
 
@@ -90,7 +117,7 @@ public abstract class TableEditorTemplate extends JDialog {
 		return dialogAdapter;
 	}
 
-	public boolean openDialog() {
+	public boolean showWindow() {
 		getDialogAdapter().showDialogCancelOnly();
 		return false;
 	}
@@ -163,6 +190,16 @@ public abstract class TableEditorTemplate extends JDialog {
 			jTableData = new JTableReadOnly();
 			jTableData.setModel(getTableModel());
 			jTableData.setName("data");
+			jTableData.setRowSorter(new TableRowSorter<TableModel>(getTableModel()));
+			jTableData.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					if (e.getClickCount() == 2) {
+						getDialogAdapter().save();
+					}
+				}
+			});
+
 			this.tablePostInit(jTableData);
 		}
 		return jTableData;
@@ -236,7 +273,7 @@ public abstract class TableEditorTemplate extends JDialog {
 	private JButton getJButtonAdd() {
 		if (jButtonAdd == null) {
 			jButtonAdd = new JButton();
-			jButtonAdd.setText(Messages.getString("TableEditorTemplate.add"));
+			jButtonAdd.setText(Messages.getString("TableViewerTemplate.add"));
 			getTableModel().registerAddRowButton(jButtonAdd);
 		}
 		return jButtonAdd;
@@ -250,7 +287,7 @@ public abstract class TableEditorTemplate extends JDialog {
 	private JButton getJButtonRemove() {
 		if (jButtonRemove == null) {
 			jButtonRemove = new JButton();
-			jButtonRemove.setText(Messages.getString("TableEditorTemplate.delete"));
+			jButtonRemove.setText(Messages.getString("TableViewerTemplate.delete"));
 			getTableModel().registerDeleteRowButton(jButtonRemove);
 		}
 		return jButtonRemove;
@@ -264,10 +301,70 @@ public abstract class TableEditorTemplate extends JDialog {
 	private JButton getJButtonEdit() {
 		if (jButtonEdit == null) {
 			jButtonEdit = new JButton();
-			jButtonEdit.setText(Messages.getString("TableEditorTemplate.edit"));
+			jButtonEdit.setText(Messages.getString("TableViewerTemplate.edit"));
 			getTableModel().registerEditRowButton(jButtonEdit);
 		}
 		return jButtonEdit;
+	}
+
+	/**
+	 * This method initializes jPanelFilters
+	 * 
+	 * @return javax.swing.JPanel
+	 */
+	private JPanel getJPanelFilters() {
+		if (jPanelFilters == null) {
+			jPanelFilters = new JPanel();
+			jPanelFilters.setLayout(new BorderLayout());
+			jPanelFilters.setBorder(BorderFactory.createTitledBorder(Messages
+					.getString("TableViewerTemplate.filtersBorder")));
+
+			jPanelFilters.add(getJPanelFiltersButtons(), BorderLayout.SOUTH);
+		}
+		return jPanelFilters;
+	}
+
+	/**
+	 * This method initializes jPanelFiltersButtons
+	 * 
+	 * @return javax.swing.JPanel
+	 */
+	private JPanel getJPanelFiltersButtons() {
+		if (jPanelFiltersButtons == null) {
+			jPanelFiltersButtons = new JPanel();
+			jPanelFiltersButtons.setLayout(new FlowLayout(FlowLayout.LEFT));
+			jPanelFiltersButtons.add(getJButtonSearchFiltered());
+			jPanelFiltersButtons.add(getJButtonResetFiltered(), null);
+		}
+		return jPanelFiltersButtons;
+	}
+
+	/**
+	 * This method initializes jButtonSearch
+	 * 
+	 * @return javax.swing.JButton
+	 */
+	private JButton getJButtonSearchFiltered() {
+		if (jButtonSearchFiltered == null) {
+			jButtonSearchFiltered = new JButton();
+			jButtonSearchFiltered.setText(Messages.getString("TableViewerTemplate.filterDo"));
+			getTableModel().registerSearchRowsButton(jButtonSearchFiltered);
+		}
+		return jButtonSearchFiltered;
+	}
+
+	/**
+	 * This method initializes jButtonResetFiltered
+	 * 
+	 * @return javax.swing.JButton
+	 */
+	private JButton getJButtonResetFiltered() {
+		if (jButtonResetFiltered == null) {
+			jButtonResetFiltered = new JButton();
+			jButtonResetFiltered.setText(Messages.getString("TableViewerTemplate.filterReset"));
+			getTableModel().registerResetSearchButton(jButtonResetFiltered);
+		}
+		return jButtonResetFiltered;
 	}
 
 } //  @jve:decl-index=0:visual-constraint="10,10"

@@ -9,10 +9,11 @@ package edu.mgupi.pass.modules;
 public class ModuleIntegrityException extends ModuleException {
 
 	/**
+	 * Default constructor.
 	 * 
+	 * @param message
+	 * @param cause
 	 */
-	private static final long serialVersionUID = 1L;
-
 	public ModuleIntegrityException(String message, Throwable cause) {
 		super(message, cause);
 	}
