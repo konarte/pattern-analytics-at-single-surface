@@ -35,7 +35,7 @@ public class ModuleHelper {
 	private final static String TMP_IMAGE_PARAM_NAME = "TEMPORARY_MODULE_IMAGE";
 
 	public static void putTemporaryModuleImage(Locuses store, BufferedImage image)
-			throws ModuleParamException, IOException {
+			throws ModuleParamException {
 		putParameterValue(store, TMP_IMAGE_PARAM_NAME, image);
 	}
 

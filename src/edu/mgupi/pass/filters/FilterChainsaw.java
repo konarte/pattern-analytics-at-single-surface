@@ -216,10 +216,11 @@ public class FilterChainsaw {
 			this.cacheInstance.releaseInstance(filter);
 			filterList.remove(pos);
 			return true;
-		} else {
-			logger.debug("FilterChainsaw.appendFilter, but pos {} is not in range", pos);
-			return false;
 		}
+
+		logger.debug("FilterChainsaw.appendFilter, but pos {} is not in range", pos);
+		return false;
+
 	}
 
 	public void removeAllFilters() {
@@ -253,9 +254,10 @@ public class FilterChainsaw {
 		int pos = this.searchFilterClassPos(filterClass);
 		if (pos != -1) {
 			return this.filterList.get(pos);
-		} else {
-			return null;
 		}
+
+		return null;
+
 	}
 
 	/**
@@ -274,13 +276,14 @@ public class FilterChainsaw {
 			}
 
 			return filterList.get(pos);
-		} else {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Requsted position {} is not in range", pos);
-			}
-
-			return null;
 		}
+
+		if (logger.isTraceEnabled()) {
+			logger.trace("Requsted position {} is not in range", pos);
+		}
+
+		return null;
+
 	}
 
 	public int getFilterCount() {
@@ -313,10 +316,11 @@ public class FilterChainsaw {
 			filterList.set(pos, old);
 
 			return true;
-		} else {
-			logger.trace("Can't move up, position {} is not in range.", pos);
-			return false;
 		}
+
+		logger.trace("Can't move up, position {} is not in range.", pos);
+		return false;
+
 	}
 
 	/**
@@ -335,10 +339,11 @@ public class FilterChainsaw {
 			filterList.set(pos, old);
 
 			return true;
-		} else {
-			logger.trace("Can't move down, position {} is not in range.", pos);
-			return false;
 		}
+
+		logger.trace("Can't move down, position {} is not in range.", pos);
+		return false;
+
 	}
 
 	/**
@@ -422,6 +427,7 @@ public class FilterChainsaw {
 	/**
 	 * Represent registered chain of filters as string (their names).
 	 */
+	@Override
 	public String toString() {
 		StringBuilder buffer = new StringBuilder();
 

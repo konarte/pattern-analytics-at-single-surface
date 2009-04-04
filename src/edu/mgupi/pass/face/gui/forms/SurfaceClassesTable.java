@@ -1,7 +1,6 @@
 package edu.mgupi.pass.face.gui.forms;
 
 import java.awt.Frame;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -12,30 +11,30 @@ import edu.mgupi.pass.db.surfaces.SurfaceClasses;
 import edu.mgupi.pass.db.surfaces.SurfaceClassesFactory;
 import edu.mgupi.pass.face.gui.template.AbstractEditorTableModel;
 import edu.mgupi.pass.face.gui.template.CommonEditorTableModel;
-import edu.mgupi.pass.face.gui.template.TableEditorTemplate;
+import edu.mgupi.pass.face.gui.template.TableViewerTemplate;
 
-public class SurfaceClassesTable extends TableEditorTemplate {
+public class SurfaceClassesTable extends TableViewerTemplate<SurfaceClasses> {
 
 	/**
+	 * Default constructor.
+	 * 
+	 * @param owner
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
-
 	public SurfaceClassesTable(Frame owner) {
 		super(owner, "surfaceClassesTable", Messages.getString("SurfaceClassesTable.title"));
 	}
 
-	private AbstractEditorTableModel tableModel = null;
+	private CommonEditorTableModel<SurfaceClasses> tableModel = null;
 
 	private final static String YES = Messages.getString("SurfaceClassesTable.yes");
 	private final static String NO = Messages.getString("SurfaceClassesTable.no");
 
 	@Override
-	protected AbstractEditorTableModel getTableModelImpl(JTable owner) {
+	protected CommonEditorTableModel<SurfaceClasses> getTableModelImpl(JTable owner) {
 		if (tableModel == null) {
 			tableModel = new CommonEditorTableModel<SurfaceClasses>(owner,
 					SurfaceClassesRecord.class) {
-				private static final long serialVersionUID = 1L;
 
 				@Override
 				protected SurfaceClasses createInstanceImpl() {
@@ -51,15 +50,13 @@ public class SurfaceClassesTable extends TableEditorTemplate {
 
 				@Override
 				protected List<SurfaceClasses> getDataImpl() throws Exception {
-					List<SurfaceClasses> classes = new ArrayList<SurfaceClasses>();
-					classes.addAll(Arrays.asList(SurfaceClassesFactory.listSurfaceClassesByQuery(
-							null, null)));
-					return classes;
+					return Arrays.asList(SurfaceClassesFactory
+							.listSurfaceClassesByQuery(null, null));
 				}
 
 				@Override
 				public Object getValueAt(int rowIndex, int columnIndex) {
-					SurfaceClasses surface = data.get(rowIndex);
+					SurfaceClasses surface = super.getRowAt(rowIndex);
 					switch (columnIndex) {
 					case 0:
 						return surface.getIdSurfaceClass();

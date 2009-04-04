@@ -45,6 +45,7 @@ public class ColorSpaceFilter implements IFilter {
 		return params;
 	}
 
+	@Override
 	public String toString() {
 		return this.getName() + " (" + COLOR_MODE.getValue() + ")";
 	}

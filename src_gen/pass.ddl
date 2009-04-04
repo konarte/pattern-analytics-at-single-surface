@@ -7,7 +7,7 @@ create table Locuses (IdLocus int(11) not null auto_increment, Name varchar(255)
 create table LocusSources (IdLocusSource int(11) not null auto_increment, Filename varchar(255) not null, SourceImage mediumblob not null, primary key (IdLocusSource)) type=InnoDB CHARACTER SET UTF8;
 create table LocusAppliedFilters (IdLocusFilter int(11) not null auto_increment, LFiltersIdLFilter int(11) not null, LocusesIdLocus int(11), LocusesIndex int(11), primary key (IdLocusFilter)) type=InnoDB CHARACTER SET UTF8;
 create table LocusModuleData (IdModuleParam int(11) not null auto_increment, ParamName varchar(255) not null, ParamData mediumblob not null, DataType int(11) not null, LocusAppliedModuleIdLocusModule int(11), LocusAppliedModuleIndex int(11), primary key (IdModuleParam)) type=InnoDB CHARACTER SET UTF8;
-create table Sensors (IdSensor int(11) not null auto_increment, Name varchar(255) not null unique, SensorTypesIdSensorType int(11) not null, MaterialsIdSurfaceMaterial int(11) not null, primary key (IdSensor)) type=InnoDB CHARACTER SET UTF8;
+create table Sensors (IdSensor int(11) not null auto_increment, Name varchar(255) not null unique, SensorTypesIdSensorType int(11) not null, primary key (IdSensor)) type=InnoDB CHARACTER SET UTF8;
 create table SensorClasses (IdSensorClass int(11) not null auto_increment, Name varchar(255) not null unique, primary key (IdSensorClass)) type=InnoDB CHARACTER SET UTF8;
 create table SensorTypes (IdSensorType int(11) not null auto_increment, Name varchar(255) not null unique, SensorImage blob, SensorClassesIdSensorClass int(11) not null, primary key (IdSensorType)) type=InnoDB CHARACTER SET UTF8;
 create table SurfaceClasses (IdSurfaceClass int(11) not null auto_increment, Name varchar(255) not null unique, SurfaceImage blob, primary key (IdSurfaceClass)) type=InnoDB CHARACTER SET UTF8;
@@ -30,7 +30,6 @@ alter table SensorTypes add index FKSensorType37521 (SensorClassesIdSensorClass)
 alter table Sensors add index FKSensors19727 (SensorTypesIdSensorType), add constraint FKSensors19727 foreign key (SensorTypesIdSensorType) references SensorTypes (IdSensorType);
 alter table Locuses add index FKLocuses194860 (SensorsIdSensor), add constraint FKLocuses194860 foreign key (SensorsIdSensor) references Sensors (IdSensor);
 alter table SurfaceTypes add index FKSurfaceTyp645510 (SurfaceClassesIdSurfaceClass), add constraint FKSurfaceTyp645510 foreign key (SurfaceClassesIdSurfaceClass) references SurfaceClasses (IdSurfaceClass);
-alter table Sensors add index FKSensors732005 (MaterialsIdSurfaceMaterial), add constraint FKSensors732005 foreign key (MaterialsIdSurfaceMaterial) references Materials (IdSurfaceMaterial);
 alter table SurfaceTypes add index FKSurfaceTyp941311 (MaterialsIdSurfaceMaterial), add constraint FKSurfaceTyp941311 foreign key (MaterialsIdSurfaceMaterial) references Materials (IdSurfaceMaterial);
 alter table Locuses add index FKLocuses42294 (LocusAppliedModuleIdLocusModule), add constraint FKLocuses42294 foreign key (LocusAppliedModuleIdLocusModule) references LocusAppliedModule (IdLocusModule);
 alter table LocusAppliedModule add index FKLocusAppli247389 (LModulesIdLModule), add constraint FKLocusAppli247389 foreign key (LModulesIdLModule) references LModules (IdLModule);

@@ -47,7 +47,7 @@ import edu.mgupi.pass.modules.ModuleProcessor;
  * hierarchy configurators. <br>
  * 
  * @author raidan
- * 
+ *
  */
 
 public class Config {
@@ -76,6 +76,7 @@ public class Config {
 			this.title = title;
 		}
 
+		@Override
 		public String toString() {
 			return title;
 		}
@@ -102,6 +103,7 @@ public class Config {
 			this.title = title;
 		}
 
+		@Override
 		public String toString() {
 			return title;
 		}
@@ -124,6 +126,7 @@ public class Config {
 			this.title = title;
 		}
 
+		@Override
 		public String toString() {
 			return title;
 		}
@@ -145,6 +148,7 @@ public class Config {
 			this.title = title;
 		}
 
+		@Override
 		public String toString() {
 			return title;
 		}
@@ -167,6 +171,7 @@ public class Config {
 			this.title = title;
 		}
 
+		@Override
 		public String toString() {
 			return title;
 		}
@@ -525,7 +530,9 @@ public class Config {
 		currentPassword = this.connectConfigInstance.getString(PARAM_CONNECTION_PASSWORD, default_);
 		return currentPassword;
 	}
-
+	
+	// TODO Create new option -- 'Always show password form'
+	
 	/**
 	 * Set new source mode.
 	 * 
@@ -576,9 +583,9 @@ public class Config {
 		if (res || !UIManager.getLookAndFeel().getClass().getName().equals(value)) {
 			AppHelper.getInstance().updateUI(value);
 			return true;
-		} else {
-			return false;
 		}
+		return false;
+
 	}
 
 	/**

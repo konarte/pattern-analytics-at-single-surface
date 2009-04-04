@@ -16,18 +16,18 @@ import edu.mgupi.pass.db.surfaces.SurfaceTypesCriteria;
 import edu.mgupi.pass.db.surfaces.Surfaces;
 import edu.mgupi.pass.db.surfaces.SurfacesCriteria;
 import edu.mgupi.pass.face.gui.template.RecordEditorTemplate;
-import edu.mgupi.pass.face.gui.template.SurfacesClassesComboBox;
 
 public class SurfaceTypesRecord extends RecordEditorTemplate<SurfaceTypes> {
 
 	/**
+	 * Default constructor.
+	 * 
+	 * @param owner
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
-
 	public SurfaceTypesRecord(Frame owner) {
 		super(owner, "surfaceTypesRecordDialog", Messages.getString("SurfaceTypesRecord.title"));
-		setFormPanelData(getFormPanel());
+		setFormPanel(getFormPanel());
 	}
 
 	@Override
@@ -71,12 +71,8 @@ public class SurfaceTypesRecord extends RecordEditorTemplate<SurfaceTypes> {
 
 		jLabelIDValue.setText(String.valueOf(object.getIdSurfaceType()));
 		jTextFieldNameValue.setText(name);
-
-		if (surfaceClass != null) {
-			jComboBoxClassValue.setSelectedItem(surfaceClass);
-		} else {
-			jComboBoxClassValue.setSelectedIndex(0);
-		}
+		
+		jComboBoxClassValue.setValue(surfaceClass);
 
 		return true;
 	}
@@ -88,15 +84,15 @@ public class SurfaceTypesRecord extends RecordEditorTemplate<SurfaceTypes> {
 	}
 
 	@Override
-	protected void saveFormToObjectImpl(SurfaceTypes object) throws Exception {
+	protected void putFormToObjectImpl(SurfaceTypes object) throws Exception {
 		object.setName(jTextFieldNameValue.getText());
-		object.setSurfaceClass((SurfaceClasses) jComboBoxClassValue.getSelectedItem());
+		object.setSurfaceClass(jComboBoxClassValue.getValue());
 	}
 
 	private JPanel jPanelPlace = null;
 	private JLabel jLabelIDValue = null;
 	private JTextField jTextFieldNameValue = null;
-	private SurfacesClassesComboBox jComboBoxClassValue = null;
+	private ComboBoxSurfaceClasses jComboBoxClassValue = null;
 
 	private JPanel formPanel = null;
 
@@ -121,7 +117,7 @@ public class SurfaceTypesRecord extends RecordEditorTemplate<SurfaceTypes> {
 
 			jLabelIDValue = new JLabel("0"); //$NON-NLS-1$
 			jTextFieldNameValue = new JTextField();
-			jComboBoxClassValue = new SurfacesClassesComboBox();
+			jComboBoxClassValue = new ComboBoxSurfaceClasses();
 
 			super.putComponentPair(jPanelPlace, Messages.getString("SurfaceTypesRecord.id"),
 					jLabelIDValue);

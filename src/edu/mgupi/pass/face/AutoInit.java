@@ -65,11 +65,11 @@ public class AutoInit {
 			} finally {
 				PassPersistentManager.instance().disposePersistentManager();
 			}
-		} else {
-			System.out.println("Done. Cancel drop.");
-			return false;
-
 		}
+
+		System.out.println("Done. Cancel drop.");
+		return false;
+
 	}
 
 	/**

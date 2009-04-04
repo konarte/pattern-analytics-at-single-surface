@@ -9,13 +9,13 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -35,12 +35,11 @@ import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
 import edu.mgupi.pass.util.Utils;
 
-public abstract class RecordEditorTemplate<T> extends JDialog implements IWindowCloseable,
-		IRefreshable {
+public abstract class RecordEditorTemplate<T> extends JDialogControlled implements
+		IWindowCloseable, IRefreshable {
 
 	private final static Logger logger = LoggerFactory.getLogger(RecordEditorTemplate.class); //  @jve:decl-index=0:
 
-	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
 	private JPanel jPanelData = null;
 	private JPanel jPanelButtons = null;
@@ -55,7 +54,22 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IWindow
 	 * @param title
 	 */
 	public RecordEditorTemplate(Frame owner, String name, String title) {
+		this(owner, name, title, false);
+	}
+
+	private boolean readOnly = false;
+
+	/**
+	 * Default constructor
+	 * 
+	 * @param owner
+	 * @param name
+	 * @param title
+	 * @param readOnly
+	 */
+	public RecordEditorTemplate(Frame owner, String name, String title, boolean readOnly) {
 		super(owner, true);
+		this.readOnly = readOnly;
 		this.setName(name);
 		this.setTitle(title);
 		initialize();
@@ -80,7 +94,8 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IWindow
 		this.setContentPane(getJContentPane());
 	}
 
-	private Map<JTextComponent, String> requiredMap = new HashMap<JTextComponent, String>();
+	private Map<JComboBox, String> requiredComboMap = new LinkedHashMap<JComboBox, String>();
+	private Map<JTextComponent, String> requiredMap = new LinkedHashMap<JTextComponent, String>();
 	private AbstractDialogAdapter dialogAdapter = null; //  @jve:decl-index=0:
 
 	private Secundomer secundomerLoad = null;
@@ -109,7 +124,7 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IWindow
 
 				@Override
 				protected void cancelImpl() throws Exception {
-//					PassPersistentManager.instance().getSession().lock(workObject, LockMode.NONE);
+					//					PassPersistentManager.instance().getSession().lock(workObject, LockMode.NONE);
 					logger.trace("Do cancel for {}.", workObject);
 				}
 
@@ -118,23 +133,17 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IWindow
 					/*
 					 * No, we use optimistic locking ;)
 					 */
-//					PassPersistentManager.instance().getSession().lock(workObject, LockMode.WRITE);
+					//					PassPersistentManager.instance().getSession().lock(workObject, LockMode.WRITE);
 				}
 
 				@Override
 				protected boolean saveImpl() throws Exception {
+					
+					if (readOnly) {
+						return false;
+					}
 
 					logger.trace("Do save for {}.", workObject);
-
-					logger.trace("Checking for required fields...");
-					for (Map.Entry<JTextComponent, String> comp : requiredMap.entrySet()) {
-						String text = comp.getKey().getText();
-						if (text == null || text.isEmpty()) {
-							AppHelper.showFieldRequiredDialog(RecordEditorTemplate.this, comp
-									.getValue());
-							return false;
-						}
-					}
 
 					logger.trace("Checking for allowedImpl...");
 					if (!isSaveAllowed(workObject)) {
@@ -144,7 +153,7 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IWindow
 					// We do not need to commit\rollback
 					logger.trace("Saving in transaction {}.", PassPersistentManager.instance()
 							.getSession().getTransaction());
-					saveFormToObjectImpl(workObject);
+					putFormToObjectImpl(workObject);
 
 					//					PersistentTransaction transaction = null;
 					//					if (Config.getInstance().getTransactionMode() == TransactionMode.COMMIT_EVERY_ROW) {
@@ -197,29 +206,42 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IWindow
 	}
 
 	private T openRecordImpl(T source, boolean isAdd) throws Exception {
-		if (source == null) {
-			throw new IllegalArgumentException("Internal error. Source must be not null.");
-		}
-
-		if (jPanelData.getBorder() != null && jPanelData.getBorder() instanceof TitledBorder) {
-			((TitledBorder) jPanelData.getBorder()).setTitle(isAdd ? Messages
-					.getString("RecordEditorTemplate.title.create") : Messages
-					.getString("RecordEditorTemplate.title.edit"));
-		}
-
-		this.workObject = source;
-		logger.trace(isAdd ? "Add record {}." : "Edit record {}.", this.workObject);
 
 		boolean retOK = false;
-		if (loadFromObject(workObject)) {
+		if (this.loadRecord(source, isAdd)) {
 			retOK = getDialogAdapter().openDialog();
 		}
 
 		if (retOK) {
 			return this.workObject;
-		} else {
-			return null;
 		}
+
+		return null;
+	}
+
+	public boolean loadRecord(T source, boolean isAdd) throws Exception {
+		if (source == null) {
+			throw new IllegalArgumentException("Internal error. Source must be not null.");
+		}
+		if (jPanelData == null) {
+			throw new IllegalStateException(
+					"Internal error. jPanelData is null but must be created calling 'setFormPanelData'.");
+		}
+
+		if (jPanelData.getBorder() != null && jPanelData.getBorder() instanceof TitledBorder) {
+			TitledBorder border = ((TitledBorder) jPanelData.getBorder());
+			if (this.readOnly) {
+				border.setTitle(Messages.getString("RecordEditorTemplate.view"));
+			} else {
+				border.setTitle(isAdd ? Messages.getString("RecordEditorTemplate.create")
+						: Messages.getString("RecordEditorTemplate.edit"));
+			}
+
+		}
+
+		this.workObject = source;
+		logger.trace(isAdd ? "Add record {}." : "Edit record {}.", this.workObject);
+		return this.loadFromObject(workObject);
 	}
 
 	public boolean deleteRecords(boolean checkForDeleteAllowed, Collection<T> source)
@@ -291,6 +313,7 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IWindow
 		secundomerLoad.start();
 		try {
 			for (Map.Entry<IRefreshable, String> key : this.refresheableMap.entrySet()) {
+				//				key.getKey().refresh();
 				if (key.getKey().refresh() == 0) {
 					secundomerLoad.stop();
 					AppHelper.showErrorDialog(this, Messages.getString(
@@ -314,15 +337,31 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IWindow
 	}
 
 	private boolean isSaveAllowed(T object) throws Exception {
+
+		logger.trace("Checking for required fields...");
+		for (Map.Entry<JTextComponent, String> comp : requiredMap.entrySet()) {
+			String text = comp.getKey().getText();
+			if (text == null || text.isEmpty()) {
+				AppHelper.showFieldRequiredDialog(RecordEditorTemplate.this, comp.getValue());
+				return false;
+			}
+		}
+
+		for (Map.Entry<JComboBox, String> comp : requiredComboMap.entrySet()) {
+			Object value = comp.getKey().getSelectedItem();
+			if (value == null) {
+				AppHelper.showFieldRequiredDialog(RecordEditorTemplate.this, comp.getValue());
+				return false;
+			}
+		}
+
 		if (uniqueComponent != null) {
 			secundomerCheckSave.start();
 			try {
 				logger.trace("Checking saving allowed for {}.", uniqueComponent.getText());
 
 				if (Utils.equals(uniqueComponent.getText(), uniqueComponentValue)) {
-
 					logger.trace("There are equals. Return true.");
-
 					return true;
 				}
 
@@ -408,7 +447,7 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IWindow
 
 	protected abstract boolean loadFormFromObjectImpl(T object) throws Exception;
 
-	protected abstract void saveFormToObjectImpl(T object) throws Exception;
+	protected abstract void putFormToObjectImpl(T object) throws Exception;
 
 	protected abstract void restoreObjectImpl(T object) throws Exception;
 
@@ -426,10 +465,11 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IWindow
 		return jContentPane;
 	}
 
-	protected void setFormPanelData(JPanel panel) {
+	protected void setFormPanel(JPanel panel) {
 		if (jPanelData == null) {
 			jPanelData = panel;
-			jPanelData.setBorder(BorderFactory.createTitledBorder(Messages
+			jPanelData.setBorder(BorderFactory.createTitledBorder(this.readOnly ? Messages
+					.getString("RecordEditorTemplate.view") : Messages
 					.getString("RecordEditorTemplate.edit")));
 			jContentPane.add(panel, BorderLayout.CENTER);
 
@@ -531,15 +571,24 @@ public abstract class RecordEditorTemplate<T> extends JDialog implements IWindow
 
 	protected JLabel putComponentPair(JPanel place, String label, Component component) {
 
+		boolean isCombo = component instanceof JComboBox;
+
 		JLabel jLabel = new JLabel(label + ":");
 		place.add(jLabel, AppHelper.getJBCForm(0, gridY));
-		place.add(component, AppHelper.getJBCForm(1, gridY, true));
 
-		if (component instanceof JComboBox) {
+		// No we do not fit width for comboBoxes
+		place.add(component, AppHelper.getJBCForm(1, gridY, !isCombo));
+
+		if (isCombo) {
 			JComboBox combo = (JComboBox) component;
-			if (combo.getModel() instanceof IRefreshable) {
-				refresheableMap.put((IRefreshable) combo.getModel(), label);
+			if (combo instanceof IRefreshable) {
+				refresheableMap.put((IRefreshable) combo, label);
+				this.requiredComboMap.put(combo, label);
 			}
+		}
+
+		if (readOnly) {
+			component.setEnabled(false);
 		}
 
 		gridY++;

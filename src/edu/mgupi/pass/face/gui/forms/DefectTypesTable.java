@@ -1,7 +1,6 @@
 package edu.mgupi.pass.face.gui.forms;
 
 import java.awt.Frame;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -12,29 +11,29 @@ import edu.mgupi.pass.db.defects.DefectTypes;
 import edu.mgupi.pass.db.defects.DefectTypesFactory;
 import edu.mgupi.pass.face.gui.template.AbstractEditorTableModel;
 import edu.mgupi.pass.face.gui.template.CommonEditorTableModel;
-import edu.mgupi.pass.face.gui.template.TableEditorTemplate;
+import edu.mgupi.pass.face.gui.template.TableViewerTemplate;
 
-public class DefectTypesTable extends TableEditorTemplate {
+public class DefectTypesTable extends TableViewerTemplate<DefectTypes> {
 
 	/**
+	 * Default constructor.
+	 * 
+	 * @param owner
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
-
 	public DefectTypesTable(Frame owner) {
 		super(owner, "defectTypesTable", Messages.getString("DefectTypesTable.title"));
 	}
 
-	private AbstractEditorTableModel tableModel = null;
+	private CommonEditorTableModel<DefectTypes> tableModel = null;
 
-	private final static String YES = Messages.getString("DefectTypesTable.yes");
-	private final static String NO = Messages.getString("DefectTypesTable.no");
+	private final static String YES = Messages.getString("DefectTypesTable.head.yes");
+	private final static String NO = Messages.getString("DefectTypesTable.head.no");
 
 	@Override
-	protected AbstractEditorTableModel getTableModelImpl(JTable owner) {
+	protected CommonEditorTableModel<DefectTypes> getTableModelImpl(JTable owner) {
 		if (tableModel == null) {
 			tableModel = new CommonEditorTableModel<DefectTypes>(owner, DefectTypesRecord.class) {
-				private static final long serialVersionUID = 1L;
 
 				@Override
 				protected DefectTypes createInstanceImpl() {
@@ -43,24 +42,21 @@ public class DefectTypesTable extends TableEditorTemplate {
 
 				@Override
 				protected String[] getColumns() {
-					return new String[] { Messages.getString("DefectTypesTable.id"),
-							Messages.getString("DefectTypesTable.class"),
-							Messages.getString("DefectTypesTable.name"),
-							Messages.getString("DefectTypesTable.options"),
-							Messages.getString("DefectTypesTable.image") };
+					return new String[] { Messages.getString("DefectTypesTable.head.id"),
+							Messages.getString("DefectTypesTable.head.class"),
+							Messages.getString("DefectTypesTable.head.name"),
+							Messages.getString("DefectTypesTable.head.options"),
+							Messages.getString("DefectTypesTable.head.image") };
 				}
 
 				@Override
 				protected List<DefectTypes> getDataImpl() throws Exception {
-					List<DefectTypes> classes = new ArrayList<DefectTypes>();
-					classes.addAll(Arrays.asList(DefectTypesFactory.listDefectTypesByQuery(null,
-							null)));
-					return classes;
+					return Arrays.asList(DefectTypesFactory.listDefectTypesByQuery(null, null));
 				}
 
 				@Override
 				public Object getValueAt(int rowIndex, int columnIndex) {
-					DefectTypes defect = data.get(rowIndex);
+					DefectTypes defect = super.getRowAt(rowIndex);
 					switch (columnIndex) {
 					case 0:
 						return defect.getIdDefectType();

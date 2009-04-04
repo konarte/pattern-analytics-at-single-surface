@@ -81,6 +81,7 @@ public class TestFilter implements IFilter, IInitiable, IFilterAttachable {
 		init = true;
 	}
 
+	@Override
 	public String toString() {
 		return this.getName();
 	}

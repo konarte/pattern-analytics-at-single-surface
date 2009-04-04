@@ -16,7 +16,6 @@ import edu.mgupi.pass.util.Const;
 
 public class RecordFormWithImageTemplate extends JPanel {
 
-	private static final long serialVersionUID = 1L;
 	private JPanel jPanelForm = null;
 	private JPanel jPanelImagePlace = null;
 	private ImagePanel imagePanel = null;
@@ -33,7 +32,23 @@ public class RecordFormWithImageTemplate extends JPanel {
 	 * @param jPanelFormData
 	 */
 	public RecordFormWithImageTemplate(JPanel jPanelFormData) {
+		this(jPanelFormData, Messages.getString("RecordFormWithImageTemplate.image"), false);
+	}
+
+	private boolean readOnly = false;
+	private String imageBorderTitle;
+
+	/**
+	 * This is the default constructor
+	 * 
+	 * @param jPanelFormData
+	 * @param imageBorderTitle 
+	 * @param readOnly
+	 */
+	public RecordFormWithImageTemplate(JPanel jPanelFormData, String imageBorderTitle, boolean readOnly) {
 		super();
+		this.readOnly = readOnly;
+		this.imageBorderTitle = imageBorderTitle;
 		this.jPanelFormData = jPanelFormData;
 		initialize();
 	}
@@ -52,12 +67,12 @@ public class RecordFormWithImageTemplate extends JPanel {
 
 	public ImageControlAdapter getImageControlAdapter() {
 		if (imageControlAdapter == null) {
-			imageControlAdapter = new ImageControlAdapter(this.getImagePanel());
+			imageControlAdapter = new ImageControlAdapter(this.getImagePanel(), this.readOnly);
 		}
 		return imageControlAdapter;
 	}
 
-	private BufferedImage convertedImage = null;
+	private BufferedImage convertedImage = null; //  @jve:decl-index=0:
 
 	public void setImageRaw(byte[] rawImage) throws IOException {
 		if (rawImage != null) {
@@ -110,7 +125,13 @@ public class RecordFormWithImageTemplate extends JPanel {
 			jPanelForm = new JPanel();
 			jPanelForm.setLayout(new GridBagLayout());
 			jPanelForm.add(this.jPanelFormData, gridBagConstraints);
+
 			jPanelForm.add(getJPanelFormImageControl(), gridBagConstraints1);
+			if (readOnly) {
+				this.jLabelImage.setVisible(false);
+				this.jButtonLoad.setVisible(false);
+				this.jButtonReset.setVisible(false);
+			}
 		}
 		return jPanelForm;
 	}
@@ -139,8 +160,8 @@ public class RecordFormWithImageTemplate extends JPanel {
 	 */
 	public ImagePanel getImagePanel() {
 		if (imagePanel == null) {
-			imagePanel = new ImagePanel(Const.THUMB_WIDTH, Const.THUMB_WIDTH, true, Messages
-					.getString("RecordFormWithImageTemplate.image"));
+			imagePanel = new ImagePanel(Const.THUMB_WIDTH, Const.THUMB_WIDTH, true,
+					this.imageBorderTitle);
 		}
 		return imagePanel;
 	}

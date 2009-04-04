@@ -9,16 +9,18 @@ import edu.mgupi.pass.face.gui.template.JTableReadOnly;
 
 public class LModulesList extends LFiltersList {
 	/**
+	 * Default constructor.
+	 * 
+	 * @param owner
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
-
 	public LModulesList(Frame owner) {
 		super(owner);
 		this.setTitle(Messages.getString("LModulesList.title"));
 		this.setName("lModulesList");
 	}
 
+	@Override
 	protected JTable getTableDataImpl() {
 		LModules modules[] = AppDataStorage.getInstance().listLModules();
 

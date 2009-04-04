@@ -19,15 +19,14 @@ import edu.mgupi.pass.face.gui.template.RecordFormWithImageTemplate;
 
 public class SurfaceClassesRecord extends RecordEditorTemplate<SurfaceClasses> {
 	/**
+	 * Default constructor.
+	 * 
+	 * @param owner
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
-
-	//private final static Logger logger = LoggerFactory.getLogger(SurfaceClassesRecord.class);
-
 	public SurfaceClassesRecord(Frame owner) {
 		super(owner, "surfaceClassesRecordDialog", Messages.getString("SurfaceClassesRecord.title"));
-		super.setFormPanelData(getFormPanel());
+		super.setFormPanel(getFormPanel());
 	}
 
 	@Override
@@ -85,7 +84,7 @@ public class SurfaceClassesRecord extends RecordEditorTemplate<SurfaceClasses> {
 	private byte[] data = null;
 
 	@Override
-	protected void saveFormToObjectImpl(SurfaceClasses object) throws Exception {
+	protected void putFormToObjectImpl(SurfaceClasses object) throws Exception {
 		object.setName(jTextFieldNameValue.getText());
 		object.setSurfaceImage(formPanel.getRawImage());
 	}

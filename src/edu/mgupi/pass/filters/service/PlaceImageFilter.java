@@ -52,6 +52,7 @@ public class PlaceImageFilter implements IFilter {
 		return params;
 	}
 
+	@Override
 	public String toString() {
 		return this.getName() + " (" + WIDTH.getValue() + "x" + HEIGHT.getValue() + " at "
 				+ PLACE.getValue() + ")";

@@ -85,7 +85,7 @@ public class ParamTest {
 
 	public static void compareInCollections(Collection<Param> first, Collection<Param> second,
 			boolean definitionOnly, boolean cloned) throws NoSuchParamException {
-		if (first == null && second == null) {
+		if (first == null || second == null) {
 			return;
 		}
 		assertEquals(first.size(), second.size());

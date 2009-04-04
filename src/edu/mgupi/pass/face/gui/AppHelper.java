@@ -2,6 +2,7 @@ package edu.mgupi.pass.face.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -16,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -282,6 +284,8 @@ public class AppHelper {
 	 * Create new instance of given class or return the same instance (if this
 	 * method already called for given windowType).
 	 * 
+	 * @param parent
+	 * 
 	 * @param windowType
 	 *            class of window
 	 * @return instance of {@link Window} (the same as on previous call with
@@ -289,26 +293,28 @@ public class AppHelper {
 	 * @throws Exception
 	 *             on any error
 	 * 
-	 * @see #getWindowImpl(Class, boolean)
+	 * @see #getWindowImpl(Frame, Class, boolean)
 	 */
-	public Window getFrameImpl(Class<? extends Frame> windowType) throws Exception {
-		return this.getWindowImpl(windowType, false);
+	public Window getFrameImpl(Frame parent, Class<? extends Frame> windowType) throws Exception {
+		return this.getWindowImpl(parent, windowType, false);
 	}
 
 	/**
 	 * Create new instance or return cached. If {@link Exception} was thrown --
 	 * it will be shown in message box, but not throwing upper.
 	 * 
+	 * @param parent
+	 * 
 	 * @param windowType
 	 *            class of window
 	 * @return instance of {@link Window} (the same as on previous call with
 	 *         same windowType)
 	 * 
-	 * @see #getWindowImpl(Class, boolean)
+	 * @see #getWindowImpl(Frame, Class, boolean)
 	 */
-	public Window getDialog(Class<? extends Dialog> windowType) {
+	public Window getDialog(Frame parent, Class<? extends Dialog> windowType) {
 		try {
-			return this.getWindowImpl(windowType, false);
+			return this.getWindowImpl(parent, windowType, false);
 		} catch (Exception e) {
 			AppHelper.showExceptionDialog(null, Messages.getString("AppHelper.err.windowCreate",
 					windowType), e);
@@ -320,41 +326,44 @@ public class AppHelper {
 	 * Create new instance of given class or return the same instance (if this
 	 * method already called for given windowType).
 	 * 
+	 * @param parent
+	 * 
 	 * @param windowType
 	 *            class of window
 	 * @return instance of {@link Window} (the same as on previous call with
 	 *         same windowType)
 	 * @throws Exception
 	 *             on any error
-	 * @see #getWindowImpl(Class, boolean)
+	 * @see #getWindowImpl(Frame, Class, boolean)
 	 */
-	public Window getDialogImpl(Class<? extends Dialog> windowType) throws Exception {
-		return this.getWindowImpl(windowType, false);
+	public Window getDialogImpl(Frame parent, Class<? extends Dialog> windowType) throws Exception {
+		return this.getWindowImpl(parent, windowType, false);
 	}
 
 	private Lock cachedLock = new ReentrantLock();
 	private volatile Map<Class<? extends Window>, Window> windowsCollection = new HashMap<Class<? extends Window>, Window>();
 	private volatile Collection<Window> additionalWindows = new ArrayList<Window>();
 
-	/**
-	 * Implementation of get-o-create-window, create without parent.
-	 * 
-	 * @param windowType
-	 *            class of creating window
-	 * @param additionalWindow
-	 *            true if instance must be registered as additional window (with
-	 *            with flag application will be always create new instance of
-	 *            given class)
-	 * @return instance of {@link Window} (the same as on previous call with
-	 *         same windowType)
-	 * @throws Exception
-	 *             on any error
-	 * @see #getWindowImpl(Frame, Class, boolean)
-	 */
-	protected synchronized Window getWindowImpl(Class<? extends Window> windowType,
-			boolean additionalWindow) throws Exception {
-		return getWindowImpl(null, windowType, additionalWindow);
-	}
+	//
+	//	/**
+	//	 * Implementation of get-o-create-window, create without parent.
+	//	 * 
+	//	 * @param windowType
+	//	 *            class of creating window
+	//	 * @param additionalWindow
+	//	 *            true if instance must be registered as additional window (with
+	//	 *            with flag application will be always create new instance of
+	//	 *            given class)
+	//	 * @return instance of {@link Window} (the same as on previous call with
+	//	 *         same windowType)
+	//	 * @throws Exception
+	//	 *             on any error
+	//	 * @see #getWindowImpl(Frame, Class, boolean)
+	//	 */
+	//	protected synchronized Window getWindowImpl(Class<? extends Window> windowType,
+	//			boolean additionalWindow) throws Exception {
+	//		return getWindowImpl(null, windowType, additionalWindow);
+	//	}
 
 	/**
 	 * Implementation of get-o-create window.
@@ -398,6 +407,7 @@ public class AppHelper {
 
 				final Window myWindow = window;
 				window.addWindowListener(new WindowAdapter() {
+					@Override
 					public void windowOpened(WindowEvent e) {
 						myWindow.requestFocus();
 					}
@@ -413,11 +423,11 @@ public class AppHelper {
 			}
 			if (additionalWindow) {
 				// Register in special collection
-				logger.trace("Return force new instance of {} :: {}.", windowType, window);
+				logger.trace("Return cached instance of {} :: {}.", windowType, window);
 				additionalWindows.add(window);
 			} else {
 				// Register in cache
-				logger.trace("Cache instance of {} :: {}.", windowType, window);
+				logger.debug("Cache instance of {} :: {}.", windowType, window);
 
 				windowsCollection.put(windowType, window);
 				Config.getInstance().loadWindowPosition(window);
@@ -432,7 +442,7 @@ public class AppHelper {
 	/**
 	 * Return count of windows registered by
 	 * {@link #registerAdditionalWindow(Frame, Class)} or
-	 * {@link #getWindowImpl(Class, boolean)} with true flag
+	 * {@link #getWindowImpl(Frame, Class, boolean)} with true flag
 	 * 
 	 * @return count of additional windows
 	 */
@@ -447,7 +457,7 @@ public class AppHelper {
 
 	/**
 	 * Return count of cached windows registered by
-	 * {@link #getWindowImpl(Class, boolean)} with false flag
+	 * {@link #getWindowImpl(Frame, Class, boolean)} with false flag
 	 * 
 	 * @return count of cached windows
 	 */
@@ -462,8 +472,8 @@ public class AppHelper {
 
 	/**
 	 * Search window in registered cache. Cached filled by methods
-	 * {@link #getDialog(Class)}, {@link #getDialogImpl(Class)},
-	 * {@link #getFrameImpl(Class)}.
+	 * {@link #getDialog(Frame, Class)}, {@link #getDialogImpl(Frame, Class)},
+	 * {@link #getFrameImpl(Frame, Class)}.
 	 * 
 	 * @param windowType
 	 *            searching class
@@ -689,6 +699,25 @@ public class AppHelper {
 	public static boolean showConfirmDialog(Component parent, String message) {
 		return JOptionPane.showConfirmDialog(parent, Utils.splitStingBySlices(message, 100, "\n"),
 				Messages.getString("AppHelper.title.confirm"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+	}
+
+	/**
+	 * Open this URI by browser.
+	 * 
+	 * @param url
+	 */
+	public static void openLink(String url) {
+		try {
+			if (Desktop.isDesktopSupported()) {
+				Desktop.getDesktop().browse(new URI(url));
+			} else {
+				JOptionPane.showInputDialog(null, Messages.getString("AppHelper.mess.openLink"),
+						url);
+			}
+		} catch (Exception e1) {
+			AppHelper.showExceptionDialog(null, Messages.getString("AppHelper.err.openLink", url),
+					e1);
+		}
 	}
 
 	public static GridBagConstraints getJBCForm(int gridX, int gridY) {

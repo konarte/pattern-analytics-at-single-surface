@@ -33,7 +33,7 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 	private JDialog owner;
 	private boolean saveRequired = false;
-	private AbstractEditorTableModel editorMode = null;
+	private AbstractEditorTableModel editorModel = null;
 
 	/**
 	 * Common constructor.
@@ -96,12 +96,18 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 		this.owner = owner;
 		this.saveRequired = saveRequired;
-		this.editorMode = editorModel;
+		this.editorModel = editorModel;
 
 		// Do not forget about listeners
 		this.owner.addWindowListener(new WindowAdapter() {
+			@Override
 			public void windowClosing(WindowEvent e) {
 				AbstractDialogAdapter.this.cancel();
+			}
+
+			@Override
+			public void windowOpened(WindowEvent e) {
+				AbstractDialogAdapter.this.showDialogCancelOnly();
 			}
 		});
 
@@ -131,7 +137,8 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 			return;
 		}
 		if (command.equals("escape") || command.equals("cancel")) {
-			this.cancel();
+			owner.dispatchEvent(new WindowEvent(owner, WindowEvent.WINDOW_CLOSING));
+			//this.cancel();
 		} else if (command.equals("accept") || command.equals("OK")) {
 			this.save();
 		}
@@ -236,7 +243,7 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 	 * @see #openDialogImpl()
 	 */
 	public void showDialogCancelOnly() {
-		if (this.cancelButton == null) {
+		if (!openedAlready && this.cancelButton == null) {
 			AppHelper.showErrorDialog(this.owner, Messages.getString(
 					"AbstractDialogAdapter.err.noOnlyCancelMode", this.owner.getTitle()), Messages
 					.getString("AbstractDialogAdapter.title.noOnlyCancelMode"));
@@ -248,7 +255,15 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 
 	}
 
+	private boolean openedAlready = false;
+
 	private boolean openDialog(boolean cancelOnly) {
+
+		if (openedAlready) {
+			logger.debug("Dialog '{}' already opened.", owner.getTitle());
+			return false;
+		}
+
 		setOK = false;
 		cancelledAlready = false;
 		this.cancelOnly = cancelOnly;
@@ -262,20 +277,24 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 		}
 
 		try {
-			if (editorMode != null) {
-				editorMode.onOpenWindow();
+			openedAlready = true;
+
+			if (editorModel != null) {
+				editorModel.onWindowOpen();
 			}
 			this.openDialogImpl();
 
 			if (this.cancelOnly) {
-				logger.trace("Dialog '{}' will be invoked later.", owner.getTitle());
+				logger.trace("Dialog '{}' will be invoked later cause of cancelOnly mode.", owner
+						.getTitle());
 
 				SwingUtilities.invokeLater(new Runnable() {
 					@Override
 					public void run() {
 						try {
 							owner.setVisible(true);
-							logger.debug("Dialog '{}' finisheds.", owner.getTitle());
+							logger.debug("Dialog '{}' finished in cancelOnly mode.", owner
+									.getTitle());
 						} catch (Throwable t) {
 							AppHelper.showExceptionDialog(owner, Messages.getString(
 									"AbstractDialogAdapter.err.windowOpen", owner.getTitle()), t);
@@ -284,7 +303,7 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 				});
 			} else {
 				this.owner.setVisible(true);
-				logger.debug("Dialog '' finished. Return {}.", owner.getTitle(), setOK);
+				logger.debug("Dialog '{}' finished. Return {}.", owner.getTitle(), setOK);
 			}
 
 			return setOK;
@@ -294,8 +313,9 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 					.getString("AbstractDialogAdapter.err.windowOpen")
 					+ this.owner.getTitle() + "'", t);
 			return false;
+		} finally {
+			openedAlready = false;
 		}
-
 	}
 
 	/**
@@ -320,12 +340,13 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 		try {
 
 			setOK = this.saveImpl();
-			if (editorMode != null) {
-				editorMode.onCloseWindow();
+			if (editorModel != null) {
+				editorModel.onWindowClose();
 			}
 
 			if (saveRequired && !setOK) {
-				logger.debug("Dialog '{}' wait for successfully saving event. Now cancel.", owner.getTitle());
+				logger.debug("Dialog '{}' wait for successfully saving event. Now cancel.", owner
+						.getTitle());
 			} else {
 
 				logger.debug("Dialog '{}' done job. After save is {}.", owner.getTitle(), setOK);
@@ -358,8 +379,8 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 		try {
 
 			this.cancelImpl();
-			if (editorMode != null) {
-				editorMode.onCloseWindow();
+			if (editorModel != null) {
+				editorModel.onWindowClose();
 			}
 
 			logger.debug("Dialog '{}' done job. After cancel is {}.", owner.getTitle(), setOK);

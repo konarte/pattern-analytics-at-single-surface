@@ -109,7 +109,7 @@ public class ModuleProcessor {
 
 	private IModule module;
 
-	public void close() throws PersistentException {
+	public void close() {
 
 		// ;)
 		this.finishProcessing();

@@ -84,8 +84,8 @@ public class AppDataStorage {
 			throws PersistentException, ModuleException {
 		LModules module = this.searchModuleByClass(moduleClass);
 		if (module == null) {
-			throw new ModuleNotFoundException(Messages
-					.getString("AppDataStorage.err.moduleNotFound", moduleClass.getName()));
+			throw new ModuleNotFoundException(Messages.getString(
+					"AppDataStorage.err.moduleNotFound", moduleClass.getName()));
 		}
 		return module;
 	}
@@ -157,8 +157,8 @@ public class AppDataStorage {
 			throws PersistentException, FilterException {
 		LFilters filter = this.searchFilterByClass(filterClass);
 		if (filter == null) {
-			throw new FilterNotFoundException(Messages
-					.getString("AppDataStorage.err.filterNotFound", filterClass.getName()));
+			throw new FilterNotFoundException(Messages.getString(
+					"AppDataStorage.err.filterNotFound", filterClass.getName()));
 		}
 		return filter;
 	}
@@ -175,8 +175,8 @@ public class AppDataStorage {
 			}
 		}
 		if (filter == null) {
-			throw new FilterNotFoundException(Messages
-					.getString("AppDataStorage.err.serviceFilterNotFound", filterClass.getName()));
+			throw new FilterNotFoundException(Messages.getString(
+					"AppDataStorage.err.serviceFilterNotFound", filterClass.getName()));
 		}
 		return filter;
 	}

@@ -49,11 +49,13 @@ public class SingleFilePick implements IInput {
 	}
 
 	private class ImagePreviewer extends JLabel {
+
 		/**
+		 * Default constructor.
+		 * 
+		 * @param chooser
 		 * 
 		 */
-		private static final long serialVersionUID = 1L;
-
 		public ImagePreviewer(JFileChooser chooser) {
 			setPreferredSize(new Dimension(256, 256));
 			setBorder(BorderFactory.createEtchedBorder());
@@ -122,9 +124,10 @@ public class SingleFilePick implements IInput {
 			}
 
 			return new InputStore(file.getName(), ImageIO.read(file), buffer);
-		} else {
-			return null;
 		}
+
+		return null;
+
 	}
 
 }

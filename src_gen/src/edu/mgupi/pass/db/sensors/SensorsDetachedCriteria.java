@@ -39,10 +39,6 @@ public class SensorsDetachedCriteria extends AbstractORMDetachedCriteria {
 		return new SensorTypesDetachedCriteria(createCriteria("sensorType"));
 	}
 	
-	public edu.mgupi.pass.db.surfaces.MaterialsDetachedCriteria createSensorMaterialCriteria() {
-		return new edu.mgupi.pass.db.surfaces.MaterialsDetachedCriteria(createCriteria("sensorMaterial"));
-	}
-	
 	public Sensors uniqueSensors(PersistentSession session) {
 		return (Sensors) super.createExecutableCriteria(session).uniqueResult();
 	}

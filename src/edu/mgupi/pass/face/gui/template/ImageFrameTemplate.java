@@ -5,15 +5,9 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 
-import javax.swing.AbstractAction;
 import javax.swing.JCheckBox;
-import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.WindowConstants;
@@ -27,9 +21,8 @@ import edu.mgupi.pass.util.Config;
  * @author raidan
  * 
  */
-public class ImageFrameTemplate extends JDialog {
+public class ImageFrameTemplate extends JDialogControlled {
 
-	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
 	private JScrollPane jScrollPane = null;
 	private ImagePanel jPanelImage = null;
@@ -43,59 +36,6 @@ public class ImageFrameTemplate extends JDialog {
 	public ImageFrameTemplate(Frame owner) {
 		super(owner);
 		initialize();
-	}
-
-	boolean registeredAlready = false;
-
-	/**
-	 * Register checkbox of parent frame, when it clicked -- we'll be show and
-	 * hide :)
-	 * 
-	 * @param controlCheckBox
-	 *            checkbox on parent window
-	 * 
-	 * @throws Exception
-	 */
-	public void registerControlCheckbox(final JCheckBox controlCheckBox) throws Exception {
-
-		if (registeredAlready) {
-			throw new IllegalStateException("Error when registering " + controlCheckBox + " for "
-					+ this + ". Already registered.");
-		}
-
-		this.addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				controlCheckBox.setSelected(false);
-			}
-		});
-
-		final Window parent = (Window) controlCheckBox.getTopLevelAncestor();
-
-		String text = controlCheckBox.getText();
-		controlCheckBox.setAction(new AbstractAction() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void actionPerformed(ActionEvent e) { // #1
-				// If window opened -- immediately set state of this window 
-				if (parent.isVisible()) {
-					ImageFrameTemplate.this.setVisible(controlCheckBox.isSelected());
-				} else {
-					// If not already opened -- add to events
-					parent.addWindowListener(new WindowAdapter() {
-						public void windowOpened(WindowEvent e) {
-							ImageFrameTemplate.this.setVisible(controlCheckBox.isSelected());
-							parent.removeWindowListener(this);
-						}
-					});
-				}
-
-			} // #1 method
-		});
-
-		// Strange workaround. 'text' just disappearing.
-		controlCheckBox.setText(text);
-
 	}
 
 	/**
@@ -214,5 +154,4 @@ public class ImageFrameTemplate extends JDialog {
 		}
 		return jCheckBoxScaleBox;
 	}
-
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -34,7 +34,7 @@ public class SettingsDialogTest {
 	@Before
 	public void setUp() throws Exception {
 		Config.getInstance().setDebugVirualMode();
-		dialog = (SettingsWindow) AppHelper.getInstance().getDialogImpl(SettingsWindow.class);
+		dialog = (SettingsWindow) AppHelper.getInstance().getDialogImpl(null,SettingsWindow.class);
 	}
 
 	@After
@@ -59,7 +59,7 @@ public class SettingsDialogTest {
 		JTabbedPane tabbed = (JTabbedPane) Utils.getChildNamed(dialog, "settingsPane");
 		assertNotNull(tabbed);
 		tabbed.setSelectedComponent(Utils.getChildNamed(dialog, "settingsCurrent"));
-		
+
 		SwingTestHelper.addWorkAndWaitThis(new WorkSet() {
 			@Override
 			public void workImpl() throws Exception {
@@ -230,7 +230,7 @@ public class SettingsDialogTest {
 			JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog, DeletionMode.NO_CONFIRM
 					.name());
 			assertNotNull(radio);
-			radio.setSelected(true);
+			radio.doClick();
 		}
 
 		for (TestTransactionMode mode : TestTransactionMode.values()) {
@@ -246,7 +246,7 @@ public class SettingsDialogTest {
 			JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog,
 					TestTransactionMode.COMMIT_BULK.name());
 			assertNotNull(radio);
-			radio.setSelected(true);
+			radio.doClick();
 		}
 
 		for (DeletionCheckMode mode : DeletionCheckMode.values()) {
@@ -262,7 +262,7 @@ public class SettingsDialogTest {
 			JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog,
 					DeletionCheckMode.CHECK_THEN_ACQUIRE.name());
 			assertNotNull(radio);
-			radio.setSelected(true);
+			radio.doClick();
 		}
 
 		combo.setSelectedItem(new MotifLookAndFeel().getName());
@@ -311,7 +311,7 @@ public class SettingsDialogTest {
 		JRadioButton radio = (JRadioButton) Utils.getChildNamed(dialog, DeletionMode.NO_CONFIRM
 				.name());
 		assertNotNull(radio);
-		radio.setSelected(true);
+		radio.doClick();
 
 		radio = (JRadioButton) Utils.getChildNamed(dialog, TestTransactionMode.COMMIT_BULK.name());
 		assertNotNull(radio);
@@ -320,11 +320,10 @@ public class SettingsDialogTest {
 		radio = (JRadioButton) Utils.getChildNamed(dialog, DeletionCheckMode.CHECK_THEN_ACQUIRE
 				.name());
 		assertNotNull(radio);
-		radio.setSelected(true);
+		radio.doClick();
 
 		combo.setSelectedItem(new MotifLookAndFeel().getName());
 
-		
 		SwingTestHelper.clickCloseDialogButton(dialog, "cancel");
 
 		assertTrue(WindowsLookAndFeel.class == UIManager.getLookAndFeel().getClass());
@@ -338,7 +337,6 @@ public class SettingsDialogTest {
 		assertFalse(resultButton);
 	}
 
-	
 	public void testShow() throws Exception {
 		dialog.openDialog();
 	}

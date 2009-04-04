@@ -24,6 +24,7 @@ public class SimpleSmoothFilter implements IFilter {
 		return null;
 	}
 
+	@Override
 	public String toString() {
 		return this.getName();
 	}

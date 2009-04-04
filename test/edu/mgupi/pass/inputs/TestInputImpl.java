@@ -15,6 +15,7 @@ public class TestInputImpl implements IInput {
 
 	private boolean init = false;
 
+	@Override
 	protected void finalize() throws Throwable {
 		if (init && !done) {
 			new Exception("WARNING!!! Close not called. Terminating application immediately.")

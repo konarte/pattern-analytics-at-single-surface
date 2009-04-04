@@ -22,6 +22,7 @@ public class GrayScaleFilter implements IFilter {
 		return null;
 	}
 
+	@Override
 	public String toString() {
 		return this.getName();
 	}

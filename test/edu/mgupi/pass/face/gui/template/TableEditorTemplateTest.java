@@ -71,17 +71,16 @@ public class TableEditorTemplateTest {
 	public void setUp() throws Exception {
 
 		tableEditor = (TestTableEditorTemplate) AppHelper.getInstance().getDialogImpl(
-				TestTableEditorTemplate.class);
+				null,TestTableEditorTemplate.class);
 
 		parentFrame = new JFrame();
 		JButton button = new JButton();
 		button.setAction(new AbstractAction() {
-			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				returnValue = false;
-				returnValue = tableEditor.openDialog();
+				returnValue = tableEditor.showWindow();
 
 			}
 		});
@@ -115,7 +114,7 @@ public class TableEditorTemplateTest {
 		return conn;
 	}
 
-	private void removeAllData() throws PersistentException, InterruptedException {
+	private void removeAllData() throws PersistentException {
 
 		PassPersistentManager.instance().getSession().close();
 		try {
@@ -521,7 +520,7 @@ public class TableEditorTemplateTest {
 			 */
 
 			final TestRecordEditorTemplate recordEditor = (TestRecordEditorTemplate) AppHelper
-					.getInstance().getDialogImpl(TestRecordEditorTemplate.class);
+					.getInstance().getDialogImpl(null,TestRecordEditorTemplate.class);
 
 			/*
 			 * When use expectOwnerIsSecond -- I means, that owner of message
@@ -715,22 +714,22 @@ public class TableEditorTemplateTest {
 
 		DefectTypes type = DefectTypesFactory.createDefectTypes();
 		type.setName("TEST-ссылка-1-0");
-		type.setDefectClass(((MyTableModel) table.getModel()).data.get(0));
+		type.setDefectClass(((MyTableModel) table.getModel()).getRowAt(0));
 		type.save();
 
 		type = DefectTypesFactory.createDefectTypes();
 		type.setName("TEST-ссылка-2-0");
-		type.setDefectClass(((MyTableModel) table.getModel()).data.get(0));
+		type.setDefectClass(((MyTableModel) table.getModel()).getRowAt(0));
 		type.save();
 
 		DefectTypes prevType = DefectTypesFactory.createDefectTypes();
 		prevType.setName("TEST-ссылка-1-1");
-		prevType.setDefectClass(((MyTableModel) table.getModel()).data.get(1));
+		prevType.setDefectClass(((MyTableModel) table.getModel()).getRowAt(1));
 		prevType.save();
 
 		DefectTypes lastType = DefectTypesFactory.createDefectTypes();
 		lastType.setName("TEST-ссылка-1-2");
-		lastType.setDefectClass(((MyTableModel) table.getModel()).data.get(2));
+		lastType.setDefectClass(((MyTableModel) table.getModel()).getRowAt(2));
 		lastType.save();
 
 		assertTrue(PassPersistentManager.instance().getSession().getTransaction().isActive());
@@ -825,7 +824,7 @@ public class TableEditorTemplateTest {
 		Config.getInstance().setDeletionCheckModeMode(DeletionCheckMode.NO_CHECK);
 
 		TestRecordEditorTemplate template = (TestRecordEditorTemplate) AppHelper.getInstance()
-				.getDialogImpl(TestRecordEditorTemplate.class);
+				.getDialogImpl(null,TestRecordEditorTemplate.class);
 		template.setUseCriterias(false);
 
 		SwingTestHelper.clickOpenDialogButton(parentFrame, null, MY_SAMPLE_NAME,
@@ -851,22 +850,22 @@ public class TableEditorTemplateTest {
 
 		DefectTypes type = DefectTypesFactory.createDefectTypes();
 		type.setName("TEST-ссылка-1-0");
-		type.setDefectClass(((MyTableModel) table.getModel()).data.get(0));
+		type.setDefectClass(((MyTableModel) table.getModel()).getRowAt(0));
 		type.save();
 
 		type = DefectTypesFactory.createDefectTypes();
 		type.setName("TEST-ссылка-2-0");
-		type.setDefectClass(((MyTableModel) table.getModel()).data.get(0));
+		type.setDefectClass(((MyTableModel) table.getModel()).getRowAt(0));
 		type.save();
 
 		DefectTypes prevType = DefectTypesFactory.createDefectTypes();
 		prevType.setName("TEST-ссылка-1-1");
-		prevType.setDefectClass(((MyTableModel) table.getModel()).data.get(1));
+		prevType.setDefectClass(((MyTableModel) table.getModel()).getRowAt(1));
 		prevType.save();
 
 		DefectTypes lastType = DefectTypesFactory.createDefectTypes();
 		lastType.setName("TEST-ссылка-1-2");
-		lastType.setDefectClass(((MyTableModel) table.getModel()).data.get(2));
+		lastType.setDefectClass(((MyTableModel) table.getModel()).getRowAt(2));
 		lastType.save();
 
 		assertTrue(PassPersistentManager.instance().getSession().getTransaction().isActive());
@@ -1055,6 +1054,9 @@ public class TableEditorTemplateTest {
 		 * Random edition
 		 */
 		int changedIdx[] = new int[RANDOM_EDIT];
+		
+		// Emergency wait until properly repaint and sort...
+		Thread.sleep(500);
 
 		for (int i = 0; i < RANDOM_EDIT; i++) {
 			int pos = rand.nextInt(ROWCOUNT);
@@ -1173,7 +1175,7 @@ public class TableEditorTemplateTest {
 	 * @author raidan
 	 * 
 	 */
-	public static class TestTableEditorTemplate extends TableEditorTemplate {
+	public static class TestTableEditorTemplate extends TableViewerTemplate<DefectClasses> {
 
 		public TestTableEditorTemplate(Frame owner) {
 			super(owner, "test", "Тест");
@@ -1205,10 +1207,8 @@ public class TableEditorTemplateTest {
 		/**
 		 * 
 		 */
-		private static final long serialVersionUID = 1L;
 
 		static class MyTableModel extends CommonEditorTableModel<DefectClasses> {
-			private static final long serialVersionUID = 1L;
 
 			public MyTableModel(JTable owner) {
 				super(owner, TestRecordEditorTemplate.class);
@@ -1252,7 +1252,7 @@ public class TableEditorTemplateTest {
 			public Object getValueAt(int rowIndex, int columnIndex) {
 				DATA_RET.start();
 				try {
-					DefectClasses defect = data.get(rowIndex);
+					DefectClasses defect = super.getRowAt(rowIndex);
 
 					return columnIndex == 0 ? defect.getIdDefectClass() : defect.getName();
 				} finally {
@@ -1262,10 +1262,10 @@ public class TableEditorTemplateTest {
 
 		}
 
-		protected MyTableModel tableModel = null;
+		private MyTableModel tableModel = null;
 
 		@Override
-		protected AbstractEditorTableModel getTableModelImpl(JTable owner) {
+		protected CommonEditorTableModel<DefectClasses> getTableModelImpl(JTable owner) {
 			if (tableModel == null) {
 				tableModel = new MyTableModel(owner);
 			}
@@ -1288,13 +1288,14 @@ public class TableEditorTemplateTest {
 	public static class TestRecordEditorTemplate extends RecordEditorTemplate<DefectClasses> {
 
 		/**
+		 * Default constructor.
+		 * 
+		 * @param owner
 		 * 
 		 */
-		private static final long serialVersionUID = 1L;
-
 		public TestRecordEditorTemplate(Frame owner) {
 			super(owner, "tst", "Тест");
-			super.setFormPanelData(getJPanel());
+			super.setFormPanel(getJPanel());
 		}
 
 		private JPanel rootPanel = null;
@@ -1377,7 +1378,7 @@ public class TableEditorTemplateTest {
 		}
 
 		@Override
-		protected void saveFormToObjectImpl(DefectClasses object) throws Exception {
+		protected void putFormToObjectImpl(DefectClasses object) throws Exception {
 			assertNotNull(object);
 			assertNotNull(field);
 

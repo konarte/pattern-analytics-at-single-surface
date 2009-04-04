@@ -102,6 +102,7 @@ public class Secundomer {
 		return this.cnt;
 	}
 
+	@Override
 	public String toString() {
 		StringBuilder string = new StringBuilder();
 		if (name != null) {

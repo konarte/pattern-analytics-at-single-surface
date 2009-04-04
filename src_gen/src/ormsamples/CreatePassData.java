@@ -49,7 +49,7 @@ public class CreatePassData {
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : value, name
 			ledumgupipassdblocusesLocusAppliedFilterParams.save();
 			edu.mgupi.pass.db.sensors.Sensors ledumgupipassdbsensorsSensors = edu.mgupi.pass.db.sensors.SensorsFactory.createSensors();
-			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : sensorMaterial, sensorType, name
+			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : sensorType, name
 			ledumgupipassdbsensorsSensors.save();
 			edu.mgupi.pass.db.sensors.SensorClasses ledumgupipassdbsensorsSensorClasses = edu.mgupi.pass.db.sensors.SensorClassesFactory.createSensorClasses();
 			// TODO Initialize the properties of the persistent object here, the following properties must be initialized before saving : name

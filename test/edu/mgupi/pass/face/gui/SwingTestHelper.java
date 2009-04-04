@@ -216,7 +216,7 @@ public class SwingTestHelper {
 		AbstractButton button = null;
 		String variants[] = buttonOrActionNameName.split("\\|");
 		for (String var : variants) {
-			System.out.println("CHECK VARIANT : " + var);
+			//System.out.println("CHECK VARIANT : " + var);
 			button = (AbstractButton) Utils.getChildNamed(parent, var);
 			if (button == null) {
 				button = (AbstractButton) SwingTestHelper.getButtonByActionCommand(parent, var);
@@ -298,7 +298,7 @@ public class SwingTestHelper {
 					assertNotNull(button);
 					button.doClick();
 				} else {
-					Window window = AppHelper.getInstance().getWindowImpl(expectedInstance, false);
+					Window window = AppHelper.getInstance().getWindowImpl(null,expectedInstance, false);
 					window.setVisible(true);
 				}
 			}
@@ -308,9 +308,8 @@ public class SwingTestHelper {
 				if (expectedInstance != null) {
 					Window expectedWindow = AppHelper.getInstance().searchWindow(expectedInstance);
 					return expectedWindow == null || !expectedWindow.isVisible();
-				} else {
-					return allChildrenClosed(expectedParentImpl);
 				}
+				return allChildrenClosed(expectedParentImpl);
 
 			}
 		});
@@ -320,10 +319,9 @@ public class SwingTestHelper {
 			assertNotNull(expectedWindow);
 			assertTrue(expectedWindow.isVisible());
 			return expectedWindow;
-		} else {
-			assertFalse(allChildrenClosed(expectedParentImpl));
-			return SwingTestHelper.searchAnyOpenedWindow(expectedParentImpl);
 		}
+		assertFalse(allChildrenClosed(expectedParentImpl));
+		return SwingTestHelper.searchAnyOpenedWindow(expectedParentImpl);
 
 	}
 

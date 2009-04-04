@@ -43,7 +43,6 @@ public class ImagePanel extends JPanel implements ActionListener {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Default constructor.
@@ -302,6 +301,7 @@ public class ImagePanel extends JPanel implements ActionListener {
 
 	private final static String NO_IMAGE_TEXT = Messages.getString("ImagePanel.noImage");
 
+	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 

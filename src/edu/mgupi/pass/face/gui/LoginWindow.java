@@ -31,7 +31,6 @@ import edu.mgupi.pass.util.Config;
 
 public class LoginWindow extends JDialog implements ActionListener {
 
-	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
 	private JPanel jPanelConnect = null;
 	private JPanel jPanelButtons = null;
