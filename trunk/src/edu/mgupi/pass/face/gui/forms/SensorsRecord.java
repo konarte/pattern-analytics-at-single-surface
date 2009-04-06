@@ -115,9 +115,11 @@ public class SensorsRecord extends RecordEditorTemplate<Sensors> {
 
 			jLabelID = new JLabel("0");
 			jClass = new ComboBoxSensorClasses();
+			jClass.setName("sensorRecordClass");
 
 			jType = new ComboBoxSensorTypes(jClass);
 			jType.addActionListener(this);
+			jType.setName("sensorRecordName");
 
 			jName = new JTextField();
 

@@ -34,20 +34,29 @@ public abstract class AbstractComboBox<T> extends JComboBox implements IRefresha
 		return model;
 	}
 
-	@SuppressWarnings("unchecked")
 	public void setValue(T value) {
+
+		int pos = this.searchValue(value);
+
+		if (pos >= 0) {
+			this.setSelectedIndex(pos);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public int searchValue(T value) {
 		if (value == null) {
-			return;
+			return -1;
 		}
 		
-		System.out.println("Try to set " + value + " to " + this.getName());
 		for (int i = 0; i < model.getSize(); i++) {
 			T currentValue = (T) model.getElementAt(i);
 			if (objectEquals(currentValue, value)) {
-				this.setSelectedIndex(i);
-				return;
+				return i;
 			}
 		}
+
+		return -1;
 	}
 
 	@SuppressWarnings("unchecked")

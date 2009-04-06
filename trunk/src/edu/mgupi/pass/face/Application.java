@@ -49,6 +49,10 @@ public class Application implements Runnable {
 	private FileChannel channel;
 	private FileLock lock;
 
+	private Secundomer applicationStart = SecundomerList.registerSecundomer("Application start");
+	private Secundomer applicationTotal = SecundomerList
+			.registerSecundomer("Application total work");
+
 	private SplashWindow splash = null;
 
 	/**
@@ -56,7 +60,7 @@ public class Application implements Runnable {
 	 */
 	private Application() {
 
-		applicationRun.start();
+		applicationStart.start();
 		applicationTotal.start();
 
 		/*
@@ -113,6 +117,15 @@ public class Application implements Runnable {
 		} catch (Exception e) {
 			AppHelper.showExceptionDialog(null, Messages.getString("Application.err.laf",
 					newLookAndFeel), e);
+		}
+
+		byte[] iconData = null;
+		try {
+			iconData = Utils.loadFromResource(Const.FORM_ICON_IMAGE_PATH);
+			ImageIcon icon = new ImageIcon(iconData);
+			AppHelper.getInstance().setWindowsIcon(icon.getImage());
+		} catch (IOException io) {
+			logger.error("Error when setting image icon.", io);
 		}
 
 		/*
@@ -294,22 +307,10 @@ public class Application implements Runnable {
 		}
 	}
 
-	private Secundomer applicationRun = SecundomerList.registerSecundomer("Application run");
-	private Secundomer applicationTotal = SecundomerList
-			.registerSecundomer("Application total work");
-
 	public void run() {
 		try {
 
 			try {
-				byte[] iconData = null;
-				try {
-					iconData = Utils.loadFromResource(Const.FORM_ICON_IMAGE_PATH);
-					ImageIcon icon = new ImageIcon(iconData);
-					AppHelper.getInstance().setWindowsIcon(icon.getImage());
-				} catch (IOException io) {
-					logger.error("Error when setting image icon.", io);
-				}
 
 				// We want to make good impression, isn't it?
 				if (channel != null && lock == null) {
@@ -344,7 +345,7 @@ public class Application implements Runnable {
 					logger.info("Application ready...");
 
 				} catch (Throwable t) {
-					applicationRun.stop();
+					applicationStart.stop();
 
 					if (t.getClass() == InvocationTargetException.class && t.getCause() != null) {
 						t = t.getCause();
@@ -360,7 +361,7 @@ public class Application implements Runnable {
 					splash.setVisible(false);
 					splash.dispose();
 				}
-				applicationRun.stop();
+				applicationStart.stop();
 			}
 
 		} catch (final Throwable t) {

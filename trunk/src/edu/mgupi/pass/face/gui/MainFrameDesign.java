@@ -641,7 +641,6 @@ public abstract class MainFrameDesign extends JFrame implements IProgress, Actio
 	private JMenuItem jMenuItemSensorClasses = null;
 
 	private JMenuItem jMenuItemSensorTypes = null;
-
 	static class FiltersModel extends AbstractListModel {
 
 		/**
@@ -822,7 +821,7 @@ public abstract class MainFrameDesign extends JFrame implements IProgress, Actio
 			gridBagConstraints17.gridx = 0;
 			gridBagConstraints17.gridwidth = 2;
 			gridBagConstraints17.anchor = GridBagConstraints.WEST;
-			gridBagConstraints17.gridy = 2;
+			gridBagConstraints17.gridy = 1;
 			GridBagConstraints gridBagConstraints15 = new GridBagConstraints();
 			gridBagConstraints15.gridx = 1;
 			gridBagConstraints15.gridy = 0;

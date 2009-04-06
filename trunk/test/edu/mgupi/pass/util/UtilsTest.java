@@ -163,6 +163,9 @@ public class UtilsTest {
 
 	@Test
 	public void testFormatPluralsSample() {
+		
+		System.out.println(MessageFormat.format("hello is {0} {0,choice,1#row|rows}", 4));
+		
 		ChoiceFormat fmt = new ChoiceFormat(
 				"-1#is negative| 0#is zero or fraction | 1#is one |1.0<is 1+ |2#is two |2<is more than 2.");
 		System.out.println("Formatter Pattern : " + fmt.toPattern());

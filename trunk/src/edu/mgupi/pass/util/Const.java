@@ -21,6 +21,11 @@ public class Const {
 	public final static boolean PRODUCTION_MODE = false;
 
 	/**
+	 * Maximum length of all string columns, that user inputs.
+	 */
+	public final static int MAXIMUM_STRING_COLUMN_WIDTH = 255;
+
+	/**
 	 * Russian locale.
 	 */
 	public final static Locale LOCALE_RU = new Locale("ru", "RU");

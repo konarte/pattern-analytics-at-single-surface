@@ -10,7 +10,6 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -284,27 +283,27 @@ public abstract class AbstractDialogAdapter implements ActionListener {
 			}
 			this.openDialogImpl();
 
-			if (this.cancelOnly) {
-				logger.trace("Dialog '{}' will be invoked later cause of cancelOnly mode.", owner
-						.getTitle());
-
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							owner.setVisible(true);
-							logger.debug("Dialog '{}' finished in cancelOnly mode.", owner
-									.getTitle());
-						} catch (Throwable t) {
-							AppHelper.showExceptionDialog(owner, Messages.getString(
-									"AbstractDialogAdapter.err.windowOpen", owner.getTitle()), t);
-						}
-					}
-				});
-			} else {
+//			if (this.cancelOnly) {
+//				logger.trace("Dialog '{}' will be invoked later cause of cancelOnly mode.", owner
+//						.getTitle());
+//
+//				SwingUtilities.invokeLater(new Runnable() {
+//					@Override
+//					public void run() {
+//						try {
+//							owner.setVisible(true);
+//							logger.debug("Dialog '{}' finished in cancelOnly mode.", owner
+//									.getTitle());
+//						} catch (Throwable t) {
+//							AppHelper.showExceptionDialog(owner, Messages.getString(
+//									"AbstractDialogAdapter.err.windowOpen", owner.getTitle()), t);
+//						}
+//					}
+//				});
+//			} else {
 				this.owner.setVisible(true);
 				logger.debug("Dialog '{}' finished. Return {}.", owner.getTitle(), setOK);
-			}
+//			}
 
 			return setOK;
 
