@@ -4,17 +4,23 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+
+import edu.mgupi.pass.util.Utils;
 
 public abstract class TableViewerTemplate<T> extends JDialog {
 
@@ -83,6 +89,8 @@ public abstract class TableViewerTemplate<T> extends JDialog {
 	private JButton jButtonResetFiltered = null;
 
 	protected T selectedObject = null;
+	private JPanel jPanelRowCount = null;
+	private JLabel jLabelRowCount = null;
 
 	protected AbstractDialogAdapter getDialogAdapter() {
 		if (dialogAdapter == null) {
@@ -199,6 +207,16 @@ public abstract class TableViewerTemplate<T> extends JDialog {
 					}
 				}
 			});
+			jTableData.getModel().addTableModelListener(new TableModelListener() {
+				@Override
+				public void tableChanged(TableModelEvent e) {
+					if (jLabelRowCount != null) {
+						jLabelRowCount.setText(Utils.formatSimplePlurals(Messages
+								.getString("TableViewerTemplate.rowCount"), jTableData
+								.getRowCount()));
+					}
+				}
+			});
 
 			this.tablePostInit(jTableData);
 		}
@@ -243,6 +261,7 @@ public abstract class TableViewerTemplate<T> extends JDialog {
 			jPanelTable = new JPanel();
 			jPanelTable.setLayout(new BorderLayout());
 			jPanelTable.add(getJScrollPaneData(), BorderLayout.CENTER);
+			jPanelTable.add(getJPanelRowCount(), BorderLayout.SOUTH);
 		}
 		return jPanelTable;
 	}
@@ -365,6 +384,27 @@ public abstract class TableViewerTemplate<T> extends JDialog {
 			getTableModel().registerResetSearchButton(jButtonResetFiltered);
 		}
 		return jButtonResetFiltered;
+	}
+
+	/**
+	 * This method initializes jPanelRowCount
+	 * 
+	 * @return javax.swing.JPanel
+	 */
+	private JPanel getJPanelRowCount() {
+		if (jPanelRowCount == null) {
+			FlowLayout flowLayout1 = new FlowLayout();
+			flowLayout1.setAlignment(FlowLayout.RIGHT);
+			jLabelRowCount = new JLabel();
+			jLabelRowCount.setName("labelRowCount");
+			jLabelRowCount.setText(Utils.formatSimplePlurals(Messages
+					.getString("TableViewerTemplate.rowCount"), 0));
+			jLabelRowCount.setDisplayedMnemonic(KeyEvent.VK_UNDEFINED);
+			jPanelRowCount = new JPanel();
+			jPanelRowCount.setLayout(flowLayout1);
+			jPanelRowCount.add(jLabelRowCount, null);
+		}
+		return jPanelRowCount;
 	}
 
 } //  @jve:decl-index=0:visual-constraint="10,10"

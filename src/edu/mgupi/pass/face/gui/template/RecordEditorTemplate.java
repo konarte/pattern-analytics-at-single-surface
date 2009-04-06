@@ -1,12 +1,12 @@
 package edu.mgupi.pass.face.gui.template;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -16,10 +16,15 @@ import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
 import org.hibernate.Criteria;
@@ -30,13 +35,14 @@ import org.slf4j.LoggerFactory;
 import edu.mgupi.pass.db.surfaces.PassPersistentManager;
 import edu.mgupi.pass.face.gui.AppHelper;
 import edu.mgupi.pass.face.gui.IWindowCloseable;
+import edu.mgupi.pass.util.Const;
 import edu.mgupi.pass.util.IRefreshable;
 import edu.mgupi.pass.util.Secundomer;
 import edu.mgupi.pass.util.SecundomerList;
 import edu.mgupi.pass.util.Utils;
 
 public abstract class RecordEditorTemplate<T> extends JDialogControlled implements
-		IWindowCloseable, IRefreshable {
+		IWindowCloseable, IRefreshable, DocumentListener {
 
 	private final static Logger logger = LoggerFactory.getLogger(RecordEditorTemplate.class); //  @jve:decl-index=0:
 
@@ -138,7 +144,7 @@ public abstract class RecordEditorTemplate<T> extends JDialogControlled implemen
 
 				@Override
 				protected boolean saveImpl() throws Exception {
-					
+
 					if (readOnly) {
 						return false;
 					}
@@ -317,7 +323,7 @@ public abstract class RecordEditorTemplate<T> extends JDialogControlled implemen
 				if (key.getKey().refresh() == 0) {
 					secundomerLoad.stop();
 					AppHelper.showErrorDialog(this, Messages.getString(
-							"RecordEditorTemplate.noValuesInSelect", key.getValue()));
+							"RecordEditorTemplate.err.noValuesInSelect", key.getValue()));
 					return false;
 				}
 			}
@@ -342,7 +348,14 @@ public abstract class RecordEditorTemplate<T> extends JDialogControlled implemen
 		for (Map.Entry<JTextComponent, String> comp : requiredMap.entrySet()) {
 			String text = comp.getKey().getText();
 			if (text == null || text.isEmpty()) {
-				AppHelper.showFieldRequiredDialog(RecordEditorTemplate.this, comp.getValue());
+				AppHelper.showFieldRequiredDialog(this, comp.getValue());
+				return false;
+			}
+			int valueLen = text.length();
+			if (valueLen > Const.MAXIMUM_STRING_COLUMN_WIDTH) {
+				AppHelper.showFormattedErrorDialog(this, Messages.getString(
+						"RecordEditorTemplate.err.rowTooBig", comp.getValue(), valueLen, Utils
+								.getPluralForm(valueLen), Const.MAXIMUM_STRING_COLUMN_WIDTH));
 				return false;
 			}
 		}
@@ -378,8 +391,8 @@ public abstract class RecordEditorTemplate<T> extends JDialogControlled implemen
 					secundomerCheckSave.stop();
 					logger.trace("Found existing value in database.");
 					AppHelper.showErrorDialog(this, Messages.getString(
-							"RecordEditorTemplate.duplicateRowInsert", newValue, this.requiredMap
-									.get(uniqueComponent)));
+							"RecordEditorTemplate.err.duplicateRowInsert", newValue,
+							this.requiredMap.get(uniqueComponent)));
 					return false;
 				}
 			} finally {
@@ -421,8 +434,9 @@ public abstract class RecordEditorTemplate<T> extends JDialogControlled implemen
 			logger.trace("Found {}.", foundObjects);
 			if (foundObjects.size() >= 0) {
 				StringBuilder buffer = new StringBuilder("<html>");
-				buffer.append(Messages.getString("RecordEditorTemplate.rowsDeleteDenied", objects
-						.size(), foundObjects.size(), Utils.getPluralForm(foundObjects.size())));
+				buffer.append(Messages.getString("RecordEditorTemplate.err.rowsDeleteDenied",
+						objects.size(), foundObjects.size(), Utils.getPluralForm(foundObjects
+								.size())));
 				buffer.append("<ul>");
 				for (Object obj : foundObjects) {
 					buffer.append("<li>").append(getDenyDeletionMessage(obj));
@@ -431,8 +445,7 @@ public abstract class RecordEditorTemplate<T> extends JDialogControlled implemen
 
 				secundomerCheckDelete.stop();
 				logger.error(buffer.toString());
-				JOptionPane.showMessageDialog(this, buffer.toString(), Messages
-						.getString("RecordEditorTemplate.title.error"), JOptionPane.ERROR_MESSAGE);
+				AppHelper.showFormattedErrorDialog(this, buffer.toString());
 			}
 
 			return false;
@@ -569,30 +582,96 @@ public abstract class RecordEditorTemplate<T> extends JDialogControlled implemen
 		this.uniqueComponentValue = component.getText();
 	}
 
-	protected JLabel putComponentPair(JPanel place, String label, Component component) {
-
-		boolean isCombo = component instanceof JComboBox;
-
+	private JLabel puComponentPair(JPanel place, String label, JComponent component,
+			boolean alignComponentWidth, int componentX) {
 		JLabel jLabel = new JLabel(label + ":");
 		place.add(jLabel, AppHelper.getJBCForm(0, gridY));
+		place.add(component, AppHelper.getJBCForm(componentX, gridY, alignComponentWidth));
 
-		// No we do not fit width for comboBoxes
-		place.add(component, AppHelper.getJBCForm(1, gridY, !isCombo));
+		gridY++;
+		return jLabel;
+	}
 
-		if (isCombo) {
-			JComboBox combo = (JComboBox) component;
-			if (combo instanceof IRefreshable) {
-				refresheableMap.put((IRefreshable) combo, label);
-				this.requiredComboMap.put(combo, label);
-			}
+	protected JLabel putComponentPair(JPanel place, String label, JLabel component) {
+		return puComponentPair(place, label, component, true, 1);
+	}
+
+	protected JLabel putComponentPair(JPanel place, String label, JComboBox component) {
+		if (component instanceof IRefreshable) {
+			refresheableMap.put((IRefreshable) component, label);
+			this.requiredComboMap.put(component, label);
 		}
 
 		if (readOnly) {
-			component.setEnabled(false);
+			component.addActionListener(this);
+			component.setVisible(false);
+
+			JLabel roLabel = new JLabel();
+			if (component.getRenderer() instanceof BasicComboBoxRenderer) {
+				roLabel.setText(((BasicComboBoxRenderer) component.getRenderer()).getText());
+			} else {
+				roLabel.setText(String.valueOf(component.getSelectedItem()));
+			}
+			place.add(roLabel, AppHelper.getJBCForm(1, gridY, true));
+
+			comboSet.put(component, roLabel);
 		}
 
-		gridY++;
+		return puComponentPair(place, label, component, false, readOnly ? 2 : 1);
+	}
 
-		return jLabel;
+	protected JLabel putComponentPair(JPanel place, String label, JTextComponent component) {
+
+		if (readOnly) {
+			component.getDocument().addDocumentListener(this);
+			component.setVisible(false);
+
+			JLabel roLabel = new JLabel(component.getText());
+			place.add(roLabel, AppHelper.getJBCForm(1, gridY, true));
+
+			textSet.put(component.getDocument(), roLabel);
+		}
+
+		return puComponentPair(place, label, component, true, readOnly ? 2 : 1);
+	}
+
+	private Map<JComboBox, JLabel> comboSet = new HashMap<JComboBox, JLabel>();
+	private Map<Document, JLabel> textSet = new HashMap<Document, JLabel>();
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		super.actionPerformed(e);
+		JLabel label = comboSet.get(e.getSource());
+		if (label != null) {
+			JComboBox component = (JComboBox) e.getSource();
+			if (component.getRenderer() instanceof BasicComboBoxRenderer) {
+				label.setText(((BasicComboBoxRenderer) component.getRenderer()).getText());
+			} else {
+				label.setText(String.valueOf(component.getSelectedItem()));
+			}
+		}
+	}
+
+	public void insertUpdate(DocumentEvent e) {
+		this.updateTexImpl(e.getDocument());
+	}
+
+	public void removeUpdate(DocumentEvent e) {
+		this.updateTexImpl(e.getDocument());
+	}
+
+	public void changedUpdate(DocumentEvent e) {
+		this.updateTexImpl(e.getDocument());
+	}
+
+	private void updateTexImpl(Document source) {
+		JLabel label = textSet.get(source);
+		if (label != null) {
+			try {
+				label.setText(source.getText(0, source.getLength()));
+			} catch (BadLocationException e) {
+				logger.error("Error when updating text in readonly mode", e);
+			}
+		}
 	}
 } //  @jve:decl-index=0:visual-constraint="10,10"

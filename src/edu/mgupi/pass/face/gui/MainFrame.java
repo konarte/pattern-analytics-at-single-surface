@@ -44,6 +44,7 @@ import edu.mgupi.pass.face.gui.forms.SurfacesFilteredTable;
 import edu.mgupi.pass.face.gui.forms.SurfacesRecord;
 import edu.mgupi.pass.face.gui.forms.SurfacesRecordView;
 import edu.mgupi.pass.face.gui.template.ImageFrameTemplate;
+import edu.mgupi.pass.face.gui.template.TableViewerTemplate;
 import edu.mgupi.pass.filters.FilterChainsaw;
 import edu.mgupi.pass.filters.FilterChainsawTransactional;
 import edu.mgupi.pass.filters.FilterNotFoundException;
@@ -143,15 +144,15 @@ public class MainFrame extends MainFrameDesign {
 				this, ImageFrameTemplate.class);
 		histogramFrame.registerControlCheckbox(this.jCheckBoxHistogram);
 		histogramFrame.setTitle(mainModuleProcessor.getHistoFilters().toString());
-		histogramFrame.setName("histogramWindow"); //$NON-NLS-1$
+		histogramFrame.setName("histogramWindow");
 		histogramFrame.setLocation(100, 200);
 		Config.getInstance().loadWindowPosition(histogramFrame);
 
 		moduleFrame = (ImageFrameTemplate) AppHelper.getInstance().registerAdditionalWindow(this,
 				ImageFrameTemplate.class);
 		moduleFrame.registerControlCheckbox(this.jCheckBoxModuleGraphic);
-		moduleFrame.setTitle(Messages.getString("MainFrame.moduleNotSelected")); //$NON-NLS-1$
-		moduleFrame.setName("moduleFrameWindow"); //$NON-NLS-1$
+		moduleFrame.setTitle(Messages.getString("MainFrame.moduleNotSelected"));
+		moduleFrame.setName("moduleFrameWindow");
 		moduleFrame.setLocation(100, 200 + histogramFrame.getHeight() + 20);
 		Config.getInstance().loadWindowPosition(moduleFrame);
 
@@ -172,13 +173,13 @@ public class MainFrame extends MainFrameDesign {
 		//LModules item = (LModules) jComboBoxModules.getSelectedItem();
 		//this.setModule((Class<IModule>) Class.forName(item.getCodename()));
 
-		logger.debug("Main frame init done."); //$NON-NLS-1$
+		logger.debug("Main frame init done.");
 	}
 
 	private void closeImpl() {
-		this.printMessage(Messages.getString("MainFrame.mess.closingApp")); //$NON-NLS-1$
+		this.printMessage(Messages.getString("MainFrame.mess.closingApp"));
 
-		logger.debug("Application terminating..."); //$NON-NLS-1$
+		logger.debug("Application terminating...");
 
 		if (singleFilePicker != null) {
 			singleFilePicker.close();
@@ -195,7 +196,7 @@ public class MainFrame extends MainFrameDesign {
 			try {
 				this.mainModuleProcessor.close();
 			} catch (Exception e) {
-				logger.error("Error when closing main module", e); //$NON-NLS-1$
+				logger.error("Error when closing main module", e);
 			}
 			mainModuleProcessor = null;
 		}
@@ -203,13 +204,13 @@ public class MainFrame extends MainFrameDesign {
 		// preprocessingCache.close();
 
 		try {
-			logger.debug("Saving current config..."); //$NON-NLS-1$
+			logger.debug("Saving current config...");
 			AppHelper.getInstance().saveWindowPositions();
 			Config.getInstance().storeWindowCheckBoxes(MainFrame.this, jCheckBoxHistogram,
 					jCheckBoxModuleGraphic, jCheckBoxSurface, jCheckBoxSensor);
 			Config.getInstance().saveCurrentConfig();
 		} catch (ConfigurationException e) {
-			logger.error("Error when saving current config", e); //$NON-NLS-1$
+			logger.error("Error when saving current config", e);
 		}
 
 		AppHelper.printCache();
@@ -226,8 +227,8 @@ public class MainFrame extends MainFrameDesign {
 	private InputStore currentSource = null; //  @jve:decl-index=0:
 	private Locuses currentLocus = null; // @jve:decl-index=0:
 
-	private String originalImageInfo = ""; //  @jve:decl-index=0: //$NON-NLS-1$
-	private String filteredImageInfo = ""; //$NON-NLS-1$
+	private String originalImageInfo = ""; //  @jve:decl-index=0: 
+	private String filteredImageInfo = "";
 
 	// private CacheInitiable<IFilter> preprocessingCache = new
 	// CacheInitiable<IFilter>(); // @jve:decl-index=0:
@@ -235,7 +236,7 @@ public class MainFrame extends MainFrameDesign {
 	protected void startProcessingImpl(InputStore source) throws Exception {
 
 		if (source == null) {
-			logger.debug("Nothing to process..."); //$NON-NLS-1$
+			logger.debug("Nothing to process...");
 			// JOptionPane.showMessageDialog(null,
 			// "Internal error. Received null source.", "Internal error",
 			// JOptionPane.ERROR_MESSAGE);
@@ -244,9 +245,9 @@ public class MainFrame extends MainFrameDesign {
 
 		this.closeProcessing();
 
-		logger.debug("Start loading source " + source.getName()); //$NON-NLS-1$
+		logger.debug("Start loading source " + source.getName());
 
-		this.setTitle(Const.PROGRAM_NAME_FULL + " -- " + source.getName()); //$NON-NLS-1$
+		this.setTitle(Const.PROGRAM_NAME_FULL + " -- " + source.getName());
 		this.processStarted = true;
 
 		this.applySourcePreProcessor(source.getSourceImage());
@@ -259,11 +260,11 @@ public class MainFrame extends MainFrameDesign {
 		BufferedImage sourceImage = source.getSourceImage();
 		BufferedImage filteredImage = mainModuleProcessor.getLastProcessedImage();
 
-		this.originalImageInfo = "" //  //$NON-NLS-1$
+		this.originalImageInfo = "" //  
 				+ sourceImage.getWidth() //
-				+ "x" //  //$NON-NLS-1$
+				+ "x" //  
 				+ sourceImage.getHeight() //
-				+ MessageFormat.format(", {0} bpp", sourceImage.getColorModel().getPixelSize()); //$NON-NLS-1$
+				+ MessageFormat.format(", {0} bpp", sourceImage.getColorModel().getPixelSize());
 
 		double percentRate = 100;
 		ResizeFilter resize = (ResizeFilter) mainModuleProcessor.getPreChainsaw()
@@ -271,11 +272,11 @@ public class MainFrame extends MainFrameDesign {
 		if (resize != null) {
 			percentRate = resize.getLastThumbRate();
 		}
-		this.filteredImageInfo = "" // //$NON-NLS-1$
+		this.filteredImageInfo = "" // 
 				+ filteredImage.getWidth() //
-				+ "x" // //$NON-NLS-1$
+				+ "x" // 
 				+ filteredImage.getHeight() //
-				+ MessageFormat.format(", {0} bpp, {1,number,percent}", filteredImage //$NON-NLS-1$
+				+ MessageFormat.format(", {0} bpp, {1,number,percent}", filteredImage
 						.getColorModel().getPixelSize(), percentRate);
 
 		jLabelImageInfo.setText(jTabbedPaneImages.getSelectedIndex() == 0 ? this.originalImageInfo
@@ -296,9 +297,9 @@ public class MainFrame extends MainFrameDesign {
 		this.setTitle(Const.PROGRAM_NAME_FULL);
 		currentLocus = null;
 		currentSource = null;
-		originalImageInfo = ""; //$NON-NLS-1$
-		filteredImageInfo = ""; //$NON-NLS-1$
-		jLabelImageInfo.setText(""); //$NON-NLS-1$
+		originalImageInfo = "";
+		filteredImageInfo = "";
+		jLabelImageInfo.setText("");
 		this.jPanelImageFiltered.setImage(null);
 		this.jPanelImageSource.setImage(null);
 		this.histogramFrame.setImage(null);
@@ -309,7 +310,7 @@ public class MainFrame extends MainFrameDesign {
 	}
 
 	protected void restartProcessingBySource() {
-		MainFrame.this.printMessage(Messages.getString("MainFrame.mess.updateBySource")); //$NON-NLS-1$
+		MainFrame.this.printMessage(Messages.getString("MainFrame.mess.updateBySource"));
 		SwingUtilities.invokeLater(new Runnable() {
 
 			public void run() {
@@ -318,7 +319,7 @@ public class MainFrame extends MainFrameDesign {
 				} catch (Throwable t) {
 					MainFrame.this.closeProcessing();
 					AppHelper.showExceptionDialog(MainFrame.this, Messages
-							.getString("MainFrame.err.updateBySource"), t); //$NON-NLS-1$
+							.getString("MainFrame.err.updateBySource"), t);
 				} finally {
 					MainFrame.this.clearMessage();
 				}
@@ -381,7 +382,7 @@ public class MainFrame extends MainFrameDesign {
 			ResizeFilter resizer = (ResizeFilter) preProcessing.appendFilter(ResizeFilter.class);
 			resizer.getWIDTH().setValue(Const.MAIN_IMAGE_WIDTH);
 			resizer.getHEIGHT().setValue(Const.MAIN_IMAGE_HEIGHT);
-			resizer.getINTERPOLATION_METHOD().setValue("bicubic"); //$NON-NLS-1$
+			resizer.getINTERPOLATION_METHOD().setValue("bicubic");
 
 			PlaceImageFilter place = (PlaceImageFilter) preProcessing
 					.appendFilter(PlaceImageFilter.class);
@@ -389,35 +390,35 @@ public class MainFrame extends MainFrameDesign {
 			place.getHEIGHT().setValue(Const.MAIN_IMAGE_HEIGHT);
 
 			place.getBACKGROUND().setValue(background);
-			place.getPLACE().setValue("center"); //$NON-NLS-1$
+			place.getPLACE().setValue("center");
 		}
 
 	}
 
 	protected void restartProcessingByModuleParams(final Collection<Param> savedParameters) {
-		this.printMessage(Messages.getString("MainFrame.mess.updateByModuleParams")); //$NON-NLS-1$
+		this.printMessage(Messages.getString("MainFrame.mess.updateByModuleParams"));
 
 		try {
 			MainFrame.this.restartProcessingByModuleParamsImpl();
 		} catch (Throwable t) {
 
-			String messageOnRestore = ""; //$NON-NLS-1$
+			String messageOnRestore = "";
 			if (savedParameters != null) {
 				try {
-					logger.info("Restoring module parameters..."); //$NON-NLS-1$
+					logger.info("Restoring module parameters...");
 					ParamHelper.restoreParameterValues(mainModuleProcessor.getModule().getParams(),
 							savedParameters);
 					MainFrame.this.restartProcessingByModuleParamsImpl();
 				} catch (Throwable t1) {
-					logger.error("Error when restoring module parameters", t1); //$NON-NLS-1$
+					logger.error("Error when restoring module parameters", t1);
 					messageOnRestore = Messages.getString(
-							"MainFrame.err.updateByModulesParams.restore", t1.getMessage()); //$NON-NLS-1$
+							"MainFrame.err.updateByModulesParams.restore", t1.getMessage());
 					MainFrame.this.closeProcessing();
 				}
 			}
 
 			AppHelper.showExceptionDialog(MainFrame.this, Messages.getString(
-					"MainFrame.err.updateByModuleParams", messageOnRestore), t); //$NON-NLS-1$
+					"MainFrame.err.updateByModuleParams", messageOnRestore), t);
 		} finally {
 			this.clearMessage();
 		}
@@ -433,10 +434,10 @@ public class MainFrame extends MainFrameDesign {
 
 		if (newModule == null) {
 			throw new IllegalArgumentException(
-					"Internal error. Parameter 'newModule' must be not null."); //$NON-NLS-1$
+					"Internal error. Parameter 'newModule' must be not null.");
 		}
 
-		logger.debug("Applying module {}", newModule); //$NON-NLS-1$
+		logger.debug("Applying module {}", newModule);
 
 		this.mainModuleProcessor.setModule(newModule);
 		this.moduleFrame.setTitle(this.mainModuleProcessor.getModule().getName());
@@ -456,27 +457,27 @@ public class MainFrame extends MainFrameDesign {
 	}
 
 	protected void restartProcessingByFilters(final FilterChainsawTransactional oldFilters) {
-		logger.debug("Restarting process by filters..."); //$NON-NLS-1$
-		this.printMessage(Messages.getString("MainFrame.mess.updateByFilters")); //$NON-NLS-1$
+		logger.debug("Restarting process by filters...");
+		this.printMessage(Messages.getString("MainFrame.mess.updateByFilters"));
 
 		try {
 			MainFrame.this.restartProcessingByFiltersImpl();
 		} catch (Throwable t) {
-			String messageOnRestore = ""; //$NON-NLS-1$
+			String messageOnRestore = "";
 			if (oldFilters != null) {
 				try {
 					oldFilters.commitChanges();
 					MainFrame.this.restartProcessingByFiltersImpl();
 				} catch (Throwable t1) {
-					logger.error("Error when restoring filters", t1); //$NON-NLS-1$
-					messageOnRestore = Messages.getString(
-							"MainFrame.err.updateByFilters.restore", t1.getMessage()); //$NON-NLS-1$
+					logger.error("Error when restoring filters", t1);
+					messageOnRestore = Messages.getString("MainFrame.err.updateByFilters.restore",
+							t1.getMessage());
 					MainFrame.this.closeProcessing();
 				}
 			}
 
 			AppHelper.showExceptionDialog(MainFrame.this, Messages.getString(
-					"MainFrame.err.updateByFilters", messageOnRestore), t); //$NON-NLS-1$
+					"MainFrame.err.updateByFilters", messageOnRestore), t);
 		} finally {
 			if (oldFilters != null) {
 				oldFilters.close();
@@ -492,9 +493,9 @@ public class MainFrame extends MainFrameDesign {
 
 	protected void loadNewSetting(final File newFile) {
 
-		logger.debug("Loading new settings file..."); //$NON-NLS-1$
+		logger.debug("Loading new settings file...");
 
-		this.printMessage(Messages.getString("MainFrame.mess.loadNewSettings")); //$NON-NLS-1$
+		this.printMessage(Messages.getString("MainFrame.mess.loadNewSettings"));
 
 		IModule currentModule = mainModuleProcessor.getModule();
 		FilterChainsawTransactional currentFilters = new FilterChainsawTransactional(
@@ -506,13 +507,13 @@ public class MainFrame extends MainFrameDesign {
 			isOK = true;
 		} catch (FilterNotFoundException fe) {
 			AppHelper.showExceptionDialog(MainFrame.this, Messages.getString(
-					"MainFrame.err.loadNewSettings.invalidFilter", newFile.getName()), fe); //$NON-NLS-1$
+					"MainFrame.err.loadNewSettings.invalidFilter", newFile.getName()), fe);
 		} catch (ModuleNotFoundException me) {
 			AppHelper.showExceptionDialog(MainFrame.this, Messages.getString(
-					"MainFrame.err.loadNewSettings.invalidModule", newFile.getName()), me); //$NON-NLS-1$
+					"MainFrame.err.loadNewSettings.invalidModule", newFile.getName()), me);
 		} catch (Throwable t) {
 			AppHelper.showExceptionDialog(MainFrame.this, Messages.getString(
-					"MainFrame.err.loadNewSettings.other", newFile.getName()), t); //$NON-NLS-1$
+					"MainFrame.err.loadNewSettings.other", newFile.getName()), t);
 		}
 
 		try {
@@ -522,15 +523,14 @@ public class MainFrame extends MainFrameDesign {
 						MainFrame.this.mainModuleProcessor.getModule().getClass()));
 			}
 		} catch (Throwable t) {
-			String messageOnRestore = ""; //$NON-NLS-1$
+			String messageOnRestore = "";
 			if (currentModule != null) {
 				try {
 					MainFrame.this.setModule(currentModule.getClass());
 				} catch (Throwable t1) {
-					logger.error("Error when restoring module", t1); //$NON-NLS-1$
+					logger.error("Error when restoring module", t1);
 					messageOnRestore = Messages.getString(
-							"MainFrame.err.loadNewSettings.restore.module", //$NON-NLS-1$ 
-							t1.getMessage());
+							"MainFrame.err.loadNewSettings.restore.module", t1.getMessage());
 					MainFrame.this.closeProcessing();
 				}
 			}
@@ -538,16 +538,15 @@ public class MainFrame extends MainFrameDesign {
 				currentFilters.commitChanges();
 				MainFrame.this.restartProcessingByFiltersImpl();
 			} catch (Throwable t1) {
-				logger.error("Error when restoring filters", t1); //$NON-NLS-1$
+				logger.error("Error when restoring filters", t1);
 
 				messageOnRestore = Messages.getString(
-						"MainFrame.err.loadNewSettings.restore.filters", //$NON-NLS-1$ 
-						t1.getMessage());
+						"MainFrame.err.loadNewSettings.restore.filters", t1.getMessage());
 				MainFrame.this.closeProcessing();
 			}
 
 			AppHelper.showExceptionDialog(MainFrame.this, Messages.getString(
-					"MainFrame.err.loadNewSettings", messageOnRestore), t); //$NON-NLS-1$ 
+					"MainFrame.err.loadNewSettings", messageOnRestore), t);
 		} finally {
 			currentFilters.close();
 			this.clearMessage();
@@ -559,12 +558,52 @@ public class MainFrame extends MainFrameDesign {
 		if (newValue == null) {
 			return null;
 		}
-		if (!box.objectEquals(box.getValue(), newValue)) {
+		if (box.searchValue(newValue) == -1) {
 			box.getMyModel().addElement(newValue);
 		}
-		
+
 		box.setValue(newValue);
 		return newValue;
+	}
+
+	private boolean updateSelectedSensor() {
+		try {
+			if (selectedSensor != null) {
+				sensorView.loadRecord(selectedSensor, false);
+			}
+			return true;
+		} catch (Throwable t) {
+			AppHelper.showExceptionDialog(MainFrame.this, Messages
+					.getString("MainFrame.err.updateSelectedSensor"), t);
+		}
+		return false;
+	}
+
+	private boolean updateSelectedSurface() {
+		try {
+			if (selectedSurface != null) {
+				surfaceView.loadRecord(selectedSurface, false);
+			}
+			return true;
+		} catch (Throwable t) {
+			AppHelper.showExceptionDialog(MainFrame.this, Messages
+					.getString("MainFrame.err.updateSelectedSurface"), t);
+		}
+		return false;
+	}
+
+	private boolean openWindow(Class<? extends TableViewerTemplate<?>> clazz) {
+		TableViewerTemplate<?> instance = (TableViewerTemplate<?>) AppHelper.getInstance()
+				.getDialog(this, clazz);
+		if (instance != null) {
+			instance.showWindow();
+			if (updateSelectedSensor()) {
+				updateSelectedSurface();
+			}
+
+			return true;
+		}
+		return false;
 	}
 
 	private JFileChooser fSChooser = null;
@@ -573,11 +612,10 @@ public class MainFrame extends MainFrameDesign {
 		if (fSChooser == null) {
 			fSChooser = new JFileChooser();
 
-			fSChooser.setCurrentDirectory(new File(".")); //$NON-NLS-1$
+			fSChooser.setCurrentDirectory(new File("."));
 			fSChooser.setMultiSelectionEnabled(false);
 			fSChooser.addChoosableFileFilter(new FileNameExtensionFilter(Messages
-					.getString("MainFrame.filterSet.filter"), //$NON-NLS-1$
-					"settings")); //$NON-NLS-1$
+					.getString("MainFrame.filterSet.filter"), "settings"));
 
 			AppHelper.getInstance().registerAdditionalComponent(fSChooser);
 
@@ -590,29 +628,13 @@ public class MainFrame extends MainFrameDesign {
 	public void actionPerformed(ActionEvent e) {
 
 		if (e.getSource() == jComboBoxSurface) {
-			try {
-
-				Surfaces item = jComboBoxSurface.getValue();
-				if (item != null) {
-					surfaceView.loadRecord(item, false);
-				}
-			} catch (Throwable t) {
-				AppHelper.showExceptionDialog(MainFrame.this, Messages
-						.getString("MainFrame.err.updateSelectedSurface"), t);
-			}
+			this.selectedSurface = jComboBoxSurface.getValue();
+			this.updateSelectedSurface();
 			return;
 		}
 		if (e.getSource() == jComboBoxSensor) {
-			try {
-
-				Sensors item = jComboBoxSensor.getValue();
-				if (item != null) {
-					sensorView.loadRecord(item, false);
-				}
-			} catch (Throwable t) {
-				AppHelper.showExceptionDialog(MainFrame.this, Messages
-						.getString("MainFrame.err.updateSelectedSurface"), t);
-			}
+			this.selectedSensor = jComboBoxSensor.getValue();
+			this.updateSelectedSensor();
 			return;
 		}
 
@@ -625,7 +647,7 @@ public class MainFrame extends MainFrameDesign {
 			final IModule currentModule = MainFrame.this.mainModuleProcessor.getModule();
 			if (currentModule != null
 					&& currentModule.getClass().getName().equals(item.getCodename())) {
-				logger.trace("Do not check module, it's already checked."); //$NON-NLS-1$
+				logger.trace("Do not check module, it's already checked.");
 				return;
 			}
 
@@ -638,20 +660,20 @@ public class MainFrame extends MainFrameDesign {
 						MainFrame.this
 								.setModule((Class<IModule>) Class.forName(item.getCodename()));
 					} catch (Throwable t) {
-						String messageOnRestore = ""; //$NON-NLS-1$
+						String messageOnRestore = "";
 						if (currentModule != null) {
 							try {
 								MainFrame.this.setModule(currentModule.getClass());
 							} catch (Throwable t1) {
-								logger.error("Error when restoring module", t1); //$NON-NLS-1$
+								logger.error("Error when restoring module", t1);
 								messageOnRestore = Messages.getString(
-										"MainFrame.err.setModule.restore", t1.getMessage()); //$NON-NLS-1$
+										"MainFrame.err.setModule.restore", t1.getMessage());
 								MainFrame.this.closeProcessing();
 							}
 						}
-						String name = item.getCodename() + " (" + item.getName() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+						String name = item.getCodename() + " (" + item.getName() + ")";
 						AppHelper.showExceptionDialog(MainFrame.this, Messages.getString(
-								"MainFrame.err.setModule", name, messageOnRestore), t); //$NON-NLS-1$
+								"MainFrame.err.setModule", name, messageOnRestore), t);
 					}
 				}
 			});
@@ -669,20 +691,20 @@ public class MainFrame extends MainFrameDesign {
 		try {
 			action = Actions.valueOf(command);
 		} catch (IllegalArgumentException iae) {
-			logger.debug("Unknown command received: " + command); //$NON-NLS-1$
+			logger.debug("Unknown command received: " + command);
 			return;
 		}
 
 		if (action == Actions.OPEN) {
 			// Open new image
 			try {
-				this.printMessage(Messages.getString("MainFrame.mess.openNewImage")); //$NON-NLS-1$
+				this.printMessage(Messages.getString("MainFrame.mess.openNewImage"));
 				this.startProcessingImpl(this.singleFilePicker.getSingleSource());
 				this.jMenuItemClose.setEnabled(true);
 			} catch (Throwable t) {
 				this.closeProcessing();
 				AppHelper.showExceptionDialog(this, Messages
-						.getString("MainFrame.err.openNewImage"), t); //$NON-NLS-1$
+						.getString("MainFrame.err.openNewImage"), t);
 			} finally {
 				this.clearMessage();
 			}
@@ -697,17 +719,16 @@ public class MainFrame extends MainFrameDesign {
 				try {
 					if (!newFile.exists()
 							|| JOptionPane.showConfirmDialog(this, Messages.getString(
-									"MainFrame.confirm.reWriteFilterSet", //$NON-NLS-1$  
-									newFile.getName()), Messages
-									.getString("MainFrame.title.rewriteFilterSet"), //$NON-NLS-2$
+									"MainFrame.confirm.reWriteFilterSet", newFile.getName()),
+									Messages.getString("MainFrame.title.rewriteFilterSet"),
 									JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-						logger.debug("Actual saving file " + newFile.getAbsolutePath()); //$NON-NLS-1$
+						logger.debug("Actual saving file " + newFile.getAbsolutePath());
 						this.mainModuleProcessor.saveSettingsToFile(newFile);
 					}
 				} catch (Throwable t) {
 					AppHelper.showExceptionDialog(this,
 
-					Messages.getString("MainFrame.err.rewriteFilterSet", newFile.getName()), t); //$NON-NLS-1$
+					Messages.getString("MainFrame.err.rewriteFilterSet", newFile.getName()), t);
 				}
 			}
 
@@ -751,32 +772,16 @@ public class MainFrame extends MainFrameDesign {
 			}
 		} else if (action == Actions.DEFECT_CLASSES) {
 			//
-			DefectClassesTable defectClasses = (DefectClassesTable) AppHelper.getInstance()
-					.getDialog(this, DefectClassesTable.class);
-			if (defectClasses != null) {
-				defectClasses.showWindow();
-			}
+			this.openWindow(DefectClassesTable.class);
 		} else if (action == Actions.DEFECT_TYPES) {
 			//
-			DefectTypesTable defectTypes = (DefectTypesTable) AppHelper.getInstance().getDialog(
-					this, DefectTypesTable.class);
-			if (defectTypes != null) {
-				defectTypes.showWindow();
-			}
+			this.openWindow(DefectTypesTable.class);
 		} else if (action == Actions.SURFACE_CLASSES) {
 			//
-			SurfaceClassesTable surfaceClasses = (SurfaceClassesTable) AppHelper.getInstance()
-					.getDialog(this, SurfaceClassesTable.class);
-			if (surfaceClasses != null) {
-				surfaceClasses.showWindow();
-			}
+			this.openWindow(SurfaceClassesTable.class);
 		} else if (action == Actions.SURFACE_TYPES) {
 			//
-			SurfaceTypesTable surfaceTypes = (SurfaceTypesTable) AppHelper.getInstance().getDialog(
-					this, SurfaceTypesTable.class);
-			if (surfaceTypes != null) {
-				surfaceTypes.showWindow();
-			}
+			this.openWindow(SurfaceTypesTable.class);
 		} else if (action == Actions.SURFACES) {
 			SurfacesFilteredTable surfaces = (SurfacesFilteredTable) AppHelper.getInstance()
 					.getDialog(this, SurfacesFilteredTable.class);
@@ -789,19 +794,10 @@ public class MainFrame extends MainFrameDesign {
 			}
 		} else if (action == Actions.SENSOR_CLASSES) {
 			//
-			SensorClassesTable sensorClasses = (SensorClassesTable) AppHelper.getInstance()
-					.getDialog(this, SensorClassesTable.class);
-			if (sensorClasses != null) {
-				sensorClasses.showWindow();
-			}
-
+			this.openWindow(SensorClassesTable.class);
 		} else if (action == Actions.SENSOR_TYPES) {
 			//
-			SensorTypesTable sensorTypes = (SensorTypesTable) AppHelper.getInstance().getDialog(
-					this, SensorTypesTable.class);
-			if (sensorTypes != null) {
-				sensorTypes.showWindow();
-			}
+			this.openWindow(SensorTypesTable.class);
 		} else if (action == Actions.SENSORS) {
 			SensorsFilteredTable sensors = (SensorsFilteredTable) AppHelper.getInstance()
 					.getDialog(this, SensorsFilteredTable.class);
@@ -824,7 +820,7 @@ public class MainFrame extends MainFrameDesign {
 			}
 		} else if (action == Actions.NOT_IMPLEMENTED) {
 			// Not implemented yet. Sorry.
-			AppHelper.showErrorDialog(this, Messages.getString("MainFrame.err.notImplemented")); //$NON-NLS-1$
+			AppHelper.showErrorDialog(this, Messages.getString("MainFrame.err.notImplemented"));
 		} else if (action == Actions.EDIT_FILTERS) {
 			//
 			FilterChainsawTransactional currentFilters = new FilterChainsawTransactional(
@@ -833,9 +829,8 @@ public class MainFrame extends MainFrameDesign {
 			FiltersEditor editor = (FiltersEditor) AppHelper.getInstance().getDialog(this,
 					FiltersEditor.class);
 			if (editor != null
-					&& editor
-							.openDialog(
-									Messages.getString("MainFrame.title.mainFilters"), mainModuleProcessor.getChainsaw())) { //$NON-NLS-1$
+					&& editor.openDialog(Messages.getString("MainFrame.title.mainFilters"),
+							mainModuleProcessor.getChainsaw())) {
 				this.restartProcessingByFilters(currentFilters);
 			}
 		} else if (action == Actions.EDIT_MODULE_PARAMS) {
@@ -846,7 +841,7 @@ public class MainFrame extends MainFrameDesign {
 						.getParams());
 			} catch (CloneNotSupportedException cnse) {
 				AppHelper.showExceptionDialog(this, Messages
-						.getString("MainFrame.err.prepareError"), cnse); //$NON-NLS-1$
+						.getString("MainFrame.err.prepareError"), cnse);
 				return;
 			}
 
@@ -860,18 +855,20 @@ public class MainFrame extends MainFrameDesign {
 			}
 		} else if (action == Actions.CREATE_DEFECT) {
 			if (this.selectedSensor == null) {
-				AppHelper.showErrorDialog(this, Messages.getString("MainFrame.err.noSensorSelected"));
+				AppHelper.showErrorDialog(this, Messages
+						.getString("MainFrame.err.noSensorSelected"));
 				return;
 			}
 			if (this.selectedSurface == null) {
-				AppHelper.showErrorDialog(this, Messages.getString("MainFrame.err.noSurfaceSelected"));
+				AppHelper.showErrorDialog(this, Messages
+						.getString("MainFrame.err.noSurfaceSelected"));
 				return;
 			}
-			
+
 			AppHelper.showInfoDialog(this, "OK!");
 		} else {
-			AppHelper.showErrorDialog(this, Messages.getString(
-					"MainFrame.err.unknownAction", action)); //$NON-NLS-1$
+			AppHelper.showErrorDialog(this, Messages.getString("MainFrame.err.unknownAction",
+					action));
 		}
 
 	}

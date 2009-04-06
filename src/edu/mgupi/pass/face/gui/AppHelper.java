@@ -618,28 +618,59 @@ public class AppHelper {
 	 * @param parent
 	 *            window, where error was occurs
 	 * @param message
-	 *            error message
+	 *            error message, this message will be automatically truncated to
+	 *            100 columns length
 	 * @param title
 	 *            title for message
 	 */
 	public static void showErrorDialog(Component parent, String message, String title) {
-		logger.error(message);
-		JOptionPane.showMessageDialog(parent, Utils.splitStingBySlices(message, 100, "\n"), title,
-				JOptionPane.ERROR_MESSAGE);
+		showFormattedErrorDialog(parent, Utils.splitStingBySlices(message, 100, "\n"), title);
 	}
 
 	/**
-	 * Show error dialog to user. Use default title for message box.
+	 * Show error dialog to user. Automatically print error message. Use default
+	 * title for message box.
 	 * 
 	 * @param parent
 	 *            window, where error was occurs
 	 * @param message
-	 *            error message
+	 *            error message, this message will be automatically truncated to
+	 *            100 columns length
 	 * 
 	 * @see #showErrorDialog(Component, String, String)
 	 */
 	public static void showErrorDialog(Component parent, String message) {
 		showErrorDialog(parent, message, Messages.getString("AppHelper.title.error"));
+	}
+
+	/**
+	 * 
+	 * Show error dialog to user. Automatically print error message.
+	 * 
+	 * @param parent
+	 *            window, where error was occurs
+	 * @param message
+	 *            error message
+	 * @param title
+	 *            title for message
+	 */
+	public static void showFormattedErrorDialog(Component parent, String message, String title) {
+		logger.error(message);
+		JOptionPane.showMessageDialog(parent, message, title, JOptionPane.ERROR_MESSAGE);
+	}
+
+	/**
+	 * 
+	 * Show error dialog to user. Automatically print error message. Use default
+	 * title for message box.
+	 * 
+	 * @param parent
+	 *            window, where error was occurs
+	 * @param message
+	 *            error message
+	 */
+	public static void showFormattedErrorDialog(Component parent, String message) {
+		showFormattedErrorDialog(parent, message, Messages.getString("AppHelper.title.error"));
 	}
 
 	/**

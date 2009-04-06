@@ -138,16 +138,23 @@ public class SurfacesRecord extends RecordEditorTemplate<Surfaces> {
 
 			jLabelID = new JLabel("0");
 			jClass = new ComboBoxSurfaceClasses();
+			jClass.setName("surfaceRecordClass");
 			jClass.addActionListener(this);
 
 			jType = new ComboBoxSurfaceTypes(jClass);
+			jType.setName("surfaceRecordType");
 
 			NumberFormatter positiveFormatter = new NumberFormatter(new DecimalFormat("0.0#######"));
 			positiveFormatter.setMinimum(0.0);
 
 			jWidth = new JFormattedTextField(positiveFormatter);
+			jWidth.setName("jWidth");
+			
 			jHeight = new JFormattedTextField(positiveFormatter);
+			jHeight.setName("jHeight");
+			
 			jLength = new JFormattedTextField(positiveFormatter);
+			jLength.setName("jLength");
 
 			jMultiLayer = new JComboBox(new String[] { Messages.getString("SurfacesRecord.ml.yes"),
 					Messages.getString("SurfacesRecord.ml.no") });
